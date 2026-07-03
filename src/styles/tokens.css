@@ -12,4 +12,7 @@
   --color-muted-3: #6c6c7c;
   --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
   --font-body: 'Instrument Sans', system-ui, sans-serif;
+  --color-surface-toast: rgba(18,18,28,.96);
+  --color-border-glass: rgba(255,255,255,.1);
+  --color-shadow-lg: rgba(0,0,0,.5);
 }
