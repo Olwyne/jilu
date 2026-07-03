@@ -7,6 +7,7 @@ import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import Header from './components/layout/Header'
 import LibraryView from './components/library/LibraryView'
+import DetailView from './components/detail/DetailView'
 
 const HEADER_COPY = {
   dashboard: { title: 'Bonsoir 👋', subtitle: "Voici ce qui t'attend" },
@@ -24,6 +25,9 @@ function Shell() {
   const [selectedId, setSelectedId] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 860)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [episodeModal, setEpisodeModal] = useState(null)
+  // TODO(Task 14): replace with the real useWorkActions(data, mutate) hook once it exists.
+  const workActions = {}
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 860)
@@ -55,6 +59,17 @@ function Shell() {
               watched={data.watched}
               ratings={data.ratings}
               onOpenWork={(id) => { setSelectedId(id); setView('detail') }}
+            />
+          )}
+          {view === 'detail' && data.works[selectedId] && (
+            <DetailView
+              work={data.works[selectedId]}
+              watched={data.watched}
+              ratings={data.ratings}
+              games={data.games}
+              feed={data.feed}
+              actions={workActions}
+              onOpenEpisode={(w, s, e) => setEpisodeModal({ workId: w.id, sNum: s.n, eNum: e.n })}
             />
           )}
         </main>

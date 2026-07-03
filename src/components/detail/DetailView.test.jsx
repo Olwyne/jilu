@@ -1,0 +1,25 @@
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import DetailView from './DetailView'
+
+const work = {
+  id: 'w1', title: 'Severance', category: 'series', genre: 'Thriller', year: 2022, status: 'en_cours',
+  overview: 'desc', seasons: [{ n: 1, episodes: [{ n: 1, title: 'Good News', air: 0 }] }]
+}
+
+describe('DetailView', () => {
+  it('shows title, overview, and status label', () => {
+    render(<DetailView work={work} watched={{}} ratings={{}} games={{}} feed={[]} actions={{}} />)
+    expect(screen.getByText('Severance')).toBeInTheDocument()
+    expect(screen.getByText('desc')).toBeInTheDocument()
+    expect(screen.getByText('En cours')).toBeInTheDocument()
+  })
+
+  it('clicking "Changer le statut" calls actions.cycleStatus with the work id', async () => {
+    const cycleStatus = vi.fn()
+    render(<DetailView work={work} watched={{}} ratings={{}} games={{}} feed={[]} actions={{ cycleStatus }} />)
+    await userEvent.click(screen.getByText('Changer le statut ›'))
+    expect(cycleStatus).toHaveBeenCalledWith('w1')
+  })
+})
