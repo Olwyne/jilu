@@ -11,6 +11,10 @@ import LibraryView from './components/library/LibraryView'
 import DetailView from './components/detail/DetailView'
 import EpisodeModal from './components/modals/EpisodeModal'
 import CalendarView from './components/calendar/CalendarView'
+import DashboardView from './components/dashboard/DashboardView'
+import StatsView from './components/stats/StatsView'
+import AccountView from './components/account/AccountView'
+import FeedView from './components/feed/FeedView'
 
 const HEADER_COPY = {
   dashboard: { title: 'Bonsoir 👋', subtitle: "Voici ce qui t'attend" },
@@ -22,7 +26,7 @@ const HEADER_COPY = {
 }
 
 function Shell() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const { data, loading, mutate } = useAppData(user)
   const [view, setView] = useState('library')
   const [selectedId, setSelectedId] = useState(null)
@@ -30,6 +34,7 @@ function Shell() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [episodeModal, setEpisodeModal] = useState(null)
   const workActions = useWorkActions(data, mutate)
+  const openWork = (id) => { setSelectedId(id); setView('detail') }
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 860)
@@ -69,6 +74,44 @@ function Shell() {
               watched={data.watched}
               onOpenWork={(id) => { setSelectedId(id); setView('detail') }}
               onMarkWatched={(id, s, e) => workActions.toggleEpisode(id, s, e)}
+            />
+          )}
+          {view === 'dashboard' && (
+            <DashboardView
+              works={data.works}
+              watched={data.watched}
+              reviews={data.reviews}
+              ratings={data.ratings}
+              onOpenWork={openWork}
+              onWatchNext={(id, s, e) => workActions.toggleEpisode(id, s, e)}
+            />
+          )}
+          {view === 'stats' && (
+            <StatsView
+              works={data.works}
+              watched={data.watched}
+              ratings={data.ratings}
+              onOpenWork={openWork}
+            />
+          )}
+          {view === 'account' && (
+            <AccountView
+              settings={data.settings}
+              profile={data.profile}
+              onToggleSetting={(k) => mutate({ settings: { ...data.settings, [k]: !data.settings[k] } })}
+              onEditField={(k, label) => { const v = window.prompt('Modifier ' + label, data.profile[k]); if (v != null && v.trim()) mutate({ profile: { ...data.profile, [k]: v.trim() } }) }}
+              onMarkAll={() => workActions.markAllWatched()}
+              onReset={() => workActions.resetProgress()}
+              onLogout={logout}
+            />
+          )}
+          {view === 'feed' && (
+            <FeedView
+              feed={data.feed}
+              works={data.works}
+              onOpenWork={openWork}
+              onToggleLike={workActions.toggleLike}
+              onDelete={workActions.deleteComment}
             />
           )}
           {view === 'detail' && data.works[selectedId] && (

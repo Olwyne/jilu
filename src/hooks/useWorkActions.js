@@ -92,6 +92,25 @@ export function useWorkActions(data, mutate) {
     await mutate({ games })
   }
 
+  async function markAllWatched() {
+    const watched = {}
+    const now = Date.now()
+    Object.values(data.works).forEach((w) => {
+      if (w.seasons) {
+        w.seasons.forEach((s) => s.episodes.forEach((e) => {
+          if (e.air <= now) watched[`${w.id}-${s.n}-${e.n}`] = true
+        }))
+      }
+    })
+    await mutate({ watched })
+  }
+
+  async function resetProgress() {
+    if (window.confirm('Réinitialiser toute ta progression ? Les épisodes cochés seront remis à zéro.')) {
+      await mutate({ watched: {} })
+    }
+  }
+
   async function addWork(searchResult) {
     if (data.works[searchResult.id]) return
     const fetchDetail = DETAIL_FETCHERS[searchResult.source]
@@ -100,5 +119,5 @@ export function useWorkActions(data, mutate) {
     await mutate({ works })
   }
 
-  return { addWork, toggleEpisode, markSeason, setRating, cycleStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier }
+  return { addWork, toggleEpisode, markSeason, setRating, cycleStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress }
 }
