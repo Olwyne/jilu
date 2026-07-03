@@ -15,6 +15,7 @@ import DashboardView from './components/dashboard/DashboardView'
 import StatsView from './components/stats/StatsView'
 import AccountView from './components/account/AccountView'
 import FeedView from './components/feed/FeedView'
+import Toast from './components/Toast'
 
 const HEADER_COPY = {
   dashboard: { title: 'Bonsoir 👋', subtitle: "Voici ce qui t'attend" },
@@ -33,6 +34,7 @@ function Shell() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 860)
   const [searchOpen, setSearchOpen] = useState(false)
   const [episodeModal, setEpisodeModal] = useState(null)
+  const [toast, setToast] = useState(null)
   const workActions = useWorkActions(data, mutate)
   const openWork = (id) => { setSelectedId(id); setView('detail') }
 
@@ -41,6 +43,12 @@ function Shell() {
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
   }, [])
+
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 6000)
+    return () => clearTimeout(t)
+  }, [toast])
 
   if (loading) return null
 
@@ -73,7 +81,7 @@ function Shell() {
               works={data.works}
               watched={data.watched}
               onOpenWork={(id) => { setSelectedId(id); setView('detail') }}
-              onMarkWatched={(id, s, e) => workActions.toggleEpisode(id, s, e)}
+              onMarkWatched={(id, s, e) => workActions.markWatchedToast(data.works[id], s, e, setToast)}
             />
           )}
           {view === 'dashboard' && (
@@ -83,7 +91,7 @@ function Shell() {
               reviews={data.reviews}
               ratings={data.ratings}
               onOpenWork={openWork}
-              onWatchNext={(id, s, e) => workActions.toggleEpisode(id, s, e)}
+              onWatchNext={(id, s, e) => workActions.markWatchedToast(data.works[id], s, e, setToast)}
             />
           )}
           {view === 'stats' && (
@@ -129,6 +137,11 @@ function Shell() {
         </main>
       </div>
       {isMobile && <MobileNav view={view} setView={setView} />}
+      <Toast
+        toast={toast}
+        onClose={() => setToast(null)}
+        onOpenRating={() => setToast(null)}
+      />
       {episodeModal && data.works[episodeModal.workId] && (
         <EpisodeModal
           work={data.works[episodeModal.workId]}

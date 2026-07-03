@@ -111,6 +111,12 @@ export function useWorkActions(data, mutate) {
     }
   }
 
+  async function markWatchedToast(work, sNum, eNum, setToast) {
+    await toggleEpisode(work.id, sNum, eNum)
+    const label = (sNum != null && eNum != null) ? `S${sNum} · E${eNum}` : null
+    setToast({ workId: work.id, title: work.title, label })
+  }
+
   async function addWork(searchResult) {
     if (data.works[searchResult.id]) return
     const fetchDetail = DETAIL_FETCHERS[searchResult.source]
@@ -119,5 +125,5 @@ export function useWorkActions(data, mutate) {
     await mutate({ works })
   }
 
-  return { addWork, toggleEpisode, markSeason, setRating, cycleStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress }
+  return { addWork, toggleEpisode, markSeason, setRating, cycleStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, markWatchedToast }
 }
