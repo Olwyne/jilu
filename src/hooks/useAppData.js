@@ -12,16 +12,24 @@ const EMPTY_DATA = {
 export function useAppData(user) {
   const [data, setData] = useState(EMPTY_DATA)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const dataRef = useRef(data)
   dataRef.current = data
 
   useEffect(() => {
     if (!user) return
     const ref = doc(db, 'users', user.uid)
-    return onSnapshot(ref, (snap) => {
-      setData(snap.exists() ? { ...EMPTY_DATA, ...snap.data() } : EMPTY_DATA)
-      setLoading(false)
-    })
+    return onSnapshot(
+      ref,
+      (snap) => {
+        setData(snap.exists() ? { ...EMPTY_DATA, ...snap.data() } : EMPTY_DATA)
+        setLoading(false)
+      },
+      (err) => {
+        setLoading(false)
+        setError(err)
+      }
+    )
   }, [user])
 
   async function mutate(patch) {
@@ -32,5 +40,5 @@ export function useAppData(user) {
     await setDoc(ref, patch, { merge: true })
   }
 
-  return { data, loading, mutate }
+  return { data, loading, mutate, error }
 }

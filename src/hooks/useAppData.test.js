@@ -3,12 +3,13 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAppData } from './useAppData'
 
 let snapshotCallback
+let errorCallback
 const setDocMock = vi.fn().mockResolvedValue()
 
 vi.mock('../firebase', () => ({ db: {} }))
 vi.mock('firebase/firestore', () => ({
   doc: (...args) => args,
-  onSnapshot: (ref, cb) => { snapshotCallback = cb; return () => {} },
+  onSnapshot: (ref, onNext, onError) => { snapshotCallback = onNext; errorCallback = onError; return () => {} },
   setDoc: (...args) => setDocMock(...args),
   getDoc: vi.fn()
 }))
@@ -32,5 +33,13 @@ describe('useAppData', () => {
     expect(setDocMock).toHaveBeenCalled()
     const patchArg = setDocMock.mock.calls[0][1]
     expect(patchArg.watched).toEqual({ 'w-1-1': true })
+  })
+
+  it('sets loading to false and error when onSnapshot error callback fires', async () => {
+    const { result } = renderHook(() => useAppData({ uid: 'u1' }))
+    const testError = new Error('permission-denied')
+    act(() => { errorCallback(testError) })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(testError)
   })
 })
