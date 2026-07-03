@@ -1,25 +1,72 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { useAppData } from './hooks/useAppData'
 import LoginPage from './components/auth/LoginPage'
 import SignupPage from './components/auth/SignupPage'
+import Sidebar from './components/layout/Sidebar'
+import MobileNav from './components/layout/MobileNav'
+import Header from './components/layout/Header'
+
+const HEADER_COPY = {
+  dashboard: { title: 'Bonsoir 👋', subtitle: "Voici ce qui t'attend" },
+  library: { title: 'Ma bibliothèque', subtitle: '' },
+  calendar: { title: 'Calendrier', subtitle: 'À rattraper et à venir' },
+  stats: { title: 'Statistiques', subtitle: 'Ton année en chiffres' },
+  account: { title: 'Compte & paramètres', subtitle: 'Profil, préférences et données' },
+  feed: { title: 'Journal', subtitle: 'Tes commentaires et réactions' }
+}
+
+function Shell() {
+  const { user } = useAuth()
+  const { data, loading, mutate } = useAppData(user)
+  const [view, setView] = useState('library')
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 860)
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 860)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  if (loading) return null
+
+  const copy = HEADER_COPY[view] || HEADER_COPY.library
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex' }}>
+      {!isMobile && <Sidebar view={view} setView={setView} onOpenSearch={() => setSearchOpen(true)} />}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 74 : 0 }}>
+        <Header
+          title={copy.title}
+          subtitle={copy.subtitle}
+          showBack={view === 'detail'}
+          onBack={() => setView('library')}
+          onOpenSearch={() => setSearchOpen(true)}
+          onOpenAccount={() => setView('account')}
+          isMobile={isMobile}
+        />
+        <main style={{ padding: '22px 30px 40px', maxWidth: 1240, width: '100%' }}>
+          {/* view components plugged in by later tasks */}
+        </main>
+      </div>
+      {isMobile && <MobileNav view={view} setView={setView} />}
+    </div>
+  )
+}
 
 function Gate() {
   const { user, loading } = useAuth()
   const [showSignup, setShowSignup] = useState(false)
-
   if (loading) return null
   if (!user) {
     return showSignup
       ? <SignupPage onSwitchToLogin={() => setShowSignup(false)} />
       : <LoginPage onSwitchToSignup={() => setShowSignup(true)} />
   }
-  return <div>Signed in as {user.email}</div> // replaced by the real app shell in Task 12
+  return <Shell />
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <Gate />
-    </AuthProvider>
-  )
+  return <AuthProvider><Gate /></AuthProvider>
 }
