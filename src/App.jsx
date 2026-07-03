@@ -10,6 +10,7 @@ import Header from './components/layout/Header'
 import LibraryView from './components/library/LibraryView'
 import DetailView from './components/detail/DetailView'
 import EpisodeModal from './components/modals/EpisodeModal'
+import CalendarView from './components/calendar/CalendarView'
 
 const HEADER_COPY = {
   dashboard: { title: 'Bonsoir 👋', subtitle: "Voici ce qui t'attend" },
@@ -60,6 +61,14 @@ function Shell() {
               watched={data.watched}
               ratings={data.ratings}
               onOpenWork={(id) => { setSelectedId(id); setView('detail') }}
+            />
+          )}
+          {view === 'calendar' && (
+            <CalendarView
+              works={data.works}
+              watched={data.watched}
+              onOpenWork={(id) => { setSelectedId(id); setView('detail') }}
+              onMarkWatched={(id, s, e) => workActions.toggleEpisode(id, s, e)}
             />
           )}
           {view === 'detail' && data.works[selectedId] && (
