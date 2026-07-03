@@ -9,6 +9,7 @@ import MobileNav from './components/layout/MobileNav'
 import Header from './components/layout/Header'
 import LibraryView from './components/library/LibraryView'
 import DetailView from './components/detail/DetailView'
+import EpisodeModal from './components/modals/EpisodeModal'
 
 const HEADER_COPY = {
   dashboard: { title: 'Bonsoir 👋', subtitle: "Voici ce qui t'attend" },
@@ -75,6 +76,17 @@ function Shell() {
         </main>
       </div>
       {isMobile && <MobileNav view={view} setView={setView} />}
+      {episodeModal && data.works[episodeModal.workId] && (
+        <EpisodeModal
+          work={data.works[episodeModal.workId]}
+          sNum={episodeModal.sNum}
+          eNum={episodeModal.eNum}
+          ratings={data.ratings}
+          feed={data.feed}
+          actions={workActions}
+          onClose={() => setEpisodeModal(null)}
+        />
+      )}
     </div>
   )
 }
