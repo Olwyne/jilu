@@ -6,6 +6,7 @@ import SignupPage from './components/auth/SignupPage'
 import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import Header from './components/layout/Header'
+import LibraryView from './components/library/LibraryView'
 
 const HEADER_COPY = {
   dashboard: { title: 'Bonsoir 👋', subtitle: "Voici ce qui t'attend" },
@@ -20,6 +21,7 @@ function Shell() {
   const { user } = useAuth()
   const { data, loading, mutate } = useAppData(user)
   const [view, setView] = useState('library')
+  const [selectedId, setSelectedId] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 860)
   const [searchOpen, setSearchOpen] = useState(false)
 
@@ -47,7 +49,14 @@ function Shell() {
           isMobile={isMobile}
         />
         <main style={{ padding: '22px 30px 40px', maxWidth: 1240, width: '100%' }}>
-          {/* view components plugged in by later tasks */}
+          {view === 'library' && (
+            <LibraryView
+              works={data.works}
+              watched={data.watched}
+              ratings={data.ratings}
+              onOpenWork={(id) => { setSelectedId(id); setView('detail') }}
+            />
+          )}
         </main>
       </div>
       {isMobile && <MobileNav view={view} setView={setView} />}
