@@ -9,7 +9,7 @@ const settings = { notifNewEp: true, notifCalendar: false, notifWeekly: false, a
 describe('AccountView', () => {
   it('calls onToggleSetting when a switch is clicked', async () => {
     const onToggleSetting = vi.fn()
-    render(<AccountView profile={profile} settings={settings} onToggleSetting={onToggleSetting} onEditField={() => {}} onMarkAll={() => {}} onReset={() => {}} onLogout={() => {}} />)
+    render(<AccountView profile={profile} settings={settings} onToggleSetting={onToggleSetting} onSetStartPage={() => {}} onEditField={() => {}} onMarkAll={() => {}} onReset={() => {}} onLogout={() => {}} />)
     await userEvent.click(screen.getByText('Nouveaux épisodes').parentElement.nextElementSibling)
     expect(onToggleSetting).toHaveBeenCalledWith('notifNewEp')
   })
@@ -17,9 +17,16 @@ describe('AccountView', () => {
   it('calls onReset only when window.confirm returns true', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     const onReset = vi.fn()
-    render(<AccountView profile={profile} settings={settings} onToggleSetting={() => {}} onEditField={() => {}} onMarkAll={() => {}} onReset={onReset} onLogout={() => {}} />)
+    render(<AccountView profile={profile} settings={settings} onToggleSetting={() => {}} onSetStartPage={() => {}} onEditField={() => {}} onMarkAll={() => {}} onReset={onReset} onLogout={() => {}} />)
     await userEvent.click(screen.getByText('Réinitialiser la progression'))
     expect(onReset).toHaveBeenCalled()
     vi.restoreAllMocks()
+  })
+
+  it('calls onSetStartPage with the view key when a start page chip is clicked', async () => {
+    const onSetStartPage = vi.fn()
+    render(<AccountView profile={profile} settings={settings} onToggleSetting={() => {}} onSetStartPage={onSetStartPage} onEditField={() => {}} onMarkAll={() => {}} onReset={() => {}} onLogout={() => {}} />)
+    await userEvent.click(screen.getByText('Bibliothèque'))
+    expect(onSetStartPage).toHaveBeenCalledWith('library')
   })
 })

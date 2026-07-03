@@ -39,7 +39,7 @@ function Section({ rows, settings, onToggleSetting }) {
   )
 }
 
-export default function AccountView({ profile, settings, onToggleSetting, onEditField, onMarkAll, onReset, onLogout }) {
+export default function AccountView({ profile, settings, onToggleSetting, onSetStartPage, onEditField, onMarkAll, onReset, onLogout }) {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', padding: 24, borderRadius: 20, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', marginBottom: 26 }}>
@@ -69,7 +69,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onEdit
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Page de démarrage</div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
         {START_OPTS.map(([k, label]) => (
-          <div key={k} onClick={() => onToggleSetting('startPage_' + k)} style={{ padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: settings.startPage === k ? 'var(--color-accent)' : 'rgba(255,255,255,.06)', color: settings.startPage === k ? '#fff' : 'var(--color-muted)' }}>{label}</div>
+          <div key={k} onClick={() => onSetStartPage(k)} style={{ padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: settings.startPage === k ? 'var(--color-accent)' : 'rgba(255,255,255,.06)', color: settings.startPage === k ? '#fff' : 'var(--color-muted)' }}>{label}</div>
         ))}
       </div>
 

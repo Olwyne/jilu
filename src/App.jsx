@@ -99,6 +99,7 @@ function Shell() {
               settings={data.settings}
               profile={data.profile}
               onToggleSetting={(k) => mutate({ settings: { ...data.settings, [k]: !data.settings[k] } })}
+              onSetStartPage={(k) => mutate({ settings: { ...data.settings, startPage: k } })}
               onEditField={(k, label) => { const v = window.prompt('Modifier ' + label, data.profile[k]); if (v != null && v.trim()) mutate({ profile: { ...data.profile, [k]: v.trim() } }) }}
               onMarkAll={() => workActions.markAllWatched()}
               onReset={() => workActions.resetProgress()}

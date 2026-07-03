@@ -88,7 +88,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
           {weeks.slice().reverse().map((v, i) => (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: 6 }}>
               <div style={{ width: '100%', borderRadius: '6px 6px 0 0', height: `${Math.max(4, Math.round(v / wkMax * 100))}%`, background: i === 9 ? 'var(--color-pink)' : 'linear-gradient(180deg, var(--color-accent), #6b4de0)' }} />
-              <span style={{ fontSize: 10, color: 'var(--color-muted-3)' }}>{i === 9 ? 'now' : (i % 3 === 0 ? `S-${9 - i}` : '')}</span>
+              <span style={{ fontSize: 10, color: 'var(--color-muted-3)' }}>{i === 9 ? 'sem.' : (i % 3 === 0 ? `S-${9 - i}` : '')}</span>
             </div>
           ))}
         </div>
