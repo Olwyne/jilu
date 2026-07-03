@@ -45,7 +45,9 @@ export function useWorkActions(data, mutate) {
         reviews = [entry, ...reviews.filter((r) => r.id !== id)]
       }
     }
-    await mutate({ ratings, reviews })
+    const patch = { ratings }
+    if (scope === 'w') patch.reviews = reviews
+    await mutate(patch)
   }
 
   async function cycleStatus(workId) {

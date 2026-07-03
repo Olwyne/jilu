@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useAppData } from './hooks/useAppData'
+import { useWorkActions } from './hooks/useWorkActions'
 import LoginPage from './components/auth/LoginPage'
 import SignupPage from './components/auth/SignupPage'
 import Sidebar from './components/layout/Sidebar'
@@ -26,8 +27,7 @@ function Shell() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 860)
   const [searchOpen, setSearchOpen] = useState(false)
   const [episodeModal, setEpisodeModal] = useState(null)
-  // TODO(Task 14): replace with the real useWorkActions(data, mutate) hook once it exists.
-  const workActions = {}
+  const workActions = useWorkActions(data, mutate)
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 860)
