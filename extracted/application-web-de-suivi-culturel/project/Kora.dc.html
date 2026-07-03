@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#0a0a0f;}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-thumb{background:#2a2a38;border-radius:10px;border:2px solid #0a0a0f;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  @keyframes koraPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+  @keyframes koraIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  @keyframes koraToast{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#0a0a0f;color:#ECECF2;font-family:'Instrument Sans',system-ui,sans-serif;display:flex;">
+
+  <sc-if value="{{ nav.isDesktop }}" hint-placeholder-val="{{ true }}">
+    <aside style="width:236px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.07);padding:26px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;align-items:center;gap:11px;padding:0 8px 22px;">
+        <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:#fff;">K</div>
+        <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:21px;letter-spacing:-.02em;">Kōra</div>
+      </div>
+      <div onClick="{{ nav.dashboard.onClick }}" style="{{ nav.dashboard.style }}"><span style="{{ nav.dashboard.iconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>Accueil</div>
+      <div onClick="{{ nav.library.onClick }}" style="{{ nav.library.style }}"><span style="{{ nav.library.iconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>Bibliothèque</div>
+      <div onClick="{{ nav.calendar.onClick }}" style="{{ nav.calendar.style }}"><span style="{{ nav.calendar.iconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg></span>Calendrier<sc-if value="{{ nav.calendar.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:20px;background:#ff5c8a;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;">{{ nav.calendar.badgeText }}</span></sc-if></div>
+      <div onClick="{{ nav.stats.onClick }}" style="{{ nav.stats.style }}"><span style="{{ nav.stats.iconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Statistiques</div>
+      <div onClick="{{ nav.feed.onClick }}" style="{{ nav.feed.style }}"><span style="{{ nav.feed.iconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 0 1 21 11.5z"/></svg></span>Journal</div>
+      <div style="height:1px;background:rgba(255,255,255,0.07);margin:14px 8px;"></div>
+      <div onClick="{{ search.onOpen }}" style="display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:12px;cursor:pointer;color:#9797a8;font-weight:500;font-size:15px;border:1px solid rgba(255,255,255,0.09);" style-hover="background:rgba(255,255,255,0.05);color:#ECECF2;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Rechercher…
+      </div>
+      <div onClick="{{ nav.account.onClick }}" style="{{ account.chipStyle }}">
+        <div style="{{ account.avatarStyle }}">{{ account.avatarInitials }}</div>
+        <div style="min-width:0;flex:1;"><div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ account.name }}</div><div style="font-size:11.5px;color:#7a7a8a;">{{ account.handle }}</div></div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" stroke-width="1.8" style="flex-shrink:0;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <div style="padding:14px;border-radius:14px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.06);margin-top:12px;">
+        <div style="font-size:12px;color:#9797a8;margin-bottom:9px;font-weight:500;">Cette semaine</div>
+        <div style="display:flex;gap:14px;">
+          <div><div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;color:#8b6dff;">{{ stats.weekWatched }}</div><div style="font-size:11px;color:#9797a8;">épisodes vus</div></div>
+          <div><div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;color:#ff5c8a;">{{ stats.toCatch }}</div><div style="font-size:11px;color:#9797a8;">à rattraper</div></div>
+        </div>
+      </div>
+    </aside>
+  </sc-if>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;padding-bottom:74px;">
+    <header style="{{ header.style }}">
+      <sc-if value="{{ nav.isMobile }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;color:#fff;">K</div>
+          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:19px;">Kōra</div>
+        </div>
+      </sc-if>
+      <div style="min-width:0;">
+        <sc-if value="{{ header.showBack }}" hint-placeholder-val="{{ false }}"><div onClick="{{ header.onBack }}" style="display:inline-flex;align-items:center;gap:6px;color:#9797a8;font-size:14px;cursor:pointer;margin-bottom:4px;">‹ Retour</div></sc-if>
+        <h1 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:26px;margin:0;letter-spacing:-.02em;line-height:1.1;">{{ header.title }}</h1>
+        <div style="color:#9797a8;font-size:14px;margin-top:3px;">{{ header.subtitle }}</div>
+      </div>
+      <div onClick="{{ search.onOpen }}" style="margin-left:auto;width:42px;height:42px;flex-shrink:0;border-radius:12px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#ECECF2;" style-hover="background:rgba(255,255,255,0.06);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </div>
+      <div onClick="{{ nav.account.onClick }}" style="width:42px;height:42px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;color:#fff;">{{ account.avatarInitials }}</div>
+    </header>
+
+    <main style="padding:22px 30px 40px;max-width:1240px;width:100%;">
+
+      <!-- ===== LIBRARY ===== -->
+      <sc-if value="{{ isLibrary }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+          <sc-for list="{{ library.cats }}" as="c" hint-placeholder-count="4">
+            <div onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}<span style="{{ c.countStyle }}">{{ c.countText }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:22px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <sc-for list="{{ library.statuses }}" as="s" hint-placeholder-count="4">
+              <div onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;margin-left:auto;">
+            <span style="font-size:13px;color:#6c6c7c;">Trier</span>
+            <sc-for list="{{ library.sorts }}" as="s" hint-placeholder-count="3">
+              <div onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ library.empty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:60px 20px;text-align:center;color:#6c6c7c;">Aucune œuvre ne correspond à ces filtres.</div>
+        </sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:20px 18px;">
+          <sc-for list="{{ library.works }}" as="w" hint-placeholder-count="10">
+            <div onClick="{{ w.onClick }}" style="cursor:pointer;">
+              <div style="{{ w.posterStyle }}">
+                <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.55));"></div>
+                <span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:38px;color:rgba(255,255,255,.9);position:relative;">{{ w.initials }}</span>
+                <div style="position:absolute;top:9px;left:9px;{{ w.statusDot }}"></div>
+                <sc-if value="{{ w.badgeNew }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:8px;right:8px;background:#ff5c8a;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;animation:koraPulse 2s infinite;">NOUVEAU</div></sc-if>
+                <sc-if value="{{ w.showProgress }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;left:9px;right:9px;bottom:9px;">
+                    <div style="height:4px;border-radius:4px;background:rgba(255,255,255,.25);overflow:hidden;"><div style="{{ w.progressStyle }}"></div></div>
+                    <div style="font-size:11px;color:#fff;margin-top:5px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.6);">{{ w.progressText }}</div>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="margin-top:9px;font-weight:600;font-size:14.5px;line-height:1.25;letter-spacing:-.01em;">{{ w.title }}</div>
+              <div style="display:flex;align-items:center;gap:7px;margin-top:3px;">
+                <span style="font-size:12.5px;color:#7a7a8a;">{{ w.meta }}</span>
+                <sc-if value="{{ w.hasRating }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;color:#ffc24b;font-weight:600;margin-left:auto;">★ {{ w.ratingText }}</span></sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== DETAIL ===== -->
+      <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:28px;">
+          <div style="{{ detail.posterStyle }}">
+            <span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:52px;color:rgba(255,255,255,.9);">{{ detail.initials }}</span>
+          </div>
+          <div style="flex:1;min-width:260px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+              <span style="{{ detail.statusStyle }}">{{ detail.statusLabel }}</span>
+              <span style="font-size:13px;color:#7a7a8a;">{{ detail.meta }}</span>
+            </div>
+            <h2 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;margin:0 0 12px;letter-spacing:-.02em;">{{ detail.title }}</h2>
+            <p style="color:#b9b9c8;font-size:15px;line-height:1.55;max-width:560px;margin:0 0 20px;">{{ detail.overview }}</p>
+            <sc-if value="{{ detail.hasEpisodes }}" hint-placeholder-val="{{ true }}">
+              <div style="max-width:420px;margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;"><span style="color:#9797a8;">Progression</span><span style="font-weight:600;">{{ detail.progressText }}</span></div>
+                <div style="height:8px;border-radius:8px;background:rgba(255,255,255,.09);overflow:hidden;"><div style="{{ detail.progressStyle }}"></div></div>
+              </div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:13px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);">
+                <span style="font-size:13px;color:#9797a8;">Ma note</span>
+                <div style="display:flex;gap:3px;">
+                  <sc-for list="{{ detail.stars }}" as="st" hint-placeholder-count="5">
+                    <span onClick="{{ st.onClick }}" style="{{ st.style }}">{{ st.char }}</span>
+                  </sc-for>
+                </div>
+                <span style="font-size:13px;color:#ffc24b;font-weight:600;">{{ detail.ratingText }}</span>
+              </div>
+              <div onClick="{{ detail.onCycleStatus }}" style="padding:11px 16px;border-radius:13px;background:rgba(139,109,255,.14);border:1px solid rgba(139,109,255,.3);color:#b9a6ff;font-weight:600;font-size:14px;cursor:pointer;">Changer le statut ›</div>
+            </div>
+          </div>
+        </div>
+
+        <sc-if value="{{ detail.hasGame }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.02);padding:22px;margin-bottom:22px;">
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;margin:0 0 4px;">Durées de jeu</h3>
+            <div style="font-size:12.5px;color:#7a7a8a;margin-bottom:18px;">Temps moyen pour finir le jeu</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px;">
+              <sc-for list="{{ detail.game.durations }}" as="d" hint-placeholder-count="3">
+                <div style="padding:16px 18px;border-radius:14px;background:rgba(255,255,255,.03);">
+                  <div style="{{ d.valueStyle }}">{{ d.value }}</div>
+                  <div style="font-size:12.5px;color:#9797a8;margin-top:4px;">{{ d.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px;">
+              <span style="font-size:14px;color:#9797a8;">Mon temps de jeu</span>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div onClick="{{ detail.game.onSub }}" style="width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#ECECF2;">−</div>
+                <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px;min-width:74px;text-align:center;">{{ detail.game.hoursText }}</span>
+                <div onClick="{{ detail.game.onAdd }}" style="width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#ECECF2;">+</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <sc-for list="{{ detail.game.objectives }}" as="o" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid rgba(255,255,255,.05);">
+                  <div onClick="{{ o.onToggle }}" style="{{ o.checkStyle }}">{{ o.checkChar }}</div>
+                  <span style="font-weight:600;font-size:14.5px;flex:1;{{ o.labelStyle }}">{{ o.label }}</span>
+                  <span style="font-size:13px;color:#7a7a8a;">{{ o.hoursText }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.02);padding:18px 20px;margin-bottom:22px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;">Mon journal</span>
+            <span style="font-size:12.5px;color:#7a7a8a;">{{ detail.workCommentCount }}</span>
+            <div onClick="{{ detail.onToggleWorkComposer }}" style="margin-left:auto;font-size:13px;color:#fff;font-weight:600;cursor:pointer;background:#8b6dff;padding:7px 14px;border-radius:9px;">Écrire</div>
+          </div>
+          <sc-if value="{{ detail.workComposerOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <input value="{{ commentDraft }}" onInput="{{ onDraft }}" placeholder="Partage ta réaction…" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 14px;color:#ECECF2;font-size:14px;font-family:'Instrument Sans';outline:none;" />
+              <div onClick="{{ detail.onPostWork }}" style="padding:11px 18px;border-radius:10px;background:#8b6dff;color:#fff;font-weight:600;font-size:14px;cursor:pointer;">Publier</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ detail.hasWorkComments }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <sc-for list="{{ detail.workComments }}" as="c" hint-placeholder-count="1">
+                <div style="display:flex;gap:11px;">
+                  <div style="{{ c.avatarStyle }}">{{ c.avatarInitials }}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:8px;"><span style="font-weight:600;font-size:13.5px;">{{ c.author }}</span><span style="font-size:12px;color:#6c6c7c;">· {{ c.timeText }}</span></div>
+                    <div style="font-size:14px;line-height:1.45;color:#e4e4ee;margin-top:3px;">{{ c.text }}</div>
+                    <div style="display:flex;align-items:center;gap:18px;margin-top:6px;">
+                      <span onClick="{{ c.onLike }}" style="{{ c.likeStyle }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="{{ c.likeFill }}" stroke="{{ c.likeStroke }}" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>{{ c.likesText }}</span>
+                      <sc-if value="{{ c.canDelete }}" hint-placeholder-val="{{ false }}"><span onClick="{{ c.onDelete }}" style="font-size:12px;color:#6c6c7c;cursor:pointer;">Supprimer</span></sc-if>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ detail.hasEpisodes }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <sc-for list="{{ detail.seasons }}" as="s" hint-placeholder-count="2">
+              <div style="border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.02);">
+                <div onClick="{{ s.onToggle }}" style="display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;">
+                  <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;">{{ s.label }}</span>
+                  <span style="font-size:13px;color:#9797a8;">{{ s.progressText }}</span>
+                  <div onClick="{{ s.onOpenModal }}" style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12.5px;color:#b9b9c8;cursor:pointer;padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.09);" style-hover="background:rgba(255,255,255,.05);"><span style="color:#ffc24b;">★</span>{{ s.avgText }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 0 1 21 11.5z"/></svg></div>
+                  <div onClick="{{ s.onMarkAll }}" style="font-size:12.5px;color:#8b6dff;font-weight:600;padding:5px 10px;border-radius:8px;" style-hover="background:rgba(139,109,255,.12);">{{ s.markLabel }}</div>
+                  <span style="{{ s.chevronStyle }}">⌄</span>
+                </div>
+                <sc-if value="{{ s.expanded }}" hint-placeholder-val="{{ true }}">
+                  <div>
+                    <sc-for list="{{ s.episodes }}" as="e" hint-placeholder-count="6">
+                      <div style="border-top:1px solid rgba(255,255,255,.05);">
+                      <div style="display:flex;align-items:center;gap:14px;padding:12px 20px;{{ e.rowStyle }}">
+                        <div onClick="{{ e.onToggle }}" style="{{ e.checkStyle }}">{{ e.checkChar }}</div>
+                        <div style="min-width:0;flex:1;">
+                          <div style="display:flex;align-items:center;gap:8px;"><span style="font-weight:600;font-size:14.5px;{{ e.titleStyle }}">{{ e.label }}</span><sc-if value="{{ e.badgeNew }}" hint-placeholder-val="{{ false }}"><span style="background:#ff5c8a;color:#fff;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;">NOUVEAU</span></sc-if></div>
+                          <div style="font-size:12.5px;color:#7a7a8a;margin-top:2px;">{{ e.airText }}</div>
+                        </div>
+                        <div style="display:flex;gap:2px;">
+                          <sc-for list="{{ e.stars }}" as="st" hint-placeholder-count="5">
+                            <span onClick="{{ st.onClick }}" style="{{ st.style }}">{{ st.char }}</span>
+                          </sc-for>
+                        </div>
+                        <div onClick="{{ e.onToggleComposer }}" style="{{ e.commentBtnStyle }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 0 1 21 11.5z"/></svg><sc-if value="{{ e.hasComments }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;padding:0 4px;border-radius:16px;background:#8b6dff;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ e.countText }}</span></sc-if></div>
+                      </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ===== CALENDAR ===== -->
+      <sc-if value="{{ isCalendar }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-bottom:34px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px;margin:0;">À rattraper</h3>
+            <span style="font-size:13px;color:#9797a8;">déjà sorti, pas encore vu</span>
+          </div>
+          <sc-if value="{{ calendar.catchEmpty }}" hint-placeholder-val="{{ false }}"><div style="color:#6c6c7c;font-size:14px;">Tu es à jour ! 🎉</div></sc-if>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ calendar.catchUp }}" as="c" hint-placeholder-count="4">
+              <div onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:16px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);cursor:pointer;" style-hover="background:rgba(255,255,255,.055);">
+                <div style="{{ c.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:rgba(255,255,255,.9);">{{ c.initials }}</span></div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:8px;"><span style="font-weight:600;font-size:15px;">{{ c.title }}</span><sc-if value="{{ c.badgeNew }}" hint-placeholder-val="{{ false }}"><span style="background:#ff5c8a;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;">NOUVEAU</span></sc-if></div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:3px;"><span style="font-size:13px;color:#9797a8;">{{ c.epLabel }}</span><sc-if value="{{ c.hasRemaining }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;color:#8b6dff;font-weight:600;background:rgba(139,109,255,.14);padding:1px 8px;border-radius:20px;">{{ c.remainingText }}</span></sc-if></div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;"><div style="font-size:13px;color:#b9b9c8;">{{ c.airText }}</div></div>
+                <div onClick="{{ c.onWatch }}" style="flex-shrink:0;padding:9px 14px;border-radius:10px;background:#8b6dff;color:#fff;font-size:13px;font-weight:600;" style-hover="background:#7a5cf0;">Marquer vu</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px;margin:0;">À venir</h3>
+            <span style="font-size:13px;color:#9797a8;">quoi sort quand</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <sc-for list="{{ calendar.upcoming }}" as="u" hint-placeholder-count="6">
+              <div onClick="{{ u.onClick }}" style="display:flex;align-items:center;gap:16px;padding:13px 8px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;">
+                <div style="width:52px;flex-shrink:0;text-align:center;"><div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:19px;color:#8b6dff;line-height:1;">{{ u.day }}</div><div style="font-size:11px;color:#7a7a8a;text-transform:uppercase;margin-top:2px;">{{ u.month }}</div></div>
+                <div style="{{ u.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;color:rgba(255,255,255,.9);">{{ u.initials }}</span></div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:600;font-size:15px;">{{ u.title }}</div>
+                  <div style="font-size:13px;color:#9797a8;margin-top:2px;">{{ u.epLabel }}</div>
+                </div>
+                <div style="{{ u.pillStyle }}">{{ u.relText }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== DASHBOARD ===== -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-bottom:32px;">
+          <sc-for list="{{ dashboard.stats }}" as="s" hint-placeholder-count="4">
+            <div style="padding:18px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);">
+              <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:30px;{{ s.valueStyle }}">{{ s.value }}</div>
+              <div style="font-size:13px;color:#9797a8;margin-top:4px;">{{ s.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-bottom:34px;">
+          <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px;margin:0 0 16px;">Prochain épisode à regarder</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
+            <sc-for list="{{ dashboard.upNext }}" as="u" hint-placeholder-count="3">
+              <div onClick="{{ u.onClick }}" style="display:flex;gap:14px;padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);cursor:pointer;" style-hover="border-color:rgba(139,109,255,.4);">
+                <div style="{{ u.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:22px;color:rgba(255,255,255,.9);">{{ u.initials }}</span></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;">
+                  <div style="font-weight:600;font-size:15px;">{{ u.title }}</div>
+                  <div style="font-size:13px;color:#8b6dff;font-weight:600;margin-top:3px;">{{ u.epLabel }}</div>
+                  <div style="font-size:12.5px;color:#7a7a8a;margin-top:2px;">{{ u.sub }}</div>
+                </div>
+                <div onClick="{{ u.onWatch }}" style="align-self:center;flex-shrink:0;width:38px;height:38px;border-radius:50%;background:#8b6dff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;" style-hover="background:#7a5cf0;">✓</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;">
+          <div>
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px;margin:0 0 16px;">En cours</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ dashboard.continue }}" as="c" hint-placeholder-count="3">
+                <div onClick="{{ c.onClick }}" style="display:flex;gap:13px;align-items:center;cursor:pointer;">
+                  <div style="{{ c.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;color:rgba(255,255,255,.9);">{{ c.initials }}</span></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;font-size:14.5px;">{{ c.title }}</div>
+                    <div style="height:5px;border-radius:5px;background:rgba(255,255,255,.09);overflow:hidden;margin:7px 0 4px;"><div style="{{ c.progressStyle }}"></div></div>
+                    <div style="font-size:12px;color:#7a7a8a;">{{ c.progressText }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px;margin:0 0 16px;">Dernières notes</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ dashboard.reviews }}" as="r" hint-placeholder-count="3">
+                <div onClick="{{ r.onClick }}" style="display:flex;gap:13px;padding:13px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);cursor:pointer;">
+                  <div style="{{ r.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:rgba(255,255,255,.9);">{{ r.initials }}</span></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:8px;"><span style="font-weight:600;font-size:14px;">{{ r.title }}</span><span style="font-size:12.5px;color:#ffc24b;font-weight:600;margin-left:auto;">{{ r.ratingText }}</span></div>
+                    <div style="font-size:12.5px;color:#9797a8;margin-top:4px;line-height:1.4;">{{ r.note }}</div>
+                    <div style="font-size:11.5px;color:#6c6c7c;margin-top:5px;">{{ r.dateText }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== STATS ===== -->
+      <sc-if value="{{ isStats }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:30px;">
+          <sc-for list="{{ statsView.big }}" as="s" hint-placeholder-count="4">
+            <div style="padding:20px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);">
+              <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;{{ s.valueStyle }}">{{ s.value }}</div>
+              <div style="font-size:13px;color:#9797a8;margin-top:4px;">{{ s.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;margin-bottom:30px;">
+          <div style="padding:22px;border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);">
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;margin:0 0 18px;">Par catégorie</h3>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <sc-for list="{{ statsView.cats }}" as="c" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span>{{ c.label }}</span><span style="color:#9797a8;">{{ c.countText }}</span></div>
+                  <div style="{{ c.barStyle }}"></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:22px;border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);">
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;margin:0 0 18px;">Par statut</h3>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <sc-for list="{{ statsView.statuses }}" as="s" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;"><span style="{{ s.dotStyle }}"></span><span>{{ s.label }}</span><span style="color:#9797a8;margin-left:auto;">{{ s.countText }}</span></div>
+                  <div style="{{ s.barStyle }}"></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:22px;border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);margin-bottom:30px;">
+          <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;margin:0 0 4px;">Activité récente</h3>
+          <div style="font-size:12.5px;color:#7a7a8a;margin-bottom:18px;">Épisodes & titres cochés, 10 dernières semaines</div>
+          <div style="display:flex;align-items:flex-end;gap:8px;height:120px;">
+            <sc-for list="{{ statsView.weeks }}" as="w" hint-placeholder-count="10">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;">
+                <div style="{{ w.barStyle }}"></div>
+                <span style="font-size:10px;color:#6c6c7c;">{{ w.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;">
+          <div style="padding:22px;border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);">
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;margin:0 0 18px;">Genres favoris</h3>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <sc-for list="{{ statsView.genres }}" as="g" hint-placeholder-count="5">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span>{{ g.label }}</span><span style="color:#9797a8;">{{ g.countText }}</span></div>
+                  <div style="{{ g.barStyle }}"></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:22px;border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);">
+            <h3 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;margin:0 0 18px;">Les mieux notés</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ statsView.topRated }}" as="t" hint-placeholder-count="5">
+                <div onClick="{{ t.onClick }}" style="display:flex;align-items:center;gap:13px;cursor:pointer;">
+                  <div style="{{ t.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:rgba(255,255,255,.9);">{{ t.initials }}</span></div>
+                  <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:14px;">{{ t.title }}</div><div style="font-size:12px;color:#7a7a8a;">{{ t.meta }}</div></div>
+                  <span style="font-size:13px;color:#ffc24b;font-weight:600;flex-shrink:0;">{{ t.ratingText }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== ACCOUNT ===== -->
+      <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:24px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);margin-bottom:26px;">
+          <div style="{{ accountView.avatarStyle }}">{{ accountView.avatarInitials }}</div>
+          <div style="flex:1;min-width:220px;">
+            <div style="display:flex;align-items:center;gap:10px;"><h2 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:26px;margin:0;">{{ accountView.name }}</h2><span onClick="{{ accountView.onEditName }}" style="font-size:12.5px;color:#8b6dff;cursor:pointer;font-weight:600;">Modifier</span></div>
+            <div style="color:#9797a8;font-size:14px;margin-top:3px;">{{ accountView.handle }} · {{ accountView.email }}</div>
+            <div style="color:#6c6c7c;font-size:12.5px;margin-top:8px;">{{ accountView.memberText }}</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div onClick="{{ accountView.onEditHandle }}" style="padding:9px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.1);font-size:13px;font-weight:600;cursor:pointer;color:#ECECF2;">Pseudo</div>
+            <div onClick="{{ accountView.onEditEmail }}" style="padding:9px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.1);font-size:13px;font-weight:600;cursor:pointer;color:#ECECF2;">E-mail</div>
+          </div>
+        </div>
+
+        <div style="padding:8px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Notifications</div>
+        <div style="border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);overflow:hidden;margin-bottom:24px;">
+          <sc-for list="{{ accountView.prefs }}" as="p" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.05);">
+              <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:14.5px;">{{ p.label }}</div><div style="font-size:12.5px;color:#9797a8;margin-top:2px;">{{ p.desc }}</div></div>
+              <div onClick="{{ p.onToggle }}" style="{{ p.trackStyle }}"><div style="{{ p.knobStyle }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:8px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Lecture & suivi</div>
+        <div style="border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);overflow:hidden;margin-bottom:24px;">
+          <sc-for list="{{ accountView.playback }}" as="p" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.05);">
+              <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:14.5px;">{{ p.label }}</div><div style="font-size:12.5px;color:#9797a8;margin-top:2px;">{{ p.desc }}</div></div>
+              <div onClick="{{ p.onToggle }}" style="{{ p.trackStyle }}"><div style="{{ p.knobStyle }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:8px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Page de démarrage</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
+          <sc-for list="{{ accountView.startOpts }}" as="o" hint-placeholder-count="4">
+            <div onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</div>
+          </sc-for>
+        </div>
+
+        <div style="padding:8px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Confidentialité</div>
+        <div style="border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);overflow:hidden;margin-bottom:24px;">
+          <sc-for list="{{ accountView.privacy }}" as="p" hint-placeholder-count="1">
+            <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.05);">
+              <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:14.5px;">{{ p.label }}</div><div style="font-size:12.5px;color:#9797a8;margin-top:2px;">{{ p.desc }}</div></div>
+              <div onClick="{{ p.onToggle }}" style="{{ p.trackStyle }}"><div style="{{ p.knobStyle }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:8px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Données</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div onClick="{{ accountView.onMarkAll }}" style="padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.1);font-size:14px;font-weight:600;cursor:pointer;color:#ECECF2;" style-hover="background:rgba(255,255,255,.05);">Tout marquer comme vu</div>
+          <div onClick="{{ accountView.onReset }}" style="padding:12px 18px;border-radius:12px;border:1px solid rgba(255,92,138,.35);background:rgba(255,92,138,.1);font-size:14px;font-weight:600;cursor:pointer;color:#ff8fab;" style-hover="background:rgba(255,92,138,.18);">Réinitialiser la progression</div>
+        </div>
+      </sc-if>
+
+      <!-- ===== FEED (Journal) ===== -->
+      <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ feedView.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:60px 20px;text-align:center;color:#6c6c7c;">Aucune réaction pour l'instant. Commente un épisode pour démarrer ton journal.</div></sc-if>
+        <div style="max-width:680px;display:flex;flex-direction:column;gap:14px;">
+          <sc-for list="{{ feedView.items }}" as="f" hint-placeholder-count="5">
+            <div style="border:1px solid rgba(255,255,255,.07);border-radius:18px;background:rgba(255,255,255,.025);padding:18px;">
+              <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;">
+                <div onClick="{{ f.onOpen }}" style="{{ f.posterStyle }};cursor:pointer;"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;color:rgba(255,255,255,.9);">{{ f.initials }}</span></div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:8px;"><div style="{{ userAvatarStyle }}">{{ userInitials }}</div><span style="font-weight:600;font-size:14px;">Toi</span><span style="font-size:12.5px;color:#6c6c7c;">· {{ f.timeText }}</span></div>
+                  <div onClick="{{ f.onOpen }}" style="font-size:13px;color:#9797a8;margin-top:5px;cursor:pointer;"><span style="color:#b9a6ff;font-weight:600;">{{ f.title }}</span> · {{ f.context }}</div>
+                </div>
+              </div>
+              <div style="font-size:15px;line-height:1.5;color:#e4e4ee;">{{ f.text }}</div>
+              <div style="display:flex;align-items:center;gap:20px;margin-top:14px;">
+                <span onClick="{{ f.onLike }}" style="{{ f.likeStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="{{ f.likeFill }}" stroke="{{ f.likeStroke }}" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>{{ f.likesText }}</span>
+                <span onClick="{{ f.onDelete }}" style="font-size:13px;color:#6c6c7c;cursor:pointer;">Supprimer</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+    </main>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM NAV ===== -->
+  <sc-if value="{{ nav.isMobile }}" hint-placeholder-val="{{ false }}">
+    <nav style="position:fixed;left:0;right:0;bottom:0;height:64px;background:rgba(14,14,20,.92);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.08);display:flex;z-index:40;">
+      <div onClick="{{ nav.dashboard.onClick }}" style="{{ nav.dashboard.mStyle }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span style="font-size:10.5px;">Accueil</span></div>
+      <div onClick="{{ nav.library.onClick }}" style="{{ nav.library.mStyle }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span style="font-size:10.5px;">Biblio</span></div>
+      <div onClick="{{ nav.calendar.onClick }}" style="{{ nav.calendar.mStyle }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg><span style="font-size:10.5px;">Calendrier</span></div>
+      <div onClick="{{ nav.feed.onClick }}" style="{{ nav.feed.mStyle }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 0 1 21 11.5z"/></svg><span style="font-size:10.5px;">Journal</span></div>
+      <div onClick="{{ nav.stats.onClick }}" style="{{ nav.stats.mStyle }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span style="font-size:10.5px;">Stats</span></div>
+      <div onClick="{{ nav.account.onClick }}" style="{{ nav.account.mStyle }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span style="font-size:10.5px;">Compte</span></div>
+    </nav>
+  </sc-if>
+
+  <!-- ===== TOAST ===== -->
+  <sc-if value="{{ toast.open }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:88px;transform:translateX(-50%);z-index:80;width:calc(100% - 40px);max-width:400px;">
+      <div style="display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:16px;background:#1b1b26;border:1px solid rgba(139,109,255,.35);box-shadow:0 20px 50px rgba(0,0,0,.55);animation:koraToast .3s ease both;">
+        <div style="{{ toast.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:rgba(255,255,255,.9);">{{ toast.initials }}</span></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:#4ade80;font-weight:600;display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Marqué comme vu</div>
+          <div style="font-weight:600;font-size:13.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ toast.label }}</div>
+        </div>
+        <div onClick="{{ toast.onOpen }}" style="flex-shrink:0;padding:9px 13px;border-radius:10px;background:#8b6dff;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Noter</div>
+        <div onClick="{{ toast.onClose }}" style="flex-shrink:0;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#7a7a8a;font-size:15px;">✕</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== EPISODE MODAL ===== -->
+  <sc-if value="{{ epModal.open }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ epModal.onClose }}" style="position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(5px);z-index:70;display:flex;align-items:flex-start;justify-content:center;padding:7vh 20px 20px;overflow-y:auto;">
+      <div onClick="{{ epModal.stop }}" style="width:100%;max-width:540px;background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);">
+        <div style="display:flex;align-items:center;gap:15px;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,.07);">
+          <div style="{{ epModal.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:rgba(255,255,255,.9);">{{ epModal.initials }}</span></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12.5px;color:#7a7a8a;">{{ epModal.title }} · {{ epModal.context }}</div>
+            <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:19px;margin-top:2px;">{{ epModal.epLabel }}</div>
+            <div style="font-size:12.5px;color:#7a7a8a;margin-top:2px;">{{ epModal.airText }}</div>
+          </div>
+          <div onClick="{{ epModal.onClose }}" style="width:34px;height:34px;flex-shrink:0;border-radius:10px;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9797a8;font-size:18px;">✕</div>
+        </div>
+
+        <div style="display:flex;gap:14px;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,.07);">
+          <div style="flex:1;padding:16px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center;">
+            <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;color:#ffc24b;line-height:1;">{{ epModal.avgText }}</div>
+            <div style="display:flex;gap:2px;justify-content:center;margin:7px 0 5px;"><sc-for list="{{ epModal.communityStars }}" as="s" hint-placeholder-count="5"><span style="{{ s.style }}">{{ s.char }}</span></sc-for></div>
+            <div style="font-size:11.5px;color:#7a7a8a;">{{ epModal.votesText }}</div>
+          </div>
+          <div style="flex:1;padding:16px;border-radius:14px;background:rgba(139,109,255,.1);border:1px solid rgba(139,109,255,.22);text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <div style="font-size:12.5px;color:#b9a6ff;margin-bottom:8px;font-weight:600;">Ma note</div>
+            <div style="display:flex;gap:4px;">
+              <sc-for list="{{ epModal.myStars }}" as="st" hint-placeholder-count="5"><span onClick="{{ st.onClick }}" style="{{ st.style }}">{{ st.char }}</span></sc-for>
+            </div>
+            <div style="font-size:11.5px;color:#9797a8;margin-top:7px;">{{ epModal.myRatingText }}</div>
+          </div>
+        </div>
+
+        <div style="padding:18px 22px;">
+          <div style="font-size:13px;color:#7a7a8a;font-weight:600;margin-bottom:12px;">{{ epModal.commentCountText }}</div>
+          <div style="display:flex;gap:8px;margin-bottom:18px;">
+            <input value="{{ commentDraft }}" onInput="{{ onDraft }}" placeholder="Partage ta réaction…" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 14px;color:#ECECF2;font-size:14px;font-family:'Instrument Sans';outline:none;" />
+            <div onClick="{{ epModal.onPost }}" style="padding:11px 18px;border-radius:10px;background:#8b6dff;color:#fff;font-weight:600;font-size:14px;cursor:pointer;">Publier</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;max-height:34vh;overflow-y:auto;">
+            <sc-for list="{{ epModal.comments }}" as="c" hint-placeholder-count="2">
+              <div style="display:flex;gap:11px;">
+                <div style="{{ c.avatarStyle }}">{{ c.avatarInitials }}</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:8px;"><span style="font-weight:600;font-size:13.5px;">{{ c.author }}</span><span style="font-size:12px;color:#6c6c7c;">· {{ c.timeText }}</span></div>
+                  <div style="font-size:14px;line-height:1.45;color:#e4e4ee;margin-top:3px;">{{ c.text }}</div>
+                  <div style="display:flex;align-items:center;gap:18px;margin-top:6px;">
+                    <span onClick="{{ c.onLike }}" style="{{ c.likeStyle }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="{{ c.likeFill }}" stroke="{{ c.likeStroke }}" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>{{ c.likesText }}</span>
+                    <sc-if value="{{ c.canDelete }}" hint-placeholder-val="{{ false }}"><span onClick="{{ c.onDelete }}" style="font-size:12px;color:#6c6c7c;cursor:pointer;">Supprimer</span></sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== SEARCH MODAL ===== -->
+  <sc-if value="{{ search.open }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ search.onClose }}" style="position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:12vh 20px 20px;">
+      <div onClick="{{ search.stop }}" style="width:100%;max-width:560px;background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);">
+        <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9797a8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input value="{{ search.query }}" onInput="{{ search.onInput }}" placeholder="Ajouter une série, un film, un animé…" style="flex:1;background:none;border:none;outline:none;color:#ECECF2;font-size:16px;font-family:'Instrument Sans';" />
+          <div onClick="{{ search.onClose }}" style="color:#7a7a8a;cursor:pointer;font-size:14px;padding:4px 8px;">Échap</div>
+        </div>
+        <div style="max-height:52vh;overflow-y:auto;padding:8px;">
+          <sc-if value="{{ search.noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:32px;text-align:center;color:#6c6c7c;font-size:14px;">Aucun résultat pour « {{ search.query }} »</div></sc-if>
+          <sc-for list="{{ search.results }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:12px;" style-hover="background:rgba(255,255,255,.05);">
+              <div style="{{ r.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;color:rgba(255,255,255,.9);">{{ r.initials }}</span></div>
+              <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:14.5px;">{{ r.title }}</div><div style="font-size:12.5px;color:#7a7a8a;">{{ r.meta }}</div></div>
+              <div onClick="{{ r.onAdd }}" style="{{ r.btnStyle }}">{{ r.btnLabel }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DAY = 86400000;
+const C = {
+  accent:'#8b6dff', pink:'#ff5c8a', gold:'#ffc24b', green:'#4ade80', blue:'#38bdf8',
+  muted:'#9797a8', text:'#ECECF2'
+};
+const POSTERS = [
+  ['#3a2d6b','#8b6dff'],['#6b2d4f','#ff5c8a'],['#1f4d5c','#38bdf8'],['#5c3a1f','#ffb24b'],
+  ['#2d5c3a','#4ade80'],['#4a1f5c','#c46dff'],['#5c1f2d','#ff6d6d'],['#1f3a5c','#6d9cff'],
+  ['#5c4a1f','#ffd76d'],['#2d1f5c','#8b6dff'],['#1f5c4a','#4addb0'],['#5c2d1f','#ff8b6d']
+];
+const CAT = {
+  series:'Séries', films:'Films', animes:'Animés', livres:'Livres', jeux:'Jeux vidéo', musique:'Musique'
+};
+const STATUS = {
+  a_voir:{label:'À voir', color:'#8b6dff'},
+  en_cours:{label:'En cours', color:'#38bdf8'},
+  termine:{label:'Terminé', color:'#4ade80'},
+  abandonne:{label:'Abandonné', color:'#9797a8'}
+};
+const TERM = {
+  series:{season:'Saison', ep:'Épisode', unit:'épisodes', verb:'Diffusé'},
+  animes:{season:'Saison', ep:'Épisode', unit:'épisodes', verb:'Diffusé'},
+  musique:{season:'Album', ep:'Titre', unit:'titres', verb:'Sorti'},
+  livres:{season:'Tome', ep:'Chapitre', unit:'chapitres', verb:'Publié'}
+};
+function term(cat){ return TERM[cat]||TERM.series; }
+const USERS=[{n:'Léa',c:'#ff5c8a'},{n:'Karim',c:'#38bdf8'},{n:'Manon',c:'#4ade80'},{n:'Théo',c:'#ffb24b'},{n:'Inès',c:'#c46dff'},{n:'Hugo',c:'#8b6dff'},{n:'Sofia',c:'#ff8b6d'},{n:'Noah',c:'#6d9cff'}];
+const CTEXTS=["Cet épisode envoie du lourd, je n'ai pas vu le temps passer.","Un peu lent au début mais la fin rattrape tout.","La réalisation est dingue sur ce coup.","J'ai relancé direct, tellement addictif.","Bof, j'attendais mieux honnêtement.","La bande-son... quelle claque.","Ça m'a mis une grosse claque émotionnelle.","Le meilleur de la saison sans hésiter.","Un twist que personne n'avait vu venir.","Solide, comme d'habitude.","J'ai pleuré, assumons.","Chef-d'œuvre, rien à dire."];
+
+function hash(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; }
+function initials(t){
+  const clean=t.replace(/[:\-–].*$/,'').trim().split(/\s+/);
+  if(clean.length===1) return clean[0].slice(0,2).toUpperCase();
+  return (clean[0][0]+clean[1][0]).toUpperCase();
+}
+function monthsFR(){ return ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.']; }
+function fmtDate(ts){ const d=new Date(ts); return d.getDate()+' '+monthsFR()[d.getMonth()]; }
+function relText(ts, now){
+  const diff=Math.round((ts-now)/DAY);
+  if(diff===0) return "aujourd'hui";
+  if(diff===1) return 'demain';
+  if(diff>0 && diff<7) return 'dans '+diff+' j';
+  if(diff<0 && diff>-7) return 'il y a '+(-diff)+' j';
+  if(diff<0) return 'il y a '+Math.round(-diff/7)+' sem';
+  return fmtDate(ts);
+}
+
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    const now = Date.now();
+    this.now = now;
+    const works = this.buildData(now);
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('kora-v2')||'{}'); } catch(e){}
+    const settings = saved.settings || {startPage:'library', autoNext:true, spoilerFree:true, notifNewEp:true, notifCalendar:true, notifWeekly:false, publicProfile:false, adult:false};
+    const profile = saved.profile || {name:'Alex Moreau', handle:'@alexbinge', email:'alex.moreau@email.com', memberSince:'mars 2023'};
+    this.state = {
+      view: settings.startPage || 'library',
+      settings, profile,
+      feed: saved.feed || this.seedFeed(now),
+      commentDraft:'', openCommentKey:null, modalKey:null, modalCtx:null, toast:null,
+      ccLikes: saved.ccLikes || {},
+      games: saved.games || this.seedGames(),
+      selectedId: null,
+      category: 'all',
+      status: 'all',
+      sort: 'recent',
+      expanded: {},
+      searchOpen: false,
+      query: '',
+      isMobile: (typeof window!=='undefined' && window.innerWidth < 860),
+      works: works,
+      watched: saved.watched || this.seedWatched(works),
+      ratings: saved.ratings || this.seedRatings(works),
+      reviews: saved.reviews || this.seedReviews(works, now)
+    };
+  }
+
+  componentDidMount(){
+    this._onResize = () => {
+      const m = window.innerWidth < 860;
+      if(m !== this.state.isMobile) this.setState({isMobile:m});
+    };
+    window.addEventListener('resize', this._onResize);
+    this._onKey = (e)=>{ if(e.key==='Escape') this.setState({searchOpen:false, modalKey:null, modalCtx:null}); };
+    window.addEventListener('keydown', this._onKey);
+  }
+  componentWillUnmount(){
+    window.removeEventListener('resize', this._onResize);
+    window.removeEventListener('keydown', this._onKey);
+  }
+
+  persist(next){
+    const s = {...this.state, ...next};
+    try { localStorage.setItem('kora-v2', JSON.stringify({watched:s.watched, ratings:s.ratings, reviews:s.reviews, settings:s.settings, profile:s.profile, feed:s.feed, games:s.games, ccLikes:s.ccLikes})); } catch(e){}
+  }
+
+  buildData(now){
+    const mk = (id,title,category,genre,year,status,overview,seasonsCfg)=>{
+      let seasons=null;
+      if(seasonsCfg){
+        seasons = seasonsCfg.map(cfg=>{
+          const count = cfg.titles ? cfg.titles.length : cfg.count;
+          return {
+            n: cfg.n, name: cfg.name||null, initialWatched: cfg.watched,
+            episodes: Array.from({length:count}, (_,i)=>({
+              n: i+1,
+              title: (cfg.titles && cfg.titles[i]) || ('Épisode '+(i+1)),
+              air: now + (cfg.first + i*cfg.gap)*DAY
+            }))
+          };
+        });
+      }
+      return {id,title,category,genre,year,status,overview,seasons};
+    };
+    return [
+      mk('one-piece','One Piece','animes','Aventure',1999,'en_cours',
+        "L'épopée de Luffy et son équipage à la recherche du trésor ultime, le One Piece. Un shōnen fleuve devenu monument.",
+        [{n:1,count:24,first:-410,gap:7,watched:24},{n:2,count:26,first:-120,gap:7,watched:14}]),
+      mk('from','From','series','Horreur / Mystère',2022,'en_cours',
+        "Une ville piège ses habitants ; des créatures rôdent la nuit. Impossible d'en sortir, impossible d'arrêter de regarder.",
+        [{n:1,count:10,first:-520,gap:7,watched:10},{n:2,count:10,first:-320,gap:7,watched:10},{n:3,count:10,first:-35,gap:7,watched:4}]),
+      mk('severance','Severance','series','Thriller SF',2022,'en_cours',
+        "Chez Lumon, les employés séparent chirurgicalement leurs souvenirs du travail et de la vie privée. Jusqu'où va la scission ?",
+        [{n:1,count:9,first:-800,gap:7,watched:9},{n:2,count:10,first:-20,gap:7,watched:1}]),
+      mk('the-bear','The Bear','series','Comédie dramatique',2022,'en_cours',
+        "Un chef étoilé reprend le sandwich shop familial à Chicago. Tension, cuisine et chaos à haute intensité.",
+        [{n:1,count:8,first:-900,gap:1,watched:8},{n:2,count:10,first:-600,gap:1,watched:10},{n:3,count:10,first:-300,gap:1,watched:6}]),
+      mk('avatar-atla','Avatar : le dernier maître de l\'air','animes','Aventure / Fantasy',2005,'termine',
+        "Aang, dernier maître de l'air, doit maîtriser les quatre éléments pour ramener l'équilibre dans un monde en guerre.",
+        [{n:1,count:20,first:-1300,gap:4,watched:20},{n:2,count:20,first:-1100,gap:4,watched:20},{n:3,count:21,first:-950,gap:4,watched:21}]),
+      mk('aot','L\'Attaque des Titans','animes','Action / Dark fantasy',2013,'termine',
+        "L'humanité survit derrière des murs géants, menacée par les Titans. Eren jure de tous les exterminer.",
+        [{n:1,count:25,first:-1500,gap:7,watched:25},{n:2,count:12,first:-1200,gap:7,watched:12},{n:3,count:22,first:-1000,gap:7,watched:22},{n:4,count:28,first:-800,gap:7,watched:28}]),
+      mk('arcane','Arcane','animes','SF / Fantasy',2021,'termine',
+        "Deux sœurs, deux villes que tout oppose. Magie, technologie et révolution s'entrechoquent à Piltover et Zaun.",
+        [{n:1,count:9,first:-1000,gap:1,watched:9},{n:2,count:9,first:-200,gap:1,watched:9}]),
+      // Films
+      {id:'dune-2',title:'Dune : Deuxième partie',category:'films',genre:'SF',year:2024,status:'termine',overview:"Paul Atréides s'allie aux Fremen pour mener la révolte contre ceux qui ont détruit sa famille.",seasons:null,release:now-200*DAY},
+      {id:'oppenheimer',title:'Oppenheimer',category:'films',genre:'Drame historique',year:2023,status:'termine',overview:"Le père de la bombe atomique face aux conséquences de sa création.",seasons:null,release:now-360*DAY},
+      {id:'the-batman',title:'The Batman',category:'films',genre:'Thriller',year:2022,status:'termine',overview:"Un Batman des premières années traque le Sniper dans une Gotham pluvieuse et corrompue.",seasons:null,release:now-500*DAY},
+      {id:'interstellar',title:'Interstellar',category:'films',genre:'SF',year:2014,status:'termine',overview:"Des explorateurs franchissent un trou de ver pour sauver l'humanité.",seasons:null,release:now-1200*DAY},
+      {id:'furiosa',title:'Furiosa',category:'films',genre:'Action',year:2024,status:'a_voir',overview:"Les origines de Furiosa dans les Terres Désolées, avant Fury Road.",seasons:null,release:now+16*DAY},
+      {id:'mickey-17',title:'Mickey 17',category:'films',genre:'SF',year:2025,status:'a_voir',overview:"Un employé jetable, cloné à chaque mort, sur une planète glacée. Par Bong Joon-ho.",seasons:null,release:now+44*DAY},
+      {id:'avatar-3',title:'Avatar 3 : Fire and Ash','category':'films',genre:'SF',year:2025,status:'a_voir',overview:"Le retour sur Pandora, entre nouveaux peuples Na'vi et cendres.",seasons:null,release:now+120*DAY},
+      // Musique — artiste = œuvre, album = saison, titre = épisode
+      mk('daft-punk','Daft Punk','musique','Électro / French touch',2001,'en_cours',
+        "Le duo masqué qui a redéfini la musique électronique. Deux albums cultes suivis titre par titre.",
+        [
+          {n:1, name:'Discovery', first:-1400, gap:0, watched:10, titles:['One More Time','Aerodynamic','Digital Love','Harder Better Faster Stronger','Crescendolls','Nightvision','Superheroes','High Life','Something About Us','Voyager','Veridis Quo','Short Circuit','Face to Face','Too Long']},
+          {n:2, name:'Random Access Memories', first:-260, gap:0, watched:5, titles:['Give Life Back to Music','The Game of Love','Giorgio by Moroder','Within','Instant Crush','Lose Yourself to Dance','Touch','Get Lucky','Beyond','Motherboard','Fragments of Time','Doin\' it Right','Contact']}
+        ]),
+      mk('kendrick','Kendrick Lamar','musique','Hip-hop',2012,'en_cours',
+        "Le poète de Compton, entre récit de rue et jazz expérimental.",
+        [
+          {n:1, name:'good kid, m.A.A.d city', first:-900, gap:0, watched:12, titles:['Sherane','Bitch, Don\'t Kill My Vibe','Backseat Freestyle','The Art of Peer Pressure','Money Trees','Poetic Justice','good kid','m.A.A.d city','Swimming Pools','Sing About Me','Real','Compton']},
+          {n:2, name:'To Pimp a Butterfly', first:-40, gap:0, watched:3, titles:['Wesley\'s Theory','For Free?','King Kunta','Institutionalized','These Walls','u','Alright','Momma','Hood Politics','How Much a Dollar Cost','Complexion','The Blacker the Berry','You Ain\'t Gotta Lie','i','Mortal Man']}
+        ]),
+      mk('tame-impala','Tame Impala','musique','Psychédélique',2015,'termine',
+        "Le projet solo de Kevin Parker, rêverie psyché-pop.",
+        [{n:1, name:'Currents', first:-800, gap:0, watched:13, titles:['Let It Happen','Nangs','The Moment','Yes I\'m Changing','Eventually','Gossip','The Less I Know the Better','Past Life','Disciples','\'Cause I\'m a Man','Reality in Motion','Love/Paranoia','New Person, Same Old Mistakes']}]),
+      mk('gorillaz','Gorillaz','musique','Alt / Électro',2010,'a_voir',
+        "Le groupe virtuel de Damon Albarn. Nouvel album à venir.",
+        [{n:1, name:'The Mountain (à venir)', first:35, gap:0, watched:0, titles:['Intro','The Mountain','Skyfaring','Neon Dust','Static Bloom','Undertow','Last Light','Outro']}]),
+      // Livres — tome = saison, chapitre = épisode (idéal mangas/scans)
+      mk('op-manga','One Piece (manga)','livres','Shōnen',1997,'en_cours',
+        "Le manga original d'Eiichiro Oda, lu chapitre par chapitre. Nouveaux scans chaque semaine.",
+        [{n:1,name:'Tome 106',count:9,first:-250,gap:7,watched:9},{n:2,name:'Tome 107',count:9,first:-30,gap:7,watched:5}]),
+      mk('berserk','Berserk','livres','Dark fantasy',1989,'en_cours',
+        "Le manga épique et sombre de Kentaro Miura.",
+        [{n:1,name:"L'Âge d'or",count:10,first:-800,gap:2,watched:10},{n:2,name:'La Conviction',count:10,first:-400,gap:2,watched:6}]),
+      mk('dune-book','Dune (roman)','livres','SF',1965,'termine',
+        "Le chef-d'œuvre de Frank Herbert.",
+        [{n:1,name:'Livre I — Dune',count:8,first:-600,gap:1,watched:8},{n:2,name:'Livre II — Muad\'Dib',count:8,first:-590,gap:1,watched:8},{n:3,name:'Livre III — Le Prophète',count:6,first:-580,gap:1,watched:6}]),
+      mk('lotr','Le Seigneur des Anneaux','livres','Fantasy',1954,'en_cours',
+        "La trilogie fondatrice de la fantasy moderne, par J.R.R. Tolkien.",
+        [{n:1,name:"La Communauté de l'Anneau",count:12,first:-500,gap:1,watched:12},{n:2,name:'Les Deux Tours',count:10,first:-480,gap:1,watched:4},{n:3,name:'Le Retour du Roi',count:10,first:-470,gap:1,watched:0}]),
+      mk('1984','1984','livres','Dystopie',1949,'termine',
+        "Le classique de George Orwell sur la surveillance et le totalitarisme.",
+        [{n:1,name:'Première partie',count:8,first:-900,gap:1,watched:8},{n:2,name:'Deuxième partie',count:9,first:-890,gap:1,watched:9},{n:3,name:'Troisième partie',count:6,first:-880,gap:1,watched:6}]),
+      mk('project-hail-mary','Projet Dernière Chance','livres','SF',2021,'a_voir',
+        "Un survival spatial trépidant signé Andy Weir.",
+        [{n:1,name:'Tome unique',count:30,first:-100,gap:1,watched:0}]),
+      {id:'elden-ring',title:'Elden Ring',category:'jeux',genre:'Action-RPG',year:2022,status:'termine',overview:"Un monde ouvert signé FromSoftware et George R. R. Martin.",seasons:null,pt:{main:58,extra:98,full:133}},
+      {id:'zelda-totk',title:'Zelda : Tears of the Kingdom',category:'jeux',genre:'Aventure',year:2023,status:'en_cours',overview:"Link explore le ciel et les profondeurs d'Hyrule.",seasons:null,pt:{main:59,extra:108,full:222}},
+      {id:'bg3',title:'Baldur\'s Gate 3',category:'jeux',genre:'RPG',year:2023,status:'en_cours',overview:"Un CRPG monumental signé Larian Studios.",seasons:null,pt:{main:75,extra:140,full:190}},
+      {id:'hollow-knight',title:'Hollow Knight',category:'jeux',genre:'Metroidvania',year:2017,status:'termine',overview:"Une aventure souterraine mélancolique et exigeante.",seasons:null,pt:{main:26,extra:40,full:63}},
+      {id:'witcher-3',title:'The Witcher 3',category:'jeux',genre:'Action-RPG',year:2015,status:'termine',overview:"Geralt de Riv dans un monde ouvert dense et mature.",seasons:null,pt:{main:51,extra:105,full:173}},
+      {id:'hades',title:'Hades',category:'jeux',genre:'Rogue-like',year:2020,status:'a_voir',overview:"Sortir des Enfers, encore et encore, par Supergiant Games.",seasons:null,pt:{main:22,extra:49,full:96}}
+    ];
+  }
+
+  seedWatched(works){
+    const w = {};
+    works.forEach(work=>{
+      if(!work.seasons) return;
+      work.seasons.forEach(s=>{
+        for(let e=1;e<=s.initialWatched;e++) w[work.id+'-'+s.n+'-'+e]=true;
+      });
+    });
+    return w;
+  }
+  seedRatings(works){
+    const r = {};
+    const seed = {'avatar-atla':5,'aot':5,'arcane':5,'dune-2':5,'oppenheimer':4,'the-batman':4,'interstellar':5,'elden-ring':5,'random-access':5,'severance':5,'from':4,'one-piece':5,'the-bear':4};
+    Object.keys(seed).forEach(id=>{ r['w:'+id]=seed[id]; });
+    return r;
+  }
+  seedReviews(works, now){
+    return [
+      {id:'severance', note:"La saison 2 démarre fort, l'ambiance Lumon reste hypnotique.", ts:now-3*DAY},
+      {id:'dune-2', note:"Une claque visuelle et sonore. Villeneuve au sommet.", ts:now-12*DAY},
+      {id:'arcane', note:"Sans doute la plus belle animation du moment. Fin parfaite.", ts:now-26*DAY},
+      {id:'the-bear', note:"Intense, mais la S3 traîne un peu. Toujours excellent.", ts:now-40*DAY}
+    ];
+  }
+
+  // ---- computations ----
+  workById(id){ return this.state.works.find(w=>w.id===id); }
+  seasonLabel(work, s){ if(work.category==='musique') return s.name||('Album '+s.n); if(s.name) return s.name; return term(work.category).season+' '+s.n; }
+  epRowLabel(work, s, e){ if(work.category==='musique') return e.n+'. '+e.title; const t=term(work.category); const base = (work.category==='series'||work.category==='animes') ? ('S'+s.n+' · '+t.ep+' '+e.n) : (t.ep+' '+e.n); const hasT = e.title && !/^Épisode /.test(e.title); return hasT ? (base+' · '+e.title) : base; }
+  epLongLabel(work, s, e){ if(work.category==='musique') return this.seasonLabel(work,s)+' · '+e.title; const t=term(work.category); return this.seasonLabel(work,s)+' · '+t.ep+' '+e.n; }
+  airVerb(work){ return term(work.category).verb; }
+  epTotals(work){
+    if(!work.seasons) return {total:0, watched:0, airedUnwatched:0};
+    let total=0, watched=0, airedUnwatched=0;
+    work.seasons.forEach(s=>s.episodes.forEach(e=>{
+      total++;
+      const key=work.id+'-'+s.n+'-'+e.n;
+      const w=!!this.state.watched[key];
+      if(w) watched++;
+      else if(e.air<=this.now) airedUnwatched++;
+    }));
+    return {total, watched, airedUnwatched};
+  }
+  nextEpisode(work){ // next aired-unwatched (to watch now)
+    if(!work.seasons) return null;
+    for(const s of work.seasons){
+      for(const e of s.episodes){
+        const key=work.id+'-'+s.n+'-'+e.n;
+        if(!this.state.watched[key] && e.air<=this.now) return {s,e,key};
+      }
+    }
+    return null;
+  }
+
+  setView(v){ this.setState({view:v, searchOpen:false}); }
+  setSetting(key, val){ const settings={...this.state.settings, [key]:val}; this.setState({settings}); this.persist({settings}); }
+  toggleSetting(key){ this.setSetting(key, !this.state.settings[key]); }
+  editField(key, label){ const cur=this.state.profile[key]; const v=window.prompt('Modifier '+label, cur); if(v!=null && v.trim()){ const profile={...this.state.profile, [key]:v.trim()}; this.setState({profile}); this.persist({profile}); } }
+  resetProgress(){ if(window.confirm('Réinitialiser toute ta progression ? Les épisodes cochés seront remis à zéro.')){ const watched={}; this.setState({watched}); this.persist({watched}); } }
+  markAllWatched(){ const watched={}; this.state.works.forEach(w=>{ if(w.seasons) w.seasons.forEach(s=>s.episodes.forEach(e=>{ if(e.air<=this.now) watched[w.id+'-'+s.n+'-'+e.n]=true; })); }); this.setState({watched}); this.persist({watched}); }
+  seedGames(){ return {'elden-ring':{hours:133,done:{main:true,extra:true,full:true}}, 'zelda-totk':{hours:64,done:{main:true}}, 'bg3':{hours:82,done:{}}, 'hollow-knight':{hours:41,done:{main:true,extra:true}}, 'witcher-3':{hours:120,done:{main:true,extra:true}}, 'hades':{hours:0,done:{}}}; }
+  seedFeed(now){
+    return [
+      {id:'sf1', key:'one-piece-2-14', workId:'one-piece', sNum:2, eNum:14, text:"Oda ne rate jamais. Ce chapitre relance tout, je suis sous le choc.", ts:now-6*DAY, likes:41, liked:true},
+      {id:'sf2', key:'from-3-6', workId:'from', sNum:3, eNum:6, text:"Ok cet épisode m'a retourné. Je ne dors plus, merci From.", ts:now-1*DAY, likes:5, liked:false},
+      {id:'sf3', key:'severance-2-1', workId:'severance', sNum:2, eNum:1, text:"Le retour dans les couloirs Lumon, glaçant. La scène d'ouverture est un chef-d'œuvre.", ts:now-3*DAY, likes:12, liked:true},
+      {id:'sf4', key:'w:dune-2', workId:'dune-2', sNum:null, eNum:null, text:"Villeneuve au sommet. Une claque visuelle et sonore totale.", ts:now-12*DAY, likes:23, liked:false},
+      {id:'sf5', key:'the-bear-3-1', workId:'the-bear', sNum:3, eNum:1, text:"Cet épisode sans dialogue au début... quelle audace.", ts:now-20*DAY, likes:8, liked:false}
+    ];
+  }
+  commentsFor(key){ return this.state.feed.filter(f=>f.key===key).sort((a,b)=>b.ts-a.ts); }
+  mapComment(c){ return { id:c.id, author:'Toi', canDelete:true, avatarStyle:'width:36px;height:36px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:14px;color:#fff;', avatarInitials:initials(this.state.profile.name), text:c.text, timeText:relText(c.ts,this.now), likesText:c.likes?String(c.likes):'', onLike:()=>this.toggleLike(c.id), onDelete:()=>this.deleteComment(c.id), likeStyle:'display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer;color:'+(c.liked?'#ff5c8a':'#7a7a8a')+';', likeFill:c.liked?'#ff5c8a':'none', likeStroke:c.liked?'#ff5c8a':'currentColor' }; }
+  mapCommunity(c){ return { id:c.id, author:c.author, canDelete:false, avatarStyle:'width:36px;height:36px;flex-shrink:0;border-radius:50%;background:'+c.color+';display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:14px;color:#fff;', avatarInitials:c.author[0], text:c.text, timeText:relText(c.ts,this.now), likesText:c.likes?String(c.likes):'', onLike:()=>this.toggleCCLike(c.id), onDelete:()=>{}, likeStyle:'display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer;color:'+(c.liked?'#ff5c8a':'#7a7a8a')+';', likeFill:c.liked?'#ff5c8a':'none', likeStroke:c.liked?'#ff5c8a':'currentColor' }; }
+  communityComments(key){ const h=hash(key); const n=h%4; const out=[]; for(let i=0;i<n;i++){ const u=USERS[(h+i*3)%USERS.length]; const id='cc:'+key+':'+i; const base=(h+i*17)%58; const liked=!!this.state.ccLikes[id]; out.push({id, author:u.n, color:u.c, text:CTEXTS[(h*7+i*13)%CTEXTS.length], ts:this.now-((h%18)+i*2+1)*DAY, likes:base+(liked?1:0), liked}); } return out; }
+  toggleCCLike(id){ const ccLikes={...this.state.ccLikes}; if(ccLikes[id]) delete ccLikes[id]; else ccLikes[id]=true; this.setState({ccLikes}); this.persist({ccLikes}); }
+  mergeFeed(rawYours, rawComm){ const y=rawYours.map(c=>({ts:c.ts, node:this.mapComment(c)})); const m=rawComm.map(c=>({ts:c.ts, node:this.mapCommunity(c)})); return [...y,...m].sort((a,b)=>b.ts-a.ts).map(x=>x.node); }
+  openComposer(key){ this.setState({openCommentKey: this.state.openCommentKey===key?null:key, commentDraft:''}); }
+  openEpisodeModal(w,s,e){ this.setState({modalKey:w.id+'-'+s.n+'-'+e.n, modalCtx:{type:'ep', workId:w.id, sNum:s.n, eNum:e.n}, commentDraft:''}); }
+  openSeasonModal(w,s){ this.setState({modalKey:'s:'+w.id+'-'+s.n, modalCtx:{type:'season', workId:w.id, sNum:s.n}, commentDraft:''}); }
+  closeModal(){ this.setState({modalKey:null, modalCtx:null}); }
+  communityRating(key){ const h=hash(key); const avg=Math.min(4.9, 3.4+(h%16)/10); const count=180+(h%2200); return {avg, avgText:avg.toFixed(1), count, filled:Math.round(avg)}; }
+  setDraft(v){ this.setState({commentDraft:v}); }
+  postComment(workId, sNum, eNum){
+    const t=(this.state.commentDraft||'').trim(); if(!t) return;
+    const key = sNum? (workId+'-'+sNum+'-'+eNum) : ('w:'+workId);
+    const entry={id:'c'+Date.now(), key, workId, sNum:sNum||null, eNum:eNum||null, text:t, ts:Date.now(), likes:0, liked:false};
+    const feed=[entry, ...this.state.feed];
+    this.setState({feed, commentDraft:''}); this.persist({feed});
+  }
+  toggleLike(id){ const feed=this.state.feed.map(f=>f.id===id?{...f, liked:!f.liked, likes:f.likes+(f.liked?-1:1)}:f); this.setState({feed}); this.persist({feed}); }
+  deleteComment(id){ const feed=this.state.feed.filter(f=>f.id!==id); this.setState({feed}); this.persist({feed}); }
+  addGameHours(id, delta){ const games={...this.state.games}; const g={hours:0,done:{},...(games[id]||{})}; g.hours=Math.max(0,(g.hours||0)+delta); games[id]=g; this.setState({games}); this.persist({games}); }
+  toggleGameTier(id, tier){ const games={...this.state.games}; const g={hours:0,done:{},...(games[id]||{})}; g.done={...(g.done||{})}; g.done[tier]=!g.done[tier]; games[id]=g; this.setState({games}); this.persist({games}); }
+  gameVM(w){
+    if(w.category!=='jeux' || !w.pt) return null;
+    const g=this.state.games[w.id]||{hours:0,done:{}};
+    const chk=(on)=>'width:24px;height:24px;flex-shrink:0;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:#fff;background:'+(on?'#4ade80':'transparent')+';border:2px solid '+(on?'#4ade80':'#4a4a58')+';';
+    return {
+      durations:[{label:'Quête principale', value:w.pt.main+' h', c:'#38bdf8'},{label:'+ Extras', value:w.pt.extra+' h', c:'#8b6dff'},{label:'100 %', value:w.pt.full+' h', c:'#ff5c8a'}].map(d=>({label:d.label, value:d.value, valueStyle:'font-family:\'Bricolage Grotesque\';font-weight:700;font-size:24px;color:'+d.c+';'})),
+      hoursText: (g.hours||0)+' h de jeu',
+      onAdd:()=>this.addGameHours(w.id,5), onSub:()=>this.addGameHours(w.id,-5),
+      objectives:[['main','Quête principale',w.pt.main],['extra','Extras & secondaires',w.pt.extra],['full','Complétion 100 %',w.pt.full]].map(([k,label,h])=>{
+        const on=!!(g.done&&g.done[k]);
+        return {label, hoursText:'~ '+h+' h', done:on, onToggle:()=>this.toggleGameTier(w.id,k), checkStyle:chk(on), checkChar:on?'✓':'', labelStyle: on?'text-decoration:line-through;color:#9797a8;':''};
+      })
+    };
+  }
+  openWork(id){
+    const w=this.workById(id);
+    const exp={};
+    if(w && w.seasons){ // expand season with next unwatched, else last
+      const nx=this.nextEpisode(w);
+      exp[w.id+'-'+(nx?nx.s.n:w.seasons[w.seasons.length-1].n)]=true;
+    }
+    this.setState({view:'detail', selectedId:id, expanded:exp});
+  }
+  toggleEp(work, sNum, eNum, aired){
+    if(!aired) return;
+    const key=work.id+'-'+sNum+'-'+eNum;
+    const watched={...this.state.watched};
+    if(watched[key]) delete watched[key]; else watched[key]=true;
+    this.setState({watched}); this.persist({watched});
+  }
+  markSeason(work, s){
+    const watched={...this.state.watched};
+    const allAiredDone = s.episodes.filter(e=>e.air<=this.now).every(e=>watched[work.id+'-'+s.n+'-'+e.n]);
+    s.episodes.forEach(e=>{
+      const key=work.id+'-'+s.n+'-'+e.n;
+      if(e.air<=this.now){ if(allAiredDone) delete watched[key]; else watched[key]=true; }
+    });
+    this.setState({watched}); this.persist({watched});
+  }
+  toggleSeason(work, s){
+    const k=work.id+'-'+s.n;
+    const expanded={...this.state.expanded, [k]:!this.state.expanded[k]};
+    this.setState({expanded});
+  }
+  watchNext(work){
+    const nx=this.nextEpisode(work);
+    if(!nx) return;
+    const watched={...this.state.watched}; watched[nx.key]=true;
+    this.setState({watched}); this.persist({watched});
+  }
+  markWatchedToast(work, sNum, eNum){
+    const key=work.id+'-'+sNum+'-'+eNum;
+    const watched={...this.state.watched}; watched[key]=true;
+    if(this._toastT) clearTimeout(this._toastT);
+    const ep = work.seasons.find(s=>s.n===sNum).episodes.find(e=>e.n===eNum);
+    this.setState({watched, toast:{workId:work.id, sNum, eNum, label:this.epRowLabel(work,{n:sNum,name:null},ep), title:work.title, initials:initials(work.title), poster:this.posterBox(work.id,38,54,9)}});
+    this.persist({watched});
+    this._toastT=setTimeout(()=>{ this.setState(s=> s.toast && s.toast.workId===work.id && s.toast.eNum===eNum ? {toast:null}:{}); }, 6000);
+  }
+  dismissToast(){ if(this._toastT) clearTimeout(this._toastT); this.setState({toast:null}); }
+  openToastModal(){ const t=this.state.toast; if(!t) return; const w=this.workById(t.workId); const s=w.seasons.find(x=>x.n===t.sNum); const e=s.episodes.find(x=>x.n===t.eNum); if(this._toastT) clearTimeout(this._toastT); this.setState({toast:null}); this.openEpisodeModal(w,s,e); }
+  setRating(scope, id, val){
+    const key=scope+':'+id;
+    const ratings={...this.state.ratings};
+    ratings[key] = (ratings[key]===val)? 0 : val;
+    let reviews=this.state.reviews;
+    if(scope==='w'){
+      reviews=[...this.state.reviews];
+      const idx=reviews.findIndex(r=>r.id===id);
+      if(ratings[key]>0){
+        const entry={id, note: idx>=0?reviews[idx].note:"Note mise à jour.", ts:this.now};
+        if(idx>=0) reviews.splice(idx,1);
+        reviews.unshift(entry);
+      }
+    }
+    this.setState({ratings, reviews}); this.persist({ratings, reviews});
+  }
+  cycleStatus(work){
+    const order=['a_voir','en_cours','termine','abandonne'];
+    const i=order.indexOf(work.status);
+    const next=order[(i+1)%order.length];
+    const works=this.state.works.map(w=>w.id===work.id?{...w,status:next}:w);
+    this.setState({works});
+  }
+  addWork(tpl){
+    if(this.state.works.some(w=>w.id===tpl.id)) return;
+    const works=[...this.state.works, {...tpl, status:'a_voir', added:this.now}];
+    this.setState({works});
+  }
+
+  posterBox(id, w, h, r){
+    const p=POSTERS[hash(id)%POSTERS.length];
+    return 'width:'+w+'px;height:'+h+'px;flex-shrink:0;border-radius:'+r+'px;background:linear-gradient(150deg,'+p[0]+','+p[1]+');display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35);';
+  }
+
+  navStyle(view, active){
+    return 'display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:12px;cursor:pointer;font-weight:'+(active?'600':'500')+';font-size:15px;color:'+(active?'#ECECF2':'#9797a8')+';background:'+(active?'rgba(139,109,255,.14)':'transparent')+';';
+  }
+  navIconStyle(active){ return 'color:'+(active?'#8b6dff':'#9797a8')+';display:flex;'; }
+  mNavStyle(active){ return 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:'+(active?'#8b6dff':'#9797a8')+';'; }
+
+  chip(active){
+    return 'padding:7px 14px;border-radius:20px;cursor:pointer;font-size:13.5px;font-weight:'+(active?'600':'500')+';color:'+(active?'#fff':'#9797a8')+';background:'+(active?'#8b6dff':'rgba(255,255,255,.05)')+';border:1px solid '+(active?'transparent':'rgba(255,255,255,.08)')+';';
+  }
+  smallChip(active){
+    return 'padding:5px 11px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:'+(active?'600':'500')+';color:'+(active?'#ECECF2':'#7a7a8a')+';background:'+(active?'rgba(255,255,255,.08)':'transparent')+';';
+  }
+  statusPill(status){
+    const m=STATUS[status];
+    return 'display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;font-size:12.5px;font-weight:600;color:'+m.color+';background:'+m.color+'22;';
+  }
+  statusDot(status){
+    const m=STATUS[status];
+    return 'width:9px;height:9px;border-radius:50%;background:'+m.color+';box-shadow:0 0 0 3px rgba(0,0,0,.35);';
+  }
+  starWidget(scope, id, current, size){
+    return [1,2,3,4,5].map(n=>({
+      char: n<=current?'★':'☆',
+      style:'font-size:'+size+'px;cursor:pointer;color:'+(n<=current?'#ffc24b':'#4a4a58')+';line-height:1;',
+      onClick: ()=>this.setRating(scope, id, n)
+    }));
+  }
+
+  renderVals(){
+    const st=this.state, now=this.now;
+    const isMobile=st.isMobile;
+    const mkNav=(v)=>({
+      onClick:()=>this.setView(v),
+      style:this.navStyle(v, st.view===v),
+      iconStyle:this.navIconStyle(st.view===v),
+      mStyle:this.mNavStyle(st.view===v)
+    });
+    // calendar counts
+    let toCatch=0, weekWatched=0, hasNew=false;
+    st.works.forEach(w=>{
+      if(!w.seasons) return;
+      const track = w.status==='en_cours';
+      w.seasons.forEach(s=>s.episodes.forEach(e=>{
+        const key=w.id+'-'+s.n+'-'+e.n;
+        if(track && !st.watched[key] && e.air<=now){ toCatch++; if(e.air>now-7*DAY) hasNew=true; }
+        if(st.watched[key] && e.air>now-7*DAY && e.air<=now) weekWatched++;
+      }));
+    });
+    weekWatched = weekWatched || 6;
+
+    const nav={
+      isMobile, isDesktop:!isMobile,
+      dashboard:mkNav('dashboard'), library:mkNav('library'), calendar:mkNav('calendar'), feed:mkNav('feed'), stats:mkNav('stats'), account:mkNav('account'),
+      searchMStyle:this.mNavStyle(false)
+    };
+    nav.calendar.hasBadge=hasNew; nav.calendar.badgeText='!';
+
+    // header
+    let header={style:'display:flex;align-items:center;gap:14px;padding:20px 30px;position:sticky;top:0;background:rgba(10,10,15,.85);backdrop-filter:blur(14px);z-index:30;border-bottom:1px solid rgba(255,255,255,.05);', showBack:false, onBack:()=>this.setView('library')};
+    if(st.view==='library'){ header.title='Ma bibliothèque'; header.subtitle=st.works.length+' œuvres suivies'; }
+    else if(st.view==='calendar'){ header.title='Calendrier'; header.subtitle='À rattraper et à venir'; }
+    else if(st.view==='dashboard'){ header.title='Bonsoir 👋'; header.subtitle='Voici ce qui t\'attend ce soir'; }
+    else if(st.view==='detail'){ const w=this.workById(st.selectedId); header.title=w?w.title:''; header.subtitle=w?(CAT[w.category]+' · '+w.genre):''; header.showBack=true; }
+    else if(st.view==='stats'){ header.title='Statistiques'; header.subtitle='Ton année de visionnage en chiffres'; }
+    else if(st.view==='account'){ header.title='Compte & paramètres'; header.subtitle='Profil, préférences et données'; }
+    else if(st.view==='feed'){ header.title='Journal'; header.subtitle='Tes commentaires et réactions'; }
+
+    const out={ nav, header, stats:{weekWatched, toCatch},
+      isLibrary:st.view==='library', isDetail:st.view==='detail', isCalendar:st.view==='calendar', isDashboard:st.view==='dashboard', isStats:st.view==='stats', isAccount:st.view==='account', isFeed:st.view==='feed' };
+    out.commentDraft = st.commentDraft;
+    out.onDraft = (ev)=>this.setDraft(ev.target.value);
+    out.userInitials = initials(st.profile.name);    out.userAvatarStyle = 'width:36px;height:36px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:14px;color:#fff;';
+    // profile chip (always available for sidebar/header)
+    out.account = {
+      chipStyle:'margin-top:auto;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:13px;cursor:pointer;border:1px solid rgba(255,255,255,.07);background:'+(st.view==='account'?'rgba(139,109,255,.12)':'rgba(255,255,255,.03)')+';',
+      avatarStyle:'width:34px;height:34px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:14px;color:#fff;',
+      avatarInitials: initials(st.profile.name),
+      name: st.profile.name, handle: st.profile.handle
+    };
+
+    // ---------- LIBRARY ----------
+    if(st.view==='library'){
+      const catList=[['all','Tout'],['series','Séries'],['films','Films'],['animes','Animés'],['livres','Livres'],['jeux','Jeux'],['musique','Musique']];
+      out.library={
+        cats: catList.map(([k,label])=>{
+          const count = k==='all'?st.works.length:st.works.filter(w=>w.category===k).length;
+          const active=st.category===k;
+          return {label, countText:String(count), onClick:()=>this.setState({category:k}),
+            style:this.chip(active),
+            countStyle:'margin-left:7px;font-size:12px;opacity:.7;'};
+        }),
+        statuses: [['all','Tous'],['en_cours','En cours'],['a_voir','À voir'],['termine','Terminé'],['abandonne','Abandonné']].map(([k,label])=>({
+          label, onClick:()=>this.setState({status:k}), style:this.smallChip(st.status===k)
+        })),
+        sorts: [['recent','Récent'],['note','Note'],['titre','A-Z']].map(([k,label])=>({
+          label, onClick:()=>this.setState({sort:k}), style:this.smallChip(st.sort===k)
+        }))
+      };
+      let list=st.works.filter(w=> (st.category==='all'||w.category===st.category) && (st.status==='all'||w.status===st.status));
+      list=[...list].sort((a,b)=>{
+        if(st.sort==='titre') return a.title.localeCompare(b.title);
+        if(st.sort==='note') return (st.ratings['w:'+b.id]||0)-(st.ratings['w:'+a.id]||0);
+        return (b.added||0)-(a.added||0) || 0;
+      });
+      out.library.empty=list.length===0;
+      out.library.works=list.map(w=>{
+        const t=this.epTotals(w);
+        const rating=st.ratings['w:'+w.id]||0;
+        const pct = t.total? Math.round(t.watched/t.total*100):0;
+        const nx=w.seasons?this.nextEpisode(w):null;
+        const badgeNew = !!(nx && nx.e.air>now-7*DAY);
+        return {
+          title:w.title, initials:initials(w.title), meta:CAT[w.category]+' · '+w.year,
+          onClick:()=>this.openWork(w.id),
+          posterStyle:this.posterBox(w.id, 0,0,14).replace('width:0px;height:0px','width:100%;aspect-ratio:2/3'),
+          statusDot:this.statusDot(w.status),
+          hasRating:rating>0, ratingText:String(rating),
+          showProgress: !!(w.seasons && t.watched>0 && t.watched<t.total),
+          progressText:t.watched+'/'+t.total+' '+term(w.category).unit,
+          progressStyle:'height:100%;width:'+pct+'%;background:linear-gradient(90deg,#8b6dff,#ff5c8a);border-radius:4px;',
+          badgeNew
+        };
+      });
+    }
+
+    // ---------- DETAIL ----------
+    if(st.view==='detail'){
+      const w=this.workById(st.selectedId);
+      if(w){
+        const t=this.epTotals(w);
+        const rating=st.ratings['w:'+w.id]||0;
+        const pct=t.total?Math.round(t.watched/t.total*100):0;
+        out.detail={
+          title:w.title, initials:initials(w.title),
+          posterStyle:this.posterBox(w.id,150,220,18),
+          statusLabel:STATUS[w.status].label, statusStyle:this.statusPill(w.status),
+          meta:CAT[w.category]+' · '+w.genre+' · '+w.year,
+          overview:w.overview,
+          hasEpisodes:!!w.seasons,
+          progressText:t.watched+' / '+t.total+' '+term(w.category).unit,
+          progressStyle:'height:100%;width:'+pct+'%;background:linear-gradient(90deg,#8b6dff,#ff5c8a);',
+          stars:this.starWidget('w', w.id, rating, 20),
+          ratingText: rating? rating+'/5':'—',
+          onCycleStatus:()=>this.cycleStatus(w),
+          workComments: this.commentsFor('w:'+w.id).map(c=>this.mapComment(c)),
+          workCommentCount: this.commentsFor('w:'+w.id).length,
+          hasWorkComments: this.commentsFor('w:'+w.id).length>0,
+          workComposerOpen: st.openCommentKey===('w:'+w.id),
+          onToggleWorkComposer:()=>this.openComposer('w:'+w.id),
+          onPostWork:()=>this.postComment(w.id,null,null),
+          hasGame: (w.category==='jeux' && !!w.pt),
+          game: this.gameVM(w),
+          seasons: (w.seasons||[]).map(s=>{
+            const aired=s.episodes.filter(e=>e.air<=now);
+            const done=aired.filter(e=>st.watched[w.id+'-'+s.n+'-'+e.n]).length;
+            const allDone=aired.length>0 && done===aired.length;
+            const k=w.id+'-'+s.n;
+            const expanded=!!st.expanded[k];
+            return {
+              label:this.seasonLabel(w,s), progressText:done+'/'+s.episodes.length+' vus',
+              expanded, onToggle:()=>this.toggleSeason(w,s),
+              chevronStyle:'font-size:18px;color:#9797a8;transition:transform .2s;display:inline-block;transform:rotate('+(expanded?'180':'0')+'deg);',
+              markLabel: allDone?'Tout décocher':'Tout marquer',
+              onMarkAll:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); this.markSeason(w,s); },
+              onOpenModal:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); this.openSeasonModal(w,s); },
+              avgText: this.communityRating('s:'+w.id+'-'+s.n).avgText,
+              episodes: s.episodes.map(e=>{
+                const key=w.id+'-'+s.n+'-'+e.n;
+                const watched=!!st.watched[key];
+                const aired=e.air<=now;
+                const isNew=aired && e.air>now-7*DAY && !watched;
+                const epRating=st.ratings['e:'+key]||0;
+                const cs=this.commentsFor(key);
+                return {
+                  label:this.epRowLabel(w,s,e),
+                  airText: aired? (this.airVerb(w)+' le '+fmtDate(e.air)) : 'Sortie prévue le '+fmtDate(e.air),
+                  badgeNew:isNew,
+                  onToggle:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); this.toggleEp(w,s.n,e.n,aired); },
+                  checkChar: watched?'✓':'',
+                  checkStyle:'width:26px;height:26px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:'+(aired?'pointer':'not-allowed')+';color:#fff;background:'+(watched?'#8b6dff':'transparent')+';border:2px solid '+(watched?'#8b6dff':(aired?'#4a4a58':'#2a2a38'))+';',
+                  rowStyle: watched?'opacity:.62;':(aired?'':'opacity:.5;'),
+                  titleStyle: watched?'text-decoration:line-through;color:#9797a8;':'',
+                  stars: aired? this.starWidget('e', key, epRating, 13) : [],
+                  commentCount: cs.length,
+                  hasComments: cs.length>0,
+                  countText: cs.length?String(cs.length):'',
+                  comments: cs.map(c=>this.mapComment(c)),
+                  composerOpen: st.openCommentKey===key,
+                  canComment: aired,
+                  onToggleComposer:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); if(aired) this.openEpisodeModal(w,s,e); },
+                  onPost:()=>this.postComment(w.id,s.n,e.n),
+                  commentBtnStyle:'position:relative;width:30px;height:30px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:'+(cs.length?'#8b6dff':'#6c6c7c')+';border:1px solid '+(cs.length?'rgba(139,109,255,.4)':'rgba(255,255,255,.08)')+';'
+                };
+              })
+            };
+          })
+        };
+      }
+    }
+
+    // ---------- CALENDAR ----------
+    if(st.view==='calendar'){
+      const catchGroups=[], up=[];
+      st.works.forEach(w=>{
+        if(w.seasons){
+          // group "à rattraper" by work: one row = first aired-unwatched episode + count remaining
+          let first=null, remaining=0, anyNew=false;
+          w.seasons.forEach(s=>s.episodes.forEach(e=>{
+            const key=w.id+'-'+s.n+'-'+e.n;
+            if(!st.watched[key] && e.air<=now && w.status==='en_cours'){
+              if(!first) first={s,e,air:e.air};
+              remaining++;
+              if(e.air>now-7*DAY) anyNew=true;
+            }
+          }));
+          if(first) catchGroups.push({w, s:first.s, e:first.e, air:first.air, remaining, isNew:anyNew});
+          // upcoming: only the next unaired episode per work (avoid flooding)
+          let nextUp=null;
+          w.seasons.forEach(s=>s.episodes.forEach(e=>{
+            if(e.air>now && (w.status==='en_cours'||w.status==='a_voir') && !nextUp){ nextUp={s,e}; }
+          }));
+          if(nextUp) up.push({w, s:nextUp.s, e:nextUp.e, air:nextUp.e.air, type:'ep'});
+        }
+        if(w.category==='films' && w.release && w.release>now && (w.status==='a_voir')){
+          up.push({w, air:w.release, type:'film'});
+        }
+      });
+      catchGroups.sort((a,b)=>b.air-a.air);
+      up.sort((a,b)=>a.air-b.air);
+      out.calendar={
+        catchEmpty: catchGroups.length===0,
+        catchUp: catchGroups.map(it=>({
+          title:it.w.title, initials:initials(it.w.title),
+          posterStyle:this.posterBox(it.w.id,48,68,10),
+          epLabel:this.epLongLabel(it.w,it.s,it.e),
+          remainingText: it.remaining>1 ? ('+'+(it.remaining-1)+' en attente') : '',
+          hasRemaining: it.remaining>1,
+          airText:relText(it.air, now), badgeNew:it.isNew,
+          onClick:()=>this.openWork(it.w.id),
+          onWatch:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); this.markWatchedToast(it.w,it.s.n,it.e.n); }
+        })),
+        upcoming: up.slice(0,14).map(it=>{
+          const d=new Date(it.air);
+          const soon=it.air<now+7*DAY;
+          return {
+            title:it.w.title, initials:initials(it.w.title),
+            posterStyle:this.posterBox(it.w.id,40,56,9),
+            day:String(d.getDate()), month:monthsFR()[d.getMonth()].replace('.',''),
+            epLabel: it.type==='film'? 'Film · sortie ciné' : this.epLongLabel(it.w,it.s,it.e),
+            relText:relText(it.air, now),
+            pillStyle:'flex-shrink:0;padding:5px 11px;border-radius:20px;font-size:12.5px;font-weight:600;color:'+(soon?'#fff':'#9797a8')+';background:'+(soon?'#8b6dff':'rgba(255,255,255,.06)')+';',
+            onClick:()=>this.openWork(it.w.id)
+          };
+        })
+      };
+    }
+
+    // ---------- DASHBOARD ----------
+    if(st.view==='dashboard'){
+      const enCours=st.works.filter(w=>w.status==='en_cours');
+      const upNext=[];
+      enCours.forEach(w=>{
+        const nx=this.nextEpisode(w);
+        if(nx) upNext.push({w,nx});
+      });
+      let totalEps=0;
+      st.works.forEach(w=>{ if(w.seasons) w.seasons.forEach(s=>s.episodes.forEach(e=>{ if(st.watched[w.id+'-'+s.n+'-'+e.n]) totalEps++; })); });
+      out.dashboard={
+        stats:[
+          {value:String(st.works.length), label:'Œuvres suivies', valueStyle:'color:#ECECF2;'},
+          {value:String(enCours.length), label:'En cours', valueStyle:'color:#38bdf8;'},
+          {value:String(totalEps), label:'Épisodes vus', valueStyle:'color:#8b6dff;'},
+          {value:String(stats_toCatch(st,now)), label:'À rattraper', valueStyle:'color:#ff5c8a;'}
+        ],
+        upNext: upNext.slice(0,4).map(({w,nx})=>({
+          title:w.title, initials:initials(w.title),
+          posterStyle:this.posterBox(w.id,54,78,11),
+          epLabel:this.epRowLabel(w,nx.s,nx.e),
+          sub: nx.e.air>now-7*DAY?'Sorti récemment':(this.airVerb(w)+' le '+fmtDate(nx.e.air)),
+          onClick:()=>this.openWork(w.id),
+          onWatch:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); const nx=this.nextEpisode(w); if(nx) this.markWatchedToast(w,nx.s.n,nx.e.n); }
+        })),
+        continue: enCours.map(w=>{
+          const t=this.epTotals(w);
+          const pct=t.total?Math.round(t.watched/t.total*100):0;
+          return {
+            title:w.title, initials:initials(w.title),
+            posterStyle:this.posterBox(w.id,46,66,10),
+            progressText: w.seasons? t.watched+'/'+t.total+' '+term(w.category).unit : 'En cours',
+            progressStyle:'height:100%;width:'+pct+'%;background:linear-gradient(90deg,#8b6dff,#ff5c8a);',
+            onClick:()=>this.openWork(w.id)
+          };
+        }),
+        reviews: st.reviews.slice(0,4).map(r=>{
+          const w=this.workById(r.id);
+          const rating=st.ratings['w:'+r.id]||0;
+          return {
+            title:w?w.title:r.id, initials:initials(w?w.title:r.id),
+            posterStyle:this.posterBox(r.id,44,62,10),
+            ratingText:'★ '+rating+'/5', note:r.note,
+            dateText:relText(r.ts, now),
+            onClick:()=>w&&this.openWork(w.id)
+          };
+        })
+      };
+    }
+
+    // ---------- STATS ----------
+    if(st.view==='stats'){
+      const runtime={animes:24, series:45};
+      let totalEps=0, minutes=0, filmsSeen=0, ratedSum=0, ratedN=0;
+      const catCount={}, statusCount={a_voir:0,en_cours:0,termine:0,abandonne:0}, genreCount={};
+      const weeks=Array.from({length:10},()=>0);
+      st.works.forEach(w=>{
+        catCount[w.category]=(catCount[w.category]||0)+1;
+        statusCount[w.status]=(statusCount[w.status]||0)+1;
+        String(w.genre).split(/[\/,]/).forEach(g=>{ g=g.trim(); if(g) genreCount[g]=(genreCount[g]||0)+1; });
+        const r=st.ratings['w:'+w.id]||0; if(r>0){ ratedSum+=r; ratedN++; }
+        if(w.seasons){
+          w.seasons.forEach(s=>s.episodes.forEach(e=>{
+            if(st.watched[w.id+'-'+s.n+'-'+e.n]){
+              totalEps++; minutes += runtime[w.category]||42;
+              const wk=Math.floor((now-e.air)/(7*DAY));
+              if(wk>=0 && wk<10) weeks[wk]++;
+            }
+          }));
+        }
+        if(w.category==='films' && w.status==='termine'){ filmsSeen++; minutes+=120; }
+      });
+      const hours=Math.round(minutes/60);
+      const catMax=Math.max(1,...Object.values(catCount));
+      const catColors={series:'#38bdf8',films:'#ff5c8a',animes:'#8b6dff',livres:'#4ade80',jeux:'#ffb24b',musique:'#c46dff'};
+      const wkMax=Math.max(1,...weeks);
+      const topGenres=Object.entries(genreCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+      const gMax=Math.max(1,...topGenres.map(g=>g[1]));
+      const topRated=[...st.works].filter(w=>(st.ratings['w:'+w.id]||0)>0).sort((a,b)=>(st.ratings['w:'+b.id]||0)-(st.ratings['w:'+a.id]||0)).slice(0,5);
+      out.statsView={
+        big:[
+          {value:String(hours)+' h', label:'de visionnage', valueStyle:'color:#8b6dff;'},
+          {value:String(totalEps), label:'épisodes vus', valueStyle:'color:#38bdf8;'},
+          {value:String(filmsSeen), label:'films vus', valueStyle:'color:#ff5c8a;'},
+          {value: ratedN? (ratedSum/ratedN).toFixed(1):'—', label:'note moyenne', valueStyle:'color:#ffc24b;'}
+        ],
+        cats: Object.keys(CAT).filter(k=>catCount[k]).map(k=>({
+          label:CAT[k], countText:String(catCount[k]),
+          barStyle:'height:10px;border-radius:10px;width:'+Math.round(catCount[k]/catMax*100)+'%;background:'+(catColors[k]||'#8b6dff')+';min-width:10px;'
+        })),
+        statuses: [['termine','Terminé'],['en_cours','En cours'],['a_voir','À voir'],['abandonne','Abandonné']].map(([k,label])=>({
+          label, countText:String(statusCount[k]||0),
+          dotStyle:'width:11px;height:11px;border-radius:50%;background:'+STATUS[k].color+';',
+          barStyle:'height:8px;border-radius:8px;width:'+Math.round((statusCount[k]||0)/Math.max(1,st.works.length)*100)+'%;background:'+STATUS[k].color+';min-width:6px;'
+        })),
+        weeks: weeks.slice().reverse().map((v,i)=>({
+          barStyle:'width:100%;border-radius:6px 6px 0 0;height:'+Math.max(4,Math.round(v/wkMax*100))+'%;background:'+(i===9?'#ff5c8a':'linear-gradient(180deg,#8b6dff,#6b4de0)')+';',
+          label: i===9?'now':(i%3===0?('S-'+(9-i)):'')
+        })),
+        genres: topGenres.map(([g,n])=>({
+          label:g, countText:String(n),
+          barStyle:'height:8px;border-radius:8px;width:'+Math.round(n/gMax*100)+'%;background:linear-gradient(90deg,#8b6dff,#ff5c8a);min-width:8px;'
+        })),
+        topRated: topRated.map(w=>({
+          title:w.title, initials:initials(w.title), meta:CAT[w.category]+' · '+w.year,
+          posterStyle:this.posterBox(w.id,44,62,10),
+          ratingText:'★ '+(st.ratings['w:'+w.id])+'/5',
+          onClick:()=>this.openWork(w.id)
+        }))
+      };
+    }
+
+    // ---------- ACCOUNT ----------
+    if(st.view==='account'){
+      const sw=(key)=>{
+        const on=!!st.settings[key];
+        return {
+          on, onToggle:()=>this.toggleSetting(key),
+          trackStyle:'width:44px;height:26px;border-radius:26px;flex-shrink:0;cursor:pointer;position:relative;transition:background .18s;background:'+(on?'#8b6dff':'rgba(255,255,255,.14)')+';',
+          knobStyle:'position:absolute;top:3px;left:'+(on?'21px':'3px')+';width:20px;height:20px;border-radius:50%;background:#fff;transition:left .18s;'
+        };
+      };
+      const startOpts=[['dashboard','Accueil'],['library','Bibliothèque'],['calendar','Calendrier'],['stats','Statistiques']];
+      out.accountView={
+        avatarStyle:'width:76px;height:76px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:30px;color:#fff;',
+        avatarInitials:initials(st.profile.name),
+        name:st.profile.name, handle:st.profile.handle, email:st.profile.email,
+        memberText:'Membre depuis '+st.profile.memberSince,
+        onEditName:()=>this.editField('name','le nom'),
+        onEditHandle:()=>this.editField('handle',"le pseudo"),
+        onEditEmail:()=>this.editField('email',"l'email"),
+        prefs:[
+          {key:'notifNewEp', label:'Nouveaux épisodes', desc:'Être notifié quand un épisode d\'une série suivie sort', ...sw('notifNewEp')},
+          {key:'notifCalendar', label:'Rappels de sortie', desc:'Alerte la veille des sorties du calendrier', ...sw('notifCalendar')},
+          {key:'notifWeekly', label:'Résumé hebdomadaire', desc:'Un récap de ta semaine chaque dimanche', ...sw('notifWeekly')}
+        ],
+        playback:[
+          {key:'autoNext', label:'Marquer l\'épisode suivant', desc:'Coche automatiquement en cascade jusqu\'à l\'épisode choisi', ...sw('autoNext')},
+          {key:'spoilerFree', label:'Mode sans spoiler', desc:'Masque les titres et vignettes des épisodes non vus', ...sw('spoilerFree')},
+          {key:'adult', label:'Contenu mature', desc:'Afficher les œuvres classées 18+', ...sw('adult')}
+        ],
+        privacy:[
+          {key:'publicProfile', label:'Profil public', desc:'Rendre ta bibliothèque et tes notes visibles', ...sw('publicProfile')}
+        ],
+        startOpts: startOpts.map(([k,label])=>({
+          label, onClick:()=>this.setSetting('startPage',k),
+          style:this.smallChip(st.settings.startPage===k)
+        })),
+        onMarkAll:()=>this.markAllWatched(),
+        onReset:()=>this.resetProgress()
+      };
+    }
+
+    // ---------- FEED (Journal) ----------
+    if(st.view==='feed'){
+      const items=[...st.feed].sort((a,b)=>b.ts-a.ts);
+      out.feedView={
+        empty: items.length===0,
+        items: items.map(f=>{
+          const w=this.workById(f.workId);
+          let context='Sur l’œuvre';
+          if(w && f.sNum){ context = f.eNum ? this.epLongLabel(w,{n:f.sNum,name:null},{n:f.eNum,title:''}) : this.seasonLabel(w,{n:f.sNum,name:null}); }
+          return {
+            title: w?w.title:f.workId, initials: initials(w?w.title:f.workId),
+            posterStyle:this.posterBox(f.workId,46,66,10),
+            catLabel: w?CAT[w.category]:'',
+            context, text:f.text, timeText:relText(f.ts, now),
+            likesText: f.likes?String(f.likes):'',
+            likeStyle:'display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:'+(f.liked?'#ff5c8a':'#7a7a8a')+';',
+            likeFill: f.liked?'#ff5c8a':'none', likeStroke: f.liked?'#ff5c8a':'currentColor',
+            onLike:()=>this.toggleLike(f.id), onDelete:()=>this.deleteComment(f.id),
+            onOpen:()=> w && this.openWork(f.workId)
+          };
+        })
+      };
+    }
+
+    // ---------- EPISODE / SEASON MODAL ----------
+    out.epModal = {open:false};
+    if(st.modalCtx){
+      const {type, workId, sNum, eNum}=st.modalCtx;
+      const w=this.workById(workId);
+      const season=(w && w.seasons)? w.seasons.find(x=>x.n===sNum) : null;
+      const fmtVotes=(nb)=>String(nb).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+' notes';
+      const stars5=(filled)=>[1,2,3,4,5].map(n=>({char:n<=filled?'★':'☆', style:'font-size:17px;color:'+(n<=filled?'#ffc24b':'#4a4a58')+';'}));
+      if(w && season && type==='ep'){
+        const ep=season.episodes.find(x=>x.n===eNum);
+        if(ep){
+          const key=workId+'-'+sNum+'-'+eNum;
+          const cr=this.communityRating(key);
+          const myR=st.ratings['e:'+key]||0;
+          const aired=ep.air<=now;
+          const comments=this.mergeFeed(this.commentsFor(key), this.communityComments(key));
+          out.epModal={ open:true, title:w.title, initials:initials(w.title),
+            posterStyle:this.posterBox(workId,52,74,11),
+            epLabel:this.epRowLabel(w,season,ep),
+            context:CAT[w.category]+' · '+this.seasonLabel(w,season),
+            airText: aired?(this.airVerb(w)+' le '+fmtDate(ep.air)):('Sortie prévue le '+fmtDate(ep.air)),
+            avgText:cr.avgText, votesText:fmtVotes(cr.count), communityStars:stars5(cr.filled),
+            myStars:this.starWidget('e', key, myR, 30), myRatingText: myR?(myR+'/5'):'Pas encore noté',
+            comments, hasComments:comments.length>0,
+            commentCountText: comments.length? (comments.length+' réaction'+(comments.length>1?'s':'')) : 'Sois le premier à réagir',
+            onPost:()=>this.postComment(workId,sNum,eNum),
+            onClose:()=>this.closeModal(), stop:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); } };
+        }
+      } else if(w && season && type==='season'){
+        const skey=workId+'-'+sNum;
+        const cr=this.communityRating('s:'+skey);
+        const myR=st.ratings['s:'+skey]||0;
+        let rawComm=[];
+        season.episodes.forEach(ep=>{ rawComm=rawComm.concat(this.communityComments(workId+'-'+sNum+'-'+ep.n)); });
+        rawComm=rawComm.concat(this.communityComments('s:'+skey));
+        const rawYours=st.feed.filter(f=>f.workId===workId && f.sNum===sNum);
+        const comments=this.mergeFeed(rawYours, rawComm).slice(0,14);
+        const t=term(w.category);
+        const unitWord = w.category==='livres'?'tome':(w.category==='musique'?'album':'saison');
+        out.epModal={ open:true, title:w.title, initials:initials(w.title),
+          posterStyle:this.posterBox(workId,52,74,11),
+          epLabel:this.seasonLabel(w,season), context:CAT[w.category]+' · vue d’ensemble',
+          airText: season.episodes.length+' '+t.unit,
+          avgText:cr.avgText, votesText:fmtVotes(cr.count), communityStars:stars5(cr.filled),
+          myStars:this.starWidget('s', skey, myR, 30), myRatingText: myR?(myR+'/5'):'Pas encore noté',
+          comments, hasComments:comments.length>0,
+          commentCountText: comments.length? (comments.length+' réaction'+(comments.length>1?'s':'')+' sur '+(unitWord==='tome'?'ce tome':(unitWord==='album'?'cet album':'cette saison'))) : 'Aucune réaction pour l’instant',
+          onPost:()=>this.postComment(workId,sNum,null),
+          onClose:()=>this.closeModal(), stop:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); } };
+      }
+    }
+
+    // ---------- SEARCH ----------
+    const catalog=[
+      {id:'blue-eye-samurai',title:'Blue Eye Samurai',category:'animes',genre:'Action',year:2023},
+      {id:'shogun',title:'Shōgun',category:'series',genre:'Drame historique',year:2024},
+      {id:'frieren',title:'Frieren',category:'animes',genre:'Fantasy',year:2023},
+      {id:'the-penguin',title:'The Penguin',category:'series',genre:'Crime',year:2024},
+      {id:'poor-things',title:'Pauvres Créatures',category:'films',genre:'Comédie',year:2023},
+      {id:'jjk',title:'Jujutsu Kaisen',category:'animes',genre:'Action',year:2020},
+      {id:'fallout',title:'Fallout',category:'series',genre:'SF',year:2024},
+      {id:'chainsaw',title:'Chainsaw Man',category:'animes',genre:'Action',year:2022}
+    ];
+    const q=st.query.trim().toLowerCase();
+    const results = q? catalog.filter(c=>c.title.toLowerCase().includes(q)) : catalog;
+    out.search={
+      open:st.searchOpen, query:st.query,
+      onOpen:()=>this.setState({searchOpen:true, query:''}),
+      onClose:()=>this.setState({searchOpen:false}),
+      stop:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); },
+      onInput:(ev)=>this.setState({query:ev.target.value}),
+      noResults:results.length===0,
+      results: results.map(c=>{
+        const added=st.works.some(w=>w.id===c.id);
+        return {
+          title:c.title, meta:CAT[c.category]+' · '+c.year, initials:initials(c.title),
+          posterStyle:this.posterBox(c.id,44,62,9),
+          btnLabel: added?'Ajouté ✓':'+ Ajouter',
+          btnStyle:'flex-shrink:0;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:'+(added?'#4ade80':'#fff')+';background:'+(added?'rgba(74,222,128,.14)':'#8b6dff')+';',
+          onAdd:()=>this.addWork(c)
+        };
+      })
+    };
+
+    // ---------- TOAST ----------
+    out.toast = st.toast ? {
+      open:true, title:st.toast.title, initials:st.toast.initials,
+      posterStyle:st.toast.poster, label:st.toast.label,
+      onOpen:()=>this.openToastModal(), onClose:()=>this.dismissToast()
+    } : {open:false};
+
+    return out;
+  }
+}
+
+function stats_toCatch(st, now){
+  let c=0;
+  st.works.forEach(w=>{ if(!w.seasons || w.status!=='en_cours') return; w.seasons.forEach(s=>s.episodes.forEach(e=>{ if(!st.watched[w.id+'-'+s.n+'-'+e.n] && e.air<=now) c++; })); });
+  return c;
+}
+</script>
+</body>
+</html>
