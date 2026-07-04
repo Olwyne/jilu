@@ -94,6 +94,7 @@
                 <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.55));"></div>
                 <span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:38px;color:rgba(255,255,255,.9);position:relative;">{{ w.initials }}</span>
                 <div style="position:absolute;top:9px;left:9px;{{ w.statusDot }}"></div>
+                <sc-if value="{{ w.isFavorite }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:7px;right:8px;font-size:16px;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.6);">★</div></sc-if>
                 <sc-if value="{{ w.badgeNew }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:8px;right:8px;background:#ff5c8a;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;animation:jiluPulse 2s infinite;">NOUVEAU</div></sc-if>
                 <sc-if value="{{ w.showProgress }}" hint-placeholder-val="{{ false }}">
                   <div style="position:absolute;left:9px;right:9px;bottom:9px;">
@@ -142,6 +143,7 @@
                 <span style="font-size:13px;color:#ffc24b;font-weight:600;">{{ detail.ratingText }}</span>
               </div>
               <div onClick="{{ detail.onCycleStatus }}" style="padding:11px 16px;border-radius:13px;background:rgba(139,109,255,.14);border:1px solid rgba(139,109,255,.3);color:#b9a6ff;font-weight:600;font-size:14px;cursor:pointer;">Changer le statut ›</div>
+              <div onClick="{{ detail.onToggleFavorite }}" style="padding:11px 16px;border-radius:13px;background:rgba(255,194,75,.08);border:1px solid rgba(255,194,75,.25);color:#ffc24b;font-weight:600;font-size:14px;cursor:pointer;">{{ detail.isFavorite ? '★ Favori' : '☆ Ajouter aux favoris' }}</div>
             </div>
           </div>
         </div>
@@ -515,10 +517,20 @@
         <div style="border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);padding:20px;margin-bottom:8px;">
           <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
             <div style="flex:1;min-width:200px;">
-              <div style="font-weight:600;font-size:14.5px;margin-bottom:4px;">Importer depuis TVTime</div>
-              <div style="font-size:12.5px;color:#9797a8;">Importe ton historique depuis l'export RGPD TVTime (.zip). Les séries du catalogue Jilu seront mises à jour automatiquement.</div>
+              <div style="font-weight:600;font-size:14.5px;margin-bottom:4px;">Importer depuis TVTime (RGPD)</div>
+              <div style="font-size:12.5px;color:#9797a8;">Export RGPD TVTime — demandé via le site. Fichier zip avec CSV.</div>
             </div>
             <div onClick="{{ accountView.onImportTVTime }}" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;border:1px solid rgba(139,109,255,.4);background:rgba(139,109,255,.12);font-size:14px;font-weight:600;cursor:pointer;color:#b9a6ff;" style-hover="background:rgba(139,109,255,.22);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Importer le .zip
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px;">
+            <div style="flex:1;min-width:200px;">
+              <div style="font-weight:600;font-size:14.5px;margin-bottom:4px;">Importer depuis TVTime Out</div>
+              <div style="font-size:12.5px;color:#9797a8;">Export TVTime Out — application tierce. Fichier zip avec JSON (séries + films).</div>
+            </div>
+            <div onClick="{{ accountView.onImportTVTimeOut }}" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;border:1px solid rgba(56,189,248,.4);background:rgba(56,189,248,.08);font-size:14px;font-weight:600;cursor:pointer;color:#7dd3fc;" style-hover="background:rgba(56,189,248,.16);">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Importer le .zip
             </div>
@@ -573,10 +585,10 @@
       <div style="display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:16px;background:#1b1b26;border:1px solid rgba(139,109,255,.35);box-shadow:0 20px 50px rgba(0,0,0,.55);animation:jiluToast .3s ease both;">
         <div style="{{ toast.posterStyle }}"><span style="font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:rgba(255,255,255,.9);">{{ toast.initials }}</span></div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:12px;color:#4ade80;font-weight:600;display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Marqué comme vu</div>
+          <div style="font-size:12px;color:#4ade80;font-weight:600;display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>{{ toast.title }}</div>
           <div style="font-weight:600;font-size:13.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ toast.label }}</div>
         </div>
-        <div onClick="{{ toast.onOpen }}" style="flex-shrink:0;padding:9px 13px;border-radius:10px;background:#8b6dff;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Noter</div>
+        <div onClick="{{ toast.onOpen }}" style="flex-shrink:0;padding:9px 13px;border-radius:10px;background:#8b6dff;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">{{ toast.btnLabel }}</div>
         <div onClick="{{ toast.onClose }}" style="flex-shrink:0;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#7a7a8a;font-size:15px;">✕</div>
       </div>
     </div>
@@ -762,7 +774,8 @@ class Component extends DCLogic {
       ratings: saved.ratings || this.seedRatings(works),
       reviews: saved.reviews || this.seedReviews(works, now),
       importedWorks: saved.importedWorks || [],
-      posters: saved.posters || {}
+      posters: saved.posters || {},
+      favorites: saved.favorites || {}
     };
   }
 
@@ -835,7 +848,7 @@ class Component extends DCLogic {
         let apiResults=[];
         if(cat==='series'||cat==='animes'){
           const r=await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
-          if(r.ok){const d=await r.json();apiResults=(d.results||[]).slice(0,8).map(x=>{const title=x.name||'';const id=slug(cat+'-'+title);const poster=x.poster_path?TMDB+x.poster_path:null;const year=parseInt((x.first_air_date||'').slice(0,4))||'';return {id,title,category:cat,year,poster,inLibrary:libIds.has(id),tmdbId:x.id};});}
+          if(r.ok){const d=await r.json();let rows=(d.results||[]);if(cat==='animes') rows=rows.filter(x=>(x.genre_ids||[]).includes(16)||(x.origin_country||[]).includes('JP'));apiResults=rows.slice(0,8).map(x=>{const title=x.name||'';const isAnime=(x.genre_ids||[]).includes(16)&&(x.origin_country||[]).includes('JP');const category=cat==='animes'?'animes':(isAnime?'animes':'series');const id=slug(category+'-'+title);const poster=x.poster_path?TMDB+x.poster_path:null;const year=parseInt((x.first_air_date||'').slice(0,4))||'';return {id,title,category,year,poster,inLibrary:libIds.has(id),tmdbId:x.id};});}
         } else if(cat==='films'){
           const r=await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
           if(r.ok){const d=await r.json();apiResults=(d.results||[]).slice(0,8).map(x=>{const title=x.title||'';const id=slug('films-'+title);const poster=x.poster_path?TMDB+x.poster_path:null;const year=parseInt((x.release_date||'').slice(0,4))||'';return {id,title,category:'films',year,poster,inLibrary:libIds.has(id),tmdbId:x.id};});}
@@ -860,7 +873,7 @@ class Component extends DCLogic {
 
   persist(next){
     const s = {...this.state, ...next};
-    try { localStorage.setItem('jilu-v2', JSON.stringify({watched:s.watched, watchDates:s.watchDates, ratings:s.ratings, reviews:s.reviews, settings:s.settings, profile:s.profile, feed:s.feed, games:s.games, ccLikes:s.ccLikes, importedWorks:s.importedWorks, posters:s.posters})); } catch(e){}
+    try { localStorage.setItem('jilu-v2', JSON.stringify({watched:s.watched, watchDates:s.watchDates, ratings:s.ratings, reviews:s.reviews, settings:s.settings, profile:s.profile, feed:s.feed, games:s.games, ccLikes:s.ccLikes, importedWorks:s.importedWorks, posters:s.posters, favorites:s.favorites})); } catch(e){}
   }
 
   buildData(now){
@@ -982,13 +995,22 @@ class Component extends DCLogic {
           .replace(/[éèêë]/g,'e').replace(/[àâä]/g,'a').replace(/[ùûü]/g,'u')
           .replace(/[îï]/g,'i').replace(/[ôö]/g,'o').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 
-        // 1. Active followed shows
+        // 1. Active followed shows + special statuses
         setResult('Chargement des séries suivies…');
         const followedNames=new Set();
+        const forLaterNames=new Set();
+        const favoriteNames=new Set();
         const followedFile=zip.file('followed_tv_show.csv');
         if(followedFile){
           parseCSV(await followedFile.async('string')).forEach(r=>{
-            if(r.active==='1'&&r.archived==='0') followedNames.add(r.tv_show_name);
+            if(r.tv_show_name) followedNames.add(r.tv_show_name);
+          });
+        }
+        const specialFile=zip.file('user_show_special_status.csv');
+        if(specialFile){
+          parseCSV(await specialFile.async('string')).forEach(r=>{
+            if(r.status==='for_later'&&r.tv_show_name) forLaterNames.add(r.tv_show_name);
+            if(r.status==='favorite'&&r.tv_show_name) favoriteNames.add(r.tv_show_name);
           });
         }
 
@@ -1025,6 +1047,7 @@ class Component extends DCLogic {
         const watchDates={...this.state.watchDates};
         const ratings={...this.state.ratings};
         const posters={...(this.state.posters||{})};
+        const favorites={...(this.state.favorites||{})};
         const importedWorks=[...(this.state.importedWorks||[])];
         const importedByTmdb=new Map(importedWorks.filter(w=>w.tmdbId).map(w=>[w.tmdbId,w]));
 
@@ -1070,10 +1093,12 @@ class Component extends DCLogic {
                 n:sNum,name:null,
                 episodes:Array.from(epMap.entries()).sort(([a],[b])=>a-b).map(([eNum,{watchedAt}])=>({n:eNum,title:'Épisode '+eNum,air:watchedAt}))
               }));
-              const newWork={id:workId,title:hit.name||showName,category,genre,year,status:'en_cours',overview:hit.overview||'',seasons,tmdbId,tvtimeImport:true};
+              const status=forLaterNames.has(showName)?'a_voir':'en_cours';
+              const newWork={id:workId,title:hit.name||showName,category,genre,year,status,overview:hit.overview||'',seasons,tmdbId,tvtimeImport:true};
               importedWorks.push(newWork);
               importedByTmdb.set(tmdbId,newWork);
               if(hit.poster_path) posters[workId]='https://image.tmdb.org/t/p/w300'+hit.poster_path;
+              if(favoriteNames.has(showName)) favorites[workId]=true;
               applyEps(workId,tvData,nName);
               newImports++;
             }catch(e){}
@@ -1131,11 +1156,147 @@ class Component extends DCLogic {
           }
         }
 
-        // 7. Commit
+        // 7. Auto-status: all episodes watched → termine
+        importedWorks.forEach(w=>{
+          if(!w.seasons||w.status==='a_voir') return;
+          const total=w.seasons.reduce((n,s)=>n+s.episodes.length,0);
+          if(total===0) return;
+          const seen=w.seasons.reduce((n,s)=>n+s.episodes.filter(e=>watched[w.id+'-'+s.n+'-'+e.n]).length,0);
+          if(seen>=total) w.status='termine';
+        });
+
+        // 8. Commit
         const allWorks=[...this.buildData(this.now),...importedWorks];
-        this.setState({works:allWorks,watched,watchDates,ratings,importedWorks,posters});
-        this.persist({watched,watchDates,ratings,importedWorks,posters});
+        this.setState({works:allWorks,watched,watchDates,ratings,importedWorks,posters,favorites});
+        this.persist({watched,watchDates,ratings,importedWorks,posters,favorites});
         setResult(`✓ Import terminé — ${newImports} série${newImports!==1?'s':''} importée${newImports!==1?'s':''}, ${totalEps} épisode${totalEps!==1?'s':''} avec dates de visionnage · ${newMovies} film${newMovies!==1?'s':''} importé${newMovies!==1?'s':''}.`);
+      }catch(e){ setResult('Erreur : '+e.message); }
+    };
+    input.click();
+  }
+  async importTVTimeOut(){
+    const input=document.createElement('input');
+    input.type='file'; input.accept='.zip';
+    input.onchange=async(ev)=>{
+      const file=ev.target.files[0]; if(!file) return;
+      const TMDB_KEY='316ee3afbca35562d710106be250b039';
+      const TMDB_GENRES={10759:'Action/Aventure',16:'Animation',35:'Comédie',80:'Crime',99:'Documentaire',18:'Drame',10751:'Famille',10762:'Enfants',9648:'Mystère',10765:'SF & Fantastique',10764:'Réalité',10766:'Feuilleton',37:'Western',10768:'Guerre & Politique'};
+      const TMDB_MOVIE_GENRES={28:'Action',12:'Aventure',16:'Animation',35:'Comédie',80:'Crime',99:'Documentaire',18:'Drame',10751:'Famille',14:'Fantastique',36:'Histoire',27:'Horreur',10402:'Musique',9648:'Mystère',10749:'Romance',878:'Science-Fiction',53:'Thriller',10752:'Guerre',37:'Western'};
+      const STATUS_MAP={up_to_date:'en_cours',continuing:'en_cours',watch_later:'a_voir',not_started_yet:'a_voir',stopped:'abandonne'};
+      const setResult=(msg)=>this.setState({importResult:msg});
+      const slug=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      setResult('Lecture du fichier…');
+      try{
+        const JSZip=window.JSZip;
+        if(!JSZip){ setResult('Erreur : JSZip non disponible.'); return; }
+        const zip=await JSZip.loadAsync(file);
+        const seriesJsonFile=zip.file(/^tvtime-series-.*\.json$/)[0];
+        if(!seriesJsonFile){ setResult('Erreur : tvtime-series-*.json introuvable. Ce fichier est-il bien un export TVTime Out ?'); return; }
+
+        const watched={...this.state.watched};
+        const watchDates={...this.state.watchDates};
+        const posters={...(this.state.posters||{})};
+        const favorites={...(this.state.favorites||{})};
+        const importedWorks=[...(this.state.importedWorks||[])];
+        const importedByTmdb=new Map(importedWorks.filter(w=>w.tmdbId).map(w=>[w.tmdbId,w]));
+        let newImports=0,totalEps=0,newMovies=0;
+        const BATCH=5;
+
+        // Series
+        const series=JSON.parse(await seriesJsonFile.async('string'));
+        for(let i=0;i<series.length;i+=BATCH){
+          setResult(`Séries TMDB… ${Math.min(i+BATCH,series.length)}/${series.length}`);
+          await Promise.all(series.slice(i,i+BATCH).map(async(show)=>{
+            const tvdbId=show.id&&show.id.tvdb;
+            if(!tvdbId&&!show.title) return;
+            try{
+              let hit=null;
+              if(tvdbId){
+                const res=await fetch(`https://api.themoviedb.org/3/find/${tvdbId}?api_key=${TMDB_KEY}&external_source=tvdb_id&language=fr-FR`);
+                if(res.ok){const d=await res.json();hit=(d.tv_results||[])[0];}
+              }
+              const title=(hit&&hit.name)||show.title;
+              const workId=slug(title);
+              const tmdbId=hit?String(hit.id):null;
+              let work=tmdbId?importedByTmdb.get(tmdbId):importedWorks.find(w=>w.id===workId);
+              if(!work){
+                const year=hit?parseInt((hit.first_air_date||'').slice(0,4))||0:0;
+                const isAnime=hit&&(hit.genre_ids||[]).includes(16)&&(hit.origin_country||[]).includes('JP');
+                const category=isAnime?'animes':'series';
+                const genre=hit&&hit.genre_ids&&hit.genre_ids[0]?TMDB_GENRES[hit.genre_ids[0]]||'Série':'Série';
+                const status=STATUS_MAP[show.status]||'en_cours';
+                const seasons=(show.seasons||[]).map(s=>({n:s.number,name:null,episodes:(s.episodes||[]).map(e=>({n:e.number,title:e.name||('Épisode '+e.number),air:e.watched_at?new Date(e.watched_at).getTime():Date.now()}))}));
+                work={id:workId,title,category,genre,year,status,overview:(hit&&hit.overview)||'',seasons,tvtimeImport:true};
+                if(tmdbId){work.tmdbId=tmdbId;importedByTmdb.set(tmdbId,work);}
+                importedWorks.push(work);
+                if(hit&&hit.poster_path) posters[workId]='https://image.tmdb.org/t/p/w300'+hit.poster_path;
+                if(show.is_favorite) favorites[workId]=true;
+                newImports++;
+              }
+              (show.seasons||[]).forEach(s=>{(s.episodes||[]).forEach(e=>{
+                if(!e.is_watched) return;
+                const key=work.id+'-'+s.number+'-'+e.number;
+                const ts=e.watched_at?new Date(e.watched_at).getTime():Date.now();
+                if(!watched[key]){watched[key]=ts;totalEps++;}
+                if(!watchDates[key]) watchDates[key]=ts;
+              });});
+            }catch(e){}
+          }));
+          await new Promise(r=>setTimeout(r,150));
+        }
+
+        // Movies
+        const moviesJsonFile=zip.file(/^tvtime-movies-.*\.json$/)[0];
+        if(moviesJsonFile){
+          const movies=JSON.parse(await moviesJsonFile.async('string'));
+          for(let i=0;i<movies.length;i+=BATCH){
+            setResult(`Films… ${Math.min(i+BATCH,movies.length)}/${movies.length}`);
+            await Promise.all(movies.slice(i,i+BATCH).map(async(movie)=>{
+              const imdbId=movie.id&&movie.id.imdb;
+              try{
+                let hit=null;
+                if(imdbId){
+                  const res=await fetch(`https://api.themoviedb.org/3/find/${imdbId}?api_key=${TMDB_KEY}&external_source=imdb_id&language=fr-FR`);
+                  if(res.ok){const d=await res.json();hit=(d.movie_results||[])[0];}
+                }
+                if(!hit&&movie.title){
+                  const res=await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(movie.title)}&language=fr-FR`);
+                  if(res.ok){const d=await res.json();hit=(d.results||[])[0];}
+                }
+                const title=(hit&&(hit.title||hit.name))||movie.title;
+                if(!title) return;
+                const workId=slug(title);
+                if(importedWorks.find(w=>w.id===workId)) return;
+                const year=hit?parseInt((hit.release_date||'').slice(0,4))||movie.year||0:movie.year||0;
+                const genre=hit&&hit.genre_ids&&hit.genre_ids[0]?TMDB_MOVIE_GENRES[hit.genre_ids[0]]||'Film':'Film';
+                const tmdbId=hit?'m'+hit.id:null;
+                const watchedAt=movie.watched_at?new Date(movie.watched_at).getTime():Date.now();
+                const newWork={id:workId,title,category:'films',genre,year,status:'termine',overview:(hit&&hit.overview)||'',seasons:null,release:watchedAt,tvtimeImport:true};
+                if(tmdbId) newWork.tmdbId=tmdbId;
+                importedWorks.push(newWork);
+                if(hit&&hit.poster_path) posters[workId]='https://image.tmdb.org/t/p/w300'+hit.poster_path;
+                if(movie.is_favorite) favorites[workId]=true;
+                watchDates['w:'+workId]=watchedAt;
+                newMovies++;
+              }catch(e){}
+            }));
+            await new Promise(r=>setTimeout(r,150));
+          }
+        }
+
+        // Auto-status
+        importedWorks.forEach(w=>{
+          if(!w.seasons||w.status==='a_voir') return;
+          const total=w.seasons.reduce((n,s)=>n+s.episodes.length,0);
+          if(total===0) return;
+          const seen=w.seasons.reduce((n,s)=>n+s.episodes.filter(e=>watched[w.id+'-'+s.n+'-'+e.n]).length,0);
+          if(seen>=total) w.status='termine';
+        });
+
+        const allWorks=[...this.buildData(this.now),...importedWorks];
+        this.setState({works:allWorks,watched,watchDates,importedWorks,posters,favorites});
+        this.persist({watched,watchDates,importedWorks,posters,favorites});
+        setResult(`✓ Import TVTime Out — ${newImports} série${newImports!==1?'s':''} importée${newImports!==1?'s':''}, ${totalEps} épisode${totalEps!==1?'s':''} cochés, ${newMovies} film${newMovies!==1?'s':''} importé${newMovies!==1?'s':''}.`);
       }catch(e){ setResult('Erreur : '+e.message); }
     };
     input.click();
@@ -1229,12 +1390,12 @@ class Component extends DCLogic {
     const watched={...this.state.watched}; watched[key]=true;
     if(this._toastT) clearTimeout(this._toastT);
     const ep = work.seasons.find(s=>s.n===sNum).episodes.find(e=>e.n===eNum);
-    this.setState({watched, toast:{workId:work.id, sNum, eNum, label:this.epRowLabel(work,{n:sNum,name:null},ep), title:work.title, initials:this.pi(work.id,work.title), poster:this.posterBox(work.id,38,54,9)}});
+    this.setState({watched, toast:{type:'ep', workId:work.id, sNum, eNum, label:this.epRowLabel(work,{n:sNum,name:null},ep), title:'Marqué comme vu', btnLabel:'Noter', initials:this.pi(work.id,work.title), poster:this.posterBox(work.id,38,54,9)}});
     this.persist({watched});
     this._toastT=setTimeout(()=>{ this.setState(s=> s.toast && s.toast.workId===work.id && s.toast.eNum===eNum ? {toast:null}:{}); }, 6000);
   }
   dismissToast(){ if(this._toastT) clearTimeout(this._toastT); this.setState({toast:null}); }
-  openToastModal(){ const t=this.state.toast; if(!t) return; const w=this.workById(t.workId); const s=w.seasons.find(x=>x.n===t.sNum); const e=s.episodes.find(x=>x.n===t.eNum); if(this._toastT) clearTimeout(this._toastT); this.setState({toast:null}); this.openEpisodeModal(w,s,e); }
+  openToastModal(){ const t=this.state.toast; if(!t) return; if(this._toastT) clearTimeout(this._toastT); this.setState({toast:null}); if(t.type==='add'){ this.openWork(t.workId); } else { const w=this.workById(t.workId); const s=w.seasons.find(x=>x.n===t.sNum); const e=s.episodes.find(x=>x.n===t.eNum); this.openEpisodeModal(w,s,e); } }
   setRating(scope, id, val){
     const key=scope+':'+id;
     const ratings={...this.state.ratings};
@@ -1260,8 +1421,15 @@ class Component extends DCLogic {
   }
   addWork(tpl){
     if(this.state.works.some(w=>w.id===tpl.id)) return;
-    const works=[...this.state.works, {...tpl, status:'a_voir', added:this.now}];
-    this.setState({works});
+    const newWork={...tpl, status:'a_voir', added:this.now};
+    const works=[...this.state.works, newWork];
+    const importedWorks=[...this.state.importedWorks, newWork];
+    const searchResults=this.state.searchResults.map(r=>r.id===tpl.id?{...r,inLibrary:true}:r);
+    if(this._toastT) clearTimeout(this._toastT);
+    const poster=this.posterBox(tpl.id,38,54,9);
+    this.setState({works, importedWorks, searchResults, toast:{type:'add', workId:tpl.id, label:tpl.title, title:'Ajouté à la bibliothèque', btnLabel:'Ouvrir', initials:this.pi(tpl.id,tpl.title), poster}});
+    this.persist({importedWorks});
+    this._toastT=setTimeout(()=>{ this.setState(s=>s.toast&&s.toast.workId===tpl.id?{toast:null}:{}); },5000);
   }
 
   posterBox(id, w, h, r){
@@ -1363,14 +1531,14 @@ class Component extends DCLogic {
             style:this.chip(active),
             countStyle:'margin-left:7px;font-size:12px;opacity:.7;'};
         }),
-        statuses: [['all','Tous'],['en_cours','En cours'],['a_voir','À voir'],['termine','Terminé'],['abandonne','Abandonné']].map(([k,label])=>({
+        statuses: [['all','Tous'],['favoris','★ Favoris'],['en_cours','En cours'],['a_voir','À voir'],['termine','Terminé'],['abandonne','Abandonné']].map(([k,label])=>({
           label, onClick:()=>this.setState({status:k}), style:this.smallChip(st.status===k)
         })),
         sorts: [['recent','Récent'],['note','Note'],['titre','A-Z']].map(([k,label])=>({
           label, onClick:()=>this.setState({sort:k}), style:this.smallChip(st.sort===k)
         }))
       };
-      let list=st.works.filter(w=> (st.category==='all'||w.category===st.category) && (st.status==='all'||w.status===st.status));
+      let list=st.works.filter(w=> (st.category==='all'||w.category===st.category) && (st.status==='all'||(st.status==='favoris'?st.favorites[w.id]:w.status===st.status)));
       list=[...list].sort((a,b)=>{
         if(st.sort==='titre') return a.title.localeCompare(b.title);
         if(st.sort==='note') return (st.ratings['w:'+b.id]||0)-(st.ratings['w:'+a.id]||0);
@@ -1392,7 +1560,8 @@ class Component extends DCLogic {
           showProgress: !!(w.seasons && t.watched>0 && t.watched<t.total),
           progressText:t.watched+'/'+t.total+' '+term(w.category).unit,
           progressStyle:'height:100%;width:'+pct+'%;background:linear-gradient(90deg,#8b6dff,#ff5c8a);border-radius:4px;',
-          badgeNew
+          badgeNew,
+          isFavorite:!!st.favorites[w.id]
         };
       });
     }
@@ -1416,6 +1585,8 @@ class Component extends DCLogic {
           stars:this.starWidget('w', w.id, rating, 20),
           ratingText: rating? rating+'/5':'—',
           onCycleStatus:()=>this.cycleStatus(w),
+          isFavorite:!!st.favorites[w.id],
+          onToggleFavorite:()=>{ const favs={...st.favorites}; if(favs[w.id]) delete favs[w.id]; else favs[w.id]=true; this.setState({favorites:favs}); this.persist({favorites:favs}); },
           workComments: this.commentsFor('w:'+w.id).map(c=>this.mapComment(c)),
           workCommentCount: this.commentsFor('w:'+w.id).length,
           hasWorkComments: this.commentsFor('w:'+w.id).length>0,
@@ -1722,6 +1893,7 @@ class Component extends DCLogic {
         onReset:()=>this.resetProgress(),
         onClearAll:()=>this.clearAll(),
         onImportTVTime:()=>this.importTVTime(),
+      onImportTVTimeOut:()=>this.importTVTimeOut(),
         importResult: st.importResult||null
       };
     }
@@ -1825,8 +1997,8 @@ class Component extends DCLogic {
           initials:posterUrl?'':this.pi(c.id,c.title),
           posterStyle,
           inLibrary:c.inLibrary,
-          btnLabel: c.inLibrary?'Ouvrir →':'+ Ajouter',
-          btnStyle:'flex-shrink:0;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:'+(c.inLibrary?'#9797a8':'#fff')+';background:'+(c.inLibrary?'rgba(255,255,255,.07)':'#8b6dff')+';',
+          btnLabel: c.inLibrary?'✓ Ajouté':'+ Ajouter',
+          btnStyle:'flex-shrink:0;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:'+(c.inLibrary?'#4ade80':'#fff')+';background:'+(c.inLibrary?'rgba(74,222,128,.12)':'#8b6dff')+';border:1px solid '+(c.inLibrary?'rgba(74,222,128,.3)':'transparent')+';',
           onAdd:()=>c.inLibrary?this.openWork(c.id):this.addWork(c)
         };
       })
