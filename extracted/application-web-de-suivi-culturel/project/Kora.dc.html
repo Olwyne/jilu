@@ -459,13 +459,10 @@
         <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:24px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);margin-bottom:26px;">
           <div style="{{ accountView.avatarStyle }}">{{ accountView.avatarInitials }}</div>
           <div style="flex:1;min-width:220px;">
-            <div style="display:flex;align-items:center;gap:10px;"><h2 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:26px;margin:0;">{{ accountView.name }}</h2><span onClick="{{ accountView.onEditName }}" style="font-size:12.5px;color:#8b6dff;cursor:pointer;font-weight:600;">Modifier</span></div>
+            <div style="display:flex;align-items:center;gap:10px;"><h2 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:26px;margin:0;">{{ accountView.name }}</h2><span onClick="{{ accountView.onEditProfile }}" style="font-size:12.5px;color:#8b6dff;cursor:pointer;font-weight:600;">Modifier</span></div>
             <div style="color:#9797a8;font-size:14px;margin-top:3px;">{{ accountView.handle }} · {{ accountView.email }}</div>
-            <div style="color:#6c6c7c;font-size:12.5px;margin-top:8px;">{{ accountView.memberText }}</div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <div onClick="{{ accountView.onEditHandle }}" style="padding:9px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.1);font-size:13px;font-weight:600;cursor:pointer;color:#ECECF2;">Pseudo</div>
-            <div onClick="{{ accountView.onEditEmail }}" style="padding:9px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.1);font-size:13px;font-weight:600;cursor:pointer;color:#ECECF2;">E-mail</div>
+            <div style="color:#6c6c7c;font-size:12.5px;margin-top:4px;">{{ accountView.memberText }}</div>
+            <div style="color:#5a5a6a;font-size:11px;margin-top:5px;font-family:monospace;">{{ accountView.profileUrl }}</div>
           </div>
         </div>
 
@@ -489,14 +486,7 @@
           </sc-for>
         </div>
 
-        <div style="padding:8px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Page de démarrage</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
-          <sc-for list="{{ accountView.startOpts }}" as="o" hint-placeholder-count="4">
-            <div onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</div>
-          </sc-for>
-        </div>
-
-        <div style="padding:8px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Confidentialité</div>
+<div style="padding:8px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Confidentialité</div>
         <div style="border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);overflow:hidden;margin-bottom:24px;">
           <sc-for list="{{ accountView.privacy }}" as="p" hint-placeholder-count="1">
             <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.05);">
@@ -650,6 +640,36 @@
   </sc-if>
 
   <!-- ===== CONFIRM MODAL ===== -->
+  <sc-if value="{{ profileEditModal.open }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.6);">
+        <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px;margin-bottom:20px;">Modifier le profil</div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
+          <div>
+            <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Nom</div>
+            <input type="text" value="{{ profileEditModal.name }}" onInput="{{ profileEditModal.onChangeName }}" placeholder="Ton nom" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
+          </div>
+          <div>
+            <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Pseudo</div>
+            <input type="text" value="{{ profileEditModal.handle }}" onInput="{{ profileEditModal.onChangeHandle }}" placeholder="@pseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
+          </div>
+          <div>
+            <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">E-mail</div>
+            <input type="email" value="{{ profileEditModal.email }}" onInput="{{ profileEditModal.onChangeEmail }}" placeholder="email@exemple.com" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
+          </div>
+          <div>
+            <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Membre depuis</div>
+            <input type="text" value="{{ profileEditModal.memberSince }}" onInput="{{ profileEditModal.onChangeMemberSince }}" placeholder="ex: Janvier 2024" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <div onClick="{{ profileEditModal.onCancel }}" style="padding:10px 20px;border-radius:10px;border:1px solid rgba(255,255,255,.1);font-size:14px;font-weight:600;cursor:pointer;color:#ECECF2;" style-hover="background:rgba(255,255,255,.06);">Annuler</div>
+          <div onClick="{{ profileEditModal.onSave }}" style="padding:10px 20px;border-radius:10px;background:#8b6dff;color:#fff;font-size:14px;font-weight:600;cursor:pointer;" style-hover="background:#7a5de8;">Enregistrer</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   <sc-if value="{{ confirmModal.open }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;">
       <div style="background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.6);">
@@ -751,13 +771,14 @@ class Component extends DCLogic {
     const works = this.buildData(now);
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem('jilu-v2')||'{}'); } catch(e){}
-    const settings = saved.settings || {startPage:'library', autoNext:true, spoilerFree:true, notifNewEp:true, notifCalendar:true, notifWeekly:false, publicProfile:false, adult:false};
-    const profile = saved.profile || {name:'Alex Moreau', handle:'@alexbinge', email:'alex.moreau@email.com', memberSince:'mars 2023'};
+    const settings = saved.settings || {autoNext:true, spoilerFree:true, notifNewEp:true, notifCalendar:true, notifWeekly:false, publicProfile:false, adult:false};
+    const savedProfile = saved.profile || {};
+    const profile = {name:'Alex Moreau', handle:'@alexbinge', email:'alex.moreau@email.com', memberSince:'mars 2023', ...savedProfile, userId: savedProfile.userId || Math.random().toString(36).slice(2,10)};
     this.state = {
-      view: settings.startPage || 'library',
+      view: 'dashboard',
       settings, profile,
       feed: saved.feed || this.seedFeed(now),
-      commentDraft:'', openCommentKey:null, modalKey:null, modalCtx:null, toast:null, importResult:null, dashLimit:{cont:5,rev:5}, calendarCat:'all', searchResults:[], searchLoading:false, confirmModal:null, searchCat:'series',
+      commentDraft:'', openCommentKey:null, modalKey:null, modalCtx:null, toast:null, importResult:null, dashLimit:{cont:5,rev:5}, calendarCat:'all', searchResults:[], searchLoading:false, confirmModal:null, searchCat:'series', profileModal:null,
       ccLikes: saved.ccLikes || {},
       games: saved.games || this.seedGames(),
       selectedId: null,
@@ -779,6 +800,22 @@ class Component extends DCLogic {
     };
   }
 
+  _parseHash(){
+    const h = location.hash.replace(/^#\/?/,'');
+    if(!h || h==='dashboard') return {view:'dashboard'};
+    if(h==='library') return {view:'library'};
+    if(h==='calendar') return {view:'calendar'};
+    if(h==='stats') return {view:'stats'};
+    if(h==='journal') return {view:'journal'};
+    if(h==='account') return {view:'account'};
+    if(h.startsWith('work/')) return {view:'detail', selectedId:decodeURIComponent(h.slice(5))};
+    if(h.startsWith('user/')) return {view:'account'};
+    return {view:'dashboard'};
+  }
+  _pushHash(v, extra){
+    const h = extra ? `${v}/${encodeURIComponent(extra)}` : v;
+    if(location.hash !== '#'+h) history.pushState(null,'','#'+h);
+  }
   componentDidMount(){
     this._onResize = () => {
       const m = window.innerWidth < 860;
@@ -787,7 +824,19 @@ class Component extends DCLogic {
     window.addEventListener('resize', this._onResize);
     this._onKey = (e)=>{ if(e.key==='Escape') this.setState({searchOpen:false, modalKey:null, modalCtx:null}); };
     window.addEventListener('keydown', this._onKey);
+    this._onHash = () => {
+      const s = this._parseHash();
+      this.setState({...s, searchOpen:false});
+    };
+    window.addEventListener('popstate', this._onHash);
+    const init = this._parseHash();
+    if(init.view !== 'dashboard' || location.hash) {
+      this.setState(init);
+    } else {
+      history.replaceState(null,'','#dashboard');
+    }
     setTimeout(()=>this._loadPosters(), 800);
+    this.persist({profile: this.state.profile});
   }
 
   async _loadPosters(){
@@ -828,6 +877,7 @@ class Component extends DCLogic {
   componentWillUnmount(){
     window.removeEventListener('resize', this._onResize);
     window.removeEventListener('keydown', this._onKey);
+    window.removeEventListener('popstate', this._onHash);
   }
 
   _searchTimer=null;
@@ -952,10 +1002,13 @@ class Component extends DCLogic {
     return null;
   }
 
-  setView(v){ this.setState({view:v, searchOpen:false}); }
+  setView(v){ this._pushHash(v); this.setState({view:v, searchOpen:false}); }
   setSetting(key, val){ const settings={...this.state.settings, [key]:val}; this.setState({settings}); this.persist({settings}); }
   toggleSetting(key){ this.setSetting(key, !this.state.settings[key]); }
   editField(key, label){ const cur=this.state.profile[key]; const v=window.prompt('Modifier '+label, cur); if(v!=null && v.trim()){ const profile={...this.state.profile, [key]:v.trim()}; this.setState({profile}); this.persist({profile}); } }
+  openProfileModal(){ const p=this.state.profile; this.setState({profileModal:{name:p.name||'',handle:p.handle||'',email:p.email||'',memberSince:p.memberSince||''}}); }
+  closeProfileModal(){ this.setState({profileModal:null}); }
+  saveProfileModal(){ const m=this.state.profileModal; if(!m) return; const profile={...this.state.profile,name:m.name.trim()||this.state.profile.name,handle:m.handle.trim()||this.state.profile.handle,email:m.email.trim()||this.state.profile.email,memberSince:m.memberSince.trim()||this.state.profile.memberSince}; this.setState({profile,profileModal:null}); this.persist({profile}); }
   showConfirm(title,msg,fn){ this.setState({confirmModal:{open:true,title,message:msg,onOk:()=>{this.setState({confirmModal:null});fn();},onCancel:()=>this.setState({confirmModal:null})}}); }
   resetProgress(){ this.showConfirm('Réinitialiser la progression','Tous les épisodes cochés seront remis à zéro. Cette action est irréversible.',()=>{ const watched={},watchDates={}; this.setState({watched,watchDates}); this.persist({watched,watchDates}); }); }
   clearAll(){ this.showConfirm('Tout effacer','Toutes tes données seront supprimées : progression, notes, avis, œuvres importées. Cette action est irréversible.',()=>{ const s=this.state; const defaultWorks=s.works.filter(w=>!s.importedWorks.some(iw=>iw.id===w.id)); this.setState({works:defaultWorks,watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{}}); try{localStorage.setItem('jilu-v2',JSON.stringify({watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{},settings:s.settings,profile:s.profile,feed:s.feed,games:s.games,ccLikes:s.ccLikes}));}catch(e){} }); }
@@ -1356,6 +1409,7 @@ class Component extends DCLogic {
       const nx=this.nextEpisode(w);
       exp[w.id+'-'+(nx?nx.s.n:w.seasons[w.seasons.length-1].n)]=true;
     }
+    this._pushHash('work', id);
     this.setState({view:'detail', selectedId:id, expanded:exp});
   }
   toggleEp(work, sNum, eNum, aired){
@@ -1863,15 +1917,13 @@ class Component extends DCLogic {
           knobStyle:'position:absolute;top:3px;left:'+(on?'21px':'3px')+';width:20px;height:20px;border-radius:50%;background:#fff;transition:left .18s;'
         };
       };
-      const startOpts=[['dashboard','Accueil'],['library','Bibliothèque'],['calendar','Calendrier'],['stats','Statistiques']];
       out.accountView={
         avatarStyle:'width:76px;height:76px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:30px;color:#fff;',
         avatarInitials:initials(st.profile.name),
         name:st.profile.name, handle:st.profile.handle, email:st.profile.email,
         memberText:'Membre depuis '+st.profile.memberSince,
-        onEditName:()=>this.editField('name','le nom'),
-        onEditHandle:()=>this.editField('handle',"le pseudo"),
-        onEditEmail:()=>this.editField('email',"l'email"),
+        profileUrl: location.origin + location.pathname + '#user/' + (st.profile.userId||''),
+        onEditProfile:()=>this.openProfileModal(),
         prefs:[
           {key:'notifNewEp', label:'Nouveaux épisodes', desc:'Être notifié quand un épisode d\'une série suivie sort', ...sw('notifNewEp')},
           {key:'notifCalendar', label:'Rappels de sortie', desc:'Alerte la veille des sorties du calendrier', ...sw('notifCalendar')},
@@ -1885,10 +1937,6 @@ class Component extends DCLogic {
         privacy:[
           {key:'publicProfile', label:'Profil public', desc:'Rendre ta bibliothèque et tes notes visibles', ...sw('publicProfile')}
         ],
-        startOpts: startOpts.map(([k,label])=>({
-          label, onClick:()=>this.setSetting('startPage',k),
-          style:this.smallChip(st.settings.startPage===k)
-        })),
         onMarkAll:()=>this.markAllWatched(),
         onReset:()=>this.resetProgress(),
         onClearAll:()=>this.clearAll(),
@@ -2012,6 +2060,18 @@ class Component extends DCLogic {
     } : {open:false};
 
     out.confirmModal = st.confirmModal || {open:false, title:'', message:'', onOk:null, onCancel:null};
+
+    const pm = st.profileModal;
+    out.profileEditModal = pm ? {
+      open: true,
+      name: pm.name, handle: pm.handle, email: pm.email, memberSince: pm.memberSince,
+      onChangeName: e => this.setState(s => ({profileModal:{...s.profileModal, name:e.target.value}})),
+      onChangeHandle: e => this.setState(s => ({profileModal:{...s.profileModal, handle:e.target.value}})),
+      onChangeEmail: e => this.setState(s => ({profileModal:{...s.profileModal, email:e.target.value}})),
+      onChangeMemberSince: e => this.setState(s => ({profileModal:{...s.profileModal, memberSince:e.target.value}})),
+      onSave: () => this.saveProfileModal(),
+      onCancel: () => this.closeProfileModal()
+    } : {open:false};
 
     return out;
   }
