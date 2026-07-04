@@ -16,6 +16,7 @@ import StatsView from './components/stats/StatsView'
 import AccountView from './components/account/AccountView'
 import FeedView from './components/feed/FeedView'
 import Toast from './components/Toast'
+import SearchModal from './components/modals/SearchModal'
 
 const HEADER_COPY = {
   dashboard: { title: 'Bonsoir 👋', subtitle: "Voici ce qui t'attend" },
@@ -142,6 +143,13 @@ function Shell() {
         onClose={() => setToast(null)}
         onOpenRating={() => setToast(null)}
       />
+      {searchOpen && (
+        <SearchModal
+          works={data.works}
+          onAdd={(r) => workActions.addWork(r)}
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
       {episodeModal && data.works[episodeModal.workId] && (
         <EpisodeModal
           work={data.works[episodeModal.workId]}
