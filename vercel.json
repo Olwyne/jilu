@@ -2,5 +2,9 @@
   "buildCommand": null,
   "outputDirectory": "extracted/application-web-de-suivi-culturel/project",
   "installCommand": null,
-  "framework": null
+  "framework": null,
+  "rewrites": [
+    { "source": "/", "destination": "/Kora.dc.html" },
+    { "source": "/(.*)", "destination": "/Kora.dc.html" }
+  ]
 }
