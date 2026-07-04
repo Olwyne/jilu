@@ -736,15 +736,29 @@
   <!-- ===== CONFIRM MODAL ===== -->
   <sc-if value="{{ onboarding }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:#0d0d14;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
-      <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:42px;letter-spacing:-1px;margin-bottom:8px;">Jilu</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:42px;letter-spacing:-1px;margin-bottom:8px;">Kōra</div>
       <div style="color:#9797a8;font-size:16px;margin-bottom:40px;">Ton journal culturel personnel</div>
       <div style="background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:32px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.5);">
-        <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-bottom:6px;">Bienvenue !</div>
-        <div style="color:#9797a8;font-size:14px;margin-bottom:24px;">Choisis ton pseudo pour commencer</div>
-        <input type="text" value="{{ onboardingView.pseudo }}" onInput="{{ onboardingView.onInput }}" placeholder="tonpseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;color:#ECECF2;font-size:16px;outline:none;box-sizing:border-box;margin-bottom:8px;" />
-        <div style="height:20px;margin-bottom:12px;font-size:13px;{{ onboardingView.statusStyle }}">{{ onboardingView.statusText }}</div>
-        <div onClick="{{ onboardingView.onSubmit }}" style="{{ onboardingView.btnStyle }}">Commencer</div>
-        <div onClick="{{ onboardingView.onSkip }}" style="margin-top:16px;text-align:center;font-size:13px;color:#9797a8;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">J'ai déjà un compte</div>
+        <sc-if value="{{ onboardingView.isLogin }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-bottom:6px;">Connexion</div>
+          <div style="color:#9797a8;font-size:14px;margin-bottom:20px;">Accède à ton compte Kōra</div>
+          <input type="email" value="{{ onboardingView.loginEmail }}" onInput="{{ onboardingView.onInputLoginEmail }}" placeholder="ton@email.com" style="{{ onboardingView.inputStyle }}" />
+          <input type="password" value="{{ onboardingView.loginPassword }}" onInput="{{ onboardingView.onInputLoginPassword }}" placeholder="Mot de passe" style="{{ onboardingView.inputStyle }}" />
+          <div style="{{ onboardingView.loginErrorStyle }}">{{ onboardingView.loginError }}</div>
+          <div onClick="{{ onboardingView.onSignIn }}" style="{{ onboardingView.loginBtnStyle }}">Se connecter</div>
+          <div onClick="{{ onboardingView.onSwitchToRegister }}" style="margin-top:16px;text-align:center;font-size:13px;color:#9797a8;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Créer un compte</div>
+        </sc-if>
+        <sc-if value="{{ onboardingView.isRegister }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-bottom:6px;">Bienvenue !</div>
+          <div style="color:#9797a8;font-size:14px;margin-bottom:20px;">Crée ton compte pour commencer</div>
+          <input type="text" value="{{ onboardingView.pseudo }}" onInput="{{ onboardingView.onInputPseudo }}" placeholder="tonpseudo" style="{{ onboardingView.inputStyle }}" />
+          <div style="height:18px;margin-bottom:8px;font-size:13px;{{ onboardingView.pseudoStatusStyle }}">{{ onboardingView.pseudoStatusText }}</div>
+          <input type="email" value="{{ onboardingView.email }}" onInput="{{ onboardingView.onInputEmail }}" placeholder="ton@email.com" style="{{ onboardingView.inputStyle }}" />
+          <input type="password" value="{{ onboardingView.password }}" onInput="{{ onboardingView.onInputPassword }}" placeholder="Mot de passe (6 car. min)" style="{{ onboardingView.inputStyle }}" />
+          <div style="{{ onboardingView.registerErrorStyle }}">{{ onboardingView.registerError }}</div>
+          <div onClick="{{ onboardingView.onSubmit }}" style="{{ onboardingView.registerBtnStyle }}">Commencer</div>
+          <div onClick="{{ onboardingView.onSwitchToLogin }}" style="margin-top:16px;text-align:center;font-size:13px;color:#9797a8;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">J'ai déjà un compte</div>
+        </sc-if>
       </div>
     </div>
   </sc-if>
@@ -880,7 +894,7 @@ class Component extends DCLogic {
       : {name:'', handle:'', email:'', memberSince: new Date().toLocaleDateString('fr-FR',{month:'long',year:'numeric'}), userId: Math.random().toString(36).slice(2,10)};
     this.state = {
       view: 'dashboard',
-      onboarding: !savedProfile || !(savedProfile.handle||savedProfile.name), onboardingPseudo: '', onboardingStatus: null,
+      onboarding: !savedProfile || !(savedProfile.handle||savedProfile.name), onboardingPseudo: '', onboardingStatus: null, loginMode: false, onboardingEmail: '', onboardingPassword: '', loginEmail: '', loginPassword: '', loginError: null, registerError: null, authLoading: false,
       settings, profile,
       feed: saved.feed || this.seedFeed(now),
       commentDraft:'', openCommentKey:null, modalKey:null, modalCtx:null, toast:null, importResult:null, dashLimit:{cont:5,rev:5}, calendarCat:'all', searchResults:[], searchLoading:false, confirmModal:null, searchCat:'series', profileModal:null,
@@ -995,28 +1009,58 @@ class Component extends DCLogic {
     const auth=window._auth, db=window._db;
     if(!auth||!db) return;
     this._unsubAuth=auth.onAuthStateChanged(async user=>{
-      if(user){
+      if(user && !user.isAnonymous){
         this._fbUid=user.uid;
-        // Update profile userId to match Firebase UID
         const profile={...this.state.profile, userId:user.uid};
-        this.setState({profile, fbReady:true});
-        // Load from Firestore
+        this.setState({profile, fbReady:true, onboarding:false, loginMode:false, authLoading:false});
         try{
           const snap=await db.collection('users').doc(user.uid).get();
-          if(snap.exists){
-            this._mergeFirestoreData(snap.data());
-          } else {
-            // First Firebase session — push local data up
-            this._saveToFirestore(this.state);
-          }
+          if(snap.exists){ this._mergeFirestoreData(snap.data()); }
+          else { this._saveToFirestore(this.state); }
         }catch(e){ console.warn('Firestore load failed',e); }
-        // Handle pending guest profile from URL hash
         const pending=this.state.pendingGuestUid;
         if(pending && pending!==user.uid) this._loadGuestProfile(pending);
+      } else if(user && user.isAnonymous){
+        auth.signOut().catch(()=>{});
       } else {
-        auth.signInAnonymously().catch(e=>console.warn('Auth failed',e));
+        this.setState({fbReady:true, authLoading:false});
       }
     });
+  }
+  async _signUp(pseudo, email, password){
+    const auth=window._auth;
+    if(!auth) return;
+    this.setState({authLoading:true, registerError:null});
+    try{
+      const cred=await auth.createUserWithEmailAndPassword(email, password);
+      const uid=cred.user.uid;
+      this._fbUid=uid;
+      const profile={...this.state.profile, name:pseudo, handle:pseudo, email, userId:uid};
+      this.setState({onboarding:false, loginMode:false, profile, registerError:null, authLoading:false});
+      this.persist({profile});
+      this._claimPseudo(pseudo);
+    }catch(e){
+      let msg=e.message||'Erreur';
+      if(e.code==='auth/email-already-in-use') msg='Email déjà utilisé';
+      if(e.code==='auth/weak-password') msg='Mot de passe trop court (6 car. min)';
+      if(e.code==='auth/invalid-email') msg='Email invalide';
+      this.setState({registerError:msg, authLoading:false});
+    }
+  }
+  async _signIn(email, password){
+    const auth=window._auth;
+    if(!auth) return;
+    this.setState({authLoading:true, loginError:null});
+    try{
+      await auth.signInWithEmailAndPassword(email, password);
+      // onAuthStateChanged fires → handles the rest
+    }catch(e){
+      let msg='Email ou mot de passe incorrect';
+      if(e.code==='auth/user-not-found') msg='Aucun compte avec cet email';
+      if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential') msg='Mot de passe incorrect';
+      if(e.code==='auth/invalid-email') msg='Email invalide';
+      this.setState({loginError:msg, authLoading:false});
+    }
   }
   _mergeFirestoreData(data){
     if(!data) return;
@@ -1240,8 +1284,7 @@ class Component extends DCLogic {
   openProfileModal(){ const p=this.state.profile; this.setState({profileModal:{pseudo:p.handle||p.name||'',email:p.email||'',pseudoStatus:'available'}}); }
   closeProfileModal(){ this.setState({profileModal:null}); }
   saveProfileModal(){ const m=this.state.profileModal; if(!m||m.pseudoStatus!=='available') return; const newHandle=(m.pseudo||'').replace(/^@/,'').trim()||this.state.profile.handle||this.state.profile.name; const oldHandle=this.state.profile.handle||''; const profile={...this.state.profile,name:newHandle,handle:newHandle,email:(m.email||'').trim()||this.state.profile.email}; this.setState({profile,profileModal:null}); this.persist({profile}); if(newHandle && newHandle!==oldHandle){ if(oldHandle) this._releasePseudo(oldHandle); this._claimPseudo(newHandle); } }
-  completeOnboarding(){ const p=(this.state.onboardingPseudo||'').replace(/^@/,'').trim(); if(!p||this.state.onboardingStatus!=='available') return; const profile={...this.state.profile,name:p,handle:p}; this.setState({onboarding:false,profile}); this.persist({profile}); this._claimPseudo(p); }
-  skipOnboarding(){ this.setState({onboarding:false}); this.persist({}); }
+  completeOnboarding(){ const p=(this.state.onboardingPseudo||'').replace(/^@/,'').trim(); const email=(this.state.onboardingEmail||'').trim(); const pwd=this.state.onboardingPassword||''; if(!p||this.state.onboardingStatus!=='available') return; if(!email||pwd.length<6){ this.setState({registerError:!email?'Email requis':'Mot de passe trop court (6 car. min)'}); return; } this._signUp(p,email,pwd); }
   showConfirm(title,msg,fn){ this.setState({confirmModal:{open:true,title,message:msg,onOk:()=>{this.setState({confirmModal:null});fn();},onCancel:()=>this.setState({confirmModal:null})}}); }
   resetProgress(){ this.showConfirm('Réinitialiser la progression','Tous les épisodes cochés seront remis à zéro. Cette action est irréversible.',()=>{ const watched={},watchDates={}; this.setState({watched,watchDates}); this.persist({watched,watchDates}); }); }
   clearAll(){ this.showConfirm('Tout effacer','Toutes tes données seront supprimées : progression, notes, avis, œuvres importées. Cette action est irréversible.',()=>{ const s=this.state; const defaultWorks=s.works.filter(w=>!s.importedWorks.some(iw=>iw.id===w.id)); this.setState({works:defaultWorks,watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{}}); try{localStorage.setItem('jilu-v2',JSON.stringify({watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{},settings:s.settings,profile:s.profile,feed:s.feed,games:s.games,ccLikes:s.ccLikes}));}catch(e){} }); }
@@ -1798,18 +1841,45 @@ class Component extends DCLogic {
       isLibrary:st.view==='library', isDetail:st.view==='detail', isCalendar:st.view==='calendar', isDashboard:st.view==='dashboard', isStats:st.view==='stats', isAccount:st.view==='account', isFeed:st.view==='feed',
       onboarding: st.onboarding,
       onboardingView: (()=>{
+        const isLogin=st.loginMode;
         const s=st.onboardingStatus;
-        const ok=s==='available';
-        const statusMap={checking:{text:'Vérification…',color:'#9797a8'},available:{text:'✓ Disponible',color:'#4ade80'},taken:{text:'✗ Déjà pris',color:'#ff5c8a'},invalid:{text:'3 à 20 caractères (lettres, chiffres, _)',color:'#f59e0b'}};
+        const pseudoOk=s==='available';
+        const emailOk=(st.onboardingEmail||'').includes('@');
+        const pwdOk=(st.onboardingPassword||'').length>=6;
+        const registerReady=pseudoOk&&emailOk&&pwdOk&&!st.authLoading;
+        const loginReady=(st.loginEmail||'').includes('@')&&(st.loginPassword||'').length>=3&&!st.authLoading;
+        const statusMap={checking:{text:'Vérification…',color:'#9797a8'},available:{text:'✓ Disponible',color:'#4ade80'},taken:{text:'✗ Déjà pris',color:'#ff5c8a'},invalid:{text:'3 à 20 car. (lettres, chiffres, _)',color:'#f59e0b'}};
         const sm=statusMap[s]||{text:'',color:'transparent'};
+        const inputStyle='width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;color:#ECECF2;font-size:15px;outline:none;box-sizing:border-box;margin-bottom:10px;';
+        const btnActive='width:100%;padding:13px;border-radius:12px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;cursor:pointer;background:#8b6dff;color:#fff;';
+        const btnDisabled='width:100%;padding:13px;border-radius:12px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;cursor:default;background:rgba(139,109,255,.3);color:rgba(255,255,255,.4);';
         return {
+          isLogin, isRegister:!isLogin,
+          // register fields
           pseudo: st.onboardingPseudo,
-          statusText: sm.text,
-          statusStyle: 'color:'+sm.color+';',
-          btnStyle: 'width:100%;padding:13px;border-radius:12px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;cursor:'+(ok?'pointer':'default')+';background:'+(ok?'#8b6dff':'rgba(139,109,255,.3)')+';color:'+(ok?'#fff':'rgba(255,255,255,.4)')+';',
-          onInput: e=>{ const v=e.target.value.replace(/^@/,''); this.setState({onboardingPseudo:v}); this._checkPseudo(v, status=>this.setState({onboardingStatus:status})); },
+          pseudoStatusText: sm.text, pseudoStatusStyle: 'color:'+sm.color+';',
+          onInputPseudo: e=>{ const v=e.target.value.replace(/^@/,''); this.setState({onboardingPseudo:v}); this._checkPseudo(v, status=>this.setState({onboardingStatus:status})); },
+          email: st.onboardingEmail,
+          onInputEmail: e=>this.setState({onboardingEmail:e.target.value}),
+          password: st.onboardingPassword,
+          onInputPassword: e=>this.setState({onboardingPassword:e.target.value}),
+          registerError: st.registerError||'',
+          registerErrorStyle: st.registerError?'color:#ff5c8a;font-size:13px;margin-bottom:10px;':'display:none;',
+          registerBtnStyle: registerReady?btnActive:btnDisabled,
           onSubmit: ()=>this.completeOnboarding(),
-          onSkip: ()=>this.skipOnboarding()
+          onSwitchToLogin: ()=>this.setState({loginMode:true,loginError:null}),
+          // login fields
+          loginEmail: st.loginEmail,
+          onInputLoginEmail: e=>this.setState({loginEmail:e.target.value}),
+          loginPassword: st.loginPassword,
+          onInputLoginPassword: e=>this.setState({loginPassword:e.target.value}),
+          loginError: st.loginError||'',
+          loginErrorStyle: st.loginError?'color:#ff5c8a;font-size:13px;margin-bottom:10px;':'display:none;',
+          loginBtnStyle: loginReady?btnActive:btnDisabled,
+          onSignIn: ()=>this._signIn(st.loginEmail, st.loginPassword),
+          onSwitchToRegister: ()=>this.setState({loginMode:false,registerError:null}),
+          inputStyle,
+          loadingText: st.authLoading?'Chargement…':''
         };
       })() };
     out.commentDraft = st.commentDraft;
