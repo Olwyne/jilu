@@ -4,6 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey:"AIzaSyBASv4S5G8LmkDm5ioHiVlsvuh2_w3KllA",
+    authDomain:"jilu-acb75.firebaseapp.com",
+    projectId:"jilu-acb75",
+    storageBucket:"jilu-acb75.firebasestorage.app",
+    messagingSenderId:"941515751949",
+    appId:"1:941515751949:web:b1f5f2fa756c42b81ecb44"
+  });
+  window._db = firebase.firestore();
+  window._auth = firebase.auth();
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -29,7 +44,7 @@
     <aside style="width:236px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.07);padding:26px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;">
       <div style="display:flex;align-items:center;gap:11px;padding:0 8px 22px;">
         <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:#fff;">K</div>
-        <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:21px;letter-spacing:-.02em;">Kōra</div>
+        <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:21px;letter-spacing:-.02em;">Jilu</div>
       </div>
       <div onClick="{{ nav.dashboard.onClick }}" style="{{ nav.dashboard.style }}"><span style="{{ nav.dashboard.iconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>Accueil</div>
       <div onClick="{{ nav.library.onClick }}" style="{{ nav.library.style }}"><span style="{{ nav.library.iconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>Bibliothèque</div>
@@ -49,7 +64,7 @@
       <sc-if value="{{ nav.isMobile }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;align-items:center;gap:9px;">
           <div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;color:#fff;">K</div>
-          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:19px;">Kōra</div>
+          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:19px;">Jilu</div>
         </div>
       </sc-if>
       <div style="min-width:0;">
@@ -533,6 +548,20 @@
 
       <!-- ===== PROFIL ===== -->
       <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ profileView.isGuest }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-radius:12px;background:rgba(139,109,255,.12);border:1px solid rgba(139,109,255,.25);margin-bottom:4px;">
+            <span style="font-size:13px;color:#b9a6ff;font-weight:600;">👁 Profil partagé — lecture seule</span>
+            <span onClick="{{ profileView.onCloseGuest }}" style="font-size:13px;color:#8b6dff;cursor:pointer;font-weight:600;">× Fermer</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ profileView.isPrivate }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:60px 20px;text-align:center;">
+            <div style="font-size:32px;margin-bottom:16px;">🔒</div>
+            <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-bottom:8px;">Profil privé</div>
+            <div style="color:#9797a8;font-size:14px;margin-bottom:24px;">{{ profileView.pseudo }} n'a pas rendu son profil public.</div>
+            <div onClick="{{ profileView.onCloseGuest }}" style="display:inline-block;padding:10px 20px;border-radius:12px;background:#8b6dff;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Retour</div>
+          </div>
+        </sc-if>
         <div style="max-width:700px;display:flex;flex-direction:column;gap:28px;">
 
           <!-- Hero -->
@@ -589,7 +618,7 @@
                   <div style="font-size:15px;line-height:1.5;color:#e4e4ee;">{{ f.text }}</div>
                   <div style="display:flex;align-items:center;gap:20px;margin-top:14px;">
                     <span onClick="{{ f.onLike }}" style="{{ f.likeStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="{{ f.likeFill }}" stroke="{{ f.likeStroke }}" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>{{ f.likesText }}</span>
-                    <span onClick="{{ f.onDelete }}" style="font-size:13px;color:#6c6c7c;cursor:pointer;">Supprimer</span>
+                    <sc-if value="{{ f.canDelete }}" hint-placeholder-val="{{ false }}"><span onClick="{{ f.onDelete }}" style="font-size:13px;color:#6c6c7c;cursor:pointer;">Supprimer</span></sc-if>
                   </div>
                 </div>
               </sc-for>
@@ -707,7 +736,7 @@
   <!-- ===== CONFIRM MODAL ===== -->
   <sc-if value="{{ onboarding }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:#0d0d14;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
-      <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:42px;letter-spacing:-1px;margin-bottom:8px;">Kōra</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:42px;letter-spacing:-1px;margin-bottom:8px;">Jilu</div>
       <div style="color:#9797a8;font-size:16px;margin-bottom:40px;">Ton journal culturel personnel</div>
       <div style="background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:32px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.5);">
         <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-bottom:6px;">Bienvenue !</div>
@@ -850,7 +879,7 @@ class Component extends DCLogic {
       : {name:'', handle:'', email:'', memberSince: new Date().toLocaleDateString('fr-FR',{month:'long',year:'numeric'}), userId: Math.random().toString(36).slice(2,10)};
     this.state = {
       view: 'dashboard',
-      onboarding: !savedProfile, onboardingPseudo: '', onboardingStatus: null,
+      onboarding: !savedProfile || !(savedProfile.handle||savedProfile.name), onboardingPseudo: '', onboardingStatus: null,
       settings, profile,
       feed: saved.feed || this.seedFeed(now),
       commentDraft:'', openCommentKey:null, modalKey:null, modalCtx:null, toast:null, importResult:null, dashLimit:{cont:5,rev:5}, calendarCat:'all', searchResults:[], searchLoading:false, confirmModal:null, searchCat:'series', profileModal:null,
@@ -871,7 +900,10 @@ class Component extends DCLogic {
       reviews: saved.reviews || this.seedReviews(works, now),
       importedWorks: saved.importedWorks || [],
       posters: saved.posters || {},
-      favorites: saved.favorites || {}
+      favorites: saved.favorites || {},
+      guestProfile: null,
+      pendingGuestUid: null,
+      fbReady: false
     };
   }
 
@@ -884,7 +916,7 @@ class Component extends DCLogic {
     if(h==='journal'||h==='profile') return {view:'feed'};
     if(h==='account') return {view:'account'};
     if(h.startsWith('work/')) return {view:'detail', selectedId:decodeURIComponent(h.slice(5))};
-    if(h.startsWith('user/')) return {view:'account'};
+    if(h.startsWith('user/')) return {view:'feed', pendingGuestUid: h.slice(5)};
     return {view:'dashboard'};
   }
   _pushHash(v, extra){
@@ -912,6 +944,7 @@ class Component extends DCLogic {
     }
     setTimeout(()=>this._loadPosters(), 800);
     this.persist({profile: this.state.profile});
+    this._initFirebase();
   }
 
   async _loadPosters(){
@@ -953,31 +986,135 @@ class Component extends DCLogic {
     window.removeEventListener('resize', this._onResize);
     window.removeEventListener('keydown', this._onKey);
     window.removeEventListener('popstate', this._onHash);
+    if(this._unsubAuth) this._unsubAuth();
   }
 
+  _fbUid=null; _unsubAuth=null; _fbSaveTimer=null;
+  _initFirebase(){
+    const auth=window._auth, db=window._db;
+    if(!auth||!db) return;
+    this._unsubAuth=auth.onAuthStateChanged(async user=>{
+      if(user){
+        this._fbUid=user.uid;
+        // Update profile userId to match Firebase UID
+        const profile={...this.state.profile, userId:user.uid};
+        this.setState({profile, fbReady:true});
+        // Load from Firestore
+        try{
+          const snap=await db.collection('users').doc(user.uid).get();
+          if(snap.exists){
+            this._mergeFirestoreData(snap.data());
+          } else {
+            // First Firebase session — push local data up
+            this._saveToFirestore(this.state);
+          }
+        }catch(e){ console.warn('Firestore load failed',e); }
+        // Handle pending guest profile from URL hash
+        const pending=this.state.pendingGuestUid;
+        if(pending && pending!==user.uid) this._loadGuestProfile(pending);
+      } else {
+        auth.signInAnonymously().catch(e=>console.warn('Auth failed',e));
+      }
+    });
+  }
+  _mergeFirestoreData(data){
+    if(!data) return;
+    const now=this.now;
+    const importedWorks=data.importedWorks||[];
+    const builtWorks=this.buildData(now);
+    const works=[...builtWorks,...importedWorks];
+    const next={
+      profile: data.profile ? {...this.state.profile,...data.profile} : this.state.profile,
+      settings: data.settings||this.state.settings,
+      watched: data.watched||this.state.watched,
+      watchDates: data.watchDates||this.state.watchDates,
+      ratings: data.ratings||this.state.ratings,
+      reviews: data.reviews||this.state.reviews,
+      importedWorks, works,
+      posters: data.posters||this.state.posters,
+      favorites: data.favorites||this.state.favorites,
+      feed: data.feed||this.state.feed,
+      games: data.games||this.state.games,
+      ccLikes: data.ccLikes||this.state.ccLikes,
+      onboarding: (data.profile && data.profile.handle) ? false : this.state.onboarding
+    };
+    this.setState(next);
+    try{ localStorage.setItem('jilu-v2', JSON.stringify({
+      watched:next.watched, watchDates:next.watchDates, ratings:next.ratings, reviews:next.reviews,
+      settings:next.settings, profile:next.profile, feed:next.feed, games:next.games,
+      ccLikes:next.ccLikes, importedWorks:next.importedWorks, posters:next.posters, favorites:next.favorites
+    })); }catch(e){}
+  }
+  _saveToFirestore(s){
+    if(!this._fbUid||!window._db) return;
+    clearTimeout(this._fbSaveTimer);
+    this._fbSaveTimer=setTimeout(async()=>{
+      try{
+        await window._db.collection('users').doc(this._fbUid).set({
+          profile:s.profile, settings:s.settings, watched:s.watched, watchDates:s.watchDates,
+          ratings:s.ratings, reviews:s.reviews, importedWorks:s.importedWorks,
+          posters:s.posters, favorites:s.favorites, feed:s.feed, games:s.games, ccLikes:s.ccLikes
+        },{merge:true});
+      }catch(e){ console.warn('Firestore save failed',e); }
+    },1500); // debounce 1.5s
+  }
+  async _loadGuestProfile(uid){
+    if(!uid||!window._db) return;
+    try{
+      const snap=await window._db.collection('users').doc(uid).get();
+      if(snap.exists){
+        const data=snap.data();
+        if(data.profile&&data.profile.isPublic){
+          this.setState({guestProfile:data, pendingGuestUid:null, view:'feed'});
+          this._pushHash('user/'+uid);
+        } else {
+          this.setState({guestProfile:{_private:true, pseudo:(data.profile&&data.profile.pseudo)||'?'}, pendingGuestUid:null, view:'feed'});
+        }
+      }
+    }catch(e){ console.warn('Guest profile load failed',e); }
+  }
   _searchTimer=null;
   _pseudoTimer=null;
   _PSEUDO_RE=/^[a-zA-Z0-9_]{3,20}$/;
-  _PSEUDO_CHECK_URL=null; // Set to 'https://api.yourapp.com/check-pseudo' — called as ?pseudo=xxx → {available:bool}
   _checkPseudo(pseudo, onStatus){
     clearTimeout(this._pseudoTimer);
     if(!pseudo){ onStatus(null); return; }
     if(!this._PSEUDO_RE.test(pseudo)){ onStatus('invalid'); return; }
     onStatus('checking');
     this._pseudoTimer=setTimeout(async()=>{
-      if(!this._PSEUDO_CHECK_URL){ onStatus('available'); return; }
+      const db=window._db;
+      if(!db){ onStatus('available'); return; }
       try{
-        const r=await fetch(this._PSEUDO_CHECK_URL+'?pseudo='+encodeURIComponent(pseudo));
-        if(r.ok){ const d=await r.json(); onStatus(d.available?'available':'taken'); }
-        else onStatus('available');
+        const snap=await db.collection('pseudos').doc(pseudo.toLowerCase()).get();
+        if(!snap.exists){ onStatus('available'); return; }
+        // belongs to current user = still available
+        if(snap.data().uid===this._fbUid){ onStatus('available'); return; }
+        onStatus('taken');
       }catch(e){ onStatus('available'); }
     },400);
+  }
+  async _claimPseudo(pseudo){
+    const db=window._db;
+    if(!db||!this._fbUid) return;
+    try{
+      await db.collection('pseudos').doc(pseudo.toLowerCase()).set({uid:this._fbUid, claimedAt:Date.now()});
+    }catch(e){ console.warn('pseudo claim failed',e); }
+  }
+  async _releasePseudo(pseudo){
+    const db=window._db;
+    if(!db||!pseudo) return;
+    try{
+      const snap=await db.collection('pseudos').doc(pseudo.toLowerCase()).get();
+      if(snap.exists && snap.data().uid===this._fbUid){
+        await db.collection('pseudos').doc(pseudo.toLowerCase()).delete();
+      }
+    }catch(e){ console.warn('pseudo release failed',e); }
   }
   async _debounceSearch(q, cat){
     clearTimeout(this._searchTimer);
     cat=cat||this.state.searchCat||'series';
     if(!q.trim()){ this.setState({searchResults:[],searchLoading:false}); return; }
-    const libMatches=this.state.works.filter(w=>(cat==='all'||w.category===cat)&&w.title.toLowerCase().includes(q.toLowerCase())).map(w=>({id:w.id,title:w.title,category:w.category,year:w.year||'',poster:this.state.posters?.[w.id]||null,inLibrary:true}));
+    const libMatches=this.state.works.filter(w=>(cat==='all'||w.category===cat)&&w.title.toLowerCase().includes(q.toLowerCase())).map(w=>({id:w.id,title:w.title,category:w.category,year:w.year||'',poster:(this.state.posters&&this.state.posters[w.id])||null,inLibrary:true}));
     this.setState({searchResults:libMatches, searchLoading:true});
     this._searchTimer=setTimeout(async()=>{
       const TMDB_KEY='316ee3afbca35562d710106be250b039';
@@ -1016,6 +1153,7 @@ class Component extends DCLogic {
   persist(next){
     const s = {...this.state, ...next};
     try { localStorage.setItem('jilu-v2', JSON.stringify({watched:s.watched, watchDates:s.watchDates, ratings:s.ratings, reviews:s.reviews, settings:s.settings, profile:s.profile, feed:s.feed, games:s.games, ccLikes:s.ccLikes, importedWorks:s.importedWorks, posters:s.posters, favorites:s.favorites})); } catch(e){}
+    this._saveToFirestore(s);
   }
 
   buildData(now){
@@ -1094,14 +1232,14 @@ class Component extends DCLogic {
     return null;
   }
 
-  setView(v){ this._pushHash(v==='feed'?'profile':v); this.setState({view:v, searchOpen:false}); }
+  setView(v){ this._pushHash(v==='feed'?'profile':v); this.setState({view:v, searchOpen:false, guestProfile:null, pendingGuestUid:null}); }
   setSetting(key, val){ const settings={...this.state.settings, [key]:val}; this.setState({settings}); this.persist({settings}); }
   toggleSetting(key){ this.setSetting(key, !this.state.settings[key]); }
   editField(key, label){ const cur=this.state.profile[key]; const v=window.prompt('Modifier '+label, cur); if(v!=null && v.trim()){ const profile={...this.state.profile, [key]:v.trim()}; this.setState({profile}); this.persist({profile}); } }
   openProfileModal(){ const p=this.state.profile; this.setState({profileModal:{pseudo:p.handle||p.name||'',email:p.email||'',pseudoStatus:'available'}}); }
   closeProfileModal(){ this.setState({profileModal:null}); }
-  saveProfileModal(){ const m=this.state.profileModal; if(!m||m.pseudoStatus!=='available') return; const pseudo=(m.pseudo||'').replace(/^@/,'').trim()||this.state.profile.handle||this.state.profile.name; const profile={...this.state.profile,name:pseudo,handle:pseudo,email:(m.email||'').trim()||this.state.profile.email}; this.setState({profile,profileModal:null}); this.persist({profile}); }
-  completeOnboarding(){ const p=(this.state.onboardingPseudo||'').replace(/^@/,'').trim(); if(!p||this.state.onboardingStatus!=='available') return; const profile={...this.state.profile,name:p,handle:p}; this.setState({onboarding:false,profile}); this.persist({profile}); }
+  saveProfileModal(){ const m=this.state.profileModal; if(!m||m.pseudoStatus!=='available') return; const newHandle=(m.pseudo||'').replace(/^@/,'').trim()||this.state.profile.handle||this.state.profile.name; const oldHandle=this.state.profile.handle||''; const profile={...this.state.profile,name:newHandle,handle:newHandle,email:(m.email||'').trim()||this.state.profile.email}; this.setState({profile,profileModal:null}); this.persist({profile}); if(newHandle && newHandle!==oldHandle){ if(oldHandle) this._releasePseudo(oldHandle); this._claimPseudo(newHandle); } }
+  completeOnboarding(){ const p=(this.state.onboardingPseudo||'').replace(/^@/,'').trim(); if(!p||this.state.onboardingStatus!=='available') return; const profile={...this.state.profile,name:p,handle:p}; this.setState({onboarding:false,profile}); this.persist({profile}); this._claimPseudo(p); }
   showConfirm(title,msg,fn){ this.setState({confirmModal:{open:true,title,message:msg,onOk:()=>{this.setState({confirmModal:null});fn();},onCancel:()=>this.setState({confirmModal:null})}}); }
   resetProgress(){ this.showConfirm('Réinitialiser la progression','Tous les épisodes cochés seront remis à zéro. Cette action est irréversible.',()=>{ const watched={},watchDates={}; this.setState({watched,watchDates}); this.persist({watched,watchDates}); }); }
   clearAll(){ this.showConfirm('Tout effacer','Toutes tes données seront supprimées : progression, notes, avis, œuvres importées. Cette action est irréversible.',()=>{ const s=this.state; const defaultWorks=s.works.filter(w=>!s.importedWorks.some(iw=>iw.id===w.id)); this.setState({works:defaultWorks,watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{}}); try{localStorage.setItem('jilu-v2',JSON.stringify({watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{},settings:s.settings,profile:s.profile,feed:s.feed,games:s.games,ccLikes:s.ccLikes}));}catch(e){} }); }
@@ -2056,53 +2194,101 @@ class Component extends DCLogic {
 
     // ---------- PROFIL / FEED ----------
     if(st.view==='feed'){
-      const isPublic=!!st.settings.publicProfile;
-      const pseudo=st.profile.handle||st.profile.name||'?';
-      const episodesCount=Object.keys(st.watched).length;
-      const ratingsCount=Object.keys(st.ratings).length;
-      const favWorks=st.works.filter(w=>st.favorites[w.id]);
+      const gp=st.guestProfile;
       const STATUS_LABEL={en_cours:'En cours',termine:'Terminé',a_voir:'À voir',abandonne:'Abandonné'};
-      const libWorks=st.works.slice().sort((a,b)=>(b.added||0)-(a.added||0)).slice(0,9);
-      out.profileView={
-        pseudo:'@'+pseudo,
-        avatarStyle:'width:72px;height:72px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:28px;color:#fff;',
-        avatarInitials:initials(pseudo),
-        memberText:'Membre depuis '+st.profile.memberSince,
-        worksCount:st.works.length,
-        episodesCount,
-        ratingsCount,
-        privacyBadge:isPublic?'🌐 Public':'🔒 Privé',
-        privacyBadgeStyle:'font-size:12px;color:'+(isPublic?'#4ade80':'#9797a8')+';',
-        shareLabel:isPublic?'Copier le lien':'Profil privé',
-        shareStyle:'padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:'+(isPublic?'pointer':'default')+';background:'+(isPublic?'rgba(139,109,255,.2)':'rgba(255,255,255,.05)')+';color:'+(isPublic?'#b9a6ff':'#5a5a6a')+';border:1px solid '+(isPublic?'rgba(139,109,255,.35)':'rgba(255,255,255,.07)')+';',
-        onShare:isPublic?()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#user/'+(st.profile.userId||''));}catch(e){}}:()=>{},
-        noFavorites:favWorks.length===0,
-        favorites:favWorks.map(w=>({title:w.title,catYear:(w.category||'')+' · '+(w.year||''),initials:this.pi(w.id,w.title),posterStyle:this.posterBox(w.id,90,130,12),onClick:()=>this.openWork(w.id)})),
-        noWorks:st.works.length===0,
-        library:libWorks.map(w=>({title:w.title,statusLabel:STATUS_LABEL[w.status]||w.status,initials:this.pi(w.id,w.title),posterStyle:this.posterBox(w.id,100,140,12),onClick:()=>this.openWork(w.id)})),
-        hasMoreWorks:st.works.length>9,
-        onSeeAll:()=>this.setView('library')
-      };
-      const items=[...st.feed].sort((a,b)=>b.ts-a.ts);
-      out.feedView={
-        empty: items.length===0,
-        items: items.map(f=>{
-          const w=this.workById(f.workId);
-          let context='Sur l’œuvre';
-          if(w && f.sNum){ context = f.eNum ? this.epLongLabel(w,{n:f.sNum,name:null},{n:f.eNum,title:''}) : this.seasonLabel(w,{n:f.sNum,name:null}); }
-          return {
-            title: w?w.title:f.workId, initials:this.pi(f.workId,w?w.title:f.workId),
+      const AVATAR='width:72px;height:72px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:28px;color:#fff;';
+      const mkPosterBox=(id,title,w,h,r)=>this.posterBox(id,w,h,r);
+      if(gp&&gp._private){
+        // Private profile — block view
+        out.profileView={
+          isGuest:true, isPrivate:true, onCloseGuest:()=>this.setState({guestProfile:null,pendingGuestUid:null}),
+          pseudo:'@'+(gp.pseudo||'?'), avatarStyle:AVATAR, avatarInitials:initials(gp.pseudo||'?'),
+          memberText:'', worksCount:0, episodesCount:0, ratingsCount:0,
+          privacyBadge:'🔒 Privé', privacyBadgeStyle:'font-size:12px;color:#9797a8;',
+          shareLabel:'', shareStyle:'display:none;', onShare:()=>{},
+          noFavorites:true, favorites:[], noWorks:true, library:[], hasMoreWorks:false, onSeeAll:()=>{}
+        };
+        out.feedView={empty:true, items:[]};
+      } else if(gp){
+        // Guest — read-only view from Firestore data
+        const gPseudo=(gp.profile&&gp.profile.handle)||(gp.profile&&gp.profile.pseudo)||(gp.profile&&gp.profile.name)||'?';
+        const gWorks=gp.importedWorks||[];
+        const gFavIds=Object.keys(gp.favorites||{});
+        const gFavWorks=gWorks.filter(w=>gFavIds.includes(w.id));
+        const gLib=gWorks.slice().sort((a,b)=>(b.added||0)-(a.added||0)).slice(0,9);
+        out.profileView={
+          isGuest:true, isPrivate:false, onCloseGuest:()=>this.setState({guestProfile:null,pendingGuestUid:null}),
+          pseudo:'@'+gPseudo, avatarStyle:AVATAR, avatarInitials:initials(gPseudo),
+          memberText:'Membre depuis '+((gp.profile&&gp.profile.memberSince)||''),
+          worksCount:gWorks.length,
+          episodesCount:Object.keys(gp.watched||{}).length,
+          ratingsCount:Object.keys(gp.ratings||{}).length,
+          privacyBadge:'🌐 Public', privacyBadgeStyle:'font-size:12px;color:#4ade80;',
+          shareLabel:'', shareStyle:'display:none;', onShare:()=>{},
+          noFavorites:gFavWorks.length===0,
+          favorites:gFavWorks.map(w=>({title:w.title,catYear:(w.category||'')+' · '+(w.year||''),initials:this.pi(w.id,w.title),posterStyle:this.posterBox(w.id,90,130,12),onClick:()=>{}})),
+          noWorks:gWorks.length===0,
+          library:gLib.map(w=>({title:w.title,statusLabel:STATUS_LABEL[w.status]||w.status,initials:this.pi(w.id,w.title),posterStyle:this.posterBox(w.id,100,140,12),onClick:()=>{}})),
+          hasMoreWorks:gWorks.length>9, onSeeAll:()=>{}
+        };
+        const gItems=(gp.feed||[]).slice().sort((a,b)=>b.ts-a.ts).slice(0,20);
+        out.feedView={
+          empty:gItems.length===0,
+          items:gItems.map(f=>({
+            title:f.workId, initials:this.pi(f.workId,f.workId),
             posterStyle:this.posterBox(f.workId,46,66,10),
-            catLabel: w?CAT[w.category]:'',
-            context, text:f.text, timeText:relText(f.ts, now),
-            likesText: f.likes?String(f.likes):'',
-            likeStyle:'display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:'+(f.liked?'#ff5c8a':'#7a7a8a')+';',
-            likeFill: f.liked?'#ff5c8a':'none', likeStroke: f.liked?'#ff5c8a':'currentColor',
-            onLike:()=>this.toggleLike(f.id), onDelete:()=>this.deleteComment(f.id),
-            onOpen:()=> w && this.openWork(f.workId)
-          };
-        })
-      };
+            context:'Sur l\'œuvre', text:f.text, timeText:relText(f.ts,now),
+            likesText:f.likes?String(f.likes):'',
+            likeStyle:'display:flex;align-items:center;gap:6px;font-size:13px;color:#7a7a8a;',
+            likeFill:'none', likeStroke:'currentColor',
+            canDelete:false, onLike:()=>{}, onDelete:null, onOpen:()=>{}
+          }))
+        };
+      } else {
+        // Own profile
+        const isPublic=!!st.settings.publicProfile;
+        const pseudo=st.profile.handle||st.profile.name||'?';
+        const episodesCount=Object.keys(st.watched).length;
+        const ratingsCount=Object.keys(st.ratings).length;
+        const favWorks=st.works.filter(w=>st.favorites[w.id]);
+        const libWorks=st.works.slice().sort((a,b)=>(b.added||0)-(a.added||0)).slice(0,9);
+        out.profileView={
+          isGuest:false, isPrivate:false, onCloseGuest:()=>{},
+          pseudo:'@'+pseudo, avatarStyle:AVATAR, avatarInitials:initials(pseudo),
+          memberText:'Membre depuis '+st.profile.memberSince,
+          worksCount:st.works.length, episodesCount, ratingsCount,
+          privacyBadge:isPublic?'🌐 Public':'🔒 Privé',
+          privacyBadgeStyle:'font-size:12px;color:'+(isPublic?'#4ade80':'#9797a8')+';',
+          shareLabel:isPublic?'Copier le lien':'Rendre public d\'abord',
+          shareStyle:'padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:'+(isPublic?'pointer':'default')+';background:'+(isPublic?'rgba(139,109,255,.2)':'rgba(255,255,255,.05)')+';color:'+(isPublic?'#b9a6ff':'#5a5a6a')+';border:1px solid '+(isPublic?'rgba(139,109,255,.35)':'rgba(255,255,255,.07)')+';',
+          onShare:isPublic?()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#user/'+(this._fbUid||st.profile.userId||''));}catch(e){}}:()=>{},
+          noFavorites:favWorks.length===0,
+          favorites:favWorks.map(w=>({title:w.title,catYear:(w.category||'')+' · '+(w.year||''),initials:this.pi(w.id,w.title),posterStyle:this.posterBox(w.id,90,130,12),onClick:()=>this.openWork(w.id)})),
+          noWorks:st.works.length===0,
+          library:libWorks.map(w=>({title:w.title,statusLabel:STATUS_LABEL[w.status]||w.status,initials:this.pi(w.id,w.title),posterStyle:this.posterBox(w.id,100,140,12),onClick:()=>this.openWork(w.id)})),
+          hasMoreWorks:st.works.length>9, onSeeAll:()=>this.setView('library')
+        };
+        const items=[...st.feed].sort((a,b)=>b.ts-a.ts);
+        out.feedView={
+          empty:items.length===0,
+          items:items.map(f=>{
+            const w=this.workById(f.workId);
+            let context='Sur l\'œuvre';
+            if(w && f.sNum){ context = f.eNum ? this.epLongLabel(w,{n:f.sNum,name:null},{n:f.eNum,title:''}) : this.seasonLabel(w,{n:f.sNum,name:null}); }
+            return {
+              title:w?w.title:f.workId, initials:this.pi(f.workId,w?w.title:f.workId),
+              posterStyle:this.posterBox(f.workId,46,66,10),
+              catLabel:w?CAT[w.category]:'',
+              context, text:f.text, timeText:relText(f.ts,now),
+              likesText:f.likes?String(f.likes):'',
+              likeStyle:'display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:'+(f.liked?'#ff5c8a':'#7a7a8a')+';',
+              likeFill:f.liked?'#ff5c8a':'none', likeStroke:f.liked?'#ff5c8a':'currentColor',
+              canDelete:true, onLike:()=>this.toggleLike(f.id), onDelete:()=>this.deleteComment(f.id),
+              onOpen:()=>w&&this.openWork(f.workId)
+            };
+          })
+        };
+      }
     }
 
     // ---------- EPISODE / SEASON MODAL ----------
@@ -2146,12 +2332,12 @@ class Component extends DCLogic {
         const unitWord = w.category==='livres'?'tome':(w.category==='musique'?'album':'saison');
         out.epModal={ open:true, title:w.title, initials:this.pi(workId,w.title),
           posterStyle:this.posterBox(workId,52,74,11),
-          epLabel:this.seasonLabel(w,season), context:CAT[w.category]+' · vue d’ensemble',
+          epLabel:this.seasonLabel(w,season), context:CAT[w.category]+' · vue d\'ensemble',
           airText: season.episodes.length+' '+t.unit,
           avgText:cr.avgText, votesText:fmtVotes(cr.count), communityStars:stars5(cr.filled),
           myStars:this.starWidget('s', skey, myR, 30), myRatingText: myR?(myR+'/5'):'Pas encore noté',
           comments, hasComments:comments.length>0,
-          commentCountText: comments.length? (comments.length+' réaction'+(comments.length>1?'s':'')+' sur '+(unitWord==='tome'?'ce tome':(unitWord==='album'?'cet album':'cette saison'))) : 'Aucune réaction pour l’instant',
+          commentCountText: comments.length? (comments.length+' réaction'+(comments.length>1?'s':'')+' sur '+(unitWord==='tome'?'ce tome':(unitWord==='album'?'cet album':'cette saison'))) : 'Aucune réaction pour l\'instant',
           onPost:()=>this.postComment(workId,sNum,null),
           onClose:()=>this.closeModal(), stop:(ev)=>{ if(ev&&ev.stopPropagation)ev.stopPropagation(); } };
       }
@@ -2172,7 +2358,7 @@ class Component extends DCLogic {
       loading:st.searchLoading,
       noResults:!st.searchLoading && st.query.trim() && st.searchResults.length===0,
       results: st.searchResults.map(c=>{
-        const posterUrl=c.poster||(this.state.posters?.[c.id])||null;
+        const posterUrl=c.poster||(this.state.posters&&this.state.posters[c.id])||null;
         const posterStyle=posterUrl?`width:44px;height:62px;flex-shrink:0;border-radius:9px;background:url('${posterUrl}') center/cover no-repeat;box-shadow:0 4px 12px rgba(0,0,0,.3);`
           :this.posterBox(c.id,44,62,9);
         return {
