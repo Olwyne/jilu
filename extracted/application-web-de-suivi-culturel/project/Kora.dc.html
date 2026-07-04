@@ -640,26 +640,31 @@
   </sc-if>
 
   <!-- ===== CONFIRM MODAL ===== -->
+  <sc-if value="{{ onboarding }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:#0d0d14;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+      <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:42px;letter-spacing:-1px;margin-bottom:8px;">Kōra</div>
+      <div style="color:#9797a8;font-size:16px;margin-bottom:40px;">Ton journal culturel personnel</div>
+      <div style="background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:32px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.5);">
+        <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-bottom:6px;">Bienvenue !</div>
+        <div style="color:#9797a8;font-size:14px;margin-bottom:24px;">Choisis ton pseudo pour commencer</div>
+        <input id="onboarding-input" type="text" placeholder="tonpseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;color:#ECECF2;font-size:16px;outline:none;box-sizing:border-box;margin-bottom:16px;" />
+        <div onClick="{{ onboardingSubmit }}" style="width:100%;padding:13px;border-radius:12px;background:#8b6dff;color:#fff;font-size:15px;font-weight:700;cursor:pointer;text-align:center;box-sizing:border-box;" style-hover="background:#7a5de8;">Commencer</div>
+      </div>
+    </div>
+  </sc-if>
+
   <sc-if value="{{ profileEditModal.open }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;">
       <div style="background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.6);">
         <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px;margin-bottom:20px;">Modifier le profil</div>
         <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
           <div>
-            <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Nom</div>
-            <input type="text" value="{{ profileEditModal.name }}" onInput="{{ profileEditModal.onChangeName }}" placeholder="Ton nom" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
-          </div>
-          <div>
             <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Pseudo</div>
-            <input type="text" value="{{ profileEditModal.handle }}" onInput="{{ profileEditModal.onChangeHandle }}" placeholder="@pseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
+            <input type="text" value="{{ profileEditModal.pseudo }}" onInput="{{ profileEditModal.onChangePseudo }}" placeholder="tonpseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
           </div>
           <div>
             <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">E-mail</div>
             <input type="email" value="{{ profileEditModal.email }}" onInput="{{ profileEditModal.onChangeEmail }}" placeholder="email@exemple.com" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
-          </div>
-          <div>
-            <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Membre depuis</div>
-            <input type="text" value="{{ profileEditModal.memberSince }}" onInput="{{ profileEditModal.onChangeMemberSince }}" placeholder="ex: Janvier 2024" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
           </div>
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -772,10 +777,13 @@ class Component extends DCLogic {
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem('jilu-v2')||'{}'); } catch(e){}
     const settings = saved.settings || {autoNext:true, spoilerFree:true, notifNewEp:true, notifCalendar:true, notifWeekly:false, publicProfile:false, adult:false};
-    const savedProfile = saved.profile || {};
-    const profile = {name:'Alex Moreau', handle:'@alexbinge', email:'alex.moreau@email.com', memberSince:'mars 2023', ...savedProfile, userId: savedProfile.userId || Math.random().toString(36).slice(2,10)};
+    const savedProfile = saved.profile || null;
+    const profile = savedProfile
+      ? {...savedProfile, handle:(savedProfile.handle||'').replace(/^@/,''), userId: savedProfile.userId || Math.random().toString(36).slice(2,10)}
+      : {name:'', handle:'', email:'', memberSince: new Date().toLocaleDateString('fr-FR',{month:'long',year:'numeric'}), userId: Math.random().toString(36).slice(2,10)};
     this.state = {
       view: 'dashboard',
+      onboarding: !savedProfile,
       settings, profile,
       feed: saved.feed || this.seedFeed(now),
       commentDraft:'', openCommentKey:null, modalKey:null, modalCtx:null, toast:null, importResult:null, dashLimit:{cont:5,rev:5}, calendarCat:'all', searchResults:[], searchLoading:false, confirmModal:null, searchCat:'series', profileModal:null,
@@ -1006,9 +1014,10 @@ class Component extends DCLogic {
   setSetting(key, val){ const settings={...this.state.settings, [key]:val}; this.setState({settings}); this.persist({settings}); }
   toggleSetting(key){ this.setSetting(key, !this.state.settings[key]); }
   editField(key, label){ const cur=this.state.profile[key]; const v=window.prompt('Modifier '+label, cur); if(v!=null && v.trim()){ const profile={...this.state.profile, [key]:v.trim()}; this.setState({profile}); this.persist({profile}); } }
-  openProfileModal(){ const p=this.state.profile; this.setState({profileModal:{name:p.name||'',handle:p.handle||'',email:p.email||'',memberSince:p.memberSince||''}}); }
+  openProfileModal(){ const p=this.state.profile; this.setState({profileModal:{pseudo:p.handle||p.name||'',email:p.email||''}}); }
   closeProfileModal(){ this.setState({profileModal:null}); }
-  saveProfileModal(){ const m=this.state.profileModal; if(!m) return; const profile={...this.state.profile,name:m.name.trim()||this.state.profile.name,handle:m.handle.trim()||this.state.profile.handle,email:m.email.trim()||this.state.profile.email,memberSince:m.memberSince.trim()||this.state.profile.memberSince}; this.setState({profile,profileModal:null}); this.persist({profile}); }
+  saveProfileModal(){ const m=this.state.profileModal; if(!m) return; const pseudo=(m.pseudo||'').replace(/^@/,'').trim()||this.state.profile.handle||this.state.profile.name; const profile={...this.state.profile,name:pseudo,handle:pseudo,email:(m.email||'').trim()||this.state.profile.email}; this.setState({profile,profileModal:null}); this.persist({profile}); }
+  completeOnboarding(pseudo){ const p=pseudo.replace(/^@/,'').trim(); if(!p) return; const profile={...this.state.profile,name:p,handle:p}; this.setState({onboarding:false,profile}); this.persist({profile}); }
   showConfirm(title,msg,fn){ this.setState({confirmModal:{open:true,title,message:msg,onOk:()=>{this.setState({confirmModal:null});fn();},onCancel:()=>this.setState({confirmModal:null})}}); }
   resetProgress(){ this.showConfirm('Réinitialiser la progression','Tous les épisodes cochés seront remis à zéro. Cette action est irréversible.',()=>{ const watched={},watchDates={}; this.setState({watched,watchDates}); this.persist({watched,watchDates}); }); }
   clearAll(){ this.showConfirm('Tout effacer','Toutes tes données seront supprimées : progression, notes, avis, œuvres importées. Cette action est irréversible.',()=>{ const s=this.state; const defaultWorks=s.works.filter(w=>!s.importedWorks.some(iw=>iw.id===w.id)); this.setState({works:defaultWorks,watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{}}); try{localStorage.setItem('jilu-v2',JSON.stringify({watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{},settings:s.settings,profile:s.profile,feed:s.feed,games:s.games,ccLikes:s.ccLikes}));}catch(e){} }); }
@@ -1562,7 +1571,9 @@ class Component extends DCLogic {
     else if(st.view==='feed'){ header.title='Journal'; header.subtitle='Tes commentaires et réactions'; }
 
     const out={ nav, header, stats:{weekWatched, toCatch},
-      isLibrary:st.view==='library', isDetail:st.view==='detail', isCalendar:st.view==='calendar', isDashboard:st.view==='dashboard', isStats:st.view==='stats', isAccount:st.view==='account', isFeed:st.view==='feed' };
+      isLibrary:st.view==='library', isDetail:st.view==='detail', isCalendar:st.view==='calendar', isDashboard:st.view==='dashboard', isStats:st.view==='stats', isAccount:st.view==='account', isFeed:st.view==='feed',
+      onboarding: st.onboarding,
+      onboardingSubmit: ()=>{ const inp=document.getElementById('onboarding-input'); if(inp) this.completeOnboarding(inp.value); } };
     out.commentDraft = st.commentDraft;
     out.onDraft = (ev)=>this.setDraft(ev.target.value);
     out.userInitials = initials(st.profile.name);    out.userAvatarStyle = 'width:36px;height:36px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:14px;color:#fff;';
@@ -1920,7 +1931,7 @@ class Component extends DCLogic {
       out.accountView={
         avatarStyle:'width:76px;height:76px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:30px;color:#fff;',
         avatarInitials:initials(st.profile.name),
-        name:st.profile.name, handle:st.profile.handle, email:st.profile.email,
+        name:st.profile.handle||st.profile.name, handle:'@'+(st.profile.handle||st.profile.name), email:st.profile.email,
         memberText:'Membre depuis '+st.profile.memberSince,
         profileUrl: location.origin + location.pathname + '#user/' + (st.profile.userId||''),
         onEditProfile:()=>this.openProfileModal(),
@@ -2064,11 +2075,9 @@ class Component extends DCLogic {
     const pm = st.profileModal;
     out.profileEditModal = pm ? {
       open: true,
-      name: pm.name, handle: pm.handle, email: pm.email, memberSince: pm.memberSince,
-      onChangeName: e => this.setState(s => ({profileModal:{...s.profileModal, name:e.target.value}})),
-      onChangeHandle: e => this.setState(s => ({profileModal:{...s.profileModal, handle:e.target.value}})),
+      pseudo: pm.pseudo, email: pm.email,
+      onChangePseudo: e => this.setState(s => ({profileModal:{...s.profileModal, pseudo:e.target.value.replace(/^@/,'')}})),
       onChangeEmail: e => this.setState(s => ({profileModal:{...s.profileModal, email:e.target.value}})),
-      onChangeMemberSince: e => this.setState(s => ({profileModal:{...s.profileModal, memberSince:e.target.value}})),
       onSave: () => this.saveProfileModal(),
       onCancel: () => this.closeProfileModal()
     } : {open:false};
