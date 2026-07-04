@@ -1233,20 +1233,8 @@ class Component extends DCLogic {
     });
     return w;
   }
-  seedRatings(works){
-    const r = {};
-    const seed = {'avatar-atla':5,'aot':5,'arcane':5,'dune-2':5,'oppenheimer':4,'the-batman':4,'interstellar':5,'elden-ring':5,'random-access':5,'severance':5,'from':4,'one-piece':5,'the-bear':4};
-    Object.keys(seed).forEach(id=>{ r['w:'+id]=seed[id]; });
-    return r;
-  }
-  seedReviews(works, now){
-    return [
-      {id:'severance', note:"La saison 2 démarre fort, l'ambiance Lumon reste hypnotique.", ts:now-3*DAY},
-      {id:'dune-2', note:"Une claque visuelle et sonore. Villeneuve au sommet.", ts:now-12*DAY},
-      {id:'arcane', note:"Sans doute la plus belle animation du moment. Fin parfaite.", ts:now-26*DAY},
-      {id:'the-bear', note:"Intense, mais la S3 traîne un peu. Toujours excellent.", ts:now-40*DAY}
-    ];
-  }
+  seedRatings(works){ return {}; }
+  seedReviews(works, now){ return []; }
 
   // ---- computations ----
   workById(id){ return this.state.works.find(w=>w.id===id); }
@@ -1631,16 +1619,8 @@ class Component extends DCLogic {
     input.click();
   }
   markAllWatched(){ const watched={}; this.state.works.forEach(w=>{ if(w.seasons) w.seasons.forEach(s=>s.episodes.forEach(e=>{ if(e.air<=this.now) watched[w.id+'-'+s.n+'-'+e.n]=true; })); }); this.setState({watched}); this.persist({watched}); }
-  seedGames(){ return {'elden-ring':{hours:133,done:{main:true,extra:true,full:true}}, 'zelda-totk':{hours:64,done:{main:true}}, 'bg3':{hours:82,done:{}}, 'hollow-knight':{hours:41,done:{main:true,extra:true}}, 'witcher-3':{hours:120,done:{main:true,extra:true}}, 'hades':{hours:0,done:{}}}; }
-  seedFeed(now){
-    return [
-      {id:'sf1', key:'one-piece-2-14', workId:'one-piece', sNum:2, eNum:14, text:"Oda ne rate jamais. Ce chapitre relance tout, je suis sous le choc.", ts:now-6*DAY, likes:41, liked:true},
-      {id:'sf2', key:'from-3-6', workId:'from', sNum:3, eNum:6, text:"Ok cet épisode m'a retourné. Je ne dors plus, merci From.", ts:now-1*DAY, likes:5, liked:false},
-      {id:'sf3', key:'severance-2-1', workId:'severance', sNum:2, eNum:1, text:"Le retour dans les couloirs Lumon, glaçant. La scène d'ouverture est un chef-d'œuvre.", ts:now-3*DAY, likes:12, liked:true},
-      {id:'sf4', key:'w:dune-2', workId:'dune-2', sNum:null, eNum:null, text:"Villeneuve au sommet. Une claque visuelle et sonore totale.", ts:now-12*DAY, likes:23, liked:false},
-      {id:'sf5', key:'the-bear-3-1', workId:'the-bear', sNum:3, eNum:1, text:"Cet épisode sans dialogue au début... quelle audace.", ts:now-20*DAY, likes:8, liked:false}
-    ];
-  }
+  seedGames(){ return {}; }
+  seedFeed(now){ return []; }
   commentsFor(key){ return this.state.feed.filter(f=>f.key===key).sort((a,b)=>b.ts-a.ts); }
   mapComment(c){ return { id:c.id, author:'Toi', canDelete:true, avatarStyle:'width:36px;height:36px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:14px;color:#fff;', avatarInitials:initials(this.state.profile.name), text:c.text, timeText:relText(c.ts,this.now), likesText:c.likes?String(c.likes):'', onLike:()=>this.toggleLike(c.id), onDelete:()=>this.deleteComment(c.id), likeStyle:'display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer;color:'+(c.liked?'#ff5c8a':'#7a7a8a')+';', likeFill:c.liked?'#ff5c8a':'none', likeStroke:c.liked?'#ff5c8a':'currentColor' }; }
   mapCommunity(c){ return { id:c.id, author:c.author, canDelete:false, avatarStyle:'width:36px;height:36px;flex-shrink:0;border-radius:50%;background:'+c.color+';display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:14px;color:#fff;', avatarInitials:c.author[0], text:c.text, timeText:relText(c.ts,this.now), likesText:c.likes?String(c.likes):'', onLike:()=>this.toggleCCLike(c.id), onDelete:()=>{}, likeStyle:'display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer;color:'+(c.liked?'#ff5c8a':'#7a7a8a')+';', likeFill:c.liked?'#ff5c8a':'none', likeStroke:c.liked?'#ff5c8a':'currentColor' }; }
