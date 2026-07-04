@@ -744,6 +744,7 @@
         <input type="text" value="{{ onboardingView.pseudo }}" onInput="{{ onboardingView.onInput }}" placeholder="tonpseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;color:#ECECF2;font-size:16px;outline:none;box-sizing:border-box;margin-bottom:8px;" />
         <div style="height:20px;margin-bottom:12px;font-size:13px;{{ onboardingView.statusStyle }}">{{ onboardingView.statusText }}</div>
         <div onClick="{{ onboardingView.onSubmit }}" style="{{ onboardingView.btnStyle }}">Commencer</div>
+        <div onClick="{{ onboardingView.onSkip }}" style="margin-top:16px;text-align:center;font-size:13px;color:#9797a8;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">J'ai déjà un compte</div>
       </div>
     </div>
   </sc-if>
@@ -1240,6 +1241,7 @@ class Component extends DCLogic {
   closeProfileModal(){ this.setState({profileModal:null}); }
   saveProfileModal(){ const m=this.state.profileModal; if(!m||m.pseudoStatus!=='available') return; const newHandle=(m.pseudo||'').replace(/^@/,'').trim()||this.state.profile.handle||this.state.profile.name; const oldHandle=this.state.profile.handle||''; const profile={...this.state.profile,name:newHandle,handle:newHandle,email:(m.email||'').trim()||this.state.profile.email}; this.setState({profile,profileModal:null}); this.persist({profile}); if(newHandle && newHandle!==oldHandle){ if(oldHandle) this._releasePseudo(oldHandle); this._claimPseudo(newHandle); } }
   completeOnboarding(){ const p=(this.state.onboardingPseudo||'').replace(/^@/,'').trim(); if(!p||this.state.onboardingStatus!=='available') return; const profile={...this.state.profile,name:p,handle:p}; this.setState({onboarding:false,profile}); this.persist({profile}); this._claimPseudo(p); }
+  skipOnboarding(){ this.setState({onboarding:false}); this.persist({}); }
   showConfirm(title,msg,fn){ this.setState({confirmModal:{open:true,title,message:msg,onOk:()=>{this.setState({confirmModal:null});fn();},onCancel:()=>this.setState({confirmModal:null})}}); }
   resetProgress(){ this.showConfirm('Réinitialiser la progression','Tous les épisodes cochés seront remis à zéro. Cette action est irréversible.',()=>{ const watched={},watchDates={}; this.setState({watched,watchDates}); this.persist({watched,watchDates}); }); }
   clearAll(){ this.showConfirm('Tout effacer','Toutes tes données seront supprimées : progression, notes, avis, œuvres importées. Cette action est irréversible.',()=>{ const s=this.state; const defaultWorks=s.works.filter(w=>!s.importedWorks.some(iw=>iw.id===w.id)); this.setState({works:defaultWorks,watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{}}); try{localStorage.setItem('jilu-v2',JSON.stringify({watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{},settings:s.settings,profile:s.profile,feed:s.feed,games:s.games,ccLikes:s.ccLikes}));}catch(e){} }); }
@@ -1806,7 +1808,8 @@ class Component extends DCLogic {
           statusStyle: 'color:'+sm.color+';',
           btnStyle: 'width:100%;padding:13px;border-radius:12px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;cursor:'+(ok?'pointer':'default')+';background:'+(ok?'#8b6dff':'rgba(139,109,255,.3)')+';color:'+(ok?'#fff':'rgba(255,255,255,.4)')+';',
           onInput: e=>{ const v=e.target.value.replace(/^@/,''); this.setState({onboardingPseudo:v}); this._checkPseudo(v, status=>this.setState({onboardingStatus:status})); },
-          onSubmit: ()=>this.completeOnboarding()
+          onSubmit: ()=>this.completeOnboarding(),
+          onSkip: ()=>this.skipOnboarding()
         };
       })() };
     out.commentDraft = st.commentDraft;
