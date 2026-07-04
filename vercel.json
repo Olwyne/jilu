@@ -4,7 +4,7 @@
   "installCommand": null,
   "framework": null,
   "rewrites": [
-    { "source": "/", "destination": "/Kora.dc.html" },
-    { "source": "/(.*)", "destination": "/Kora.dc.html" }
+    { "source": "/", "destination": "/Jilu.dc.html" },
+    { "source": "/(.*)", "destination": "/Jilu.dc.html" }
   ]
 }
