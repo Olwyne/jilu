@@ -647,8 +647,9 @@
       <div style="background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:32px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.5);">
         <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-bottom:6px;">Bienvenue !</div>
         <div style="color:#9797a8;font-size:14px;margin-bottom:24px;">Choisis ton pseudo pour commencer</div>
-        <input id="onboarding-input" type="text" placeholder="tonpseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;color:#ECECF2;font-size:16px;outline:none;box-sizing:border-box;margin-bottom:16px;" />
-        <div onClick="{{ onboardingSubmit }}" style="width:100%;padding:13px;border-radius:12px;background:#8b6dff;color:#fff;font-size:15px;font-weight:700;cursor:pointer;text-align:center;box-sizing:border-box;" style-hover="background:#7a5de8;">Commencer</div>
+        <input type="text" value="{{ onboardingView.pseudo }}" onInput="{{ onboardingView.onInput }}" placeholder="tonpseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;color:#ECECF2;font-size:16px;outline:none;box-sizing:border-box;margin-bottom:8px;" />
+        <div style="height:20px;margin-bottom:12px;font-size:13px;{{ onboardingView.statusStyle }}">{{ onboardingView.statusText }}</div>
+        <div onClick="{{ onboardingView.onSubmit }}" style="{{ onboardingView.btnStyle }}">Commencer</div>
       </div>
     </div>
   </sc-if>
@@ -661,6 +662,7 @@
           <div>
             <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Pseudo</div>
             <input type="text" value="{{ profileEditModal.pseudo }}" onInput="{{ profileEditModal.onChangePseudo }}" placeholder="tonpseudo" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;color:#ECECF2;font-size:14px;outline:none;box-sizing:border-box;" />
+            <div style="height:18px;margin-top:5px;font-size:12.5px;{{ profileEditModal.statusStyle }}">{{ profileEditModal.statusText }}</div>
           </div>
           <div>
             <div style="font-size:12px;color:#9797a8;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">E-mail</div>
@@ -669,7 +671,7 @@
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end;">
           <div onClick="{{ profileEditModal.onCancel }}" style="padding:10px 20px;border-radius:10px;border:1px solid rgba(255,255,255,.1);font-size:14px;font-weight:600;cursor:pointer;color:#ECECF2;" style-hover="background:rgba(255,255,255,.06);">Annuler</div>
-          <div onClick="{{ profileEditModal.onSave }}" style="padding:10px 20px;border-radius:10px;background:#8b6dff;color:#fff;font-size:14px;font-weight:600;cursor:pointer;" style-hover="background:#7a5de8;">Enregistrer</div>
+          <div onClick="{{ profileEditModal.onSave }}" style="{{ profileEditModal.saveStyle }}">Enregistrer</div>
         </div>
       </div>
     </div>
@@ -783,7 +785,7 @@ class Component extends DCLogic {
       : {name:'', handle:'', email:'', memberSince: new Date().toLocaleDateString('fr-FR',{month:'long',year:'numeric'}), userId: Math.random().toString(36).slice(2,10)};
     this.state = {
       view: 'dashboard',
-      onboarding: !savedProfile,
+      onboarding: !savedProfile, onboardingPseudo: '', onboardingStatus: null,
       settings, profile,
       feed: saved.feed || this.seedFeed(now),
       commentDraft:'', openCommentKey:null, modalKey:null, modalCtx:null, toast:null, importResult:null, dashLimit:{cont:5,rev:5}, calendarCat:'all', searchResults:[], searchLoading:false, confirmModal:null, searchCat:'series', profileModal:null,
@@ -889,6 +891,23 @@ class Component extends DCLogic {
   }
 
   _searchTimer=null;
+  _pseudoTimer=null;
+  _PSEUDO_RE=/^[a-zA-Z0-9_]{3,20}$/;
+  _PSEUDO_CHECK_URL=null; // Set to 'https://api.yourapp.com/check-pseudo' — called as ?pseudo=xxx → {available:bool}
+  _checkPseudo(pseudo, onStatus){
+    clearTimeout(this._pseudoTimer);
+    if(!pseudo){ onStatus(null); return; }
+    if(!this._PSEUDO_RE.test(pseudo)){ onStatus('invalid'); return; }
+    onStatus('checking');
+    this._pseudoTimer=setTimeout(async()=>{
+      if(!this._PSEUDO_CHECK_URL){ onStatus('available'); return; }
+      try{
+        const r=await fetch(this._PSEUDO_CHECK_URL+'?pseudo='+encodeURIComponent(pseudo));
+        if(r.ok){ const d=await r.json(); onStatus(d.available?'available':'taken'); }
+        else onStatus('available');
+      }catch(e){ onStatus('available'); }
+    },400);
+  }
   async _debounceSearch(q, cat){
     clearTimeout(this._searchTimer);
     cat=cat||this.state.searchCat||'series';
@@ -1014,10 +1033,10 @@ class Component extends DCLogic {
   setSetting(key, val){ const settings={...this.state.settings, [key]:val}; this.setState({settings}); this.persist({settings}); }
   toggleSetting(key){ this.setSetting(key, !this.state.settings[key]); }
   editField(key, label){ const cur=this.state.profile[key]; const v=window.prompt('Modifier '+label, cur); if(v!=null && v.trim()){ const profile={...this.state.profile, [key]:v.trim()}; this.setState({profile}); this.persist({profile}); } }
-  openProfileModal(){ const p=this.state.profile; this.setState({profileModal:{pseudo:p.handle||p.name||'',email:p.email||''}}); }
+  openProfileModal(){ const p=this.state.profile; this.setState({profileModal:{pseudo:p.handle||p.name||'',email:p.email||'',pseudoStatus:'available'}}); }
   closeProfileModal(){ this.setState({profileModal:null}); }
-  saveProfileModal(){ const m=this.state.profileModal; if(!m) return; const pseudo=(m.pseudo||'').replace(/^@/,'').trim()||this.state.profile.handle||this.state.profile.name; const profile={...this.state.profile,name:pseudo,handle:pseudo,email:(m.email||'').trim()||this.state.profile.email}; this.setState({profile,profileModal:null}); this.persist({profile}); }
-  completeOnboarding(pseudo){ const p=pseudo.replace(/^@/,'').trim(); if(!p) return; const profile={...this.state.profile,name:p,handle:p}; this.setState({onboarding:false,profile}); this.persist({profile}); }
+  saveProfileModal(){ const m=this.state.profileModal; if(!m||m.pseudoStatus!=='available') return; const pseudo=(m.pseudo||'').replace(/^@/,'').trim()||this.state.profile.handle||this.state.profile.name; const profile={...this.state.profile,name:pseudo,handle:pseudo,email:(m.email||'').trim()||this.state.profile.email}; this.setState({profile,profileModal:null}); this.persist({profile}); }
+  completeOnboarding(){ const p=(this.state.onboardingPseudo||'').replace(/^@/,'').trim(); if(!p||this.state.onboardingStatus!=='available') return; const profile={...this.state.profile,name:p,handle:p}; this.setState({onboarding:false,profile}); this.persist({profile}); }
   showConfirm(title,msg,fn){ this.setState({confirmModal:{open:true,title,message:msg,onOk:()=>{this.setState({confirmModal:null});fn();},onCancel:()=>this.setState({confirmModal:null})}}); }
   resetProgress(){ this.showConfirm('Réinitialiser la progression','Tous les épisodes cochés seront remis à zéro. Cette action est irréversible.',()=>{ const watched={},watchDates={}; this.setState({watched,watchDates}); this.persist({watched,watchDates}); }); }
   clearAll(){ this.showConfirm('Tout effacer','Toutes tes données seront supprimées : progression, notes, avis, œuvres importées. Cette action est irréversible.',()=>{ const s=this.state; const defaultWorks=s.works.filter(w=>!s.importedWorks.some(iw=>iw.id===w.id)); this.setState({works:defaultWorks,watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{}}); try{localStorage.setItem('jilu-v2',JSON.stringify({watched:{},watchDates:{},ratings:{},reviews:[],importedWorks:[],posters:{},settings:s.settings,profile:s.profile,feed:s.feed,games:s.games,ccLikes:s.ccLikes}));}catch(e){} }); }
@@ -1573,7 +1592,20 @@ class Component extends DCLogic {
     const out={ nav, header, stats:{weekWatched, toCatch},
       isLibrary:st.view==='library', isDetail:st.view==='detail', isCalendar:st.view==='calendar', isDashboard:st.view==='dashboard', isStats:st.view==='stats', isAccount:st.view==='account', isFeed:st.view==='feed',
       onboarding: st.onboarding,
-      onboardingSubmit: ()=>{ const inp=document.getElementById('onboarding-input'); if(inp) this.completeOnboarding(inp.value); } };
+      onboardingView: (()=>{
+        const s=st.onboardingStatus;
+        const ok=s==='available';
+        const statusMap={checking:{text:'Vérification…',color:'#9797a8'},available:{text:'✓ Disponible',color:'#4ade80'},taken:{text:'✗ Déjà pris',color:'#ff5c8a'},invalid:{text:'3 à 20 caractères (lettres, chiffres, _)',color:'#f59e0b'}};
+        const sm=statusMap[s]||{text:'',color:'transparent'};
+        return {
+          pseudo: st.onboardingPseudo,
+          statusText: sm.text,
+          statusStyle: 'color:'+sm.color+';',
+          btnStyle: 'width:100%;padding:13px;border-radius:12px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;cursor:'+(ok?'pointer':'default')+';background:'+(ok?'#8b6dff':'rgba(139,109,255,.3)')+';color:'+(ok?'#fff':'rgba(255,255,255,.4)')+';',
+          onInput: e=>{ const v=e.target.value.replace(/^@/,''); this.setState({onboardingPseudo:v}); this._checkPseudo(v, status=>this.setState({onboardingStatus:status})); },
+          onSubmit: ()=>this.completeOnboarding()
+        };
+      })() };
     out.commentDraft = st.commentDraft;
     out.onDraft = (ev)=>this.setDraft(ev.target.value);
     out.userInitials = initials(st.profile.name);    out.userAvatarStyle = 'width:36px;height:36px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#8b6dff,#ff5c8a);display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\';font-weight:700;font-size:14px;color:#fff;';
@@ -2073,14 +2105,22 @@ class Component extends DCLogic {
     out.confirmModal = st.confirmModal || {open:false, title:'', message:'', onOk:null, onCancel:null};
 
     const pm = st.profileModal;
-    out.profileEditModal = pm ? {
-      open: true,
-      pseudo: pm.pseudo, email: pm.email,
-      onChangePseudo: e => this.setState(s => ({profileModal:{...s.profileModal, pseudo:e.target.value.replace(/^@/,'')}})),
-      onChangeEmail: e => this.setState(s => ({profileModal:{...s.profileModal, email:e.target.value}})),
-      onSave: () => this.saveProfileModal(),
-      onCancel: () => this.closeProfileModal()
-    } : {open:false};
+    if(pm){
+      const s=pm.pseudoStatus;
+      const ok=s==='available';
+      const statusMap={checking:{text:'Vérification…',color:'#9797a8'},available:{text:'✓ Disponible',color:'#4ade80'},taken:{text:'✗ Déjà pris',color:'#ff5c8a'},invalid:{text:'3 à 20 caractères (lettres, chiffres, _)',color:'#f59e0b'}};
+      const sm=statusMap[s]||{text:'',color:'transparent'};
+      out.profileEditModal = {
+        open: true,
+        pseudo: pm.pseudo, email: pm.email,
+        statusText: sm.text, statusStyle: 'color:'+sm.color+';',
+        saveStyle: 'padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:'+(ok?'pointer':'default')+';background:'+(ok?'#8b6dff':'rgba(139,109,255,.3)')+';color:'+(ok?'#fff':'rgba(255,255,255,.4)')+';',
+        onChangePseudo: e => { const v=e.target.value.replace(/^@/,''); this.setState(s=>({profileModal:{...s.profileModal,pseudo:v}})); this._checkPseudo(v, status=>this.setState(s=>({profileModal:{...s.profileModal,pseudoStatus:status}}))); },
+        onChangeEmail: e => this.setState(s => ({profileModal:{...s.profileModal, email:e.target.value}})),
+        onSave: () => this.saveProfileModal(),
+        onCancel: () => this.closeProfileModal()
+      };
+    } else { out.profileEditModal = {open:false}; }
 
     return out;
   }
