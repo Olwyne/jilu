@@ -40,5 +40,15 @@ export function useAppData(user) {
     await setDoc(ref, patch, { merge: true })
   }
 
-  return { data, loading, mutate, error }
+  async function syncAll() {
+    if (!user) return
+    const ref = doc(db, 'users', user.uid)
+    const d = dataRef.current
+    await setDoc(ref, {
+      works: d.works, watched: d.watched, ratings: d.ratings, reviews: d.reviews,
+      settings: d.settings, profile: d.profile, feed: d.feed, games: d.games
+    }, { merge: true })
+  }
+
+  return { data, loading, mutate, syncAll, error }
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useAppData } from './hooks/useAppData'
 import { useWorkActions } from './hooks/useWorkActions'
+import { useImport } from './hooks/useImport'
 import LoginPage from './components/auth/LoginPage'
 import SignupPage from './components/auth/SignupPage'
 import Sidebar from './components/layout/Sidebar'
@@ -29,7 +30,7 @@ const HEADER_COPY = {
 
 function Shell() {
   const { user, logout } = useAuth()
-  const { data, loading, mutate } = useAppData(user)
+  const { data, loading, mutate, syncAll } = useAppData(user)
   const [view, setView] = useState('library')
   const [selectedId, setSelectedId] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 860)
@@ -37,6 +38,7 @@ function Shell() {
   const [episodeModal, setEpisodeModal] = useState(null)
   const [toast, setToast] = useState(null)
   const workActions = useWorkActions(data, mutate)
+  const { importTVTime, importTVTimeOut } = useImport(data, mutate)
   const openWork = (id) => { setSelectedId(id); setView('detail') }
 
   useEffect(() => {
@@ -112,6 +114,10 @@ function Shell() {
               onEditField={(k, label) => { const v = window.prompt('Modifier ' + label, data.profile[k]); if (v != null && v.trim()) mutate({ profile: { ...data.profile, [k]: v.trim() } }) }}
               onMarkAll={() => workActions.markAllWatched()}
               onReset={() => workActions.resetProgress()}
+              onClearAll={() => workActions.clearAll()}
+              onSync={syncAll}
+              onImportTVTime={importTVTime}
+              onImportTVTimeOut={importTVTimeOut}
               onLogout={logout}
             />
           )}

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { initials } from '../../lib/domain'
 
 function Toggle({ on, onToggle }) {
@@ -39,7 +40,26 @@ function Section({ rows, settings, onToggleSetting }) {
   )
 }
 
-export default function AccountView({ profile, settings, onToggleSetting, onSetStartPage, onEditField, onMarkAll, onReset, onLogout }) {
+export default function AccountView({ profile, settings, onToggleSetting, onSetStartPage, onEditField, onMarkAll, onReset, onLogout, onSync, onClearAll, onImportTVTime, onImportTVTimeOut }) {
+  const [syncLabel, setSyncLabel] = useState('Synchroniser')
+  const [importLabel, setImportLabel] = useState('Importer TVTime (RGPD)')
+  const [importOutLabel, setImportOutLabel] = useState('Importer TVTime Out')
+
+  async function handleSync() {
+    setSyncLabel('Synchronisation…')
+    try { await onSync(); setSyncLabel('✓ Synchronisé') } catch { setSyncLabel('Erreur') }
+    setTimeout(() => setSyncLabel('Synchroniser'), 3000)
+  }
+
+  async function handleImport() {
+    await onImportTVTime(msg => setImportLabel(msg))
+    setTimeout(() => setImportLabel('Importer TVTime (RGPD)'), 6000)
+  }
+
+  async function handleImportOut() {
+    await onImportTVTimeOut(msg => setImportOutLabel(msg))
+    setTimeout(() => setImportOutLabel('Importer TVTime Out'), 6000)
+  }
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', padding: 24, borderRadius: 20, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', marginBottom: 26 }}>
@@ -76,10 +96,18 @@ export default function AccountView({ profile, settings, onToggleSetting, onSetS
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Confidentialité</div>
       <Section rows={PRIVACY_ROWS} settings={settings} onToggleSetting={onToggleSetting} />
 
+      <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Import</div>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
+        <div onClick={handleImport} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid rgba(255,255,255,.1)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{importLabel}</div>
+        <div onClick={handleImportOut} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid rgba(255,255,255,.1)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{importOutLabel}</div>
+      </div>
+
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Données</div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
+        <div onClick={handleSync} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid rgba(255,255,255,.1)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{syncLabel}</div>
         <div onClick={onMarkAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid rgba(255,255,255,.1)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Tout marquer comme vu</div>
         <div onClick={onReset} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid rgba(255,92,138,.35)', background: 'rgba(255,92,138,.1)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ff8fab' }}>Réinitialiser la progression</div>
+        <div onClick={onClearAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid rgba(255,92,138,.5)', background: 'rgba(255,92,138,.12)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ff8fab' }}>Tout effacer</div>
       </div>
 
       <div style={{ borderTop: '1px solid rgba(255,255,255,.07)', paddingTop: 24 }}>

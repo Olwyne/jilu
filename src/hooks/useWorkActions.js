@@ -111,6 +111,12 @@ export function useWorkActions(data, mutate) {
     }
   }
 
+  async function clearAll() {
+    if (window.confirm('Tout effacer ? Progression, notes, avis et œuvres importées seront supprimés. Irréversible.')) {
+      await mutate({ works: {}, watched: {}, ratings: {}, reviews: [], feed: [], games: {} })
+    }
+  }
+
   async function markWatchedToast(work, sNum, eNum, setToast) {
     await toggleEpisode(work.id, sNum, eNum)
     const label = (sNum != null && eNum != null) ? `S${sNum} · E${eNum}` : null
@@ -125,5 +131,5 @@ export function useWorkActions(data, mutate) {
     await mutate({ works })
   }
 
-  return { addWork, toggleEpisode, markSeason, setRating, cycleStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, markWatchedToast }
+  return { addWork, toggleEpisode, markSeason, setRating, cycleStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, clearAll, markWatchedToast }
 }
