@@ -516,6 +516,7 @@
           <div onClick="{{ accountView.onMarkAll }}" style="padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.1);font-size:14px;font-weight:600;cursor:pointer;color:#ECECF2;" style-hover="background:rgba(255,255,255,.05);">Tout marquer comme vu</div>
           <div onClick="{{ accountView.onReset }}" style="padding:12px 18px;border-radius:12px;border:1px solid rgba(255,92,138,.35);background:rgba(255,92,138,.1);font-size:14px;font-weight:600;cursor:pointer;color:#ff8fab;" style-hover="background:rgba(255,92,138,.18);">Réinitialiser la progression</div>
           <div onClick="{{ accountView.onClearAll }}" style="padding:12px 18px;border-radius:12px;border:1px solid rgba(255,60,60,.35);background:rgba(255,60,60,.08);font-size:14px;font-weight:600;cursor:pointer;color:#ff7070;" style-hover="background:rgba(255,60,60,.18);">Tout effacer</div>
+          <div onClick="{{ accountView.onSync }}" style="padding:12px 18px;border-radius:12px;border:1px solid rgba(56,189,248,.35);background:rgba(56,189,248,.08);font-size:14px;font-weight:600;cursor:pointer;color:#7dd3fc;" style-hover="background:rgba(56,189,248,.16);">{{ accountView.syncLabel }}</div>
         </div>
 
         <div style="padding:16px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Import</div>
@@ -544,6 +545,9 @@
             <div style="margin-top:14px;padding:12px 16px;border-radius:10px;background:rgba(139,109,255,.1);border:1px solid rgba(139,109,255,.25);font-size:13px;color:#c4b5fd;">{{ accountView.importResult }}</div>
           </sc-if>
         </div>
+
+        <div style="padding:16px 4px 4px;font-size:13px;color:#7a7a8a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Compte</div>
+        <div onClick="{{ accountView.onLogout }}" style="display:inline-block;padding:12px 18px;border-radius:12px;border:1px solid rgba(255,92,138,.35);background:rgba(255,92,138,.08);font-size:14px;font-weight:600;cursor:pointer;color:#ff8fab;" style-hover="background:rgba(255,92,138,.18);">Se déconnecter</div>
       </sc-if>
 
       <!-- ===== PROFIL ===== -->
@@ -894,7 +898,7 @@ class Component extends DCLogic {
       : {name:'', handle:'', email:'', memberSince: new Date().toLocaleDateString('fr-FR',{month:'long',year:'numeric'}), userId: Math.random().toString(36).slice(2,10)};
     this.state = {
       view: 'dashboard',
-      onboarding: !savedProfile || !(savedProfile.handle||savedProfile.name), onboardingPseudo: '', onboardingStatus: null, loginMode: false, onboardingEmail: '', onboardingPassword: '', loginEmail: '', loginPassword: '', loginError: null, registerError: null, authLoading: false,
+      onboarding: !savedProfile || !(savedProfile.handle||savedProfile.name), onboardingPseudo: '', onboardingStatus: null, loginMode: false, onboardingEmail: '', onboardingPassword: '', loginEmail: '', loginPassword: '', loginError: null, registerError: null, authLoading: false, syncStatus: null,
       settings, profile,
       feed: saved.feed || this.seedFeed(now),
       commentDraft:'', openCommentKey:null, modalKey:null, modalCtx:null, toast:null, importResult:null, dashLimit:{cont:5,rev:5}, calendarCat:'all', searchResults:[], searchLoading:false, confirmModal:null, searchCat:'series', profileModal:null,
@@ -1002,9 +1006,10 @@ class Component extends DCLogic {
     window.removeEventListener('keydown', this._onKey);
     window.removeEventListener('popstate', this._onHash);
     if(this._unsubAuth) this._unsubAuth();
+    if(this._unsubData) this._unsubData();
   }
 
-  _fbUid=null; _unsubAuth=null; _fbSaveTimer=null;
+  _fbUid=null; _unsubAuth=null; _unsubData=null; _fbSaveTimer=null;
   _initFirebase(){
     const auth=window._auth, db=window._db;
     if(!auth||!db) return;
@@ -1013,16 +1018,18 @@ class Component extends DCLogic {
         this._fbUid=user.uid;
         const profile={...this.state.profile, userId:user.uid};
         this.setState({profile, fbReady:true, onboarding:false, loginMode:false, authLoading:false});
-        try{
-          const snap=await db.collection('users').doc(user.uid).get();
-          if(snap.exists){ this._mergeFirestoreData(snap.data()); }
-          else { this._saveToFirestore(this.state); }
-        }catch(e){ console.warn('Firestore load failed',e); }
+        if(this._unsubData) this._unsubData();
+        this._unsubData=db.collection('users').doc(user.uid).onSnapshot(
+          snap=>{ if(this._fbSaveTimer) return; if(snap.exists){ this._mergeFirestoreData(snap.data()); } else { this._saveToFirestore(this.state); } },
+          e=>console.warn('Firestore load failed',e)
+        );
         const pending=this.state.pendingGuestUid;
         if(pending && pending!==user.uid) this._loadGuestProfile(pending);
       } else if(user && user.isAnonymous){
         auth.signOut().catch(()=>{});
       } else {
+        this._fbUid=null;
+        if(this._unsubData){ this._unsubData(); this._unsubData=null; }
         this.setState({fbReady:true, authLoading:false});
       }
     });
@@ -1068,19 +1075,20 @@ class Component extends DCLogic {
     const importedWorks=data.importedWorks||[];
     const builtWorks=this.buildData(now);
     const works=[...builtWorks,...importedWorks];
+    const has=(k)=>k in data;
     const next={
       profile: data.profile ? {...this.state.profile,...data.profile} : this.state.profile,
-      settings: data.settings||this.state.settings,
-      watched: data.watched||this.state.watched,
-      watchDates: data.watchDates||this.state.watchDates,
-      ratings: data.ratings||this.state.ratings,
-      reviews: data.reviews||this.state.reviews,
+      settings: has('settings') ? data.settings : this.state.settings,
+      watched: has('watched') ? data.watched : this.state.watched,
+      watchDates: has('watchDates') ? data.watchDates : this.state.watchDates,
+      ratings: has('ratings') ? data.ratings : this.state.ratings,
+      reviews: has('reviews') ? data.reviews : this.state.reviews,
       importedWorks, works,
-      posters: data.posters||this.state.posters,
-      favorites: data.favorites||this.state.favorites,
-      feed: data.feed||this.state.feed,
-      games: data.games||this.state.games,
-      ccLikes: data.ccLikes||this.state.ccLikes,
+      posters: has('posters') ? data.posters : this.state.posters,
+      favorites: has('favorites') ? data.favorites : this.state.favorites,
+      feed: has('feed') ? data.feed : this.state.feed,
+      games: has('games') ? data.games : this.state.games,
+      ccLikes: has('ccLikes') ? data.ccLikes : this.state.ccLikes,
       onboarding: (data.profile && data.profile.handle) ? false : this.state.onboarding
     };
     this.setState(next);
@@ -1090,15 +1098,16 @@ class Component extends DCLogic {
       ccLikes:next.ccLikes, importedWorks:next.importedWorks, posters:next.posters, favorites:next.favorites
     })); }catch(e){}
   }
+  _cleanObj(o){ if(!o||typeof o!=='object') return o; return Object.fromEntries(Object.entries(o).filter(([k])=>k!=='')); }
   _saveToFirestore(s){
     if(!this._fbUid||!window._db) return;
     clearTimeout(this._fbSaveTimer);
     this._fbSaveTimer=setTimeout(async()=>{
       try{
         await window._db.collection('users').doc(this._fbUid).set({
-          profile:s.profile, settings:s.settings, watched:s.watched, watchDates:s.watchDates,
-          ratings:s.ratings, reviews:s.reviews, importedWorks:s.importedWorks,
-          posters:s.posters, favorites:s.favorites, feed:s.feed, games:s.games, ccLikes:s.ccLikes
+          profile:s.profile, settings:s.settings, watched:this._cleanObj(s.watched), watchDates:this._cleanObj(s.watchDates),
+          ratings:this._cleanObj(s.ratings), reviews:s.reviews, importedWorks:s.importedWorks,
+          posters:this._cleanObj(s.posters), favorites:this._cleanObj(s.favorites), feed:s.feed, games:this._cleanObj(s.games), ccLikes:this._cleanObj(s.ccLikes)
         },{merge:true});
       }catch(e){ console.warn('Firestore save failed',e); }
     },1500); // debounce 1.5s
@@ -1270,6 +1279,8 @@ class Component extends DCLogic {
   toggleSetting(key){ this.setSetting(key, !this.state.settings[key]); }
   editField(key, label){ const cur=this.state.profile[key]; const v=window.prompt('Modifier '+label, cur); if(v!=null && v.trim()){ const profile={...this.state.profile, [key]:v.trim()}; this.setState({profile}); this.persist({profile}); } }
   openProfileModal(){ const p=this.state.profile; this.setState({profileModal:{pseudo:p.handle||p.name||'',email:p.email||'',pseudoStatus:'available'}}); }
+  async syncNow(){ if(!this._fbUid||!window._db){ this.setState({syncStatus:'error'}); setTimeout(()=>this.setState({syncStatus:null}),3000); return; } this.setState({syncStatus:'syncing'}); try{ clearTimeout(this._fbSaveTimer); this._fbSaveTimer=null; const s=this.state; await window._db.collection('users').doc(this._fbUid).set({profile:s.profile,settings:s.settings,watched:this._cleanObj(s.watched),watchDates:this._cleanObj(s.watchDates),ratings:this._cleanObj(s.ratings),reviews:s.reviews,importedWorks:s.importedWorks,posters:this._cleanObj(s.posters),favorites:this._cleanObj(s.favorites),feed:s.feed,games:this._cleanObj(s.games),ccLikes:this._cleanObj(s.ccLikes)},{merge:true}); this.setState({syncStatus:'ok'}); }catch(e){ console.warn('syncNow failed',e); this.setState({syncStatus:'error'}); } setTimeout(()=>this.setState({syncStatus:null}),3000); }
+  logout(){ this.showConfirm('Se déconnecter','Tu seras déconnecté de ton compte. Tes données restent sauvegardées.',()=>{ window._auth && window._auth.signOut().catch(()=>{}); this.setState({onboarding:true,loginMode:true}); }); }
   closeProfileModal(){ this.setState({profileModal:null}); }
   saveProfileModal(){ const m=this.state.profileModal; if(!m||m.pseudoStatus!=='available') return; const newHandle=(m.pseudo||'').replace(/^@/,'').trim()||this.state.profile.handle||this.state.profile.name; const oldHandle=this.state.profile.handle||''; const profile={...this.state.profile,name:newHandle,handle:newHandle,email:(m.email||'').trim()||this.state.profile.email}; this.setState({profile,profileModal:null}); this.persist({profile}); if(newHandle && newHandle!==oldHandle){ if(oldHandle) this._releasePseudo(oldHandle); this._claimPseudo(newHandle); } }
   completeOnboarding(){ const p=(this.state.onboardingPseudo||'').replace(/^@/,'').trim(); const email=(this.state.onboardingEmail||'').trim(); const pwd=this.state.onboardingPassword||''; if(!p||this.state.onboardingStatus!=='available') return; if(!email||pwd.length<6){ this.setState({registerError:!email?'Email requis':'Mot de passe trop court (6 car. min)'}); return; } this._signUp(p,email,pwd); }
@@ -2240,7 +2251,10 @@ class Component extends DCLogic {
         onReset:()=>this.resetProgress(),
         onClearAll:()=>this.clearAll(),
         onImportTVTime:()=>this.importTVTime(),
-      onImportTVTimeOut:()=>this.importTVTimeOut(),
+        onImportTVTimeOut:()=>this.importTVTimeOut(),
+        onLogout:()=>this.logout(),
+        onSync:()=>this.syncNow(),
+        syncLabel: st.syncStatus==='syncing' ? '⏳ Synchronisation…' : st.syncStatus==='ok' ? '✓ Synchronisé' : st.syncStatus==='error' ? '✗ Erreur de sync' : '↑ Synchroniser',
         importResult: st.importResult||null
       };
     }
