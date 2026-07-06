@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jilu-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", ".worktrees/jilu-app"],
+      "port": 5173
+    },
+    {
+      "name": "jilu-prototype",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-p", "5174", "extracted/application-web-de-suivi-culturel/project"],
+      "port": 5174
+    }
+  ]
+}
