@@ -26,7 +26,8 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
 
   function handleShare() {
     if (!isPublic) return
-    try { navigator.clipboard.writeText(window.location.href) } catch (e) {}
+    const url = `${window.location.origin}/u/${pseudo}`
+    try { navigator.clipboard.writeText(url) } catch (e) {}
   }
 
   return (

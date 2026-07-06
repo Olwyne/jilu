@@ -35,6 +35,7 @@ function autoStatus(importedWorks, watched) {
 
 export function useImport(data, mutate) {
   async function importTVTime(onStatus) {
+    if (!import.meta.env.VITE_TMDB_API_KEY) { onStatus('Erreur : clé TMDB manquante (VITE_TMDB_API_KEY).'); return }
     const file = await pickFile('.zip')
     if (!file) return
     onStatus('Lecture du fichier…')
@@ -132,7 +133,7 @@ export function useImport(data, mutate) {
             applyEps(workId, tvData, nName)
             if (favoriteNames.has(showName)) favorites[workId] = true
             newImports++
-          } catch (e) { }
+          } catch (e) { console.warn('Import série:', showName, e.message) }
         }))
         await new Promise(r => setTimeout(r, 150))
       }
@@ -169,7 +170,7 @@ export function useImport(data, mutate) {
                 seasons: null, release: watchedAt, added: Date.now()
               }
               newMovies++
-            } catch (e) { }
+            } catch (e) { console.warn('Import film:', movieName, e.message) }
           }))
           await new Promise(r => setTimeout(r, 150))
         }
@@ -181,6 +182,7 @@ export function useImport(data, mutate) {
   }
 
   async function importTVTimeOut(onStatus) {
+    if (!import.meta.env.VITE_TMDB_API_KEY) { onStatus('Erreur : clé TMDB manquante (VITE_TMDB_API_KEY).'); return }
     const file = await pickFile('.zip')
     if (!file) return
     onStatus('Lecture du fichier…')
@@ -238,7 +240,7 @@ export function useImport(data, mutate) {
               const ts = e.watched_at ? new Date(e.watched_at).getTime() : Date.now()
               if (!watched[key]) { watched[key] = ts; totalEps++ }
             }))
-          } catch (e) { }
+          } catch (e) { console.warn('Import Out série:', show.title, e.message) }
         }))
         await new Promise(r => setTimeout(r, 150))
       }
@@ -274,13 +276,13 @@ export function useImport(data, mutate) {
                 seasons: null, release: watchedAt, added: Date.now()
               }
               newMovies++
-            } catch (e) { }
+            } catch (e) { console.warn('Import Out film:', movie.title, e.message) }
           }))
           await new Promise(r => setTimeout(r, 150))
         }
       }
 
-      await mutate({ works, watched, favorites })
+      await mutate({ works, watched, ratings, favorites })
       onStatus(`✓ ${newImports} série${newImports !== 1 ? 's' : ''}, ${totalEps} épisode${totalEps !== 1 ? 's' : ''}, ${newMovies} film${newMovies !== 1 ? 's' : ''} importé${newMovies !== 1 ? 's' : ''}.`)
     } catch (e) { onStatus('Erreur : ' + e.message) }
   }

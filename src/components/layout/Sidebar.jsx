@@ -1,15 +1,18 @@
+import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './Sidebar.module.css'
 import { initials } from '../../lib/domain'
 
 const ITEMS = [
-  { key: 'dashboard', label: 'Accueil' },
-  { key: 'library', label: 'Bibliothèque' },
-  { key: 'calendar', label: 'Calendrier' },
-  { key: 'stats', label: 'Statistiques' },
-  { key: 'profile', label: 'Profil' }
+  { path: '/dashboard', label: 'Accueil' },
+  { path: '/library', label: 'Bibliothèque' },
+  { path: '/calendar', label: 'Calendrier' },
+  { path: '/stats', label: 'Statistiques' },
+  { path: '/profile', label: 'Profil' }
 ]
 
-export default function Sidebar({ view, setView, profile = {}, toCatch = 0 }) {
+export default function Sidebar({ profile = {}, toCatch = 0 }) {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
   return (
     <aside className={styles.aside}>
       <div className={styles.brand}>
@@ -18,20 +21,20 @@ export default function Sidebar({ view, setView, profile = {}, toCatch = 0 }) {
       </div>
       {ITEMS.map((item) => (
         <div
-          key={item.key}
-          className={`${styles.navItem} ${view === item.key ? styles.active : ''}`}
-          onClick={() => setView(item.key)}
+          key={item.path}
+          className={`${styles.navItem} ${pathname === item.path ? styles.active : ''}`}
+          onClick={() => navigate(item.path)}
         >
           {item.label}
-          {item.key === 'calendar' && toCatch > 0 && (
+          {item.path === '/calendar' && toCatch > 0 && (
             <span style={{ marginLeft: 'auto', minWidth: 20, height: 20, padding: '0 6px', borderRadius: 20, background: 'var(--color-pink)', color: '#fff', fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toCatch}</span>
           )}
         </div>
       ))}
       <div style={{ flex: 1 }} />
       <div
-        onClick={() => setView('account')}
-        className={`${styles.accountChip} ${view === 'account' ? styles.active : ''}`}
+        onClick={() => navigate('/account')}
+        className={`${styles.accountChip} ${pathname === '/account' ? styles.active : ''}`}
       >
         <div className={styles.chipAvatar}>{initials(profile.handle || '?')}</div>
         <div className={styles.chipInfo}>

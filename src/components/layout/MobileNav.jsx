@@ -1,8 +1,9 @@
+import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './MobileNav.module.css'
 
 const ITEMS = [
   {
-    key: 'dashboard',
+    path: '/dashboard',
     label: 'Accueil',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
@@ -14,7 +15,7 @@ const ITEMS = [
     )
   },
   {
-    key: 'library',
+    path: '/library',
     label: 'Biblio',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
@@ -26,7 +27,7 @@ const ITEMS = [
     )
   },
   {
-    key: 'calendar',
+    path: '/calendar',
     label: 'Calendrier',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
@@ -36,7 +37,7 @@ const ITEMS = [
     )
   },
   {
-    key: 'profile',
+    path: '/profile',
     label: 'Profil',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
@@ -45,7 +46,7 @@ const ITEMS = [
     )
   },
   {
-    key: 'stats',
+    path: '/stats',
     label: 'Stats',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
@@ -54,7 +55,7 @@ const ITEMS = [
     )
   },
   {
-    key: 'account',
+    path: '/account',
     label: 'Compte',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
@@ -64,14 +65,16 @@ const ITEMS = [
   }
 ]
 
-export default function MobileNav({ view, setView }) {
+export default function MobileNav() {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
   return (
     <nav className={styles.nav}>
       {ITEMS.map((item) => (
         <div
-          key={item.key}
-          className={`${styles.item} ${view === item.key ? styles.active : ''}`}
-          onClick={() => setView(item.key)}
+          key={item.path}
+          className={`${styles.item} ${pathname === item.path ? styles.active : ''}`}
+          onClick={() => navigate(item.path)}
         >
           {item.icon}
           <span className={styles.label}>{item.label}</span>
