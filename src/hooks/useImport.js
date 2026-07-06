@@ -194,6 +194,7 @@ export function useImport(data, mutate) {
 
       const watched = { ...data.watched }
       const works = { ...data.works }
+      const ratings = { ...data.ratings }
       const favorites = { ...(data.favorites || {}) }
       const existingByTmdb = new Map(Object.values(works).filter(w => w.tmdbId).map(w => [w.tmdbId, w]))
       let newImports = 0, totalEps = 0, newMovies = 0
