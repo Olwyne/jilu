@@ -1,5 +1,5 @@
-import { posterGradient } from '../../lib/posterBox'
-import { initials, CAT, STATUS, DAY } from '../../lib/domain'
+import PosterBox from '../ui/PosterBox'
+import { CAT, STATUS, DAY } from '../../lib/domain'
 
 const RUNTIME = { animes: 24, series: 45 }
 const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: '#c46dff' }
@@ -110,12 +110,9 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>Les mieux notés</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {topRated.map((w) => {
-              const { from, to } = posterGradient(w.id)
               return (
                 <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer' }}>
-                  <div style={{ width: 44, height: 62, borderRadius: 10, background: `linear-gradient(150deg, ${from}, ${to})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15, color: 'rgba(255,255,255,.9)' }}>{initials(w.title)}</span>
-                  </div>
+                  <PosterBox id={w.id} title={w.title} poster={w.poster} width={44} height={62} radius={10} fontSize={15} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: 14 }}>{w.title}</div>
                     <div style={{ fontSize: 12, color: 'var(--color-muted-2)' }}>{CAT[w.category]} · {w.year}</div>

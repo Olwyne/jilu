@@ -1,5 +1,5 @@
-import { posterGradient } from '../../lib/posterBox'
-import { initials, CAT, STATUS, term } from '../../lib/domain'
+import PosterBox from '../ui/PosterBox'
+import { CAT, STATUS, term } from '../../lib/domain'
 import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
 import JournalThread from './JournalThread'
@@ -15,7 +15,6 @@ function epTotals(work, watched) {
 }
 
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites }) {
-  const { from, to } = posterGradient(work.id)
   const { total, watchedCount } = epTotals(work, watched)
   const rating = ratings[`w:${work.id}`] || 0
   const isFav = !!(favorites && favorites[work.id])
@@ -23,9 +22,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
   return (
     <div>
       <div style={{ display: 'flex', gap: 26, flexWrap: 'wrap', marginBottom: 28 }}>
-        <div style={{ width: 150, height: 220, borderRadius: 18, background: `linear-gradient(150deg, ${from}, ${to})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 52, color: 'rgba(255,255,255,.9)' }}>{initials(work.title)}</span>
-        </div>
+        <PosterBox id={work.id} title={work.title} poster={work.poster} width={150} height={220} radius={18} fontSize={52} />
         <div style={{ flex: 1, minWidth: 260 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <span style={{ padding: '5px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: STATUS[work.status].color, background: `${STATUS[work.status].color}22` }}>{STATUS[work.status].label}</span>

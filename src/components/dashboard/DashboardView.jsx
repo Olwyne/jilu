@@ -1,5 +1,5 @@
-import { posterGradient } from '../../lib/posterBox'
-import { initials, relText } from '../../lib/domain'
+import PosterBox from '../ui/PosterBox'
+import { relText } from '../../lib/domain'
 
 function nextEpisode(work, watched) {
   if (!work.seasons) return null
@@ -45,12 +45,9 @@ export default function DashboardView({ works, watched, reviews, ratings, onOpen
       <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>Prochain épisode à regarder</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 34 }}>
         {upNext.map(({ w, nx }) => {
-          const { from, to } = posterGradient(w.id)
           return (
             <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 12, borderRadius: 16, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', cursor: 'pointer' }}>
-              <div style={{ width: 54, height: 78, borderRadius: 11, background: `linear-gradient(150deg, ${from}, ${to})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 22, color: 'rgba(255,255,255,.9)' }}>{initials(w.title)}</span>
-              </div>
+              <PosterBox id={w.id} title={w.title} poster={w.poster} width={54} height={78} radius={11} fontSize={22} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
                 <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, marginTop: 3 }}>S{nx.s.n} · Épisode {nx.e.n}</div>

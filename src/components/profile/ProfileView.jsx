@@ -1,5 +1,5 @@
-import { posterGradient } from '../../lib/posterBox'
-import { initials, relText, term } from '../../lib/domain'
+import PosterBox from '../ui/PosterBox'
+import { relText, term } from '../../lib/domain'
 
 const STATUS_LABEL = { en_cours: 'En cours', termine: 'Terminé', a_voir: 'À voir', abandonne: 'Abandonné' }
 
@@ -9,15 +9,6 @@ function getContext(f, works) {
   if (f.sNum && f.eNum) { const t = term(w.category); return `${t.season} ${f.sNum} · ${t.ep} ${f.eNum}` }
   if (f.sNum) return `Saison ${f.sNum}`
   return "Sur l'œuvre"
-}
-
-function Poster({ id, title, w, h, r }) {
-  const { from, to } = posterGradient(id)
-  return (
-    <div style={{ width: w, height: h, borderRadius: r, background: `linear-gradient(150deg, ${from}, ${to})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: Math.round(w * 0.28), color: 'rgba(255,255,255,.9)' }}>{initials(title)}</span>
-    </div>
-  )
 }
 
 export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, onShare }) {
@@ -70,7 +61,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
           <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
             {favWorks.map(w => (
               <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ flexShrink: 0, width: 90, cursor: 'pointer' }}>
-                <Poster id={w.id} title={w.title} w={90} h={130} r={12} />
+                <PosterBox id={w.id} title={w.title} poster={w.poster} width={90} height={130} radius={12} />
                 <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title}</div>
                 <div style={{ fontSize: 11, color: 'var(--color-muted-3)' }}>{w.category} · {w.year}</div>
               </div>
@@ -93,7 +84,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                   <div key={f.id} style={{ border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, background: 'rgba(255,255,255,.025)', padding: 18 }}>
                     <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
                       <div onClick={() => w && onOpenWork(w.id)} style={{ flexShrink: 0, cursor: 'pointer' }}>
-                        <Poster id={f.workId} title={w ? w.title : f.workId} w={46} h={66} r={10} />
+                        <PosterBox id={f.workId} title={w ? w.title : f.workId} poster={w?.poster} width={46} height={66} radius={10} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -131,7 +122,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 14 }}>
                 {libWorks.map(w => (
                   <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ cursor: 'pointer' }}>
-                    <Poster id={w.id} title={w.title} w="100%" h={140} r={12} />
+                    <PosterBox id={w.id} title={w.title} poster={w.poster} width="100%" height={140} radius={12} />
                     <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title}</div>
                     <div style={{ fontSize: 11, color: 'var(--color-muted-3)' }}>{STATUS_LABEL[w.status] || w.status}</div>
                   </div>

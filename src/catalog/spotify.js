@@ -21,6 +21,7 @@ export async function spotifySearch(query) {
     genre: (a.genres || [])[0] || 'Divers',
     year: null,
     overview: '',
+    poster: a.images?.[0]?.url || null,
     seasons: null,
     release: null
   }))

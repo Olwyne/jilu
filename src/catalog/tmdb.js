@@ -24,6 +24,7 @@ export async function tmdbSearch(query) {
         genre: genreLabel(r.genre_ids),
         year,
         overview: r.overview || '',
+        poster: r.poster_path ? `https://image.tmdb.org/t/p/w300${r.poster_path}` : null,
         seasons: null,
         release: dateStr ? Date.parse(dateStr) : null
       }

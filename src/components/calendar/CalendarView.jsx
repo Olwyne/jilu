@@ -1,5 +1,5 @@
-import { posterGradient } from '../../lib/posterBox'
-import { initials, relText, DAY } from '../../lib/domain'
+import PosterBox from '../ui/PosterBox'
+import { relText, DAY } from '../../lib/domain'
 
 export default function CalendarView({ works, watched, onOpenWork, onMarkWatched }) {
   const now = Date.now()
@@ -35,12 +35,9 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
         {catchGroups.length === 0 && <div style={{ color: 'var(--color-muted-3)', fontSize: 14 }}>Tu es à jour ! 🎉</div>}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {catchGroups.map(({ w, s, e, remaining }) => {
-            const { from, to } = posterGradient(w.id)
             return (
               <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 14px', borderRadius: 14, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', cursor: 'pointer' }}>
-                <div style={{ width: 48, height: 68, borderRadius: 10, background: `linear-gradient(150deg, ${from}, ${to})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 20, color: 'rgba(255,255,255,.9)' }}>{initials(w.title)}</span>
-                </div>
+                <PosterBox id={w.id} title={w.title} poster={w.poster} width={48} height={68} radius={10} fontSize={20} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
                   <div style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 3 }}>

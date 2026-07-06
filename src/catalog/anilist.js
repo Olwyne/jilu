@@ -14,7 +14,7 @@ export async function anilistSearch(query) {
   const q = `query ($search: String) {
     Page(perPage: 10) {
       media(search: $search, type: ANIME) {
-        id title { romaji } genres startDate { year } description episodes status
+        id title { romaji } genres startDate { year } description episodes status coverImage { large }
       }
     }
   }`
@@ -28,6 +28,7 @@ export async function anilistSearch(query) {
     genre: (m.genres || [])[0] || 'Divers',
     year: m.startDate?.year || null,
     overview: (m.description || '').replace(/<[^>]+>/g, ''),
+    poster: m.coverImage?.large || null,
     seasons: null,
     release: null
   }))

@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { searchCatalog } from '../../catalog/search'
 import { CAT } from '../../lib/domain'
-import { posterGradient } from '../../lib/posterBox'
-import { initials } from '../../lib/domain'
+import PosterBox from '../ui/PosterBox'
 
 const CATS = [
   { k: 'series', label: 'Séries' },
@@ -63,12 +62,9 @@ export default function SearchModal({ works, onAdd, onClose }) {
           )}
           {results.map((r) => {
             const added = !!works[r.id]
-            const { from, to } = posterGradient(r.id)
             return (
               <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', borderRadius: 12 }}>
-                <div style={{ width: 44, height: 62, flexShrink: 0, borderRadius: 9, background: `linear-gradient(150deg, ${from}, ${to})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'rgba(255,255,255,.9)' }}>{initials(r.title)}</span>
-                </div>
+                <PosterBox id={r.id} title={r.title} poster={r.poster} width={44} height={62} radius={9} fontSize={16} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 600, fontSize: 14.5 }}>{r.title}</div>
                   <div style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{CAT[r.category]}{r.year ? ` · ${r.year}` : ''}</div>

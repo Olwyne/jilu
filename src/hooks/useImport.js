@@ -123,7 +123,9 @@ export function useImport(data, mutate) {
               title: hit.name || showName, category: isAnime ? 'animes' : 'series',
               genre: GENRES_TV[hit.genre_ids?.[0]] || 'Série', year,
               status: forLaterNames.has(showName) ? 'a_voir' : 'en_cours',
-              overview: hit.overview || '', seasons, added: Date.now()
+              overview: hit.overview || '',
+              poster: hit.poster_path ? `https://image.tmdb.org/t/p/w300${hit.poster_path}` : null,
+              seasons, added: Date.now()
             }
             works[workId] = newWork
             existingByTmdb.set(tmdbId, newWork)
@@ -162,8 +164,9 @@ export function useImport(data, mutate) {
                 title: hit.title || movieName, category: 'films',
                 genre: GENRES_MOVIE[hit.genre_ids?.[0]] || 'Film',
                 year: hit.release_date ? parseInt(hit.release_date.slice(0, 4)) : 0,
-                status: 'termine', overview: hit.overview || '', seasons: null,
-                release: watchedAt, added: Date.now()
+                status: 'termine', overview: hit.overview || '',
+                poster: hit.poster_path ? `https://image.tmdb.org/t/p/w300${hit.poster_path}` : null,
+                seasons: null, release: watchedAt, added: Date.now()
               }
               newMovies++
             } catch (e) { }
@@ -220,7 +223,9 @@ export function useImport(data, mutate) {
                 genre: GENRES_TV[hit?.genre_ids?.[0]] || 'Série',
                 year: hit ? parseInt((hit.first_air_date || '').slice(0, 4)) || 0 : 0,
                 status: STATUS_MAP[show.status] || 'en_cours',
-                overview: hit?.overview || '', seasons, added: Date.now()
+                overview: hit?.overview || '',
+                poster: hit?.poster_path ? `https://image.tmdb.org/t/p/w300${hit.poster_path}` : null,
+                seasons, added: Date.now()
               }
               works[workId] = work
               if (tmdbId) existingByTmdb.set(tmdbId, work)
@@ -264,8 +269,9 @@ export function useImport(data, mutate) {
                 title, category: 'films',
                 genre: GENRES_MOVIE[hit?.genre_ids?.[0]] || 'Film',
                 year: hit ? parseInt((hit.release_date || '').slice(0, 4)) || 0 : movie.year || 0,
-                status: 'termine', overview: hit?.overview || '', seasons: null,
-                release: watchedAt, added: Date.now()
+                status: 'termine', overview: hit?.overview || '',
+                poster: hit?.poster_path ? `https://image.tmdb.org/t/p/w300${hit.poster_path}` : null,
+                seasons: null, release: watchedAt, added: Date.now()
               }
               newMovies++
             } catch (e) { }

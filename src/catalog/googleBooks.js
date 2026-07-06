@@ -15,6 +15,7 @@ export async function googleBooksSearch(query) {
       genre: (v.categories || [])[0] || 'Divers',
       year,
       overview: v.description || '',
+      poster: v.imageLinks?.thumbnail?.replace('http:', 'https:') || null,
       seasons: null,
       release: null
     }

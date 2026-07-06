@@ -13,6 +13,7 @@ export async function rawgSearch(query) {
     genre: (g.genres || [])[0]?.name || 'Divers',
     year: g.released ? Number(g.released.slice(0, 4)) : null,
     overview: '',
+    poster: g.background_image || null,
     seasons: null,
     release: g.released ? Date.parse(g.released) : null
   }))
