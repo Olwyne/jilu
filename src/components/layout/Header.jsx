@@ -24,7 +24,6 @@ export default function Header({
           <path d="M21 21l-4.3-4.3" />
         </svg>
       </div>
-      <div className={styles.avatar} onClick={onOpenAccount}>{avatarInitials}</div>
     </header>
   )
 }

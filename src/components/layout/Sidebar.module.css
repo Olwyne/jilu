@@ -1,4 +1,4 @@
-.aside { width: 236px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,.07); padding: 26px 18px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 6px; }
+.aside { width: 236px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,.07); padding: 26px 18px 18px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
 .brand { display: flex; align-items: center; gap: 11px; padding: 0 8px 22px; }
 .mark { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--color-accent), var(--color-pink)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 19px; color: #fff; }
 .name { font-family: var(--font-display); font-weight: 700; font-size: 21px; letter-spacing: -.02em; }
@@ -12,3 +12,10 @@
 .statValueAccent { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--color-accent); }
 .statValuePink { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--color-pink); }
 .statSub { font-size: 11px; color: var(--color-muted); }
+.accountChip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; cursor: pointer; border: 1px solid rgba(255,255,255,.07); background: rgba(255,255,255,.025); margin-top: 8px; transition: background .15s; }
+.accountChip:hover { background: rgba(255,255,255,.05); }
+.accountChip.active { background: rgba(139,109,255,.14); border-color: rgba(139,109,255,.25); }
+.chipAvatar { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, var(--color-accent), var(--color-pink)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: #fff; }
+.chipInfo { flex: 1; min-width: 0; }
+.chipName { font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chipHandle { font-size: 11.5px; color: var(--color-muted-2); }

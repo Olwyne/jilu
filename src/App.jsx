@@ -61,7 +61,7 @@ function Shell() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
-      {!isMobile && <Sidebar view={view} setView={setView} onOpenSearch={() => setSearchOpen(true)} />}
+      {!isMobile && <Sidebar view={view} setView={setView} profile={data.profile} />}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 74 : 0 }}>
         <Header
           title={copy.title}
