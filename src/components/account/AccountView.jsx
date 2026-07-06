@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { initials } from '../../lib/domain'
+import EditProfileModal from '../modals/EditProfileModal'
 
 function Toggle({ on, onToggle }) {
   return (
@@ -39,10 +40,11 @@ function Section({ rows, settings, onToggleSetting }) {
   )
 }
 
-export default function AccountView({ profile, settings, onToggleSetting, onEditField, onMarkAll, onReset, onLogout, onSync, onClearAll, onImportTVTime, onImportTVTimeOut }) {
+export default function AccountView({ profile, settings, onToggleSetting, onSaveProfile, onMarkAll, onReset, onLogout, onSync, onClearAll, onImportTVTime, onImportTVTimeOut }) {
   const [syncLabel, setSyncLabel] = useState('Synchroniser')
   const [importLabel, setImportLabel] = useState('Importer TVTime (RGPD)')
   const [importOutLabel, setImportOutLabel] = useState('Importer TVTime Out')
+  const [editOpen, setEditOpen] = useState(false)
 
   async function handleSync() {
     setSyncLabel('Synchronisation…')
@@ -61,21 +63,24 @@ export default function AccountView({ profile, settings, onToggleSetting, onEdit
   }
   return (
     <div>
+      {editOpen && (
+        <EditProfileModal
+          profile={profile}
+          onSave={onSaveProfile}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', padding: 24, borderRadius: 20, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', marginBottom: 26 }}>
         <div style={{ width: 76, height: 76, flexShrink: 0, borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), var(--color-pink))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30, color: '#fff' }}>
-          {initials(profile.name)}
+          {initials(profile.handle || profile.name)}
         </div>
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>{profile.name}</h2>
-            <span onClick={() => onEditField('name', 'le nom')} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>Modifier</span>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>@{profile.handle || '—'}</h2>
+            <span onClick={() => setEditOpen(true)} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>Modifier</span>
           </div>
-          <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{profile.handle} · {profile.email}</div>
+          <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{profile.email}</div>
           <div style={{ color: 'var(--color-muted-3)', fontSize: 12.5, marginTop: 8 }}>Membre depuis {profile.memberSince}</div>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <div onClick={() => onEditField('handle', 'le pseudo')} style={{ padding: '9px 14px', borderRadius: 11, border: '1px solid rgba(255,255,255,.1)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Pseudo</div>
-          <div onClick={() => onEditField('email', "l'email")} style={{ padding: '9px 14px', borderRadius: 11, border: '1px solid rgba(255,255,255,.1)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>E-mail</div>
         </div>
       </div>
 

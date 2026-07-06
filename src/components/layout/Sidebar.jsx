@@ -33,10 +33,10 @@ export default function Sidebar({ view, setView, profile = {}, toCatch = 0 }) {
         onClick={() => setView('account')}
         className={`${styles.accountChip} ${view === 'account' ? styles.active : ''}`}
       >
-        <div className={styles.chipAvatar}>{initials(profile.name || profile.handle || '?')}</div>
+        <div className={styles.chipAvatar}>{initials(profile.handle || '?')}</div>
         <div className={styles.chipInfo}>
-          <div className={styles.chipName}>{profile.name || 'Compte'}</div>
-          <div className={styles.chipHandle}>{profile.handle ? '@' + profile.handle : 'Paramètres'}</div>
+          <div className={styles.chipName}>{profile.handle ? '@' + profile.handle : 'Compte'}</div>
+          <div className={styles.chipHandle}>{profile.email || 'Paramètres'}</div>
         </div>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.8" style={{ flexShrink: 0 }}>
           <circle cx="12" cy="12" r="3" />
