@@ -1,5 +1,8 @@
 export default function Toast({ toast, onClose, onOpenRating }) {
   if (!toast) return null
+  const header = toast.header ?? 'Marqué comme vu'
+  const handleAction = toast.action ? toast.action.fn : onOpenRating
+  const actionLabel = toast.action ? toast.action.label : 'Noter'
   return (
     <div style={{
       position: 'fixed', bottom: 28, right: 28, zIndex: 9000,
@@ -10,15 +13,15 @@ export default function Toast({ toast, onClose, onOpenRating }) {
       minWidth: 260, maxWidth: 380,
     }}>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: 'var(--color-green)', fontWeight: 700, marginBottom: 3 }}>Marqué comme vu</div>
+        <div style={{ fontSize: 12, color: 'var(--color-green)', fontWeight: 700, marginBottom: 3 }}>{header}</div>
         <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{toast.title}</div>
         {toast.label && <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 2 }}>{toast.label}</div>}
       </div>
       <button
-        onClick={onOpenRating}
+        onClick={handleAction}
         style={{ padding: '7px 13px', borderRadius: 10, background: 'var(--color-accent)', fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0, border: 'none', color: 'inherit' }}
       >
-        Noter
+        {actionLabel}
       </button>
       <button onClick={onClose} style={{ fontSize: 16, color: 'var(--color-muted-2)', cursor: 'pointer', flexShrink: 0, lineHeight: 1, background: 'none', border: 'none' }}>✕</button>
     </div>

@@ -36,7 +36,7 @@ export async function anilistSearch(query) {
 
 export async function anilistGetDetail(work) {
   const q = `query ($id: Int) {
-    Media(id: $id, type: ANIME) { episodes startDate { year month day } }
+    Media(id: $id, type: ANIME) { episodes status startDate { year month day } }
   }`
   const json = await gql(q, { id: work.sourceId })
   const m = json.data?.Media
@@ -49,5 +49,6 @@ export async function anilistGetDetail(work) {
     title: 'Épisode ' + (i + 1),
     air: start + i * 7 * DAY
   }))
-  return { ...work, seasons: [{ n: 1, name: null, episodes }] }
+  const ended = m?.status === 'FINISHED' || m?.status === 'CANCELLED'
+  return { ...work, seasons: [{ n: 1, name: null, episodes }], ended }
 }

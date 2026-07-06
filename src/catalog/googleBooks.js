@@ -1,7 +1,9 @@
 const BASE = 'https://www.googleapis.com/books/v1/volumes'
 
 export async function googleBooksSearch(query) {
-  const res = await fetch(`${BASE}?q=${encodeURIComponent(query)}&maxResults=10&langRestrict=fr`)
+  const key = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
+  const keyParam = key ? `&key=${key}` : ''
+  const res = await fetch(`${BASE}?q=${encodeURIComponent(query)}&maxResults=10&langRestrict=fr${keyParam}`)
   const json = await res.json()
   return (json.items || []).map((it) => {
     const v = it.volumeInfo || {}

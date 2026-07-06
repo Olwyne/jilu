@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, getDocs, collection } from 'firebase/firestore'
 import { db } from '../../firebase'
 import ProfileView from './ProfileView'
 
@@ -19,9 +19,23 @@ export default function PublicProfilePage() {
         const { uid } = pseudoSnap.data()
         const userSnap = await getDoc(doc(db, 'users', uid))
         if (!userSnap.exists()) { setStatus('notfound'); return }
-        const data = { ...EMPTY, ...userSnap.data() }
-        if (!data.settings?.publicProfile) { setStatus('private'); return }
-        setProfileData(data)
+        const base = { ...EMPTY, ...userSnap.data() }
+        if (!base.settings?.publicProfile) { setStatus('private'); return }
+
+        const [worksSnap, watchedSnap] = await Promise.all([
+          getDocs(collection(db, 'users', uid, 'works')),
+          getDocs(collection(db, 'users', uid, 'watched'))
+        ])
+        const works = {}
+        worksSnap.forEach(d => { works[d.id] = d.data() })
+        const watched = {}
+        watchedSnap.forEach(d => {
+          Object.entries(d.data().eps || {}).forEach(([k, ts]) => {
+            watched[`${d.id}-${k}`] = ts
+          })
+        })
+
+        setProfileData({ ...base, works, watched })
         setStatus('found')
       } catch { setStatus('notfound') }
     }

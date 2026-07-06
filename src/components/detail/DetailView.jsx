@@ -1,4 +1,5 @@
 import PosterBox from '../ui/PosterBox'
+import StatusSelect from '../ui/StatusSelect'
 import { CAT, STATUS, term } from '../../lib/domain'
 import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
@@ -26,7 +27,11 @@ export default function DetailView({ work, watched, ratings, games, feed, action
         <div style={{ flex: 1, minWidth: 260 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <span style={{ padding: '5px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: STATUS[work.status].color, background: `${STATUS[work.status].color}22` }}>{STATUS[work.status].label}</span>
-            <span style={{ fontSize: 13, color: 'var(--color-muted-2)' }}>{CAT[work.category]} · {work.genre} · {work.year}</span>
+            <span style={{ fontSize: 13, color: 'var(--color-muted-2)' }}>
+              {CAT[work.category]} · {work.genre} · {work.year}
+              {work.ended === true && <span style={{ marginLeft: 6, color: '#4ade80', fontWeight: 600 }}>· Terminée</span>}
+              {work.ended === false && <span style={{ marginLeft: 6, color: '#f59e0b', fontWeight: 600 }}>· En cours</span>}
+            </span>
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, margin: '0 0 12px' }}>{work.title}</h2>
           <p style={{ color: '#b9b9c8', fontSize: 15, lineHeight: 1.55, maxWidth: 560 }}>{work.overview}</p>
@@ -50,7 +55,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
                 ))}
               </div>
             </div>
-            <div onClick={() => actions.cycleStatus(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: 'rgba(139,109,255,.14)', border: '1px solid rgba(139,109,255,.3)', color: '#b9a6ff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Changer le statut ›</div>
+            <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} />
             {actions.toggleFavorite && (
               <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'rgba(255,255,255,.045)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'rgba(255,255,255,.08)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? '★ Favori' : '☆ Favori'}</div>
             )}

@@ -50,5 +50,6 @@ export async function tmdbGetDetail(work) {
       }))
     })
   }
-  return { ...work, seasons }
+  const ended = show.status === 'Ended' || show.status === 'Canceled'
+  return { ...work, seasons, ended }
 }

@@ -8,7 +8,28 @@ const DETAIL_FETCHERS = {
   spotify: spotifyGetDetail
 }
 
-const STATUS_ORDER = ['a_voir', 'en_cours', 'termine', 'abandonne']
+function computeAutoStatus(work, watched) {
+  if (!work.seasons || !work.seasons.length) return null
+  let total = 0, watchedCount = 0
+  work.seasons.forEach((s) => s.episodes.forEach((e) => {
+    total++
+    if (watched[`${work.id}-${s.n}-${e.n}`]) watchedCount++
+  }))
+  if (total === 0) return null
+  if (watchedCount === 0) return 'a_voir'
+  if (watchedCount >= total) return work.ended === false ? 'en_cours' : 'termine'
+  return 'en_cours'
+}
+
+async function applyAutoStatus(work, watched, mutate, works) {
+  const auto = computeAutoStatus(work, watched)
+  if (!auto || auto === work.status) return
+  if (work.status === 'abandonne') {
+    const resume = window.confirm(`Tu reprends "${work.title}" ? Passer en "${auto === 'en_cours' ? 'En cours' : auto === 'a_voir' ? 'À voir' : 'Terminé'}" ?`)
+    if (!resume) return
+  }
+  await mutate({ works: { ...works, [work.id]: { ...work, status: auto } } })
+}
 
 export function useWorkActions(data, mutate) {
   async function toggleEpisode(workId, sNum, eNum) {
@@ -16,6 +37,7 @@ export function useWorkActions(data, mutate) {
     const watched = { ...data.watched }
     if (watched[key]) delete watched[key]; else watched[key] = Date.now()
     await mutate({ watched })
+    await applyAutoStatus(data.works[workId], watched, mutate, data.works)
   }
 
   async function markSeason(workId, sNum) {
@@ -30,6 +52,7 @@ export function useWorkActions(data, mutate) {
       if (allDone) delete watched[key]; else watched[key] = Date.now()
     })
     await mutate({ watched })
+    await applyAutoStatus(work, watched, mutate, data.works)
   }
 
   async function setRating(scope, id, val) {
@@ -50,11 +73,9 @@ export function useWorkActions(data, mutate) {
     await mutate(patch)
   }
 
-  async function cycleStatus(workId) {
+  async function setStatus(workId, status) {
     const work = data.works[workId]
-    const idx = STATUS_ORDER.indexOf(work.status)
-    const next = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length]
-    const works = { ...data.works, [workId]: { ...work, status: next } }
+    const works = { ...data.works, [workId]: { ...work, status } }
     await mutate({ works })
   }
 
@@ -129,6 +150,24 @@ export function useWorkActions(data, mutate) {
     setToast({ workId: work.id, title: work.title, label })
   }
 
+  async function refreshAllWorks(onProgress) {
+    const entries = Object.values(data.works).filter((w) => w.sourceId && DETAIL_FETCHERS[w.source])
+    if (!entries.length) { onProgress?.('Aucune œuvre à rafraîchir'); return }
+    let done = 0
+    const works = { ...data.works }
+    for (const work of entries) {
+      onProgress?.(`Rafraîchissement… ${done}/${entries.length}`)
+      try {
+        const fetcher = DETAIL_FETCHERS[work.source]
+        const fresh = await fetcher(work)
+        works[work.id] = { ...work, ...fresh, status: work.status, added: work.added }
+      } catch { /* skip failed */ }
+      done++
+    }
+    await mutate({ works })
+    onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
+  }
+
   async function addWork(searchResult) {
     if (data.works[searchResult.id]) return
     const fetchDetail = DETAIL_FETCHERS[searchResult.source]
@@ -137,5 +176,5 @@ export function useWorkActions(data, mutate) {
     await mutate({ works })
   }
 
-  return { addWork, toggleEpisode, markSeason, setRating, cycleStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast }
+  return { addWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
 }

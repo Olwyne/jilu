@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import WorkCard from './WorkCard'
 import { CAT } from '../../lib/domain'
 import styles from './LibraryView.module.css'
@@ -21,13 +21,37 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
   const [category, setCategory] = useState('all')
   const [status, setStatus] = useState('all')
   const [sort, setSort] = useState('recent')
+  const [sortDir, setSortDir] = useState('desc')
+
+  const lastWatchedByWork = useMemo(() => {
+    const cache = {}
+    for (const [k, v] of Object.entries(watched)) {
+      if (typeof v !== 'number') continue
+      const parts = k.split('-')
+      parts.pop(); parts.pop()
+      const workId = parts.join('-')
+      if (!cache[workId] || v > cache[workId]) cache[workId] = v
+    }
+    return cache
+  }, [watched])
+
+  function handleSort(key) {
+    if (key === sort) setSortDir(d => d === 'desc' ? 'asc' : 'desc')
+    else { setSort(key); setSortDir('desc') }
+  }
 
   const list = Object.values(works)
     .filter((w) => (category === 'all' || w.category === category) && (status === 'all' || w.status === status))
     .sort((a, b) => {
-      if (sort === 'titre') return a.title.localeCompare(b.title)
-      if (sort === 'note') return (ratings[`w:${b.id}`] || 0) - (ratings[`w:${a.id}`] || 0)
-      return (b.added || 0) - (a.added || 0)
+      let cmp
+      if (sort === 'titre') cmp = a.title.localeCompare(b.title)
+      else if (sort === 'note') cmp = (ratings[`w:${a.id}`] || 0) - (ratings[`w:${b.id}`] || 0)
+      else {
+        const ta = lastWatchedByWork[a.id] || (a.added || 0)
+        const tb = lastWatchedByWork[b.id] || (b.added || 0)
+        cmp = ta - tb
+      }
+      return sortDir === 'desc' ? -cmp : cmp
     })
 
   return (
@@ -48,7 +72,9 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
         <div className={styles.sortChips}>
           <span className={styles.sortLabel}>Trier</span>
           {SORTS.map(([key, label]) => (
-            <div key={key} className={`${styles.smallChip} ${sort === key ? styles.smallChipActive : ''}`} onClick={() => setSort(key)}>{label}</div>
+            <div key={key} className={`${styles.smallChip} ${sort === key ? styles.smallChipActive : ''}`} onClick={() => handleSort(key)}>
+              {label}{sort === key ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+            </div>
           ))}
         </div>
       </div>

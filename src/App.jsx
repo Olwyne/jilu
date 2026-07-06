@@ -179,7 +179,21 @@ function Shell() {
       {searchOpen && (
         <SearchModal
           works={data.works}
-          onAdd={(r) => workActions.addWork(r)}
+          onAdd={(r) => {
+            workActions.addWork(r)
+            setToast({
+              header: 'Ajouté à ta bibliothèque',
+              title: r.title,
+              action: {
+                label: 'Voir',
+                fn: () => {
+                  setSearchOpen(false)
+                  setToast(null)
+                  navigate('/work/' + r.id)
+                }
+              }
+            })
+          }}
           onClose={() => setSearchOpen(false)}
         />
       )}

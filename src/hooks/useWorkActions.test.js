@@ -6,10 +6,10 @@ import * as tmdb from '../catalog/tmdb'
 describe('useWorkActions', () => {
   it('toggleEpisode flips a watched key and persists it', async () => {
     const mutate = vi.fn().mockResolvedValue()
-    const data = { works: { w1: { id: 'w1', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }] } }, watched: {} }
+    const data = { works: { w1: { id: 'w1', status: 'a_voir', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }] } }, watched: {} }
     const { result } = renderHook(() => useWorkActions(data, mutate))
     await act(async () => { await result.current.toggleEpisode('w1', 1, 1) })
-    expect(mutate).toHaveBeenCalledWith({ watched: { 'w1-1-1': true } })
+    expect(mutate).toHaveBeenCalledWith({ watched: { 'w1-1-1': expect.any(Number) } })
   })
 
   it('toggleEpisode un-marks an already-watched episode', async () => {
@@ -28,12 +28,12 @@ describe('useWorkActions', () => {
     expect(mutate).toHaveBeenCalledWith(expect.objectContaining({ ratings: { 'w:w1': 0 } }))
   })
 
-  it('cycleStatus advances through the fixed status order', async () => {
+  it('setStatus updates the work status directly', async () => {
     const mutate = vi.fn().mockResolvedValue()
     const data = { works: { w1: { id: 'w1', status: 'a_voir' } } }
     const { result } = renderHook(() => useWorkActions(data, mutate))
-    await act(async () => { await result.current.cycleStatus('w1') })
-    expect(mutate.mock.calls[0][0].works.w1.status).toBe('en_cours')
+    await act(async () => { await result.current.setStatus('w1', 'abandonne') })
+    expect(mutate.mock.calls[0][0].works.w1.status).toBe('abandonne')
   })
 
   it('addWork fetches full detail before storing, keyed by search result id', async () => {

@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import PosterBox from '../ui/PosterBox'
-import { relText, term } from '../../lib/domain'
+import { initials, relText, term } from '../../lib/domain'
 
 const STATUS_LABEL = { en_cours: 'En cours', termine: 'Terminé', a_voir: 'À voir', abandonne: 'Abandonné' }
 
@@ -13,6 +15,13 @@ function getContext(f, works) {
 
 export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, onShare }) {
   const { works, watched, ratings, favorites, feed, profile, settings } = data
+  const navigate = useNavigate()
+  const { handle: handleParam } = useParams()
+
+  useEffect(() => {
+    const h = profile.handle
+    if (h && !handleParam) navigate(`/profile/${h}`, { replace: true })
+  }, [profile.handle, handleParam, navigate])
   const worksArr = Object.values(works)
   const worksCount = worksArr.length
   const episodesCount = Object.keys(watched).length

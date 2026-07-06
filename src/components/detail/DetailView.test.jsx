@@ -13,13 +13,14 @@ describe('DetailView', () => {
     render(<DetailView work={work} watched={{}} ratings={{}} games={{}} feed={[]} actions={{}} />)
     expect(screen.getByText('Severance')).toBeInTheDocument()
     expect(screen.getByText('desc')).toBeInTheDocument()
-    expect(screen.getByText('En cours')).toBeInTheDocument()
+    expect(screen.getAllByText('En cours').length).toBeGreaterThan(0)
   })
 
-  it('clicking "Changer le statut" calls actions.cycleStatus with the work id', async () => {
-    const cycleStatus = vi.fn()
-    render(<DetailView work={work} watched={{}} ratings={{}} games={{}} feed={[]} actions={{ cycleStatus }} />)
-    await userEvent.click(screen.getByText('Changer le statut ›'))
-    expect(cycleStatus).toHaveBeenCalledWith('w1')
+  it('clicking a status option calls actions.setStatus with the work id and new value', async () => {
+    const setStatus = vi.fn()
+    render(<DetailView work={work} watched={{}} ratings={{}} games={{}} feed={[]} actions={{ setStatus }} />)
+    await userEvent.click(screen.getByRole('button', { name: /cours/i }))
+    await userEvent.click(screen.getByText('Terminé'))
+    expect(setStatus).toHaveBeenCalledWith('w1', 'termine')
   })
 })

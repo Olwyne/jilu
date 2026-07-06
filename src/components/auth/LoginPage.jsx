@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './LoginPage.module.css'
 
-export default function LoginPage({ onSwitchToSignup }) {
+export default function LoginPage() {
   const { login } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -13,6 +16,7 @@ export default function LoginPage({ onSwitchToSignup }) {
     setError('')
     try {
       await login(email, password)
+      navigate(location.state?.from || '/library', { replace: true })
     } catch (err) {
       setError("Impossible de se connecter. Vérifie ton e-mail et ton mot de passe.")
     }
@@ -41,7 +45,7 @@ export default function LoginPage({ onSwitchToSignup }) {
         />
         {error && <div className={styles.error}>{error}</div>}
         <button className={styles.button} type="submit">Se connecter</button>
-        <div className={styles.switch} onClick={onSwitchToSignup}>
+        <div className={styles.switch} onClick={() => navigate('/signup', { state: location.state })}>
           Pas de compte ? Créer un compte
         </div>
       </form>
