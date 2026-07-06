@@ -80,6 +80,7 @@ function Shell() {
               works={data.works}
               watched={data.watched}
               ratings={data.ratings}
+              favorites={data.favorites}
               onOpenWork={(id) => { setSelectedId(id); setView('detail') }}
             />
           )}

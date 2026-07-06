@@ -17,7 +17,7 @@ function epTotals(work, watched) {
   return { total, watchedCount }
 }
 
-export default function LibraryView({ works, watched, ratings, onOpenWork }) {
+export default function LibraryView({ works, watched, ratings, favorites, onOpenWork }) {
   const [category, setCategory] = useState('all')
   const [status, setStatus] = useState('all')
   const [sort, setSort] = useState('recent')
@@ -63,6 +63,7 @@ export default function LibraryView({ works, watched, ratings, onOpenWork }) {
               totalCount={total}
               watchedCount={watchedCount}
               rating={ratings[`w:${w.id}`] || 0}
+              isFavorite={!!(favorites && favorites[w.id])}
               onClick={() => onOpenWork(w.id)}
             />
           )
