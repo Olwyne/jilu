@@ -22,7 +22,6 @@ const PLAYBACK_ROWS = [
 const PRIVACY_ROWS = [
   ['publicProfile', 'Profil public', 'Rendre ta bibliothèque et tes notes visibles']
 ]
-const START_OPTS = [['dashboard', 'Accueil'], ['library', 'Bibliothèque'], ['calendar', 'Calendrier'], ['stats', 'Statistiques']]
 
 function Section({ rows, settings, onToggleSetting }) {
   return (
@@ -40,7 +39,7 @@ function Section({ rows, settings, onToggleSetting }) {
   )
 }
 
-export default function AccountView({ profile, settings, onToggleSetting, onSetStartPage, onEditField, onMarkAll, onReset, onLogout, onSync, onClearAll, onImportTVTime, onImportTVTimeOut }) {
+export default function AccountView({ profile, settings, onToggleSetting, onEditField, onMarkAll, onReset, onLogout, onSync, onClearAll, onImportTVTime, onImportTVTimeOut }) {
   const [syncLabel, setSyncLabel] = useState('Synchroniser')
   const [importLabel, setImportLabel] = useState('Importer TVTime (RGPD)')
   const [importOutLabel, setImportOutLabel] = useState('Importer TVTime Out')
@@ -85,13 +84,6 @@ export default function AccountView({ profile, settings, onToggleSetting, onSetS
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Lecture & suivi</div>
       <Section rows={PLAYBACK_ROWS} settings={settings} onToggleSetting={onToggleSetting} />
-
-      <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Page de démarrage</div>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
-        {START_OPTS.map(([k, label]) => (
-          <div key={k} onClick={() => onSetStartPage(k)} style={{ padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: settings.startPage === k ? 'var(--color-accent)' : 'rgba(255,255,255,.06)', color: settings.startPage === k ? '#fff' : 'var(--color-muted)' }}>{label}</div>
-        ))}
-      </div>
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Confidentialité</div>
       <Section rows={PRIVACY_ROWS} settings={settings} onToggleSetting={onToggleSetting} />
