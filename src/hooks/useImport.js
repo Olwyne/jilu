@@ -82,6 +82,7 @@ export function useImport(data, mutate) {
       const watched = { ...data.watched }
       const ratings = { ...data.ratings }
       const works = { ...data.works }
+      const favorites = { ...(data.favorites || {}) }
       let newImports = 0, totalEps = 0
 
       const applyEps = (workId, tvData, nName) => {
@@ -127,6 +128,7 @@ export function useImport(data, mutate) {
             works[workId] = newWork
             existingByTmdb.set(tmdbId, newWork)
             applyEps(workId, tvData, nName)
+            if (favoriteNames.has(showName)) favorites[workId] = true
             newImports++
           } catch (e) { }
         }))
@@ -170,7 +172,7 @@ export function useImport(data, mutate) {
         }
       }
 
-      await mutate({ works, watched, ratings })
+      await mutate({ works, watched, ratings, favorites })
       onStatus(`✓ ${newImports} série${newImports !== 1 ? 's' : ''}, ${totalEps} épisode${totalEps !== 1 ? 's' : ''}, ${newMovies} film${newMovies !== 1 ? 's' : ''} importé${newMovies !== 1 ? 's' : ''}.`)
     } catch (e) { onStatus('Erreur : ' + e.message) }
   }
@@ -187,6 +189,7 @@ export function useImport(data, mutate) {
 
       const watched = { ...data.watched }
       const works = { ...data.works }
+      const favorites = { ...(data.favorites || {}) }
       const existingByTmdb = new Map(Object.values(works).filter(w => w.tmdbId).map(w => [w.tmdbId, w]))
       let newImports = 0, totalEps = 0, newMovies = 0
 
@@ -223,6 +226,7 @@ export function useImport(data, mutate) {
               if (tmdbId) existingByTmdb.set(tmdbId, work)
               newImports++
             }
+            if (show.is_favorite) favorites[work.id] = true
             ;(show.seasons || []).forEach(s => (s.episodes || []).forEach(e => {
               if (!e.is_watched) return
               const key = work.id + '-' + s.number + '-' + e.number
@@ -270,7 +274,7 @@ export function useImport(data, mutate) {
         }
       }
 
-      await mutate({ works, watched })
+      await mutate({ works, watched, favorites })
       onStatus(`✓ ${newImports} série${newImports !== 1 ? 's' : ''}, ${totalEps} épisode${totalEps !== 1 ? 's' : ''}, ${newMovies} film${newMovies !== 1 ? 's' : ''} importé${newMovies !== 1 ? 's' : ''}.`)
     } catch (e) { onStatus('Erreur : ' + e.message) }
   }

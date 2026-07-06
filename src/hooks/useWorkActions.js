@@ -14,7 +14,7 @@ export function useWorkActions(data, mutate) {
   async function toggleEpisode(workId, sNum, eNum) {
     const key = `${workId}-${sNum}-${eNum}`
     const watched = { ...data.watched }
-    if (watched[key]) delete watched[key]; else watched[key] = true
+    if (watched[key]) delete watched[key]; else watched[key] = Date.now()
     await mutate({ watched })
   }
 
@@ -27,7 +27,7 @@ export function useWorkActions(data, mutate) {
     const watched = { ...data.watched }
     aired.forEach((e) => {
       const key = `${workId}-${sNum}-${e.n}`
-      if (allDone) delete watched[key]; else watched[key] = true
+      if (allDone) delete watched[key]; else watched[key] = Date.now()
     })
     await mutate({ watched })
   }

@@ -42,6 +42,8 @@ function Shell() {
   const workActions = useWorkActions(data, mutate)
   const { importTVTime, importTVTimeOut } = useImport(data, mutate)
   const openWork = (id) => { setSelectedId(id); setView('detail') }
+  const now = Date.now()
+  const toCatch = Object.values(data.works).filter(w => w.status === 'en_cours' && w.seasons).reduce((n, w) => n + w.seasons.reduce((m, s) => m + s.episodes.filter(e => e.air <= now && !data.watched[`${w.id}-${s.n}-${e.n}`]).length, 0), 0)
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 860)
@@ -61,7 +63,7 @@ function Shell() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
-      {!isMobile && <Sidebar view={view} setView={setView} profile={data.profile} />}
+      {!isMobile && <Sidebar view={view} setView={setView} profile={data.profile} toCatch={toCatch} />}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 74 : 0 }}>
         <Header
           title={copy.title}

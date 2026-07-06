@@ -9,7 +9,7 @@ const ITEMS = [
   { key: 'profile', label: 'Profil' }
 ]
 
-export default function Sidebar({ view, setView, profile = {} }) {
+export default function Sidebar({ view, setView, profile = {}, toCatch = 0 }) {
   return (
     <aside className={styles.aside}>
       <div className={styles.brand}>
@@ -23,6 +23,9 @@ export default function Sidebar({ view, setView, profile = {} }) {
           onClick={() => setView(item.key)}
         >
           {item.label}
+          {item.key === 'calendar' && toCatch > 0 && (
+            <span style={{ marginLeft: 'auto', minWidth: 20, height: 20, padding: '0 6px', borderRadius: 20, background: 'var(--color-pink)', color: '#fff', fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toCatch}</span>
+          )}
         </div>
       ))}
       <div style={{ flex: 1 }} />
