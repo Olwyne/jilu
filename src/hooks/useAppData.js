@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { doc, onSnapshot, setDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 
+function sanitize(v) {
+  if (v === undefined) return null
+  if (v === null || typeof v !== 'object') return v
+  if (Array.isArray(v)) return v.map(sanitize)
+  return Object.fromEntries(Object.entries(v).filter(([, val]) => val !== undefined).map(([k, val]) => [k, sanitize(val)]))
+}
+
 const EMPTY_DATA = {
   works: {}, watched: {}, ratings: {}, reviews: [],
   settings: { startPage: 'library', autoNext: true, spoilerFree: true, notifNewEp: true, notifCalendar: true, notifWeekly: false, publicProfile: false, adult: false },
@@ -37,17 +44,17 @@ export function useAppData(user) {
     setData(next)
     if (!user) return
     const ref = doc(db, 'users', user.uid)
-    await setDoc(ref, patch, { merge: true })
+    await setDoc(ref, sanitize(patch), { merge: true })
   }
 
   async function syncAll() {
     if (!user) return
     const ref = doc(db, 'users', user.uid)
     const d = dataRef.current
-    await setDoc(ref, {
+    await setDoc(ref, sanitize({
       works: d.works, watched: d.watched, ratings: d.ratings, reviews: d.reviews,
       settings: d.settings, profile: d.profile, feed: d.feed, games: d.games, favorites: d.favorites
-    }, { merge: true })
+    }), { merge: true })
   }
 
   return { data, loading, mutate, syncAll, error }
