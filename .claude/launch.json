@@ -4,7 +4,7 @@
     {
       "name": "jilu-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", ".worktrees/jilu-app"],
+      "runtimeArgs": ["run", "dev"],
       "port": 5173
     },
     {

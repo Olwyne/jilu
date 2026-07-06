@@ -14,10 +14,11 @@ function epTotals(work, watched) {
   return { total, watchedCount }
 }
 
-export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode }) {
+export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites }) {
   const { from, to } = posterGradient(work.id)
   const { total, watchedCount } = epTotals(work, watched)
   const rating = ratings[`w:${work.id}`] || 0
+  const isFav = !!(favorites && favorites[work.id])
 
   return (
     <div>
@@ -53,6 +54,9 @@ export default function DetailView({ work, watched, ratings, games, feed, action
               </div>
             </div>
             <div onClick={() => actions.cycleStatus(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: 'rgba(139,109,255,.14)', border: '1px solid rgba(139,109,255,.3)', color: '#b9a6ff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Changer le statut ›</div>
+            {actions.toggleFavorite && (
+              <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'rgba(255,255,255,.045)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'rgba(255,255,255,.08)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? '★ Favori' : '☆ Favori'}</div>
+            )}
           </div>
         </div>
       </div>

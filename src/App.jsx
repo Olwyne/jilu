@@ -16,6 +16,7 @@ import DashboardView from './components/dashboard/DashboardView'
 import StatsView from './components/stats/StatsView'
 import AccountView from './components/account/AccountView'
 import FeedView from './components/feed/FeedView'
+import ProfileView from './components/profile/ProfileView'
 import Toast from './components/Toast'
 import SearchModal from './components/modals/SearchModal'
 
@@ -25,6 +26,7 @@ const HEADER_COPY = {
   calendar: { title: 'Calendrier', subtitle: 'À rattraper et à venir' },
   stats: { title: 'Statistiques', subtitle: 'Ton année en chiffres' },
   account: { title: 'Compte & paramètres', subtitle: 'Profil, préférences et données' },
+  profile: { title: 'Mon profil', subtitle: 'Tes stats, favoris et bibliothèque' },
   feed: { title: 'Journal', subtitle: 'Tes commentaires et réactions' }
 }
 
@@ -121,6 +123,14 @@ function Shell() {
               onLogout={logout}
             />
           )}
+          {view === 'profile' && (
+            <ProfileView
+              data={data}
+              onOpenWork={(id) => { if (id === '__library') { setView('library') } else { openWork(id) } }}
+              onToggleLike={workActions.toggleLike}
+              onDelete={workActions.deleteComment}
+            />
+          )}
           {view === 'feed' && (
             <FeedView
               feed={data.feed}
@@ -138,6 +148,7 @@ function Shell() {
               games={data.games}
               feed={data.feed}
               actions={workActions}
+              favorites={data.favorites}
               onOpenEpisode={(w, s, e) => setEpisodeModal({ workId: w.id, sNum: s.n, eNum: e.n })}
             />
           )}

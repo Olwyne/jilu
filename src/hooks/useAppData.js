@@ -6,7 +6,7 @@ const EMPTY_DATA = {
   works: {}, watched: {}, ratings: {}, reviews: [],
   settings: { startPage: 'library', autoNext: true, spoilerFree: true, notifNewEp: true, notifCalendar: true, notifWeekly: false, publicProfile: false, adult: false },
   profile: { name: '', handle: '', email: '', memberSince: '' },
-  feed: [], games: {}, ccLikes: {}
+  feed: [], games: {}, ccLikes: {}, favorites: {}
 }
 
 export function useAppData(user) {
@@ -46,7 +46,7 @@ export function useAppData(user) {
     const d = dataRef.current
     await setDoc(ref, {
       works: d.works, watched: d.watched, ratings: d.ratings, reviews: d.reviews,
-      settings: d.settings, profile: d.profile, feed: d.feed, games: d.games
+      settings: d.settings, profile: d.profile, feed: d.feed, games: d.games, favorites: d.favorites
     }, { merge: true })
   }
 

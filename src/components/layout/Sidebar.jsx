@@ -5,6 +5,7 @@ const ITEMS = [
   { key: 'library', label: 'Bibliothèque' },
   { key: 'calendar', label: 'Calendrier' },
   { key: 'stats', label: 'Statistiques' },
+  { key: 'profile', label: 'Profil' },
   { key: 'feed', label: 'Journal' }
 ]
 
