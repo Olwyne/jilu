@@ -32,9 +32,9 @@ export default function SearchModal({ works, onAdd, onClose }) {
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '12vh 20px 20px' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: '#15151d', border: '1px solid rgba(255,255,255,.1)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '18px 20px', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9797a8" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'color-mix(in srgb, var(--color-bg) 96%, var(--color-text))', border: '1px solid var(--color-border-btn)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 30px 80px var(--color-shadow-lg)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '18px 20px', borderBottom: '1px solid var(--color-border)' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-muted)" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
           <input
             autoFocus
             value={query}
@@ -49,7 +49,7 @@ export default function SearchModal({ works, onAdd, onClose }) {
             <div
               key={c.k}
               onClick={() => { setCat(c.k); setResults([]) }}
-              style={{ padding: '6px 13px', borderRadius: 20, fontSize: 13, fontWeight: cat === c.k ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap', color: cat === c.k ? '#fff' : 'var(--color-muted)', background: cat === c.k ? 'var(--color-accent)' : 'rgba(255,255,255,.05)', border: `1px solid ${cat === c.k ? 'transparent' : 'rgba(255,255,255,.08)'}`, flexShrink: 0 }}
+              style={{ padding: '6px 13px', borderRadius: 20, fontSize: 13, fontWeight: cat === c.k ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap', color: cat === c.k ? '#fff' : 'var(--color-muted)', background: cat === c.k ? 'var(--color-accent)' : 'var(--color-surface-row)', border: `1px solid ${cat === c.k ? 'transparent' : 'var(--color-border)'}`, flexShrink: 0 }}
             >
               {c.label}
             </div>

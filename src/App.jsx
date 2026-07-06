@@ -59,6 +59,10 @@ function Shell() {
   const [toast, setToast] = useState(null)
   const workActions = useWorkActions(data, mutate)
   const { importTVTime, importTVTimeOut } = useImport(data, mutate)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = data.settings.darkMode === false ? 'light' : 'dark'
+  }, [data.settings.darkMode])
   const openWork = (id) => navigate('/work/' + id)
 
   const now = Date.now()
@@ -145,12 +149,13 @@ function Shell() {
                 onReset={() => workActions.resetProgress()}
                 onClearAll={() => workActions.clearAll()}
                 onSync={syncAll}
+                onRefreshAll={workActions.refreshAllWorks}
                 onImportTVTime={importTVTime}
                 onImportTVTimeOut={importTVTimeOut}
                 onLogout={logout}
               />
             } />
-            <Route path="/profile" element={
+            <Route path="/profile/:handle?" element={
               <ProfileView
                 data={data}
                 onOpenWork={(id) => id === '__library' ? navigate('/library') : openWork(id)}
@@ -193,16 +198,28 @@ function Shell() {
   )
 }
 
-function Gate() {
+function AuthGuard() {
   const { user, loading } = useAuth()
-  const [showSignup, setShowSignup] = useState(false)
+  const location = useLocation()
   if (loading) return null
-  if (!user) {
-    return showSignup
-      ? <SignupPage onSwitchToLogin={() => setShowSignup(false)} />
-      : <LoginPage onSwitchToSignup={() => setShowSignup(true)} />
-  }
+  if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />
   return <Shell />
+}
+
+function LoginRoute() {
+  const { user, loading } = useAuth()
+  const location = useLocation()
+  if (loading) return null
+  if (user) return <Navigate to={location.state?.from || '/library'} replace />
+  return <LoginPage />
+}
+
+function SignupRoute() {
+  const { user, loading } = useAuth()
+  const location = useLocation()
+  if (loading) return null
+  if (user) return <Navigate to={location.state?.from || '/library'} replace />
+  return <SignupPage />
 }
 
 export default function App() {
@@ -211,7 +228,9 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/u/:handle" element={<PublicProfilePage />} />
-          <Route path="/*" element={<Gate />} />
+          <Route path="/login" element={<LoginRoute />} />
+          <Route path="/signup" element={<SignupRoute />} />
+          <Route path="/*" element={<AuthGuard />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

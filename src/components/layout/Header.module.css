@@ -1,4 +1,4 @@
-.header { display: flex; align-items: center; gap: 14px; padding: 20px 30px; position: sticky; top: 0; background: rgba(10,10,15,.85); backdrop-filter: blur(14px); z-index: 30; border-bottom: 1px solid rgba(255,255,255,.05); }
+.header { display: flex; align-items: center; gap: 14px; padding: 20px 30px; position: sticky; top: 0; background: color-mix(in srgb, var(--color-bg) 85%, transparent); backdrop-filter: blur(14px); z-index: 30; border-bottom: 1px solid var(--color-border-sm); }
 .brand { display: flex; align-items: center; gap: 9px; }
 .mark { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--color-accent), var(--color-pink)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 16px; color: #fff; }
 .name { font-family: var(--font-display); font-weight: 700; font-size: 19px; }
@@ -6,5 +6,5 @@
 .back { display: inline-flex; align-items: center; gap: 6px; color: var(--color-muted); font-size: 14px; cursor: pointer; margin-bottom: 4px; }
 .title { font-family: var(--font-display); font-weight: 700; font-size: 26px; margin: 0; letter-spacing: -.02em; line-height: 1.1; }
 .subtitle { color: var(--color-muted); font-size: 14px; margin-top: 3px; }
-.searchButton { margin-left: auto; width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text); }
+.searchButton { margin-left: auto; width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; border: 1px solid var(--color-border-btn); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text); }
 .avatar { width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, var(--color-accent), var(--color-pink)); display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 15px; color: #fff; }

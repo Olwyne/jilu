@@ -15,4 +15,43 @@
   --color-surface-toast: rgba(18,18,28,.96);
   --color-border-glass: rgba(255,255,255,.1);
   --color-shadow-lg: rgba(0,0,0,.5);
+  --color-surface: rgba(255,255,255,.025);
+  --color-surface-row: rgba(255,255,255,.04);
+  --color-border: rgba(255,255,255,.07);
+  --color-border-sm: rgba(255,255,255,.05);
+  --color-border-btn: rgba(255,255,255,.1);
+  --color-scrollbar-thumb: #2a2a38;
+  --color-danger-bg: rgba(255,92,138,.1);
+  --color-danger-bg-2: rgba(255,92,138,.12);
+  --color-danger-border: rgba(255,92,138,.35);
+  --color-danger-border-2: rgba(255,92,138,.5);
+  --color-danger-text: #ff8fab;
+}
+
+[data-theme="light"] {
+  --color-bg: #f2f2f7;
+  --color-text: #1a1a2e;
+  --color-accent: #7a5cf0;
+  --color-accent-hover: #6a4ce0;
+  --color-pink: #e0255e;
+  --color-gold: #c47d00;
+  --color-green: #16a34a;
+  --color-blue: #0284c7;
+  --color-muted: #6b6b80;
+  --color-muted-2: #8a8a9a;
+  --color-muted-3: #aaaabc;
+  --color-surface-toast: rgba(242,242,247,.97);
+  --color-border-glass: rgba(0,0,0,.1);
+  --color-shadow-lg: rgba(0,0,0,.15);
+  --color-surface: rgba(0,0,0,.03);
+  --color-surface-row: rgba(0,0,0,.025);
+  --color-border: rgba(0,0,0,.08);
+  --color-border-sm: rgba(0,0,0,.05);
+  --color-border-btn: rgba(0,0,0,.12);
+  --color-scrollbar-thumb: #c4c4d4;
+  --color-danger-bg: rgba(220,38,100,.08);
+  --color-danger-bg-2: rgba(220,38,100,.1);
+  --color-danger-border: rgba(220,38,100,.3);
+  --color-danger-border-2: rgba(220,38,100,.45);
+  --color-danger-text: #c01f56;
 }

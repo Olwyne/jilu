@@ -2,7 +2,7 @@
 html, body { margin: 0; padding: 0; background: var(--color-bg); }
 body { font-family: var(--font-body); color: var(--color-text); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #2a2a38; border-radius: 10px; border: 2px solid var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-scrollbar-thumb); border-radius: 10px; border: 2px solid var(--color-bg); }
 ::-webkit-scrollbar-track { background: transparent; }
 
 @keyframes jiluPulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
