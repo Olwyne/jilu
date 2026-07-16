@@ -7,8 +7,9 @@ async function gql(query, variables, attempt = 0) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables })
   })
-  if (res.status === 429 && attempt < 4) {
-    await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)))
+  if (res.status === 429 && attempt < 3) {
+    const retryAfter = parseInt(res.headers.get('retry-after') || '60', 10)
+    await new Promise((r) => setTimeout(r, (retryAfter + 1) * 1000))
     return gql(query, variables, attempt + 1)
   }
   return res.json()
