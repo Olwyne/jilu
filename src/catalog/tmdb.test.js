@@ -9,14 +9,14 @@ describe('tmdbSearch', () => {
       ok: true,
       json: async () => ({
         results: [
-          { id: 1396, media_type: 'tv', name: 'Breaking Bad', overview: '...', first_air_date: '2008-01-20', genre_ids: [18] },
-          { id: 42, media_type: 'movie', title: 'Dune', overview: '...', release_date: '2021-10-22', genre_ids: [878] }
+          { id: 1396, media_type: 'tv', name: 'Breaking Bad', original_name: 'Breaking Bad', overview: '...', first_air_date: '2008-01-20', genre_ids: [18] },
+          { id: 42, media_type: 'movie', title: 'Dune', original_name: 'Dune', overview: '...', release_date: '2021-10-22', genre_ids: [878] }
         ]
       })
     })
     const results = await tmdbSearch('bre')
-    expect(results[0]).toMatchObject({ source: 'tmdb', id: 'tmdb-tv-1396', title: 'Breaking Bad', category: 'series', year: 2008 })
-    expect(results[1]).toMatchObject({ source: 'tmdb', id: 'tmdb-movie-42', title: 'Dune', category: 'films', year: 2021 })
+    expect(results[0]).toMatchObject({ source: 'tmdb', id: 'tmdb-tv-1396', title: 'Breaking Bad', originalTitle: 'Breaking Bad', category: 'series', year: 2008 })
+    expect(results[1]).toMatchObject({ source: 'tmdb', id: 'tmdb-movie-42', title: 'Dune', originalTitle: 'Dune', category: 'films', year: 2021 })
   })
 
   it('categorizes animation tv as animes', async () => {
@@ -24,12 +24,12 @@ describe('tmdbSearch', () => {
       ok: true,
       json: async () => ({
         results: [
-          { id: 130590, media_type: 'tv', name: 'Blue Lock', overview: '...', first_air_date: '2022-10-08', genre_ids: [16, 28] }
+          { id: 130590, media_type: 'tv', name: 'Blue Lock', original_name: 'ブルーロック', overview: '...', first_air_date: '2022-10-08', genre_ids: [16, 28] }
         ]
       })
     })
     const results = await tmdbSearch('blue lock')
-    expect(results[0]).toMatchObject({ source: 'tmdb', id: 'tmdb-tv-130590', title: 'Blue Lock', category: 'animes' })
+    expect(results[0]).toMatchObject({ source: 'tmdb', id: 'tmdb-tv-130590', title: 'Blue Lock', originalTitle: 'ブルーロック', category: 'animes' })
   })
 
   it('ignores non-tv/movie results (e.g. person)', async () => {

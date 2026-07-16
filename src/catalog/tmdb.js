@@ -21,6 +21,7 @@ export async function tmdbSearch(query) {
         sourceId: r.id,
         id: `tmdb-${r.media_type}-${r.id}`,
         title: isTv ? r.name : r.title,
+        originalTitle: r.original_name || null,
         category: isAnime ? 'animes' : isTv ? 'series' : 'films',
         genre: genreLabel(r.genre_ids),
         year,
