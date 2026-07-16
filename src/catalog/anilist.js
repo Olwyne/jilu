@@ -1,7 +1,13 @@
 const ENDPOINT = import.meta.env.DEV ? '/anilist-proxy' : 'https://graphql.anilist.co'
 const DAY = 86400000
+const MIN_INTERVAL = 800
+let lastGqlCall = 0
 
 async function gql(query, variables, attempt = 0) {
+  const wait = Math.max(0, lastGqlCall + MIN_INTERVAL - Date.now())
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait))
+  lastGqlCall = Date.now()
+
   const res = await fetch(ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -9,6 +15,7 @@ async function gql(query, variables, attempt = 0) {
   })
   if (res.status === 429 && attempt < 3) {
     const retryAfter = parseInt(res.headers.get('retry-after') || '60', 10)
+    lastGqlCall = Date.now() + retryAfter * 1000
     await new Promise((r) => setTimeout(r, (retryAfter + 1) * 1000))
     return gql(query, variables, attempt + 1)
   }

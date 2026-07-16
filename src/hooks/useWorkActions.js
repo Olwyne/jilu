@@ -194,7 +194,6 @@ export function useWorkActions(data, mutate) {
         if (work.category === 'animes') {
           let anilistId = work.anilistId
           if (!anilistId) {
-            await new Promise((r) => setTimeout(r, 3000))
             anilistId = await anilistFindId(work.originalTitle || work.title, work.year)
           }
           if (anilistId) {
