@@ -19,6 +19,19 @@ describe('tmdbSearch', () => {
     expect(results[1]).toMatchObject({ source: 'tmdb', id: 'tmdb-movie-42', title: 'Dune', category: 'films', year: 2021 })
   })
 
+  it('categorizes animation tv as animes', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        results: [
+          { id: 130590, media_type: 'tv', name: 'Blue Lock', overview: '...', first_air_date: '2022-10-08', genre_ids: [16, 28] }
+        ]
+      })
+    })
+    const results = await tmdbSearch('blue lock')
+    expect(results[0]).toMatchObject({ source: 'tmdb', id: 'tmdb-tv-130590', title: 'Blue Lock', category: 'animes' })
+  })
+
   it('ignores non-tv/movie results (e.g. person)', async () => {
     global.fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ results: [{ id: 9, media_type: 'person', name: 'Someone' }] }) })
     const results = await tmdbSearch('someone')

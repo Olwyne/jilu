@@ -1,12 +1,10 @@
 import { tmdbSearch } from './tmdb'
-import { anilistSearch } from './anilist'
 import { googleBooksSearch } from './googleBooks'
 import { rawgSearch } from './rawg'
 import { spotifySearch } from './spotify'
 
 const SOURCE_CATS = [
-  { fn: tmdbSearch, cats: ['series', 'films'] },
-  { fn: anilistSearch, cats: ['animes'] },
+  { fn: tmdbSearch, cats: ['series', 'films', 'animes'] },
   { fn: googleBooksSearch, cats: ['livres'] },
   { fn: rawgSearch, cats: ['jeux'] },
   { fn: spotifySearch, cats: ['musique'] }

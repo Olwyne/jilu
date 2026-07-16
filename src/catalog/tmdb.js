@@ -15,12 +15,13 @@ export async function tmdbSearch(query) {
       const isTv = r.media_type === 'tv'
       const dateStr = isTv ? r.first_air_date : r.release_date
       const year = dateStr ? Number(dateStr.slice(0, 4)) : null
+      const isAnime = isTv && (r.genre_ids || []).includes(16)
       return {
         source: 'tmdb',
         sourceId: r.id,
         id: `tmdb-${r.media_type}-${r.id}`,
         title: isTv ? r.name : r.title,
-        category: isTv ? 'series' : 'films',
+        category: isAnime ? 'animes' : isTv ? 'series' : 'films',
         genre: genreLabel(r.genre_ids),
         year,
         overview: r.overview || '',
