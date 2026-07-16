@@ -1,4 +1,4 @@
-const ENDPOINT = 'https://graphql.anilist.co'
+const ENDPOINT = import.meta.env.DEV ? '/anilist-proxy' : 'https://graphql.anilist.co'
 const DAY = 86400000
 
 async function gql(query, variables, attempt = 0) {

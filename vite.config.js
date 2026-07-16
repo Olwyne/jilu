@@ -31,6 +31,15 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
   plugins: [react(), spotifyTokenPlugin(env)],
+  server: {
+    proxy: {
+      '/anilist-proxy': {
+        target: 'https://graphql.anilist.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/anilist-proxy/, '')
+      }
+    }
+  },
   test: {
     environment: 'jsdom',
     globals: true,
