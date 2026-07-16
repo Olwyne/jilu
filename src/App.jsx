@@ -23,7 +23,7 @@ import SearchModal from './components/modals/SearchModal'
 
 const ROUTE_COPY = {
   '/': { title: 'Accueil', subtitle: "Voici ce qui t'attend" },
-  '/library': { title: 'Ma bibliothèque', subtitle: '' },
+  '/library': { title: 'Accueil', subtitle: '' },
   '/calendar': { title: 'Calendrier', subtitle: 'À rattraper et à venir' },
   '/stats': { title: 'Statistiques', subtitle: 'Ton année en chiffres' },
   '/account': { title: 'Compte & paramètres', subtitle: 'Profil, préférences et données' },
@@ -127,6 +127,7 @@ function Shell() {
                 watched={data.watched}
                 reviews={data.reviews}
                 ratings={data.ratings}
+                feed={data.feed}
                 onOpenWork={openWork}
                 onWatchNext={(id, s, e) => workActions.markWatchedToast(data.works[id], s, e, setToast)}
               />
