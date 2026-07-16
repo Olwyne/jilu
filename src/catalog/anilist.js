@@ -60,10 +60,12 @@ export async function anilistFindId(originalTitle, year) {
   return match?.id || null
 }
 
+const SPECIAL_FORMATS = new Set(['MOVIE', 'OVA', 'SPECIAL', 'MUSIC'])
+
 async function fetchEntry(id) {
   const q = `query ($id: Int) {
     Media(id: $id, type: ANIME) {
-      episodes status startDate { year month day }
+      episodes status format startDate { year month day }
       relations { edges { relationType node { id } } }
     }
   }`
@@ -74,6 +76,7 @@ async function fetchEntry(id) {
 export async function anilistGetDetail(anilistId) {
   const visited = new Set()
   const seasons = []
+  const specials = []
   let currentId = anilistId
   let ended = false
 
@@ -91,11 +94,20 @@ export async function anilistGetDetail(anilistId) {
       title: 'Épisode ' + (i + 1),
       air: start + i * 7 * DAY
     }))
-    seasons.push({ n: seasons.length + 1, name: null, episodes })
-    ended = m.status === 'FINISHED' || m.status === 'CANCELLED'
+
+    if (SPECIAL_FORMATS.has(m.format)) {
+      specials.push(...episodes)
+    } else {
+      seasons.push({ n: seasons.length + 1, name: null, episodes })
+      ended = m.status === 'FINISHED' || m.status === 'CANCELLED'
+    }
 
     const sequel = (m.relations?.edges || []).find((e) => e.relationType === 'SEQUEL')
     currentId = sequel?.node?.id || null
+  }
+
+  if (specials.length) {
+    seasons.push({ n: seasons.length + 1, name: 'Spéciaux', episodes: specials.map((e, i) => ({ ...e, n: i + 1 })) })
   }
 
   return { seasons, ended }

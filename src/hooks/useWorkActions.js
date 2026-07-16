@@ -169,7 +169,10 @@ export function useWorkActions(data, mutate) {
         const anilistId = await anilistFindId(searchResult.originalTitle || searchResult.title, searchResult.year)
         if (anilistId) {
           const anilistDetail = await anilistGetDetail(anilistId)
-          detailed = { ...detailed, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
+          const keepTmdb = anilistDetail.seasons.length <= 1 && (detailed.seasons?.length || 0) > 1
+          detailed = keepTmdb
+            ? { ...detailed, anilistId }
+            : { ...detailed, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
         }
       } catch { /* keep TMDB seasons on failure */ }
     }
@@ -198,7 +201,10 @@ export function useWorkActions(data, mutate) {
           }
           if (anilistId) {
             const anilistDetail = await anilistGetDetail(anilistId)
-            next = { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
+            const keepTmdb = anilistDetail.seasons.length <= 1 && (next.seasons?.length || 0) > 1
+            next = keepTmdb
+              ? { ...next, anilistId }
+              : { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
           }
         }
 
