@@ -1,7 +1,14 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useWorkActions } from './useWorkActions'
 import { renderHook, act } from '@testing-library/react'
-import * as tmdb from '../catalog/tmdb'
+import { tmdbGetDetail } from '../catalog/tmdb'
+import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
+
+vi.mock('../catalog/tmdb', () => ({ tmdbGetDetail: vi.fn(), tmdbSearch: vi.fn() }))
+vi.mock('../catalog/anilist', () => ({ anilistFindId: vi.fn(), anilistGetDetail: vi.fn(), anilistSearch: vi.fn() }))
+vi.mock('../catalog/spotify', () => ({ spotifyGetDetail: vi.fn() }))
+
+beforeEach(() => { vi.clearAllMocks() })
 
 describe('useWorkActions', () => {
   it('toggleEpisode marks episode and updates status atomically', async () => {
@@ -45,9 +52,52 @@ describe('useWorkActions', () => {
   it('addWork fetches full detail before storing, keyed by search result id', async () => {
     const mutate = vi.fn().mockResolvedValue()
     const data = { works: {} }
-    vi.spyOn(tmdb, 'tmdbGetDetail').mockResolvedValue({ id: 'tmdb-tv-1', title: 'X', seasons: [] })
+    vi.mocked(tmdbGetDetail).mockResolvedValue({ id: 'tmdb-tv-1', title: 'X', seasons: [] })
     const { result } = renderHook(() => useWorkActions(data, mutate))
     await act(async () => { await result.current.addWork({ source: 'tmdb', id: 'tmdb-tv-1', title: 'X' }) })
     expect(mutate.mock.calls[0][0].works['tmdb-tv-1']).toMatchObject({ title: 'X', status: 'a_voir' })
+  })
+
+  it('addWork stores anilistId and AniList seasons for anime', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const data = { works: {} }
+    vi.mocked(tmdbGetDetail).mockResolvedValue({
+      id: 'tmdb-tv-131041', sourceId: 131041, title: 'Blue Lock', category: 'animes',
+      originalTitle: 'ブルーロック', year: 2022, seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }]
+    })
+    vi.mocked(anilistFindId).mockResolvedValue(163134)
+    vi.mocked(anilistGetDetail).mockResolvedValue({
+      seasons: [
+        { n: 1, name: null, episodes: [{ n: 1, title: 'Épisode 1', air: 0 }] },
+        { n: 2, name: null, episodes: [{ n: 1, title: 'Épisode 1', air: 1 }] }
+      ],
+      ended: false
+    })
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+    await act(async () => {
+      await result.current.addWork({ source: 'tmdb', id: 'tmdb-tv-131041', sourceId: 131041, title: 'Blue Lock', category: 'animes', originalTitle: 'ブルーロック', year: 2022 })
+    })
+    const stored = mutate.mock.calls[0][0].works['tmdb-tv-131041']
+    expect(stored.anilistId).toBe(163134)
+    expect(stored.seasons).toHaveLength(2)
+    expect(stored.title).toBe('Blue Lock')
+  })
+
+  it('addWork falls back to TMDB seasons when anilistFindId returns null', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const data = { works: {} }
+    vi.mocked(tmdbGetDetail).mockResolvedValue({
+      id: 'tmdb-tv-999', sourceId: 999, title: 'Some Anime', category: 'animes',
+      originalTitle: 'Some Anime', year: 2023,
+      seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }]
+    })
+    vi.mocked(anilistFindId).mockResolvedValue(null)
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+    await act(async () => {
+      await result.current.addWork({ source: 'tmdb', id: 'tmdb-tv-999', sourceId: 999, title: 'Some Anime', category: 'animes', originalTitle: 'Some Anime', year: 2023 })
+    })
+    const stored = mutate.mock.calls[0][0].works['tmdb-tv-999']
+    expect(stored.anilistId).toBeUndefined()
+    expect(stored.seasons).toHaveLength(1)
   })
 })

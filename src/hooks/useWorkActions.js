@@ -1,10 +1,10 @@
 import { tmdbGetDetail } from '../catalog/tmdb'
-import { anilistGetDetail } from '../catalog/anilist'
+import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
 import { spotifyGetDetail } from '../catalog/spotify'
 
 const DETAIL_FETCHERS = {
   tmdb: tmdbGetDetail,
-  anilist: anilistGetDetail,
+  anilist: (work) => anilistGetDetail(work.anilistId || work.sourceId).then((d) => ({ ...work, ...d })),
   spotify: spotifyGetDetail
 }
 
@@ -159,30 +159,56 @@ export function useWorkActions(data, mutate) {
     setToast({ workId: work.id, title: work.title, label })
   }
 
+  async function addWork(searchResult) {
+    if (data.works[searchResult.id]) return
+    const fetchDetail = DETAIL_FETCHERS[searchResult.source]
+    let detailed = fetchDetail ? await fetchDetail(searchResult) : searchResult
+
+    if (searchResult.category === 'animes' && searchResult.source === 'tmdb') {
+      try {
+        const anilistId = await anilistFindId(searchResult.originalTitle || searchResult.title, searchResult.year)
+        if (anilistId) {
+          const anilistDetail = await anilistGetDetail(anilistId)
+          detailed = { ...detailed, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
+        }
+      } catch { /* keep TMDB seasons on failure */ }
+    }
+
+    const works = { ...data.works, [searchResult.id]: { ...detailed, status: 'a_voir', added: Date.now() } }
+    await mutate({ works })
+  }
+
   async function refreshAllWorks(onProgress) {
     const entries = Object.values(data.works).filter((w) => w.sourceId && DETAIL_FETCHERS[w.source])
     if (!entries.length) { onProgress?.('Aucune œuvre à rafraîchir'); return }
     let done = 0
     const works = { ...data.works }
+
     for (const work of entries) {
       onProgress?.(`Rafraîchissement… ${done}/${entries.length}`)
       try {
         const fetcher = DETAIL_FETCHERS[work.source]
         const fresh = await fetcher(work)
-        works[work.id] = { ...work, ...fresh, status: work.status, added: work.added }
-      } catch { /* skip failed */ }
+        let next = { ...work, ...fresh, status: work.status, added: work.added }
+
+        if (work.category === 'animes') {
+          let anilistId = work.anilistId
+          if (!anilistId) {
+            anilistId = await anilistFindId(work.originalTitle || work.title, work.year)
+          }
+          if (anilistId) {
+            const anilistDetail = await anilistGetDetail(anilistId)
+            next = { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
+          }
+        }
+
+        works[work.id] = next
+      } catch (e) { console.error('[refresh]', work.title, e) }
       done++
     }
+
     await mutate({ works })
     onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
-  }
-
-  async function addWork(searchResult) {
-    if (data.works[searchResult.id]) return
-    const fetchDetail = DETAIL_FETCHERS[searchResult.source]
-    const detailed = fetchDetail ? await fetchDetail(searchResult) : searchResult
-    const works = { ...data.works, [searchResult.id]: { ...detailed, status: 'a_voir', added: Date.now() } }
-    await mutate({ works })
   }
 
   return { addWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
