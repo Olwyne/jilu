@@ -4,20 +4,26 @@ import { renderHook, act } from '@testing-library/react'
 import * as tmdb from '../catalog/tmdb'
 
 describe('useWorkActions', () => {
-  it('toggleEpisode flips a watched key and persists it', async () => {
+  it('toggleEpisode marks episode and updates status atomically', async () => {
     const mutate = vi.fn().mockResolvedValue()
-    const data = { works: { w1: { id: 'w1', status: 'a_voir', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }] } }, watched: {} }
+    const data = { works: { w1: { id: 'w1', status: 'a_voir', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }, { n: 2, air: 0 }] }] } }, watched: {} }
     const { result } = renderHook(() => useWorkActions(data, mutate))
     await act(async () => { await result.current.toggleEpisode('w1', 1, 1) })
-    expect(mutate).toHaveBeenCalledWith({ watched: { 'w1-1-1': expect.any(Number) } })
+    expect(mutate).toHaveBeenCalledWith({
+      watched: { 'w1-1-1': expect.any(Number) },
+      works: expect.objectContaining({ w1: expect.objectContaining({ status: 'en_cours' }) })
+    })
   })
 
-  it('toggleEpisode un-marks an already-watched episode', async () => {
+  it('toggleEpisode un-marks and status reverts to a_voir when nothing left watched', async () => {
     const mutate = vi.fn().mockResolvedValue()
-    const data = { works: { w1: { id: 'w1', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }] } }, watched: { 'w1-1-1': true } }
+    const data = { works: { w1: { id: 'w1', status: 'en_cours', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }] } }, watched: { 'w1-1-1': 123 } }
     const { result } = renderHook(() => useWorkActions(data, mutate))
     await act(async () => { await result.current.toggleEpisode('w1', 1, 1) })
-    expect(mutate).toHaveBeenCalledWith({ watched: {} })
+    expect(mutate).toHaveBeenCalledWith({
+      watched: {},
+      works: expect.objectContaining({ w1: expect.objectContaining({ status: 'a_voir' }) })
+    })
   })
 
   it('setRating toggles off when clicking the same value again', async () => {

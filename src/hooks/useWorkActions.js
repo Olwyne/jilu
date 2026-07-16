@@ -21,14 +21,10 @@ function computeAutoStatus(work, watched) {
   return 'en_cours'
 }
 
-async function applyAutoStatus(work, watched, mutate, works) {
+function buildStatusPatch(work, watched, works) {
   const auto = computeAutoStatus(work, watched)
-  if (!auto || auto === work.status) return
-  if (work.status === 'abandonne') {
-    const resume = window.confirm(`Tu reprends "${work.title}" ? Passer en "${auto === 'en_cours' ? 'En cours' : auto === 'a_voir' ? 'À voir' : 'Terminé'}" ?`)
-    if (!resume) return
-  }
-  await mutate({ works: { ...works, [work.id]: { ...work, status: auto } } })
+  if (!auto || auto === work.status) return {}
+  return { works: { ...works, [work.id]: { ...work, status: auto } } }
 }
 
 export function useWorkActions(data, mutate) {
@@ -36,8 +32,15 @@ export function useWorkActions(data, mutate) {
     const key = `${workId}-${sNum}-${eNum}`
     const watched = { ...data.watched }
     if (watched[key]) delete watched[key]; else watched[key] = Date.now()
-    await mutate({ watched })
-    await applyAutoStatus(data.works[workId], watched, mutate, data.works)
+    const work = data.works[workId]
+    const statusPatch = buildStatusPatch(work, watched, data.works)
+    if (statusPatch.works && work.status === 'abandonne') {
+      const auto = statusPatch.works[workId].status
+      const label = auto === 'en_cours' ? 'En cours' : 'Terminé'
+      const resume = window.confirm(`Tu reprends "${work.title}" ? Passer en "${label}" ?`)
+      if (!resume) { await mutate({ watched }); return }
+    }
+    await mutate({ watched, ...statusPatch })
   }
 
   async function markSeason(workId, sNum) {
@@ -51,8 +54,14 @@ export function useWorkActions(data, mutate) {
       const key = `${workId}-${sNum}-${e.n}`
       if (allDone) delete watched[key]; else watched[key] = Date.now()
     })
-    await mutate({ watched })
-    await applyAutoStatus(work, watched, mutate, data.works)
+    const statusPatch = buildStatusPatch(work, watched, data.works)
+    if (statusPatch.works && work.status === 'abandonne') {
+      const auto = statusPatch.works[workId].status
+      const label = auto === 'en_cours' ? 'En cours' : 'Terminé'
+      const resume = window.confirm(`Tu reprends "${work.title}" ? Passer en "${label}" ?`)
+      if (!resume) { await mutate({ watched }); return }
+    }
+    await mutate({ watched, ...statusPatch })
   }
 
   async function setRating(scope, id, val) {

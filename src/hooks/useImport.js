@@ -25,11 +25,13 @@ function parseCSV(text) {
 
 function autoStatus(importedWorks, watched) {
   importedWorks.forEach(w => {
-    if (!w.seasons || w.status === 'a_voir') return
+    if (!w.seasons || w.status === 'abandonne') return
     const total = w.seasons.reduce((n, s) => n + s.episodes.length, 0)
     if (total === 0) return
-    const seen = w.seasons.reduce((n, s) => n + s.episodes.filter(e => watched[w.id + '-' + s.n + '-' + e.n]).length, 0)
-    if (seen >= total) w.status = 'termine'
+    const seen = w.seasons.reduce((n, s) => n + s.episodes.filter(e => watched[`${w.id}-${s.n}-${e.n}`]).length, 0)
+    if (seen === 0) return
+    if (seen >= total) w.status = w.ended === false ? 'en_cours' : 'termine'
+    else w.status = 'en_cours'
   })
 }
 
@@ -177,6 +179,7 @@ export function useImport(data, mutate) {
         }
       }
 
+      autoStatus(Object.values(works), watched)
       await mutate({ works, watched, ratings, favorites })
       if (onFailed && failed.length > 0) onFailed(failed)
       onStatus(`✓ ${newImports} série${newImports !== 1 ? 's' : ''}, ${totalEps} épisode${totalEps !== 1 ? 's' : ''}, ${newMovies} film${newMovies !== 1 ? 's' : ''} importé${newMovies !== 1 ? 's' : ''}.`)
@@ -286,6 +289,7 @@ export function useImport(data, mutate) {
         }
       }
 
+      autoStatus(Object.values(works), watched)
       await mutate({ works, watched, ratings, favorites })
       if (onFailed && failed.length > 0) onFailed(failed)
       onStatus(`✓ ${newImports} série${newImports !== 1 ? 's' : ''}, ${totalEps} épisode${totalEps !== 1 ? 's' : ''}, ${newMovies} film${newMovies !== 1 ? 's' : ''} importé${newMovies !== 1 ? 's' : ''}.`)
