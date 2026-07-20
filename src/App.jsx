@@ -62,6 +62,7 @@ function Shell() {
   const [toast, setToast] = useState(null)
   const workActions = useWorkActions(data, mutate)
   const { importTVTime, importTVTimeOut } = useImport(data, mutate)
+  const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
 
   useEffect(() => {
     document.documentElement.dataset.theme = data.settings.darkMode === false ? 'light' : 'dark'
@@ -211,6 +212,8 @@ function Shell() {
           ratings={data.ratings}
           feed={data.feed}
           actions={workActions}
+          watched={data.watched}
+          currentUser={currentUser}
           onClose={() => setEpisodeModal(null)}
         />
       )}
