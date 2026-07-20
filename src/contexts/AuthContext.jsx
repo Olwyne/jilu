@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import {
   onAuthStateChanged, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, signOut
+  createUserWithEmailAndPassword, signOut,
+  sendPasswordResetEmail, confirmPasswordReset
 } from 'firebase/auth'
 import { auth } from '../firebase'
 
@@ -20,7 +21,9 @@ export function AuthProvider({ children }) {
     loading,
     signup: (email, password) => createUserWithEmailAndPassword(auth, email, password),
     login: (email, password) => signInWithEmailAndPassword(auth, email, password),
-    logout: () => signOut(auth)
+    logout: () => signOut(auth),
+    resetPassword: (email) => sendPasswordResetEmail(auth, email, { url: 'https://jilu-app.vercel.app/login' }),
+    confirmReset: (oobCode, newPassword) => confirmPasswordReset(auth, oobCode, newPassword),
   }
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
