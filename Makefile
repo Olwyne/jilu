@@ -10,4 +10,6 @@ logs:
 	docker compose logs -f web
 
 ci:
-	npm run lint && npm test && npm audit
+	npm run lint
+	npm test
+	npm audit
