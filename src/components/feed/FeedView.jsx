@@ -30,7 +30,7 @@ export default function FeedView({ feed, works, onOpenWork, onToggleLike, onDele
         const { from, to } = posterGradient(f.workId)
         const context = getContext(f, works)
         return (
-          <div key={f.id} style={{ border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, background: 'rgba(255,255,255,.025)', padding: 18 }}>
+          <div key={f.id} style={{ border: '1px solid var(--color-border)', borderRadius: 18, background: 'var(--color-surface)', padding: 18 }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
               <div onClick={() => w && onOpenWork(w.id)} style={{ width: 46, height: 66, borderRadius: 10, background: `linear-gradient(150deg, ${from}, ${to})`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 17, color: 'rgba(255,255,255,.9)' }}>{initials(w ? w.title : f.workId)}</span>

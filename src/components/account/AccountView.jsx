@@ -11,14 +11,14 @@ function Toggle({ on, onToggle }) {
 }
 
 const PREF_ROWS = [
-  ['notifNewEp', 'Nouveaux épisodes', "Être notifié quand un épisode d'une série suivie sort"],
-  ['notifCalendar', 'Rappels de sortie', 'Alerte la veille des sorties du calendrier'],
-  ['notifWeekly', 'Résumé hebdomadaire', 'Un récap de ta semaine chaque dimanche']
+  ['notifNewEp', 'Nouveaux épisodes', "Être notifié quand un épisode d'une série suivie sort", true],
+  ['notifCalendar', 'Rappels de sortie', 'Alerte la veille des sorties du calendrier', true],
+  ['notifWeekly', 'Résumé hebdomadaire', 'Un récap de ta semaine chaque dimanche', true]
 ]
 const PLAYBACK_ROWS = [
-  ['autoNext', "Marquer l'épisode suivant", "Coche automatiquement en cascade jusqu'à l'épisode choisi"],
-  ['spoilerFree', 'Mode sans spoiler', 'Masque les titres et vignettes des épisodes non vus'],
-  ['adult', 'Contenu mature', 'Afficher les œuvres classées 18+']
+  ['autoNext', "Marquer l'épisode suivant", "Coche automatiquement en cascade jusqu'à l'épisode choisi", true],
+  ['spoilerFree', 'Mode sans spoiler', 'Masque les titres et vignettes des épisodes non vus', true],
+  ['adult', 'Contenu mature', 'Afficher les œuvres classées 18+', true]
 ]
 const PRIVACY_ROWS = [
   ['publicProfile', 'Profil public', 'Rendre ta bibliothèque et tes notes visibles']
@@ -27,13 +27,22 @@ const PRIVACY_ROWS = [
 function Section({ rows, settings, onToggleSetting }) {
   return (
     <div style={{ borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden', marginBottom: 24 }}>
-      {rows.map(([key, label, desc]) => (
-        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderTop: '1px solid var(--color-border-sm)' }}>
+      {rows.map(([key, label, desc, disabled]) => (
+        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderTop: '1px solid var(--color-border-sm)', opacity: disabled ? 0.45 : 1 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 600, fontSize: 14.5 }}>{label}</div>
+            <div style={{ fontWeight: 600, fontSize: 14.5, display: 'flex', alignItems: 'center', gap: 8 }}>
+              {label}
+              {disabled && (
+                <span style={{ background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 6px', lineHeight: 1.5 }}>
+                  À venir
+                </span>
+              )}
+            </div>
             <div style={{ fontSize: 12.5, color: 'var(--color-muted)', marginTop: 2 }}>{desc}</div>
           </div>
-          <Toggle on={!!settings[key]} onToggle={() => onToggleSetting(key)} />
+          <div style={{ pointerEvents: disabled ? 'none' : 'auto' }}>
+            <Toggle on={disabled ? false : !!settings[key]} onToggle={() => onToggleSetting(key)} />
+          </div>
         </div>
       ))}
     </div>
@@ -89,7 +98,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         </div>
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>@{profile.handle || '—'}</h2>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>{profile.handle || '—'}</h2>
             <span onClick={() => setEditOpen(true)} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>Modifier</span>
           </div>
           <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{profile.email}</div>

@@ -30,7 +30,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
         const done = aired.filter((e) => watched[`${work.id}-${s.n}-${e.n}`]).length
         const isOpen = expanded.has(s.n)
         return (
-          <div key={s.n} style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 16, overflow: 'hidden', background: 'rgba(255,255,255,.02)' }}>
+          <div key={s.n} style={{ border: '1px solid var(--color-border-btn)', borderRadius: 16, overflow: 'hidden', background: 'var(--color-surface)' }}>
             <div onClick={() => toggleExpanded(s.n)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', cursor: 'pointer' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17 }}>{s.name || `Saison ${s.n}`}</span>
               <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{done}/{s.episodes.length} vus</span>
@@ -48,10 +48,10 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
                   const isWatched = !!watched[key]
                   const aired2 = e.air > 0 && e.air <= now
                   return (
-                    <div key={e.n} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderTop: '1px solid rgba(255,255,255,.05)', opacity: isWatched ? .62 : (aired2 ? 1 : .5) }}>
+                    <div key={e.n} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderTop: '1px solid var(--color-border)', opacity: isWatched ? .62 : (aired2 ? 1 : .5) }}>
                       <div
                         onClick={(ev) => { ev.stopPropagation(); if (aired2) onToggleEpisode(work.id, s.n, e.n) }}
-                        style={{ width: 26, height: 26, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, cursor: aired2 ? 'pointer' : 'not-allowed', color: '#fff', background: isWatched ? 'var(--color-accent)' : 'transparent', border: `2px solid ${isWatched ? 'var(--color-accent)' : (aired2 ? '#4a4a58' : '#2a2a38')}` }}
+                        style={{ width: 26, height: 26, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, cursor: aired2 ? 'pointer' : 'not-allowed', color: '#fff', background: isWatched ? 'var(--color-accent)' : 'transparent', border: `2px solid ${isWatched ? 'var(--color-accent)' : (aired2 ? 'var(--color-check-border)' : 'var(--color-check-border-dim)')}` }}
                       >
                         {isWatched ? '✓' : ''}
                       </div>

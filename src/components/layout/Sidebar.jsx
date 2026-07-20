@@ -38,7 +38,7 @@ export default function Sidebar({ profile = {}, toCatch = 0 }) {
       >
         <div className={styles.chipAvatar}>{initials(profile.handle || '?')}</div>
         <div className={styles.chipInfo}>
-          <div className={styles.chipName}>{profile.handle ? '@' + profile.handle : 'Compte'}</div>
+          <div className={styles.chipName}>{profile.handle || 'Compte'}</div>
           <div className={styles.chipHandle}>{profile.email || 'Paramètres'}</div>
         </div>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.8" style={{ flexShrink: 0 }}>

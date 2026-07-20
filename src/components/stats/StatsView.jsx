@@ -43,7 +43,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
           [String(filmsSeen), 'films vus', 'var(--color-pink)'],
           [ratedN ? (ratedSum / ratedN).toFixed(1) : '—', 'note moyenne', 'var(--color-gold)']
         ].map(([value, label, color]) => (
-          <div key={label} style={{ padding: 20, borderRadius: 16, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)' }}>
+          <div key={label} style={{ padding: 20, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, color }}>{value}</div>
             <div style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 4 }}>{label}</div>
           </div>
@@ -51,7 +51,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 26, marginBottom: 30 }}>
-        <div style={{ padding: 22, borderRadius: 18, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.07)' }}>
+        <div style={{ padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>Par catégorie</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {Object.keys(CAT).filter((k) => catCount[k]).map((k) => (
@@ -64,7 +64,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
             ))}
           </div>
         </div>
-        <div style={{ padding: 22, borderRadius: 18, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.07)' }}>
+        <div style={{ padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>Par statut</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {[['termine', 'Terminé'], ['en_cours', 'En cours'], ['a_voir', 'À voir'], ['abandonne', 'Abandonné']].map(([k, label]) => (
@@ -81,7 +81,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
         </div>
       </div>
 
-      <div style={{ padding: 22, borderRadius: 18, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.07)', marginBottom: 30 }}>
+      <div style={{ padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)', marginBottom: 30 }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 4px' }}>Activité récente</h3>
         <div style={{ fontSize: 12.5, color: 'var(--color-muted-2)', marginBottom: 18 }}>Épisodes & titres cochés, 10 dernières semaines</div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 120 }}>
@@ -95,7 +95,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 26 }}>
-        <div style={{ padding: 22, borderRadius: 18, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.07)' }}>
+        <div style={{ padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>Genres favoris</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {topGenres.map(([g, n]) => (
@@ -106,7 +106,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
             ))}
           </div>
         </div>
-        <div style={{ padding: 22, borderRadius: 18, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.07)' }}>
+        <div style={{ padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>Les mieux notés</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {topRated.map((w) => {

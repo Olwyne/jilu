@@ -1,5 +1,12 @@
 :root {
   --color-bg: #0a0a0f;
+  --color-chip-bg: rgba(255,255,255,.05);
+  --color-progress-track: rgba(255,255,255,.09);
+  --color-dropdown-bg: #1c1c2e;
+  --color-modal-bg: #15151d;
+  --color-mobile-nav-bg: rgba(14,14,20,.92);
+  --color-check-border: #4a4a58;
+  --color-check-border-dim: #2a2a38;
   --color-text: #ECECF2;
   --color-accent: #8b6dff;
   --color-accent-hover: #7a5cf0;
@@ -30,6 +37,7 @@
 
 [data-theme="light"] {
   --color-bg: #f2f2f7;
+  --color-surface-nav: #e6e6f0;
   --color-text: #1a1a2e;
   --color-accent: #7a5cf0;
   --color-accent-hover: #6a4ce0;
@@ -43,8 +51,15 @@
   --color-surface-toast: rgba(242,242,247,.97);
   --color-border-glass: rgba(0,0,0,.1);
   --color-shadow-lg: rgba(0,0,0,.15);
-  --color-surface: rgba(0,0,0,.03);
-  --color-surface-row: rgba(0,0,0,.025);
+  --color-surface: rgba(255,255,255,.88);
+  --color-surface-row: rgba(255,255,255,.6);
+  --color-chip-bg: rgba(0,0,0,.06);
+  --color-progress-track: rgba(0,0,0,.09);
+  --color-dropdown-bg: #ffffff;
+  --color-modal-bg: #ffffff;
+  --color-mobile-nav-bg: rgba(242,242,247,.92);
+  --color-check-border: rgba(0,0,0,.28);
+  --color-check-border-dim: rgba(0,0,0,.13);
   --color-border: rgba(0,0,0,.08);
   --color-border-sm: rgba(0,0,0,.05);
   --color-border-btn: rgba(0,0,0,.12);

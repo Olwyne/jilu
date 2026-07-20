@@ -40,8 +40,8 @@ export default function StatusSelect({ value, onChange }) {
       {open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 100,
-          background: '#1c1c2e',
-          border: '1px solid rgba(255,255,255,.1)',
+          background: 'var(--color-dropdown-bg)',
+          border: '1px solid var(--color-border-btn)',
           borderRadius: 13,
           overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(0,0,0,.45)',
@@ -55,13 +55,13 @@ export default function StatusSelect({ value, onChange }) {
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '11px 16px',
                 cursor: 'pointer',
-                color: key === value ? color : '#c8c8dc',
+                color: key === value ? color : 'var(--color-muted)',
                 fontWeight: key === value ? 700 : 500,
                 fontSize: 14,
                 background: key === value ? `${color}14` : 'transparent',
                 transition: 'background .12s',
               }}
-              onMouseEnter={(e) => { if (key !== value) e.currentTarget.style.background = 'rgba(255,255,255,.06)' }}
+              onMouseEnter={(e) => { if (key !== value) e.currentTarget.style.background = 'var(--color-chip-bg)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = key === value ? `${color}14` : 'transparent' }}
             >
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, flexShrink: 0 }} />

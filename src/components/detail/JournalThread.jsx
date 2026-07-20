@@ -12,7 +12,7 @@ export default function JournalThread({ commentsKey, feed, onPost, onToggleLike,
   }
 
   return (
-    <div style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 16, background: 'rgba(255,255,255,.02)', padding: '18px 20px' }}>
+    <div style={{ border: '1px solid var(--color-border-btn)', borderRadius: 16, background: 'var(--color-surface)', padding: '18px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16 }}>Mon journal</span>
         <span style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{comments.length}</span>
@@ -22,7 +22,7 @@ export default function JournalThread({ commentsKey, feed, onPost, onToggleLike,
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Partage ta réaction…"
-          style={{ flex: 1, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, padding: '11px 14px', color: 'var(--color-text)', fontSize: 14 }}
+          style={{ flex: 1, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 10, padding: '11px 14px', color: 'var(--color-text)', fontSize: 14 }}
         />
         <div onClick={submit} style={{ padding: '11px 18px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Publier</div>
       </div>

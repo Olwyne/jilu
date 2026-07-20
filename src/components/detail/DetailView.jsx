@@ -41,13 +41,13 @@ export default function DetailView({ work, watched, ratings, games, feed, action
                 <span style={{ color: 'var(--color-muted)' }}>Progression</span>
                 <span style={{ fontWeight: 600 }}>{watchedCount} / {total} {term(work.category).unit}</span>
               </div>
-              <div style={{ height: 8, borderRadius: 8, background: 'rgba(255,255,255,.09)', overflow: 'hidden' }}>
+              <div style={{ height: 8, borderRadius: 8, background: 'var(--color-progress-track)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${total ? Math.round((watchedCount / total) * 100) : 0}%`, background: 'linear-gradient(90deg, var(--color-accent), var(--color-pink))' }} />
               </div>
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 13, background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.08)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 13, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)' }}>
               <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>Ma note</span>
               <div style={{ display: 'flex', gap: 3 }}>
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -57,7 +57,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
             </div>
             <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} />
             {actions.toggleFavorite && (
-              <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'rgba(255,255,255,.045)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'rgba(255,255,255,.08)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? '★ Favori' : '☆ Favori'}</div>
+              <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? '★ Favori' : '☆ Favori'}</div>
             )}
           </div>
         </div>

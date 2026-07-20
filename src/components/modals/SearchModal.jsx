@@ -45,15 +45,23 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
           <div onClick={onClose} style={{ color: 'var(--color-muted-2)', cursor: 'pointer', fontSize: 14, padding: '4px 8px' }}>Échap</div>
         </div>
         <div style={{ display: 'flex', gap: 6, padding: '12px 14px 0', overflowX: 'auto', scrollbarWidth: 'none' }}>
-          {CATS.map((c) => (
-            <div
-              key={c.k}
-              onClick={() => { setCat(c.k); setResults([]) }}
-              style={{ padding: '6px 13px', borderRadius: 20, fontSize: 13, fontWeight: cat === c.k ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap', color: cat === c.k ? '#fff' : 'var(--color-muted)', background: cat === c.k ? 'var(--color-accent)' : 'var(--color-surface-row)', border: `1px solid ${cat === c.k ? 'transparent' : 'var(--color-border)'}`, flexShrink: 0 }}
-            >
-              {c.label}
-            </div>
-          ))}
+          {CATS.map((c) => {
+            const disabled = c.k === 'musique'
+            return (
+              <div
+                key={c.k}
+                onClick={() => { if (!disabled) { setCat(c.k); setResults([]) } }}
+                style={{ position: 'relative', padding: '6px 13px', borderRadius: 20, fontSize: 13, fontWeight: cat === c.k ? 600 : 500, cursor: disabled ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', color: disabled ? 'var(--color-muted-3)' : cat === c.k ? '#fff' : 'var(--color-muted)', background: disabled ? 'var(--color-surface-row)' : cat === c.k ? 'var(--color-accent)' : 'var(--color-surface-row)', border: `1px solid ${!disabled && cat === c.k ? 'transparent' : 'var(--color-border)'}`, opacity: disabled ? 0.5 : 1, flexShrink: 0 }}
+              >
+                {c.label}
+                {disabled && (
+                  <span style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                    À venir
+                  </span>
+                )}
+              </div>
+            )
+          })}
         </div>
         <div style={{ maxHeight: '48vh', overflowY: 'auto', padding: 8 }}>
           {loading && <div style={{ padding: '16px 32px', textAlign: 'center', color: 'var(--color-muted-3)', fontSize: 13 }}>Recherche en cours…</div>}

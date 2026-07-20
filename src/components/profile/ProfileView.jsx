@@ -43,12 +43,12 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
     <div style={{ maxWidth: 700, display: 'flex', flexDirection: 'column', gap: 28 }}>
 
       {/* Hero */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20, padding: 24, borderRadius: 22, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.07)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, padding: 24, borderRadius: 22, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
         <div style={{ width: 72, height: 72, flexShrink: 0, borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), var(--color-pink))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: '#fff' }}>
           {initials(pseudo)}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 26 }}>@{pseudo}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 26 }}>{pseudo}</div>
           <div style={{ color: 'var(--color-muted-3)', fontSize: 13, marginTop: 2 }}>Membre depuis {profile.memberSince}</div>
           <div style={{ display: 'flex', gap: 20, marginTop: 12, flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{worksCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>œuvres</div></div>
@@ -57,7 +57,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-          <div onClick={handleShare} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'rgba(255,255,255,.05)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'rgba(255,255,255,.07)'}` }}>
+          <div onClick={handleShare} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
             {isPublic ? 'Copier le lien' : 'Profil privé'}
           </div>
           <div style={{ fontSize: 12, color: isPublic ? '#4ade80' : 'var(--color-muted)' }}>{isPublic ? '🌐 Public' : '🔒 Privé'}</div>
@@ -91,14 +91,14 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                 const w = works[f.workId]
                 const context = getContext(f, works)
                 return (
-                  <div key={f.id} style={{ border: '1px solid rgba(255,255,255,.07)', borderRadius: 18, background: 'rgba(255,255,255,.025)', padding: 18 }}>
+                  <div key={f.id} style={{ border: '1px solid var(--color-border)', borderRadius: 18, background: 'var(--color-surface)', padding: 18 }}>
                     <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
                       <div onClick={() => w && onOpenWork(w.id)} style={{ flexShrink: 0, cursor: 'pointer' }}>
                         <PosterBox id={f.workId} title={w ? w.title : f.workId} poster={w?.poster} width={46} height={66} radius={10} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ fontWeight: 600, fontSize: 14 }}>@{pseudo}</span>
+                          <span style={{ fontWeight: 600, fontSize: 14 }}>{pseudo}</span>
                           <span style={{ fontSize: 12.5, color: 'var(--color-muted-3)' }}>· {relText(f.ts, Date.now())}</span>
                         </div>
                         <div onClick={() => w && onOpenWork(w.id)} style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 5, cursor: 'pointer' }}>

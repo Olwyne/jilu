@@ -59,7 +59,7 @@ export default function DashboardView({ works, watched, reviews, ratings, feed, 
           [String(totalEps), 'Épisodes vus'],
           [String(toCatch), 'À rattraper']
         ].map(([value, label]) => (
-          <div key={label} style={{ padding: 18, borderRadius: 16, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)' }}>
+          <div key={label} style={{ padding: 18, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30 }}>{value}</div>
             <div style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 4 }}>{label}</div>
           </div>
@@ -69,7 +69,7 @@ export default function DashboardView({ works, watched, reviews, ratings, feed, 
       <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>Prochain épisode à regarder</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 34 }}>
         {upNext.map(({ w, nx }) => (
-          <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 12, borderRadius: 16, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', cursor: 'pointer' }}>
+          <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 12, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
             <PosterBox id={w.id} title={w.title} poster={w.poster} width={54} height={78} radius={11} fontSize={22} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
@@ -91,7 +91,7 @@ export default function DashboardView({ works, watched, reviews, ratings, feed, 
                 ? `S${item.sNum} · Ep. ${item.eNum}`
                 : item._type === 'review' ? 'Avis global' : null
               return (
-                <div key={item.id || item._type + item.ts} onClick={() => w && onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 14, borderRadius: 16, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', cursor: 'pointer' }}>
+                <div key={item.id || item._type + item.ts} onClick={() => w && onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 14, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
                   <PosterBox id={w?.id || item.workId || item.id} title={w?.title || ''} poster={w?.poster} width={46} height={66} radius={10} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>

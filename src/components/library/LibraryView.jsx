@@ -57,11 +57,24 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
   return (
     <div>
       <div className={styles.chipsRow}>
-        {CATS.map(([key, label]) => (
-          <div key={key} className={`${styles.chip} ${category === key ? styles.chipActive : ''}`} onClick={() => setCategory(key)}>
-            {label} <span className={styles.chipCount}>{key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length}</span>
-          </div>
-        ))}
+        {CATS.map(([key, label]) => {
+          const disabled = key === 'musique'
+          return (
+            <div
+              key={key}
+              className={`${styles.chip} ${!disabled && category === key ? styles.chipActive : ''} ${disabled ? styles.chipDisabled : ''}`}
+              onClick={() => { if (!disabled) setCategory(key) }}
+              style={disabled ? { cursor: 'not-allowed', opacity: 0.45, position: 'relative' } : { position: 'relative' }}
+            >
+              {label} <span className={styles.chipCount}>{key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length}</span>
+              {disabled && (
+                <span style={{ position: 'absolute', top: -6, right: -6, background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                  À venir
+                </span>
+              )}
+            </div>
+          )
+        })}
       </div>
       <div className={styles.filtersRow}>
         <div className={styles.smallChips}>
