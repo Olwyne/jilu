@@ -3,17 +3,22 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MobileNav from './MobileNav'
 
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockNavigate,
+  useLocation: () => ({ pathname: '/library' })
+}))
+
 describe('MobileNav', () => {
-  it('renders the five nav items and highlights the active one', () => {
-    render(<MobileNav view="library" setView={() => {}} />)
+  it('renders nav items and highlights the active one', () => {
+    render(<MobileNav />)
     const libraryItem = screen.getByText('Biblio').closest('div')
     expect(libraryItem.className).toMatch(/active/)
   })
 
-  it('calls setView with the clicked section', async () => {
-    const setView = vi.fn()
-    render(<MobileNav view="library" setView={setView} />)
+  it('navigates to the clicked section', async () => {
+    render(<MobileNav />)
     await userEvent.click(screen.getByText('Calendrier'))
-    expect(setView).toHaveBeenCalledWith('calendar')
+    expect(mockNavigate).toHaveBeenCalledWith('/calendar')
   })
 })

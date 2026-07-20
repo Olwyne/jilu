@@ -3,6 +3,12 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SignupPage from './SignupPage'
 
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockNavigate,
+  useLocation: () => ({ state: null })
+}))
+
 const signup = vi.fn().mockResolvedValue()
 vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => ({ signup }) }))
 
