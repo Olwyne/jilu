@@ -14,7 +14,7 @@ function Field({ label, children }) {
 
 const inputStyle = {
   width: '100%', padding: '12px 14px', borderRadius: 11, fontSize: 15,
-  background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)',
+  background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)',
   outline: 'none', color: 'var(--color-text)', fontFamily: 'inherit', boxSizing: 'border-box'
 }
 
@@ -28,12 +28,15 @@ const STATUS_MSG = {
 }
 
 export default function EditProfileModal({ profile, onSave, onClose }) {
-  const { user } = useAuth()
+  const { user, changePassword } = useAuth()
   const [handle, setHandle] = useState(profile.handle || '')
   const [email, setEmail] = useState(profile.email || '')
   const [handleStatus, setHandleStatus] = useState('self')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   useEffect(() => {
     const h = handle.trim().toLowerCase()
@@ -49,9 +52,16 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
     return () => clearTimeout(t)
   }, [handle, profile.handle, user.uid])
 
+  const passwordFilled = newPassword.length > 0 || currentPassword.length > 0
+
   async function handleSubmit(e) {
     e.preventDefault()
     if (handleStatus === 'taken' || handleStatus === 'invalid' || handleStatus === 'checking') return
+    if (passwordFilled) {
+      if (!currentPassword) { setError('Saisis ton mot de passe actuel.'); return }
+      if (newPassword.length < 6) { setError('Le nouveau mot de passe doit faire au moins 6 caractères.'); return }
+      if (newPassword !== confirmPassword) { setError('Les mots de passe ne correspondent pas.'); return }
+    }
     setSaving(true)
     setError(null)
     try {
@@ -61,9 +71,15 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
         await setDoc(doc(db, 'pseudos', h), { uid: user.uid })
       }
       await onSave({ handle: h, email: email.trim() })
+      if (passwordFilled) await changePassword(currentPassword, newPassword)
       onClose()
     } catch (err) {
-      setError(err.message || 'Erreur lors de la sauvegarde')
+      const code = err.code
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        setError('Mot de passe actuel incorrect.')
+      } else {
+        setError(err.message || 'Erreur lors de la sauvegarde')
+      }
     }
     setSaving(false)
   }
@@ -73,18 +89,17 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, background: '#15151d', border: '1px solid rgba(255,255,255,.1)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 24 }}>Modifier le profil</div>
         <form onSubmit={handleSubmit}>
           <Field label="Pseudo">
             <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted-2)', fontSize: 15, pointerEvents: 'none' }}>@</span>
               <input
                 value={handle}
                 onChange={(e) => setHandle(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
                 placeholder="ton_pseudo"
                 maxLength={20}
-                style={{ ...inputStyle, paddingLeft: 28 }}
+                style={{ ...inputStyle }}
               />
             </div>
             {msg && <div style={{ fontSize: 12.5, marginTop: 6, color: msg.color }}>{msg.text}</div>}
@@ -97,12 +112,40 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
               placeholder="ton@email.com"
               style={inputStyle}
             />
-            <div style={{ fontSize: 12, color: 'var(--color-muted-3)', marginTop: 6 }}>Modifie uniquement dans les paramètres Firebase Auth si besoin.</div>
+          </Field>
+          <Field label="Changer le mot de passe">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Mot de passe actuel"
+                style={inputStyle}
+                autoComplete="current-password"
+              />
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Nouveau mot de passe"
+                style={inputStyle}
+                minLength={6}
+                autoComplete="new-password"
+              />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirmer le nouveau mot de passe"
+                style={inputStyle}
+                autoComplete="new-password"
+              />
+            </div>
           </Field>
           {error && <div style={{ fontSize: 13, color: '#f87171', marginBottom: 14 }}>{error}</div>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-            <div onClick={onClose} style={{ padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-muted-2)', background: 'rgba(255,255,255,.05)' }}>Annuler</div>
-            <button type="submit" disabled={!canSave} style={{ padding: '11px 22px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed', border: 'none', background: canSave ? 'var(--color-accent)' : 'rgba(255,255,255,.1)', color: canSave ? '#fff' : 'var(--color-muted-3)' }}>
+            <div onClick={onClose} style={{ padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-muted-2)', background: 'var(--color-chip-bg)' }}>Annuler</div>
+            <button type="submit" disabled={!canSave} style={{ padding: '11px 22px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed', border: 'none', background: canSave ? 'var(--color-accent)' : 'var(--color-border-btn)', color: canSave ? '#fff' : 'var(--color-muted-3)' }}>
               {saving ? 'Sauvegarde…' : 'Sauvegarder'}
             </button>
           </div>
