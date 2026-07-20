@@ -27,3 +27,5 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+docs/superpowers/plans/2026-07-20-forgot-password.md
+*.zip
