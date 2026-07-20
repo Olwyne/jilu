@@ -6,6 +6,8 @@ import { useWorkActions } from './hooks/useWorkActions'
 import { useImport } from './hooks/useImport'
 import LoginPage from './components/auth/LoginPage'
 import SignupPage from './components/auth/SignupPage'
+import ForgotPasswordPage from './components/auth/ForgotPasswordPage'
+import ResetPasswordPage from './components/auth/ResetPasswordPage'
 import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import Header from './components/layout/Header'
@@ -240,6 +242,13 @@ function SignupRoute() {
   return <SignupPage />
 }
 
+function ForgotPasswordRoute() {
+  const { user, loading } = useAuth()
+  if (loading) return null
+  if (user) return <Navigate to="/library" replace />
+  return <ForgotPasswordPage />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -248,6 +257,8 @@ export default function App() {
           <Route path="/u/:handle" element={<PublicProfilePage />} />
           <Route path="/login" element={<LoginRoute />} />
           <Route path="/signup" element={<SignupRoute />} />
+          <Route path="/forgot-password" element={<ForgotPasswordRoute />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/*" element={<AuthGuard />} />
         </Routes>
       </AuthProvider>
