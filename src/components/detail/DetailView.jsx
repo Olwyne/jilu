@@ -1,19 +1,9 @@
 import PosterBox from '../ui/PosterBox'
 import StatusSelect from '../ui/StatusSelect'
-import { CAT, STATUS, term } from '../../lib/domain'
+import { CAT, STATUS, term, epTotals } from '../../lib/domain'
 import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
 import JournalThread from './JournalThread'
-
-function epTotals(work, watched) {
-  if (!work.seasons) return { total: 0, watchedCount: 0 }
-  let total = 0, watchedCount = 0
-  work.seasons.forEach((s) => s.episodes.forEach((e) => {
-    total++
-    if (watched[`${work.id}-${s.n}-${e.n}`]) watchedCount++
-  }))
-  return { total, watchedCount }
-}
 
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites }) {
   const { total, watchedCount } = epTotals(work, watched)

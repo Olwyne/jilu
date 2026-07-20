@@ -51,3 +51,13 @@ export function relText(ts, now) {
   if (diff < 0) return 'il y a ' + Math.round(-diff / 7) + ' sem'
   return fmtDate(ts)
 }
+
+export function epTotals(work, watched) {
+  if (!work.seasons) return { total: 0, watchedCount: 0 }
+  let total = 0, watchedCount = 0
+  work.seasons.forEach((s) => s.episodes.forEach((e) => {
+    total++
+    if (watched[`${work.id}-${s.n}-${e.n}`]) watchedCount++
+  }))
+  return { total, watchedCount }
+}

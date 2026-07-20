@@ -12,7 +12,7 @@ function nextEpisode(work, watched) {
   return null
 }
 
-export default function DashboardView({ works, watched, reviews, ratings, feed, onOpenWork, onWatchNext }) {
+export default function DashboardView({ works, watched, reviews, feed, onOpenWork, onWatchNext }) {
   const list = Object.values(works)
   const enCours = list.filter((w) => w.status === 'en_cours')
   let totalEps = 0, toCatch = 0

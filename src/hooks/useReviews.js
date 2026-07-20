@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   collection, query, where, orderBy, onSnapshot,
-  addDoc, deleteDoc, doc, limit
+  addDoc, deleteDoc, doc
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
@@ -21,7 +21,6 @@ export function useReviews(workId, currentUser) {
   }, [workId, currentUser?.uid])
 
   const episodeReviews = reviews.filter(r => r.sNum != null)
-  const globalReviews = reviews.filter(r => r.sNum == null)
 
   async function addReview({ sNum = null, eNum = null, text, rating = null }) {
     if (!currentUser?.uid || !text?.trim()) return
@@ -42,23 +41,5 @@ export function useReviews(workId, currentUser) {
     await deleteDoc(doc(db, 'reviews', reviewId))
   }
 
-  return { episodeReviews, globalReviews, addReview, deleteReview }
-}
-
-export function useAllReviews(currentUser) {
-  const [reviews, setReviews] = useState([])
-
-  useEffect(() => {
-    if (!currentUser?.uid) return
-    const q = query(
-      collection(db, 'reviews'),
-      orderBy('ts', 'desc'),
-      limit(100)
-    )
-    return onSnapshot(q, snap => {
-      setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-    })
-  }, [currentUser?.uid])
-
-  return reviews
+  return { episodeReviews, addReview, deleteReview }
 }

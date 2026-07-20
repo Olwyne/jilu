@@ -1,21 +1,11 @@
 import { useState, useMemo } from 'react'
 import WorkCard from './WorkCard'
-import { CAT } from '../../lib/domain'
+import { epTotals } from '../../lib/domain'
 import styles from './LibraryView.module.css'
 
 const CATS = [['all', 'Tout'], ['series', 'Séries'], ['films', 'Films'], ['animes', 'Animés'], ['livres', 'Livres'], ['jeux', 'Jeux'], ['musique', 'Musique']]
 const STATUSES = [['all', 'Tous'], ['en_cours', 'En cours'], ['a_voir', 'À voir'], ['termine', 'Terminé'], ['abandonne', 'Abandonné']]
 const SORTS = [['recent', 'Récent'], ['note', 'Note'], ['titre', 'A-Z']]
-
-function epTotals(work, watched) {
-  if (!work.seasons) return { total: 0, watchedCount: 0 }
-  let total = 0, watchedCount = 0
-  work.seasons.forEach((s) => s.episodes.forEach((e) => {
-    total++
-    if (watched[`${work.id}-${s.n}-${e.n}`]) watchedCount++
-  }))
-  return { total, watchedCount }
-}
 
 export default function LibraryView({ works, watched, ratings, favorites, onOpenWork }) {
   const [category, setCategory] = useState('all')
