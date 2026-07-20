@@ -6,7 +6,7 @@ function nextEpisode(work, watched) {
   const now = Date.now()
   for (const s of work.seasons) {
     for (const e of s.episodes) {
-      if (!watched[`${work.id}-${s.n}-${e.n}`] && e.air <= now) return { s, e }
+      if (!watched[`${work.id}-${s.n}-${e.n}`] && e.air > 0 && e.air <= now) return { s, e }
     }
   }
   return null
@@ -21,7 +21,7 @@ export default function DashboardView({ works, watched, reviews, ratings, feed, 
     w.seasons.forEach((s) => s.episodes.forEach((e) => {
       const key = `${w.id}-${s.n}-${e.n}`
       if (watched[key]) totalEps++
-      else if (e.air <= Date.now() && w.status === 'en_cours') toCatch++
+      else if (e.air > 0 && e.air <= Date.now() && w.status === 'en_cours') toCatch++
     }))
   })
   const upNext = enCours.map((w) => ({ w, nx: nextEpisode(w, watched) })).filter((x) => x.nx).slice(0, 4)

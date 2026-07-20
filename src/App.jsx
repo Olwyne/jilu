@@ -68,7 +68,7 @@ function Shell() {
   const now = Date.now()
   const toCatch = Object.values(data.works)
     .filter(w => w.status === 'en_cours' && w.seasons)
-    .reduce((n, w) => n + w.seasons.reduce((m, s) => m + s.episodes.filter(e => e.air <= now && !data.watched[`${w.id}-${s.n}-${e.n}`]).length, 0), 0)
+    .reduce((n, w) => n + w.seasons.reduce((m, s) => m + s.episodes.filter(e => e.air > 0 && e.air <= now && !data.watched[`${w.id}-${s.n}-${e.n}`]).length, 0), 0)
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 860)
@@ -195,6 +195,7 @@ function Shell() {
               }
             })
           }}
+          onNavigate={(r) => { setSearchOpen(false); navigate('/work/' + r.id) }}
           onClose={() => setSearchOpen(false)}
         />
       )}

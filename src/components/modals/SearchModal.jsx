@@ -13,7 +13,7 @@ const CATS = [
   { k: 'all', label: 'Tout' }
 ]
 
-export default function SearchModal({ works, onAdd, onClose }) {
+export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
   const [query, setQuery] = useState('')
   const [cat, setCat] = useState('series')
   const [results, setResults] = useState([])
@@ -64,10 +64,15 @@ export default function SearchModal({ works, onAdd, onClose }) {
             const added = !!works[r.id]
             return (
               <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', borderRadius: 12 }}>
-                <PosterBox id={r.id} title={r.title} poster={r.poster} width={44} height={62} radius={9} fontSize={16} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14.5 }}>{r.title}</div>
-                  <div style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{CAT[r.category]}{r.year ? ` · ${r.year}` : ''}</div>
+                <div
+                  onClick={() => added && onNavigate?.(r)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0, cursor: added ? 'pointer' : 'default' }}
+                >
+                  <PosterBox id={r.id} title={r.title} poster={r.poster} width={44} height={62} radius={9} fontSize={16} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14.5 }}>{r.title}</div>
+                    <div style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{CAT[r.category]}{r.year ? ` · ${r.year}` : ''}</div>
+                  </div>
                 </div>
                 <div
                   onClick={() => !added && onAdd(r)}

@@ -85,14 +85,15 @@ export async function anilistGetDetail(anilistId) {
     const m = await fetchEntry(currentId)
     if (!m) break
 
-    const start = m.startDate?.year
+    const notYetReleased = m.status === 'NOT_YET_RELEASED'
+    const start = (!notYetReleased && m.startDate?.year)
       ? new Date(m.startDate.year, (m.startDate.month || 1) - 1, m.startDate.day || 1).getTime()
-      : Date.now()
+      : 0
     const count = m.episodes || 1
     const episodes = Array.from({ length: count }, (_, i) => ({
       n: i + 1,
       title: 'Épisode ' + (i + 1),
-      air: start + i * 7 * DAY
+      air: start > 0 ? start + i * 7 * DAY : 0
     }))
 
     if (SPECIAL_FORMATS.has(m.format)) {
