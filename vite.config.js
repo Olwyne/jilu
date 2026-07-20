@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
   return {
   plugins: [react(), spotifyTokenPlugin(env)],
   server: {
+    allowedHosts: ['jilu.localhost'],
     proxy: {
       '/anilist-proxy': {
         target: 'https://graphql.anilist.co',
