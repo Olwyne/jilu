@@ -23,7 +23,8 @@ import SearchModal from './components/modals/SearchModal'
 
 const ROUTE_COPY = {
   '/': { title: 'Accueil', subtitle: "Voici ce qui t'attend" },
-  '/library': { title: 'Accueil', subtitle: '' },
+  '/dashboard': { title: 'Accueil', subtitle: "Voici ce qui t'attend" },
+  '/library': { title: 'Bibliothèque', subtitle: 'Tes animes, films et séries' },
   '/calendar': { title: 'Calendrier', subtitle: 'À rattraper et à venir' },
   '/stats': { title: 'Statistiques', subtitle: 'Ton année en chiffres' },
   '/account': { title: 'Compte & paramètres', subtitle: 'Profil, préférences et données' },
@@ -87,7 +88,8 @@ function Shell() {
   if (loading) return null
 
   const isDetail = pathname.startsWith('/work/')
-  const copy = ROUTE_COPY[pathname] || (isDetail ? { title: '', subtitle: '' } : ROUTE_COPY['/library'])
+  const isProfile = pathname.startsWith('/profile')
+  const copy = ROUTE_COPY[pathname] || (isDetail ? { title: '', subtitle: '' } : isProfile ? ROUTE_COPY['/profile'] : ROUTE_COPY['/library'])
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
