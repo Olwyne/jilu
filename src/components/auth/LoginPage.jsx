@@ -43,7 +43,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <div className={styles.switch} style={{ textAlign: 'right', marginTop: -4 }} onClick={() => navigate('/forgot-password')}>
+        <div className={styles.switchRight} onClick={() => navigate('/forgot-password')}>
           Mot de passe oublié ?
         </div>
         {error && <div className={styles.error}>{error}</div>}
