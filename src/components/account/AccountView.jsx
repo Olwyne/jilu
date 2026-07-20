@@ -1,6 +1,111 @@
 import { useState } from 'react'
+import emailjs from '@emailjs/browser'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { db } from '../../firebase'
+import { useAuth } from '../../contexts/AuthContext'
 import { initials } from '../../lib/domain'
 import EditProfileModal from '../modals/EditProfileModal'
+
+const FEEDBACK_TYPES = [
+  { value: 'bug', label: 'Bug 🐛' },
+  { value: 'suggestion', label: 'Suggestion 💡' },
+  { value: 'other', label: 'Autre 💬' },
+]
+const TYPE_EMOJI = { bug: '🐛', suggestion: '💡', other: '💬' }
+
+const RATE_LIMIT = 3
+const WINDOW_MS = 24 * 60 * 60 * 1000
+
+function FeedbackSection({ profile }) {
+  const { user } = useAuth()
+  const [type, setType] = useState('suggestion')
+  const [subject, setSubject] = useState('')
+  const [message, setMessage] = useState('')
+  const [status, setStatus] = useState('idle')
+
+  async function handleSend() {
+    if (!subject.trim() || !message.trim() || !user) return
+    setStatus('loading')
+    try {
+      const userRef = doc(db, 'users', user.uid)
+      const snap = await getDoc(userRef)
+      const now = Date.now()
+      const prev = (snap.data()?.feedbackTimestamps ?? []).filter(t => now - t < WINDOW_MS)
+      if (prev.length >= RATE_LIMIT) {
+        setStatus('ratelimit')
+        setTimeout(() => setStatus('idle'), 4000)
+        return
+      }
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          type: FEEDBACK_TYPES.find(t => t.value === type)?.label ?? type,
+          emoji: TYPE_EMOJI[type],
+          subject: subject.trim(),
+          message: message.trim(),
+          user_handle: profile?.handle || '—',
+          user_uid: profile?.uid || '—',
+          user_agent: navigator.userAgent,
+          language: navigator.language,
+          screen: `${screen.width}×${screen.height} (viewport ${window.innerWidth}×${window.innerHeight})`,
+          sent_at: new Date().toLocaleString('fr-FR'),
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+      )
+      await setDoc(userRef, { feedbackTimestamps: [...prev, now] }, { merge: true })
+      setStatus('success')
+      setSubject('')
+      setMessage('')
+      setType('suggestion')
+      setTimeout(() => setStatus('idle'), 4000)
+    } catch {
+      setStatus('error')
+      setTimeout(() => setStatus('idle'), 4000)
+    }
+  }
+
+  return (
+    <div style={{ borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden', marginBottom: 24, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {FEEDBACK_TYPES.map(t => (
+          <button
+            key={t.value}
+            onClick={() => setType(t.value)}
+            style={{ padding: '6px 14px', borderRadius: 20, border: '1px solid', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: type === t.value ? 'var(--color-accent)' : 'transparent', color: type === t.value ? '#fff' : 'var(--color-muted)', borderColor: type === t.value ? 'var(--color-accent)' : 'var(--color-border-btn)', transition: 'all .15s' }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <input
+        value={subject}
+        onChange={e => setSubject(e.target.value)}
+        placeholder="Sujet"
+        style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+      />
+      <textarea
+        value={message}
+        onChange={e => setMessage(e.target.value)}
+        placeholder="Décris le problème ou la suggestion…"
+        rows={4}
+        style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
+      />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button
+          onClick={handleSend}
+          disabled={status === 'loading' || !subject.trim() || !message.trim()}
+          style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: 'var(--color-accent)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: status === 'loading' ? 'wait' : 'pointer', opacity: (!subject.trim() || !message.trim()) ? 0.5 : 1, transition: 'opacity .15s' }}
+        >
+          {status === 'loading' ? 'Envoi…' : 'Envoyer'}
+        </button>
+        {status === 'success' && <span style={{ fontSize: 13, color: 'var(--color-green, #22c55e)', fontWeight: 600 }}>✓ Envoyé, merci !</span>}
+        {status === 'error' && <span style={{ fontSize: 13, color: 'var(--color-danger-text)', fontWeight: 600 }}>Erreur — réessaie</span>}
+        {status === 'ratelimit' && <span style={{ fontSize: 13, color: 'var(--color-danger-text)', fontWeight: 600 }}>Limite atteinte (3/jour)</span>}
+      </div>
+    </div>
+  )
+}
 
 function Toggle({ on, onToggle }) {
   return (
@@ -162,6 +267,9 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         <div onClick={onReset} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>Réinitialiser la progression</div>
         <div onClick={onClearAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border-2)', background: 'var(--color-danger-bg-2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>Tout effacer</div>
       </div>
+
+      <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Feedback</div>
+      <FeedbackSection profile={profile} />
 
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 24 }}>
         <div onClick={onLogout} style={{ display: 'inline-block', padding: '11px 20px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>Se déconnecter</div>
