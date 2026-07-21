@@ -129,7 +129,7 @@ function Shell() {
         />
         <main style={{ padding: '22px 30px 40px', maxWidth: 1240, width: '100%' }}>
           <Routes>
-            <Route path="/" element={<Navigate to="/library" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/library" element={
               <LibraryView
                 works={data.works}
@@ -198,7 +198,7 @@ function Shell() {
                 onOpenEpisode={(w, s, e) => setEpisodeModal({ workId: w.id, sNum: s.n, eNum: e.n })}
               />
             } />
-            <Route path="*" element={<Navigate to="/library" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>
@@ -254,7 +254,7 @@ function LoginRoute() {
   const { user, loading } = useAuth()
   const location = useLocation()
   if (loading) return null
-  if (user) return <Navigate to={location.state?.from || '/library'} replace />
+  if (user) return <Navigate to={location.state?.from || '/dashboard'} replace />
   return <LoginPage />
 }
 
@@ -262,14 +262,14 @@ function SignupRoute() {
   const { user, loading } = useAuth()
   const location = useLocation()
   if (loading) return null
-  if (user) return <Navigate to={location.state?.from || '/library'} replace />
+  if (user) return <Navigate to={location.state?.from || '/dashboard'} replace />
   return <SignupPage />
 }
 
 function ForgotPasswordRoute() {
   const { user, loading } = useAuth()
   if (loading) return null
-  if (user) return <Navigate to="/library" replace />
+  if (user) return <Navigate to="/dashboard" replace />
   return <ForgotPasswordPage />
 }
 
