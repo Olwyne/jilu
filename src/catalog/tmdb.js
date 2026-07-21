@@ -49,7 +49,7 @@ export async function tmdbGetDetail(work) {
         n: e.episode_number,
         title: e.name,
         air: e.air_date ? Date.parse(e.air_date) : Infinity
-      }))
+      })).sort((a, b) => a.n - b.n)
     })
   }
   const ended = show.status === 'Ended' || show.status === 'Canceled'
