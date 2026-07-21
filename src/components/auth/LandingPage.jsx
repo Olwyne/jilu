@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n/index.js'
+import heroScreenshot from '../../assets/hero-screenshot.png'
 
 const css = `
 .lp { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f9; color: #1a1a2e; min-height: 100vh; }
@@ -41,23 +42,7 @@ const css = `
 .lp .dot-yellow { background: #febc2e; }
 .lp .dot-green { background: #28c840; }
 .lp .browser-url { background: white; border-radius: 6px; padding: 0.25rem 0.75rem; font-size: 0.75rem; color: #9999b3; flex: 1; border: 1px solid #e8e6f0; }
-.lp .app-ui { display: flex; height: 340px; }
-.lp .sidebar { width: 160px; background: #f9f8fc; border-right: 1px solid #e8e6f0; padding: 1rem 0; flex-shrink: 0; }
-.lp .sidebar-logo { display: flex; align-items: center; gap: 0.5rem; padding: 0 1rem 1rem; margin-bottom: 0.5rem; }
-.lp .sidebar-logo-icon { width: 26px; height: 26px; background: linear-gradient(135deg, #7c3aed, #a855f7); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 11px; }
-.lp .sidebar-logo-text { font-weight: 600; font-size: 0.9rem; }
-.lp .nav-item { padding: 0.45rem 1rem; font-size: 0.8rem; color: #6b6b8a; display: flex; align-items: center; justify-content: space-between; }
-.lp .nav-item.active { background: #ede9fe; color: #7c3aed; font-weight: 500; border-radius: 6px; margin: 0 0.5rem; padding: 0.45rem 0.5rem; }
-.lp .badge-count { background: #7c3aed; color: white; font-size: 0.65rem; padding: 1px 6px; border-radius: 99px; }
-.lp .main-content { flex: 1; padding: 1.25rem 1.5rem; overflow: hidden; }
-.lp .page-title { font-size: 1.1rem; font-weight: 600; color: #1a1a2e; margin-bottom: 0.2rem; }
-.lp .page-sub { font-size: 0.75rem; color: #9999b3; margin-bottom: 0.9rem; }
-.lp .filter-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.lp .tab { padding: 0.25rem 0.65rem; border-radius: 99px; font-size: 0.72rem; background: white; border: 1px solid #e8e6f0; color: #6b6b8a; }
-.lp .tab.active { background: #7c3aed; color: white; border-color: #7c3aed; }
-.lp .poster-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; }
-.lp .poster { border-radius: 6px; aspect-ratio: 2/3; }
-.lp .p1{background:linear-gradient(135deg,#1a1a2e,#4a4e8a)}.lp .p2{background:linear-gradient(135deg,#2d1b4e,#7c3aed)}.lp .p3{background:linear-gradient(135deg,#1e3a2f,#2d6a4f)}.lp .p4{background:linear-gradient(135deg,#3d1515,#c0392b)}.lp .p5{background:linear-gradient(135deg,#1a2a4a,#2563eb)}.lp .p6{background:linear-gradient(135deg,#2d1b00,#d97706)}
+.lp .hero-screenshot { width: 100%; display: block; }
 
 .lp .stats-row { max-width: 860px; margin: 3rem auto 0; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .lp .stat-card { background: white; border-radius: 12px; padding: 1.25rem; border: 1px solid #e8e6f0; text-align: center; }
@@ -119,9 +104,6 @@ const css = `
   .lp .bento { grid-template-columns: 1fr 1fr; }
   .lp .bento-card.wide { grid-column: span 2; }
   .lp .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .lp .poster-grid { grid-template-columns: repeat(3, 1fr); }
-  .lp .app-ui { height: auto; }
-  .lp .sidebar { display: none; }
 }
 @media (max-width: 420px) {
   .lp .bento { grid-template-columns: 1fr; }
@@ -187,39 +169,7 @@ export default function LandingPage() {
             </div>
             <div className="browser-url">jilu-app.vercel.app/library</div>
           </div>
-          <div className="app-ui">
-            <div className="sidebar">
-              <div className="sidebar-logo">
-                <div className="sidebar-logo-icon">J</div>
-                <span className="sidebar-logo-text">Jilu</span>
-              </div>
-              <div className="nav-item">Home</div>
-              <div className="nav-item active">Library</div>
-              <div className="nav-item">Calendar <span className="badge-count">12</span></div>
-              <div className="nav-item">Stats</div>
-              <div className="nav-item">Profile</div>
-            </div>
-            <div className="main-content">
-              <div className="page-title">Library</div>
-              <div className="page-sub">Your series, films and anime</div>
-              <div className="filter-tabs">
-                <span className="tab active">All 1005</span>
-                <span className="tab">Series 606</span>
-                <span className="tab">Films 300</span>
-                <span className="tab">Anime 96</span>
-                <span className="tab">Books</span>
-                <span className="tab">Games</span>
-              </div>
-              <div className="poster-grid">
-                <div className="poster p1"></div>
-                <div className="poster p2"></div>
-                <div className="poster p3"></div>
-                <div className="poster p4"></div>
-                <div className="poster p5"></div>
-                <div className="poster p6"></div>
-              </div>
-            </div>
-          </div>
+          <img src={heroScreenshot} alt="Jilu app screenshot" className="hero-screenshot" />
         </div>
       </div>
 
