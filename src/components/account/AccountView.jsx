@@ -234,24 +234,14 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 600, fontSize: 14.5 }}>{t('settings.language')}</div>
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {['en', 'fr'].map(lang => (
-              <button
-                key={lang}
-                onClick={() => onChangeLanguage?.(lang)}
-                style={{
-                  padding: '6px 14px', borderRadius: 20, border: '1px solid',
-                  fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                  background: i18nInstance.language === lang ? 'var(--color-accent)' : 'transparent',
-                  color: i18nInstance.language === lang ? '#fff' : 'var(--color-muted)',
-                  borderColor: i18nInstance.language === lang ? 'var(--color-accent)' : 'var(--color-border-btn)',
-                  transition: 'all .15s',
-                }}
-              >
-                {lang.toUpperCase()}
-              </button>
-            ))}
-          </div>
+          <select
+            value={i18nInstance.language?.split('-')[0] === 'fr' ? 'fr' : 'en'}
+            onChange={e => onChangeLanguage?.(e.target.value)}
+            style={{ padding: '8px 32px 8px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, fontWeight: 500, cursor: 'pointer', outline: 'none', appearance: 'auto' }}
+          >
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+          </select>
         </div>
       </div>
 
