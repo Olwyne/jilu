@@ -6,5 +6,6 @@ Disallow: /calendar
 Disallow: /stats
 Disallow: /account
 Disallow: /profile
+Disallow: /u/
 
 Sitemap: https://jilu-app.vercel.app/sitemap.xml
