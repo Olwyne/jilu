@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { initials, relText } from '../../lib/domain'
 
-export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, onShare }) {
+export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, onShare, readOnly }) {
   const { t, i18n } = useTranslation()
   const { works, watched, ratings, favorites, feed, profile, settings } = data
   const navigate = useNavigate()
@@ -33,8 +33,17 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
   const pseudo = profile.handle || profile.name || '?'
 
   const favWorks = worksArr.filter(w => favorites && favorites[w.id])
-  const libWorks = [...worksArr].sort((a, b) => (b.added || 0) - (a.added || 0)).slice(0, 9)
   const recentFeed = [...(feed || [])].sort((a, b) => b.ts - a.ts).slice(0, 20)
+  const recentWatched = Object.entries(watched || {})
+    .map(([key, ts]) => {
+      const parts = key.split('-')
+      const eNum = parts[parts.length - 1]
+      const sNum = parts[parts.length - 2]
+      const workId = parts.slice(0, -2).join('-')
+      return { workId, sNum, eNum, ts }
+    })
+    .sort((a, b) => b.ts - a.ts)
+    .slice(0, 10)
 
   function handleShare() {
     if (!isPublic) return
@@ -59,12 +68,14 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{ratingsCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>avis</div></div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-          <div onClick={handleShare} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
-            {isPublic ? t('profile.copyLink') : t('profile.private')}
+        {!readOnly && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+            <div onClick={handleShare} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
+              {isPublic ? t('profile.copyLink') : t('profile.private')}
+            </div>
+            <div style={{ fontSize: 12, color: isPublic ? '#4ade80' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
           </div>
-          <div style={{ fontSize: 12, color: isPublic ? '#4ade80' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
-        </div>
+        )}
       </div>
 
       {/* Favoris */}
@@ -82,6 +93,33 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
           </div>
         </div>
       )}
+
+      {/* Activité récente */}
+      <div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 14 }}>{t('profile.recentActivity')}</div>
+        {recentWatched.length === 0
+          ? <div style={{ color: 'var(--color-muted-3)', fontSize: 14, padding: '16px 0' }}>{t('profile.noRecent')}</div>
+          : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {recentWatched.map(({ workId, sNum, eNum, ts }) => {
+                const w = works[workId]
+                const cat = w?.category || 'default'
+                const label = `${t('term.' + cat + '.season')} ${sNum} · ${t('term.' + cat + '.ep')} ${eNum}`
+                return (
+                  <div key={`${workId}-${sNum}-${eNum}`} onClick={() => w && onOpenWork(workId)} style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px 16px', borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: w ? 'pointer' : 'default' }}>
+                    <PosterBox id={workId} title={w?.title || workId} poster={w?.poster} width={40} height={58} radius={8} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w?.title || workId}</div>
+                      <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 2 }}>{label}</div>
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--color-muted-3)', flexShrink: 0 }}>{relText(ts, Date.now(), i18n.language)}</div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        }
+      </div>
 
       {/* Avis & commentaires */}
       <div>
@@ -121,32 +159,6 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                 )
               })}
             </div>
-          )
-        }
-      </div>
-
-      {/* Bibliothèque */}
-      <div>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 14 }}>{t('profile.library')}</div>
-        {libWorks.length === 0
-          ? <div style={{ color: 'var(--color-muted-3)', fontSize: 14, padding: '16px 0' }}>{t('profile.emptyLibrary')}</div>
-          : (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 14 }}>
-                {libWorks.map(w => (
-                  <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ cursor: 'pointer' }}>
-                    <PosterBox id={w.id} title={w.title} poster={w.poster} width="100%" height={140} radius={12} />
-                    <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title}</div>
-                    <div style={{ fontSize: 11, color: 'var(--color-muted-3)' }}>{t('status.' + w.status)}</div>
-                  </div>
-                ))}
-              </div>
-              {worksArr.length > 9 && (
-                <div onClick={() => onOpenWork && onOpenWork('__library')} style={{ marginTop: 16, textAlign: 'center', fontSize: 13.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>
-                  {t('profile.seeAll')}
-                </div>
-              )}
-            </>
           )
         }
       </div>
