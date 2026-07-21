@@ -28,7 +28,7 @@ describe('SeasonList', () => {
 
   it('clicking the checkbox on an aired episode calls onToggleEpisode(workId, sNum, eNum)', async () => {
     const onToggleEpisode = vi.fn()
-    const { container } = render(<SeasonList work={work} watched={{}} onToggleEpisode={onToggleEpisode} onMarkSeason={() => {}} onOpenEpisode={() => {}} />)
+    render(<SeasonList work={work} watched={{}} onToggleEpisode={onToggleEpisode} onMarkSeason={() => {}} onOpenEpisode={() => {}} />)
     const label = screen.getByText(/Good News/)
     const row = label.closest('div').parentElement
     const checkbox = row.firstChild
