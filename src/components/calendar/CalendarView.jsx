@@ -92,7 +92,7 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
                     <div style={{ marginTop: 5 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-muted)', background: 'var(--color-chip-bg)', padding: '3px 8px', borderRadius: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6 }}>
                         S{s.n} · {t('term.series.ep')} {e.n}{remaining > 1 ? ` · ${t('calendar.remaining', { count: remaining - 1 })}` : ''}
                       </span>
                     </div>
@@ -149,7 +149,7 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
                     <div style={{ marginTop: 5 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-muted)', background: 'var(--color-chip-bg)', padding: '3px 8px', borderRadius: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6 }}>
                         S{s.n} · {t('term.series.ep')} {e.n}{remaining > 1 ? ` · ${t('calendar.remainingUnseen', { count: remaining - 1 })}` : ''}
                       </span>
                     </div>
