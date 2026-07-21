@@ -74,6 +74,12 @@ function Shell() {
   const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
 
   useEffect(() => {
+    const meta = document.querySelector('meta[name="robots"]')
+    if (meta) meta.setAttribute('content', 'noindex, nofollow')
+    return () => { if (meta) meta.setAttribute('content', 'index, follow') }
+  }, [])
+
+  useEffect(() => {
     document.documentElement.dataset.theme = data.settings.darkMode === false ? 'light' : 'dark'
   }, [data.settings.darkMode])
 
