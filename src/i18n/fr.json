@@ -6,7 +6,6 @@
   "nav.stats": "Statistiques",
   "nav.profile": "Profil",
   "nav.account": "Compte",
-
   "route.home.title": "Accueil",
   "route.home.sub": "Voici ce qui t'attend",
   "route.library.title": "Bibliothèque",
@@ -19,7 +18,6 @@
   "route.account.sub": "Profil, préférences et données",
   "route.profile.title": "Mon profil",
   "route.profile.sub": "Tes stats, favoris et bibliothèque",
-
   "auth.login": "Connexion",
   "auth.signup": "Créer un compte",
   "auth.createAccount": "Créer mon compte",
@@ -42,9 +40,7 @@
   "auth.resetSuccess": "Mot de passe mis à jour ! Tu peux maintenant te connecter.",
   "auth.resetError": "Impossible de réinitialiser le mot de passe. Le lien est peut-être expiré.",
   "auth.invalidLink": "Lien invalide ou expiré. Recommence la procédure.",
-
   "header.back": "‹ Retour",
-
   "settings.appearance": "Apparence",
   "settings.darkMode": "Mode sombre",
   "settings.darkModeDesc": "Basculer entre le thème sombre et le thème clair",
@@ -92,7 +88,6 @@
   "settings.deleteAccountCancel": "Annuler",
   "settings.deleteAccountDeleting": "Suppression…",
   "settings.deleteAccountError": "Erreur — déconnecte-toi et reconnecte-toi, puis réessaie.",
-
   "feedback.bug": "Bug 🐛",
   "feedback.suggestion": "Suggestion 💡",
   "feedback.other": "Autre 💬",
@@ -103,12 +98,10 @@
   "feedback.success": "✓ Envoyé, merci !",
   "feedback.error": "Erreur — réessaie",
   "feedback.rateLimit": "Limite atteinte (3/jour)",
-
   "status.a_voir": "À voir",
   "status.en_cours": "En cours",
   "status.termine": "Terminé",
   "status.abandonne": "Abandonné",
-
   "cat.all": "Tout",
   "cat.series": "Séries",
   "cat.films": "Films",
@@ -116,7 +109,6 @@
   "cat.livres": "Livres",
   "cat.jeux": "Jeux",
   "cat.musique": "Musique",
-
   "term.series.season": "Saison",
   "term.series.ep": "Épisode",
   "term.series.unit": "épisodes",
@@ -145,37 +137,31 @@
   "term.default.ep": "Épisode",
   "term.default.unit": "épisodes",
   "term.default.verb": "Diffusé",
-
   "library.noResults": "Aucune œuvre ne correspond à ces filtres.",
   "library.sort": "Trier",
   "library.sort.recent": "Récent",
   "library.sort.note": "Note",
   "library.sort.titre": "A-Z",
-
   "detail.progress": "Progression",
   "detail.myRating": "Ma note",
   "detail.favorite": "★ Favori",
   "detail.notFavorite": "☆ Favori",
   "detail.ended": "· Terminée",
   "detail.ongoing": "· En cours",
-
   "season.default": "Saison {{n}}",
   "season.seen": "{{done}}/{{total}} vus",
   "season.markAll": "Tout marquer",
   "season.unmarkAll": "Tout décocher",
-
   "journal.title": "Mon journal",
   "journal.placeholder": "Partage ta réaction…",
   "journal.post": "Publier",
   "journal.you": "Toi",
   "journal.delete": "Supprimer",
-
   "game.title": "Mon temps de jeu",
   "game.hours": "{{hours}} h de jeu",
   "game.main": "Quête principale",
   "game.extra": "Extras & secondaires",
   "game.full": "Complétion 100 %",
-
   "calendar.catchUp": "À rattraper",
   "calendar.upcoming": "À venir",
   "calendar.dropped": "Abandonné",
@@ -185,7 +171,6 @@
   "calendar.upToDate": "Tu es à jour ! 🎉",
   "calendar.nothingUpcoming": "Rien à venir.",
   "calendar.nothingDropped": "Aucune série abandonnée avec des épisodes non vus.",
-
   "search.placeholder": "Ajouter une série, un film, un animé…",
   "search.escape": "Échap",
   "search.add": "+ Ajouter",
@@ -193,9 +178,7 @@
   "search.searching": "Recherche en cours…",
   "search.noResults": "Aucun résultat pour « {{query}} »",
   "search.comingSoon": "À venir",
-
   "episode.reveal": "Révéler",
-
   "profile.works": "œuvres",
   "profile.seen": "vus",
   "profile.ratings": "avis",
@@ -216,7 +199,6 @@
   "profile.openApp": "← Ouvrir Jilu",
   "profile.onWork": "Sur l'œuvre",
   "profile.delete": "Supprimer",
-
   "editProfile.title": "Modifier le profil",
   "editProfile.pseudo": "Pseudo",
   "editProfile.email": "Adresse e-mail",
@@ -235,7 +217,6 @@
   "editProfile.passwordMismatch": "Les mots de passe ne correspondent pas.",
   "editProfile.passwordTooShort": "Le nouveau mot de passe doit faire au moins 6 caractères.",
   "editProfile.saveError": "Erreur lors de la sauvegarde",
-
   "stats.watchTime": "de visionnage",
   "stats.episodesSeen": "épisodes vus",
   "stats.filmsSeen": "films vus",
@@ -247,7 +228,6 @@
   "stats.recentActivity": "Activité récente",
   "stats.recentActivitySub": "Épisodes & titres cochés, 10 dernières semaines",
   "stats.thisWeek": "sem.",
-
   "dashboard.worksTracked": "Œuvres suivies",
   "dashboard.watching": "En cours",
   "dashboard.episodesSeen": "Épisodes vus",
@@ -257,7 +237,6 @@
   "dashboard.noActivity": "Aucune note ou commentaire sur des épisodes vus.",
   "dashboard.globalReview": "Avis global",
   "dashboard.ep": "S{{s}} · Épisode {{e}}",
-
   "landing.nav.features": "Fonctionnalités",
   "landing.nav.import": "Importer TV Time",
   "landing.nav.cta": "Essayer gratuitement →",
@@ -312,9 +291,7 @@
   "landing.footer.privacy": "Confidentialité",
   "landing.footer.terms": "CGU",
   "landing.footer.legal": "Mentions légales",
-
   "legal.date": "21 juillet 2026",
-
   "legal.privacy.title": "Politique de confidentialité",
   "legal.privacy.s1.h": "1. Responsable du traitement",
   "legal.privacy.s1.editor": "Jilu est édité par",
@@ -345,7 +322,6 @@
   "legal.privacy.s6.contact_mid": ". En cas de litige, vous pouvez introduire une réclamation auprès de la",
   "legal.privacy.s7.h": "7. Cookies",
   "legal.privacy.s7.p": "Jilu utilise uniquement des données de session stockées localement (localStorage / IndexedDB) strictement nécessaires au fonctionnement de l'authentification. Aucun cookie de tracking ou publicitaire n'est utilisé.",
-
   "legal.terms.title": "Conditions générales d'utilisation",
   "legal.terms.s1.h": "1. Objet",
   "legal.terms.s1.p": "Jilu est une application web permettant de suivre et organiser sa consommation d'animes, films et séries. L'utilisation de Jilu implique l'acceptation pleine et entière des présentes conditions.",
@@ -365,7 +341,6 @@
   "legal.terms.s8.p": "Les présentes CGU peuvent être modifiées à tout moment. L'utilisateur sera informé par e-mail en cas de modification substantielle. La poursuite de l'utilisation du service vaut acceptation.",
   "legal.terms.s9.h": "9. Droit applicable",
   "legal.terms.s9.p": "Les présentes CGU sont soumises au droit français. Tout litige relève de la compétence des tribunaux français.",
-
   "legal.notice.title": "Mentions légales",
   "legal.notice.s1.h": "Éditeur du site",
   "legal.notice.s1.name_label": "Nom :",
@@ -384,5 +359,17 @@
   "legal.notice.s5.p_pre": "Pour toute question relative au traitement de vos données personnelles, consultez notre",
   "legal.notice.s5.p_link": "Politique de confidentialité",
   "legal.notice.s6.h": "Contact",
-  "legal.notice.s6.p": "Pour toute question :"
+  "legal.notice.s6.p": "Pour toute question :",
+  "landing.faq.label": "FAQ",
+  "landing.faq.title": "Questions fréquentes",
+  "landing.faq.q1": "Jilu est-il gratuit ?",
+  "landing.faq.a1": "Oui, entièrement gratuit. Pas d'abonnement, pas de version premium, pas de frais cachés.",
+  "landing.faq.q2": "Que puis-je suivre sur Jilu ?",
+  "landing.faq.a2": "Des séries, films, animés, mangas, livres et jeux vidéo — tout au même endroit, épisode par épisode.",
+  "landing.faq.q3": "Jilu est-il une alternative à TV Time ?",
+  "landing.faq.a3": "Oui. Jilu a été créé par un utilisateur de TV Time comme remplaçant gratuit. Il couvre les mêmes fonctionnalités, plus des stats détaillées, un calendrier de sorties et des profils publics.",
+  "landing.faq.q4": "Jilu fonctionne-t-il sur mobile ?",
+  "landing.faq.a4": "Oui. Jilu est une PWA — installez-le sur iOS ou Android depuis votre navigateur, sans passer par l'App Store.",
+  "landing.faq.q5": "Puis-je importer mes données TV Time ?",
+  "landing.faq.a5": "Oui. Exportez vos données TV Time, uploadez le ZIP sur Jilu, et tout votre historique s'importe en quelques secondes."
 }

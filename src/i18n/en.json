@@ -6,7 +6,6 @@
   "nav.stats": "Stats",
   "nav.profile": "Profile",
   "nav.account": "Account",
-
   "route.home.title": "Home",
   "route.home.sub": "Here's what's waiting for you",
   "route.library.title": "Library",
@@ -19,7 +18,6 @@
   "route.account.sub": "Profile, preferences and data",
   "route.profile.title": "My profile",
   "route.profile.sub": "Your stats, favorites and library",
-
   "auth.login": "Sign in",
   "auth.signup": "Sign up",
   "auth.createAccount": "Create account",
@@ -42,9 +40,7 @@
   "auth.resetSuccess": "Password updated! You can now sign in.",
   "auth.resetError": "Cannot reset password. The link may have expired.",
   "auth.invalidLink": "Invalid or expired link. Start over.",
-
   "header.back": "‹ Back",
-
   "settings.appearance": "Appearance",
   "settings.darkMode": "Dark mode",
   "settings.darkModeDesc": "Switch between dark and light theme",
@@ -92,7 +88,6 @@
   "settings.deleteAccountCancel": "Cancel",
   "settings.deleteAccountDeleting": "Deleting…",
   "settings.deleteAccountError": "Error — please log out and log back in, then try again.",
-
   "feedback.bug": "Bug 🐛",
   "feedback.suggestion": "Suggestion 💡",
   "feedback.other": "Other 💬",
@@ -103,12 +98,10 @@
   "feedback.success": "✓ Sent, thanks!",
   "feedback.error": "Error — try again",
   "feedback.rateLimit": "Limit reached (3/day)",
-
   "status.a_voir": "Plan to watch",
   "status.en_cours": "Watching",
   "status.termine": "Completed",
   "status.abandonne": "Dropped",
-
   "cat.all": "All",
   "cat.series": "Series",
   "cat.films": "Films",
@@ -116,7 +109,6 @@
   "cat.livres": "Books",
   "cat.jeux": "Games",
   "cat.musique": "Music",
-
   "term.series.season": "Season",
   "term.series.ep": "Episode",
   "term.series.unit": "episodes",
@@ -145,37 +137,31 @@
   "term.default.ep": "Episode",
   "term.default.unit": "episodes",
   "term.default.verb": "Aired",
-
   "library.noResults": "No works match these filters.",
   "library.sort": "Sort",
   "library.sort.recent": "Recent",
   "library.sort.note": "Rating",
   "library.sort.titre": "A-Z",
-
   "detail.progress": "Progress",
   "detail.myRating": "My rating",
   "detail.favorite": "★ Favorite",
   "detail.notFavorite": "☆ Favorite",
   "detail.ended": "· Ended",
   "detail.ongoing": "· Ongoing",
-
   "season.default": "Season {{n}}",
   "season.seen": "{{done}}/{{total}} seen",
   "season.markAll": "Mark all",
   "season.unmarkAll": "Unmark all",
-
   "journal.title": "My journal",
   "journal.placeholder": "Share your reaction…",
   "journal.post": "Post",
   "journal.you": "You",
   "journal.delete": "Delete",
-
   "game.title": "My playtime",
   "game.hours": "{{hours}} h played",
   "game.main": "Main quest",
   "game.extra": "Side quests & extras",
   "game.full": "100% completion",
-
   "calendar.catchUp": "To catch up",
   "calendar.upcoming": "Upcoming",
   "calendar.dropped": "Dropped",
@@ -185,7 +171,6 @@
   "calendar.upToDate": "You're all caught up! 🎉",
   "calendar.nothingUpcoming": "Nothing coming up.",
   "calendar.nothingDropped": "No dropped series with unseen episodes.",
-
   "search.placeholder": "Add a series, movie, anime…",
   "search.escape": "Esc",
   "search.add": "+ Add",
@@ -193,9 +178,7 @@
   "search.searching": "Searching…",
   "search.noResults": "No results for « {{query}} »",
   "search.comingSoon": "Coming soon",
-
   "episode.reveal": "Reveal",
-
   "profile.works": "works",
   "profile.seen": "seen",
   "profile.ratings": "ratings",
@@ -216,7 +199,6 @@
   "profile.openApp": "← Open Jilu",
   "profile.onWork": "On this work",
   "profile.delete": "Delete",
-
   "editProfile.title": "Edit profile",
   "editProfile.pseudo": "Username",
   "editProfile.email": "Email address",
@@ -235,7 +217,6 @@
   "editProfile.passwordMismatch": "Passwords don't match.",
   "editProfile.passwordTooShort": "New password must be at least 6 characters.",
   "editProfile.saveError": "Error saving",
-
   "stats.watchTime": "watch time",
   "stats.episodesSeen": "episodes seen",
   "stats.filmsSeen": "movies seen",
@@ -247,7 +228,6 @@
   "stats.recentActivity": "Recent activity",
   "stats.recentActivitySub": "Episodes & tracks checked, last 10 weeks",
   "stats.thisWeek": "this w.",
-
   "dashboard.worksTracked": "Works tracked",
   "dashboard.watching": "Watching",
   "dashboard.episodesSeen": "Episodes seen",
@@ -257,7 +237,6 @@
   "dashboard.noActivity": "No rating or comment on watched episodes.",
   "dashboard.globalReview": "Global review",
   "dashboard.ep": "S{{s}} · Episode {{e}}",
-
   "landing.nav.features": "Features",
   "landing.nav.import": "Import TV Time",
   "landing.nav.cta": "Try for free →",
@@ -312,9 +291,7 @@
   "landing.footer.privacy": "Privacy",
   "landing.footer.terms": "Terms",
   "landing.footer.legal": "Legal",
-
   "legal.date": "July 21, 2026",
-
   "legal.privacy.title": "Privacy Policy",
   "legal.privacy.s1.h": "1. Data Controller",
   "legal.privacy.s1.editor": "Jilu is published by",
@@ -345,7 +322,6 @@
   "legal.privacy.s6.contact_mid": ". If you have a complaint, you can contact the",
   "legal.privacy.s7.h": "7. Cookies",
   "legal.privacy.s7.p": "Jilu only uses session data stored locally (localStorage / IndexedDB) strictly necessary for authentication. No tracking or advertising cookies are used.",
-
   "legal.terms.title": "Terms of Use",
   "legal.terms.s1.h": "1. Purpose",
   "legal.terms.s1.p": "Jilu is a web application for tracking and organizing your consumption of anime, movies and series. Using Jilu implies full acceptance of these terms.",
@@ -365,7 +341,6 @@
   "legal.terms.s8.p": "These terms may be updated at any time. Users will be notified by email of any material changes. Continued use of the service constitutes acceptance.",
   "legal.terms.s9.h": "9. Applicable Law",
   "legal.terms.s9.p": "These terms are governed by French law. Any dispute falls under the jurisdiction of French courts.",
-
   "legal.notice.title": "Legal Notice",
   "legal.notice.s1.h": "Publisher",
   "legal.notice.s1.name_label": "Name:",
@@ -384,5 +359,17 @@
   "legal.notice.s5.p_pre": "For any questions regarding the processing of your personal data, see our",
   "legal.notice.s5.p_link": "Privacy Policy",
   "legal.notice.s6.h": "Contact",
-  "legal.notice.s6.p": "For any questions:"
+  "legal.notice.s6.p": "For any questions:",
+  "landing.faq.label": "FAQ",
+  "landing.faq.title": "Frequently asked questions",
+  "landing.faq.q1": "Is Jilu free?",
+  "landing.faq.a1": "Yes, completely free. No subscription, no premium tier, no hidden fees.",
+  "landing.faq.q2": "What can I track on Jilu?",
+  "landing.faq.a2": "Series, films, anime, manga, books, and video games — all in one place, episode by episode.",
+  "landing.faq.q3": "Is Jilu a TV Time alternative?",
+  "landing.faq.a3": "Yes. Jilu was built by a TV Time user as a free replacement. It covers all the same features plus detailed stats, a release calendar, and public profiles.",
+  "landing.faq.q4": "Does Jilu work on mobile?",
+  "landing.faq.a4": "Yes. Jilu is a PWA — install it on iOS or Android directly from your browser, no app store needed.",
+  "landing.faq.q5": "Can I import my TV Time data?",
+  "landing.faq.a5": "Yes. Export your TV Time data, upload the ZIP to Jilu, and your entire watch history imports in seconds."
 }

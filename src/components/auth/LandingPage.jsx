@@ -88,6 +88,13 @@ const css = `
 .lp .platform-badges { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
 .lp .platform-badge { display: flex; align-items: center; gap: 0.5rem; background: white; border: 1.5px solid #e8e6f0; border-radius: 10px; padding: 0.6rem 1.25rem; font-size: 0.85rem; font-weight: 500; color: #1a1a2e; }
 
+.lp .faq-section { max-width: 680px; margin: 4.5rem auto 0; padding: 0 1.5rem; }
+.lp .faq-list { margin-top: 2rem; display: flex; flex-direction: column; gap: 0; border: 1px solid #e8e6f0; border-radius: 14px; overflow: hidden; }
+.lp .faq-item { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e8e6f0; background: white; }
+.lp .faq-item:last-child { border-bottom: none; }
+.lp .faq-q { font-weight: 600; font-size: 0.95rem; color: #1a1a2e; margin-bottom: 0.4rem; }
+.lp .faq-a { font-size: 0.88rem; color: #6b6b8a; line-height: 1.6; }
+
 .lp .cta-section { max-width: 860px; margin: 4.5rem auto; padding: 0 1.5rem; }
 .lp .cta-card { background: linear-gradient(135deg, #7c3aed, #a855f7); border-radius: 18px; padding: 3.5rem 2rem; text-align: center; color: white; }
 .lp .cta-card h2 { font-size: 2rem; font-weight: 700; margin-bottom: 0.75rem; }
@@ -302,6 +309,19 @@ export default function LandingPage() {
           <div className="platform-badge">💻 Web app</div>
           <div className="platform-badge">📱 iOS — Add to home screen</div>
           <div className="platform-badge">🤖 Android — Add to home screen</div>
+        </div>
+      </section>
+
+      <section className="faq-section">
+        <p className="section-label">{t('landing.faq.label')}</p>
+        <h2 className="section-title">{t('landing.faq.title')}</h2>
+        <div className="faq-list">
+          {[1,2,3,4,5].map(n => (
+            <div key={n} className="faq-item">
+              <p className="faq-q">{t(`landing.faq.q${n}`)}</p>
+              <p className="faq-a">{t(`landing.faq.a${n}`)}</p>
+            </div>
+          ))}
         </div>
       </section>
 

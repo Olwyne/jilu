@@ -1,0 +1,45 @@
+# Jilu
+
+> Free TV Time alternative — track series, films, anime, manga, books, and video games in one place.
+
+## What is Jilu?
+
+Jilu is a free personal media tracker built as a replacement for TV Time. It lets you track series, films, anime, manga, books, and video games — all from a single app, episode by episode.
+
+## Key features
+
+- Episode-by-episode tracking with per-episode ratings and comments
+- Release calendar showing upcoming episodes and new releases
+- Detailed stats: hours watched, top genres, weekly activity, average rating
+- Multi-source search: TMDB, AniList, RAWG, Google Books, Spotify
+- Public profiles shareable at /u/yourhandle
+- TV Time data import (ZIP export → instant migration)
+- Bilingual: English and French
+- PWA: works on desktop, iOS, and Android without an app store
+
+## Pricing
+
+Free. No subscription, no premium tier, no ads, no hidden fees.
+
+## App
+
+- [Jilu](https://jilu-app.vercel.app/): Web app (PWA)
+- [Privacy Policy](https://jilu-app.vercel.app/privacy)
+- [Terms of Use](https://jilu-app.vercel.app/terms)
+
+## FAQ
+
+Q: Is Jilu free?
+A: Yes, completely free. No subscription, no premium tier, no hidden fees.
+
+Q: What can I track on Jilu?
+A: Series, films, anime, manga, books, and video games — all in one place, episode by episode.
+
+Q: Is Jilu a TV Time alternative?
+A: Yes. Jilu was built by a TV Time user as a free replacement covering all the same features plus detailed stats, a release calendar, and public profiles.
+
+Q: Does Jilu work on mobile?
+A: Yes. Jilu is a PWA — install it on iOS or Android directly from your browser, no app store needed.
+
+Q: Can I import my TV Time data?
+A: Yes. Export your TV Time data, upload the ZIP to Jilu, and your entire watch history imports in seconds.
