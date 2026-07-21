@@ -39,9 +39,22 @@ export default function PublicProfilePage() {
 
         setProfileData({ ...base, works, watched })
         setStatus('found')
+        const pseudo = base.profile?.handle || base.profile?.name || handle
+        const title = `${pseudo} on Jilu`
+        const desc = `See what ${pseudo} is watching, reading, and playing on Jilu.`
+        document.title = title
+        document.querySelector('meta[name="description"]')?.setAttribute('content', desc)
+        document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
+        document.querySelector('meta[property="og:description"]')?.setAttribute('content', desc)
+        document.querySelector('link[rel="canonical"]')?.setAttribute('href', `https://jilu-app.vercel.app/u/${handle}`)
       } catch { setStatus('notfound') }
     }
     load()
+    return () => {
+      document.title = 'Jilu — Your whole culture, tracked in one place'
+      document.querySelector('meta[name="description"]')?.setAttribute('content', 'Series, films, anime, manga, books, video games — episode-by-episode tracking, stats, release calendar, and public profiles. Free TV Time alternative.')
+      document.querySelector('link[rel="canonical"]')?.setAttribute('href', 'https://jilu-app.vercel.app/')
+    }
   }, [handle])
 
   const wrap = (children) => (

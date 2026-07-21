@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /library
+Disallow: /calendar
+Disallow: /stats
+Disallow: /account
+Disallow: /profile
+
+Sitemap: https://jilu-app.vercel.app/sitemap.xml

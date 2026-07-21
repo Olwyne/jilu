@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n/index.js'
@@ -119,6 +120,19 @@ export default function LandingPage() {
   const { t, i18n: i18nInstance } = useTranslation()
   const lang = i18nInstance.language?.startsWith('fr') ? 'fr' : 'en'
   const other = OTHER[lang]
+
+  useEffect(() => {
+    const title = lang === 'fr'
+      ? 'Jilu — Toute ta culture, suivie en un seul endroit'
+      : 'Jilu — Your whole culture, tracked in one place'
+    const desc = lang === 'fr'
+      ? 'Séries, films, animés, mangas, livres, jeux vidéo — suivi épisode par épisode, stats, calendrier et profils publics. Gratuit.'
+      : 'Series, films, anime, manga, books, video games — episode-by-episode tracking, stats, release calendar, and public profiles. Free TV Time alternative.'
+    document.title = title
+    document.querySelector('meta[name="description"]')?.setAttribute('content', desc)
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', desc)
+  }, [lang])
 
   function toggleLang() {
     i18n.changeLanguage(other)
