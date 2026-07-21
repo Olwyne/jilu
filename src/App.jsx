@@ -7,6 +7,7 @@ import { useAppData } from './hooks/useAppData'
 import { useWorkActions } from './hooks/useWorkActions'
 import { useImport } from './hooks/useImport'
 import LoginPage from './components/auth/LoginPage'
+import LandingPage from './components/auth/LandingPage'
 import SignupPage from './components/auth/SignupPage'
 import ForgotPasswordPage from './components/auth/ForgotPasswordPage'
 import ResetPasswordPage from './components/auth/ResetPasswordPage'
@@ -24,6 +25,9 @@ import ProfileView from './components/profile/ProfileView'
 import PublicProfilePage from './components/profile/PublicProfilePage'
 import Toast from './components/Toast'
 import SearchModal from './components/modals/SearchModal'
+import PrivacyPage from './components/legal/PrivacyPage'
+import TermsPage from './components/legal/TermsPage'
+import LegalNoticePage from './components/legal/LegalNoticePage'
 
 function getRouteCopy(t) {
   return {
@@ -241,9 +245,8 @@ function Shell() {
 
 function AuthGuard() {
   const { user, loading } = useAuth()
-  const location = useLocation()
   if (loading) return null
-  if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  if (!user) return <LandingPage />
   return <Shell />
 }
 
@@ -276,6 +279,9 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/u/:handle" element={<PublicProfilePage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/legal" element={<LegalNoticePage />} />
           <Route path="/login" element={<LoginRoute />} />
           <Route path="/signup" element={<SignupRoute />} />
           <Route path="/forgot-password" element={<ForgotPasswordRoute />} />
