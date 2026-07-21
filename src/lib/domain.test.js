@@ -24,13 +24,20 @@ describe('domain helpers', () => {
     expect(fmtDate(ts)).toBe('15 janv.')
   })
 
-  it('relText handles today/tomorrow/near future/past/far future', () => {
+  it('relText handles today/tomorrow/near future/past/far future in French', () => {
     const now = Date.now()
-    expect(relText(now, now)).toBe("aujourd'hui")
-    expect(relText(now + DAY, now)).toBe('demain')
-    expect(relText(now + 3 * DAY, now)).toBe('dans 3 j')
-    expect(relText(now - 3 * DAY, now)).toBe('il y a 3 j')
-    expect(relText(now - 20 * DAY, now)).toBe('il y a 3 sem')
+    expect(relText(now, now, 'fr')).toBe("aujourd’hui")
+    expect(relText(now + DAY, now, 'fr')).toBe('demain')
+    expect(relText(now + 3 * DAY, now, 'fr')).toBe('dans 3 jours')
+    expect(relText(now - 3 * DAY, now, 'fr')).toBe('il y a 3 jours')
+    expect(relText(now - 20 * DAY, now, 'fr')).toBe('il y a 3 semaines')
+  })
+
+  it('relText returns English relative time when lang is en', () => {
+    const now = Date.now()
+    expect(relText(now, now, 'en')).toBe('today')
+    expect(relText(now + DAY, now, 'en')).toBe('tomorrow')
+    expect(relText(now + 3 * DAY, now, 'en')).toBe('in 3 days')
   })
 
   it('term returns series terminology by default and music terminology for musique', () => {

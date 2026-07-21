@@ -42,14 +42,13 @@ export function fmtDate(ts) {
   return d.getDate() + ' ' + monthsFR()[d.getMonth()]
 }
 
-export function relText(ts, now) {
+export function relText(ts, now, lang = 'fr') {
   const diff = Math.round((ts - now) / DAY)
-  if (diff === 0) return "aujourd'hui"
-  if (diff === 1) return 'demain'
-  if (diff > 0 && diff < 7) return 'dans ' + diff + ' j'
-  if (diff < 0 && diff > -7) return 'il y a ' + (-diff) + ' j'
-  if (diff < 0) return 'il y a ' + Math.round(-diff / 7) + ' sem'
-  return fmtDate(ts)
+  const l = lang.split('-')[0]
+  const rtf = new Intl.RelativeTimeFormat(l, { numeric: 'auto' })
+  if (Math.abs(diff) < 7) return rtf.format(diff, 'day')
+  if (Math.abs(diff) < 30) return rtf.format(Math.round(diff / 7), 'week')
+  return new Intl.DateTimeFormat(l, { day: 'numeric', month: 'short' }).format(new Date(ts))
 }
 
 export function epTotals(work, watched) {

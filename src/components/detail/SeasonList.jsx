@@ -1,18 +1,21 @@
 import { useState } from 'react'
-import { term } from '../../lib/domain'
+import { useTranslation } from 'react-i18next'
 
 function fmtFull(ts) {
   const d = new Date(ts)
   return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear()
 }
 
-function epLabel(work, season, ep) {
-  const t = term(work.category)
-  const base = (work.category === 'series' || work.category === 'animes') ? `S${season.n} · ${t.ep} ${ep.n}` : `${t.ep} ${ep.n}`
+function epLabel(work, season, ep, t) {
+  const cat = work.category
+  const epWord = t('term.' + cat + '.ep')
+  const seasonCat = ['series', 'animes'].includes(cat)
+  const base = seasonCat ? `S${season.n} · ${epWord} ${ep.n}` : `${epWord} ${ep.n}`
   return ep.title && !/^Épisode /.test(ep.title) ? `${base} · ${ep.title}` : base
 }
 
 export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeason, onOpenEpisode }) {
+  const { t } = useTranslation()
   const now = Date.now()
   const firstUnwatched = work.seasons.find((s) => s.episodes.some((e) => e.air > 0 && e.air <= now && !watched[`${work.id}-${s.n}-${e.n}`]))
   const [expanded, setExpanded] = useState(() => new Set([firstUnwatched ? firstUnwatched.n : work.seasons[work.seasons.length - 1].n]))
@@ -32,13 +35,13 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
         return (
           <div key={s.n} style={{ border: '1px solid var(--color-border-btn)', borderRadius: 16, overflow: 'hidden', background: 'var(--color-surface)' }}>
             <div onClick={() => toggleExpanded(s.n)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', cursor: 'pointer' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17 }}>{s.name || `Saison ${s.n}`}</span>
-              <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{done}/{s.episodes.length} vus</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17 }}>{s.name || t('season.default', { n: s.n })}</span>
+              <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('season.seen', { done, total: s.episodes.length })}</span>
               <div
                 onClick={(e) => { e.stopPropagation(); onMarkSeason(work.id, s.n) }}
                 style={{ marginLeft: 'auto', fontSize: 12.5, color: 'var(--color-accent)', fontWeight: 600, padding: '5px 10px', borderRadius: 8 }}
               >
-                {aired.length > 0 && done === aired.length ? 'Tout décocher' : 'Tout marquer'}
+                {aired.length > 0 && done === aired.length ? t('season.unmarkAll') : t('season.markAll')}
               </div>
             </div>
             {isOpen && (
@@ -56,7 +59,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
                         {isWatched ? '✓' : ''}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{ fontWeight: 600, fontSize: 14.5, textDecoration: isWatched ? 'line-through' : 'none', color: isWatched ? 'var(--color-muted)' : 'inherit' }}>{epLabel(work, s, e)}</span>
+                        <span style={{ fontWeight: 600, fontSize: 14.5, textDecoration: isWatched ? 'line-through' : 'none', color: isWatched ? 'var(--color-muted)' : 'inherit' }}>{epLabel(work, s, e, t)}</span>
                         {e.air > 0 && <span style={{ marginLeft: 8, fontSize: 12, color: aired2 ? 'var(--color-muted)' : 'var(--color-accent)', fontWeight: 500 }}>{fmtFull(e.air)}</span>}
                       </div>
                       <div onClick={() => aired2 && onOpenEpisode(work, s, e)} style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: aired2 ? 'pointer' : 'default', color: aired2 ? 'var(--color-muted)' : 'transparent', fontSize: 20, lineHeight: 1 }}>›</div>

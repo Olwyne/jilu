@@ -9,7 +9,7 @@ describe('EpisodeModal', () => {
   it('renders the episode label and a close button', async () => {
     const onClose = vi.fn()
     render(<EpisodeModal work={work} sNum={1} eNum={1} ratings={{}} feed={[]} actions={{}} onClose={onClose} />)
-    expect(screen.getByText(/Épisode 1/)).toBeInTheDocument()
+    expect(screen.getByText(/Episode 1/)).toBeInTheDocument()
     await userEvent.click(screen.getByText('✕'))
     expect(onClose).toHaveBeenCalled()
   })

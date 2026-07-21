@@ -1,18 +1,21 @@
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import styles from './Sidebar.module.css'
 import { initials } from '../../lib/domain'
-
-const ITEMS = [
-  { path: '/dashboard', label: 'Accueil' },
-  { path: '/library', label: 'Bibliothèque' },
-  { path: '/calendar', label: 'Calendrier' },
-  { path: '/stats', label: 'Statistiques' },
-  { path: '/profile', label: 'Profil' }
-]
 
 export default function Sidebar({ profile = {}, toCatch = 0 }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const { t } = useTranslation()
+
+  const ITEMS = [
+    { path: '/dashboard', label: t('nav.home') },
+    { path: '/library', label: t('nav.library') },
+    { path: '/calendar', label: t('nav.calendar') },
+    { path: '/stats', label: t('nav.stats') },
+    { path: '/profile', label: t('nav.profile') },
+  ]
+
   return (
     <aside className={styles.aside}>
       <div className={styles.brand}>
@@ -38,8 +41,8 @@ export default function Sidebar({ profile = {}, toCatch = 0 }) {
       >
         <div className={styles.chipAvatar}>{initials(profile.handle || '?')}</div>
         <div className={styles.chipInfo}>
-          <div className={styles.chipName}>{profile.handle || 'Compte'}</div>
-          <div className={styles.chipHandle}>{profile.email || 'Paramètres'}</div>
+          <div className={styles.chipName}>{profile.handle || t('nav.account')}</div>
+          <div className={styles.chipHandle}>{profile.email || t('settings.appearance')}</div>
         </div>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.8" style={{ flexShrink: 0 }}>
           <circle cx="12" cy="12" r="3" />

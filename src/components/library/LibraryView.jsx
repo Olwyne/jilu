@@ -1,17 +1,37 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import WorkCard from './WorkCard'
 import { epTotals } from '../../lib/domain'
 import styles from './LibraryView.module.css'
 
-const CATS = [['all', 'Tout'], ['series', 'Séries'], ['films', 'Films'], ['animes', 'Animés'], ['livres', 'Livres'], ['jeux', 'Jeux'], ['musique', 'Musique']]
-const STATUSES = [['all', 'Tous'], ['en_cours', 'En cours'], ['a_voir', 'À voir'], ['termine', 'Terminé'], ['abandonne', 'Abandonné']]
-const SORTS = [['recent', 'Récent'], ['note', 'Note'], ['titre', 'A-Z']]
-
 export default function LibraryView({ works, watched, ratings, favorites, onOpenWork }) {
+  const { t } = useTranslation()
   const [category, setCategory] = useState('all')
   const [status, setStatus] = useState('all')
   const [sort, setSort] = useState('recent')
   const [sortDir, setSortDir] = useState('desc')
+
+  const CATS = [
+    ['all', t('cat.all')],
+    ['series', t('cat.series')],
+    ['films', t('cat.films')],
+    ['animes', t('cat.animes')],
+    ['livres', t('cat.livres')],
+    ['jeux', t('cat.jeux')],
+    ['musique', t('cat.musique')],
+  ]
+  const STATUSES = [
+    ['all', t('cat.all')],
+    ['en_cours', t('status.en_cours')],
+    ['a_voir', t('status.a_voir')],
+    ['termine', t('status.termine')],
+    ['abandonne', t('status.abandonne')],
+  ]
+  const SORTS = [
+    ['recent', t('library.sort.recent')],
+    ['note', t('library.sort.note')],
+    ['titre', t('library.sort.titre')],
+  ]
 
   const lastWatchedByWork = useMemo(() => {
     const cache = {}
@@ -59,7 +79,7 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
               {label} <span className={styles.chipCount}>{key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length}</span>
               {disabled && (
                 <span style={{ position: 'absolute', top: -6, right: -6, background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
-                  À venir
+                  {t('settings.comingSoon')}
                 </span>
               )}
             </div>
@@ -73,7 +93,7 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
           ))}
         </div>
         <div className={styles.sortChips}>
-          <span className={styles.sortLabel}>Trier</span>
+          <span className={styles.sortLabel}>{t('library.sort')}</span>
           {SORTS.map(([key, label]) => (
             <div key={key} className={`${styles.smallChip} ${sort === key ? styles.smallChipActive : ''}`} onClick={() => handleSort(key)}>
               {label}{sort === key ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
@@ -81,7 +101,7 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
           ))}
         </div>
       </div>
-      {list.length === 0 && <div className={styles.empty}>Aucune œuvre ne correspond à ces filtres.</div>}
+      {list.length === 0 && <div className={styles.empty}>{t('library.noResults')}</div>}
       <div className={styles.grid}>
         {list.map((w) => {
           const { total, watchedCount } = epTotals(w, watched)

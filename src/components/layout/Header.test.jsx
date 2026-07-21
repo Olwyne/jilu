@@ -34,7 +34,7 @@ describe('Header', () => {
         avatarInitials="AM"
       />
     )
-    expect(screen.queryByText('‹ Retour')).toBeNull()
+    expect(screen.queryByText('‹ Back')).toBeNull()
   })
 
   it('renders the back link and calls onBack when showBack is true', async () => {
@@ -51,7 +51,7 @@ describe('Header', () => {
         avatarInitials="AM"
       />
     )
-    await userEvent.click(screen.getByText('‹ Retour'))
+    await userEvent.click(screen.getByText('‹ Back'))
     expect(onBack).toHaveBeenCalled()
   })
 

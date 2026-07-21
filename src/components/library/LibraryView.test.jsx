@@ -10,11 +10,11 @@ describe('LibraryView', () => {
   it('renders a card per work with title and category/year meta', () => {
     render(<LibraryView works={works} watched={{}} ratings={{}} onOpenWork={() => {}} />)
     expect(screen.getByText('One Piece')).toBeInTheDocument()
-    expect(screen.getByText('Animés · 1999')).toBeInTheDocument()
+    expect(screen.getByText('Anime · 1999')).toBeInTheDocument()
   })
 
   it('shows the empty state when no work matches', () => {
     render(<LibraryView works={{}} watched={{}} ratings={{}} onOpenWork={() => {}} />)
-    expect(screen.getByText('Aucune œuvre ne correspond à ces filtres.')).toBeInTheDocument()
+    expect(screen.getByText('No works match these filters.')).toBeInTheDocument()
   })
 })

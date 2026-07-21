@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { STATUS } from '../../lib/domain'
 
 export default function StatusSelect({ value, onChange }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -33,7 +35,7 @@ export default function StatusSelect({ value, onChange }) {
         }}
       >
         <span style={{ width: 7, height: 7, borderRadius: '50%', background: current.color, flexShrink: 0 }} />
-        {current.label}
+        {t('status.' + value)}
         <span style={{ fontSize: 10, opacity: .7, marginLeft: 2 }}>▾</span>
       </button>
 
@@ -47,7 +49,7 @@ export default function StatusSelect({ value, onChange }) {
           boxShadow: '0 8px 32px rgba(0,0,0,.45)',
           minWidth: '100%',
         }}>
-          {Object.entries(STATUS).map(([key, { label, color }]) => (
+          {Object.entries(STATUS).map(([key, { color }]) => (
             <div
               key={key}
               onClick={() => { onChange(key); setOpen(false) }}
@@ -65,7 +67,7 @@ export default function StatusSelect({ value, onChange }) {
               onMouseLeave={(e) => { e.currentTarget.style.background = key === value ? `${color}14` : 'transparent' }}
             >
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, flexShrink: 0 }} />
-              {label}
+              {t('status.' + key)}
             </div>
           ))}
         </div>

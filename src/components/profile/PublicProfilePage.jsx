@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore'
 import { db } from '../../firebase'
 import ProfileView from './ProfileView'
@@ -7,6 +8,7 @@ import ProfileView from './ProfileView'
 const EMPTY = { works: {}, watched: {}, ratings: {}, favorites: {}, feed: [], settings: {}, profile: {} }
 
 export default function PublicProfilePage() {
+  const { t } = useTranslation()
   const { handle } = useParams()
   const [profileData, setProfileData] = useState(null)
   const [status, setStatus] = useState('loading')
@@ -46,16 +48,16 @@ export default function PublicProfilePage() {
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', padding: '24px 20px' }}>
       <div style={{ maxWidth: 740, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
-          <Link to="/" style={{ color: 'var(--color-accent)', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>← Ouvrir Jilu</Link>
+          <Link to="/" style={{ color: 'var(--color-accent)', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>{t('profile.openApp')}</Link>
         </div>
         {children}
       </div>
     </div>
   )
 
-  if (status === 'loading') return wrap(<div style={{ color: 'var(--color-muted-3)', padding: 40, textAlign: 'center' }}>Chargement…</div>)
-  if (status === 'notfound') return wrap(<div style={{ color: 'var(--color-muted-3)', padding: 40, textAlign: 'center' }}>Profil introuvable.</div>)
-  if (status === 'private') return wrap(<div style={{ color: 'var(--color-muted-3)', padding: 40, textAlign: 'center' }}>🔒 Ce profil est privé.</div>)
+  if (status === 'loading') return wrap(<div style={{ color: 'var(--color-muted-3)', padding: 40, textAlign: 'center' }}>{t('profile.loading')}</div>)
+  if (status === 'notfound') return wrap(<div style={{ color: 'var(--color-muted-3)', padding: 40, textAlign: 'center' }}>{t('profile.notFound')}</div>)
+  if (status === 'private') return wrap(<div style={{ color: 'var(--color-muted-3)', padding: 40, textAlign: 'center' }}>{t('profile.privateMsg')}</div>)
 
   return wrap(
     <ProfileView

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import i18n from './i18n/index.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useAppData } from './hooks/useAppData'
 import { useWorkActions } from './hooks/useWorkActions'
@@ -23,14 +25,16 @@ import PublicProfilePage from './components/profile/PublicProfilePage'
 import Toast from './components/Toast'
 import SearchModal from './components/modals/SearchModal'
 
-const ROUTE_COPY = {
-  '/': { title: 'Accueil', subtitle: "Voici ce qui t'attend" },
-  '/dashboard': { title: 'Accueil', subtitle: "Voici ce qui t'attend" },
-  '/library': { title: 'Bibliothèque', subtitle: 'Tes animes, films et séries' },
-  '/calendar': { title: 'Calendrier', subtitle: 'À rattraper et à venir' },
-  '/stats': { title: 'Statistiques', subtitle: 'Ton année en chiffres' },
-  '/account': { title: 'Compte & paramètres', subtitle: 'Profil, préférences et données' },
-  '/profile': { title: 'Mon profil', subtitle: 'Tes stats, favoris et bibliothèque' },
+function getRouteCopy(t) {
+  return {
+    '/': { title: t('route.home.title'), subtitle: t('route.home.sub') },
+    '/dashboard': { title: t('route.home.title'), subtitle: t('route.home.sub') },
+    '/library': { title: t('route.library.title'), subtitle: t('route.library.sub') },
+    '/calendar': { title: t('route.calendar.title'), subtitle: t('route.calendar.sub') },
+    '/stats': { title: t('route.stats.title'), subtitle: t('route.stats.sub') },
+    '/account': { title: t('route.account.title'), subtitle: t('route.account.sub') },
+    '/profile': { title: t('route.profile.title'), subtitle: t('route.profile.sub') },
+  }
 }
 
 function DetailRoute({ data, workActions, onOpenEpisode }) {
@@ -56,6 +60,7 @@ function Shell() {
   const { data, loading, mutate, syncAll } = useAppData(user)
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const { t } = useTranslation()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 860)
   const [searchOpen, setSearchOpen] = useState(false)
   const [episodeModal, setEpisodeModal] = useState(null)
@@ -67,6 +72,12 @@ function Shell() {
   useEffect(() => {
     document.documentElement.dataset.theme = data.settings.darkMode === false ? 'light' : 'dark'
   }, [data.settings.darkMode])
+
+  useEffect(() => {
+    if (data.settings.language) {
+      i18n.changeLanguage(data.settings.language)
+    }
+  }, [data.settings.language])
   const openWork = (id) => navigate('/work/' + id)
 
   const now = Date.now()
@@ -88,11 +99,17 @@ function Shell() {
 
   useEffect(() => { setEpisodeModal(null) }, [pathname])
 
+  function handleChangeLanguage(lang) {
+    i18n.changeLanguage(lang)
+    mutate({ settings: { ...data.settings, language: lang } })
+  }
+
   if (loading) return null
 
+  const routeCopy = getRouteCopy(t)
   const isDetail = pathname.startsWith('/work/')
   const isProfile = pathname.startsWith('/profile')
-  const copy = ROUTE_COPY[pathname] || (isDetail ? { title: '', subtitle: '' } : isProfile ? ROUTE_COPY['/profile'] : ROUTE_COPY['/library'])
+  const copy = routeCopy[pathname] || (isDetail ? { title: '', subtitle: '' } : isProfile ? routeCopy['/profile'] : routeCopy['/library'])
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
@@ -159,6 +176,7 @@ function Shell() {
                 onImportTVTime={importTVTime}
                 onImportTVTimeOut={importTVTimeOut}
                 onLogout={logout}
+                onChangeLanguage={handleChangeLanguage}
               />
             } />
             <Route path="/profile/:handle?" element={

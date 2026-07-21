@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { term } from '../../lib/domain'
+import { useTranslation } from 'react-i18next'
 import JournalThread from '../detail/JournalThread'
 import { useReviews } from '../../hooks/useReviews'
 
@@ -18,12 +18,14 @@ function avgRating(reviews) {
 }
 
 export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions, watched, currentUser, onClose }) {
+  const { t } = useTranslation()
   const season = work.seasons.find((s) => s.n === sNum)
   const ep = season.episodes.find((e) => e.n === eNum)
   const key = `${work.id}-${sNum}-${eNum}`
   const myRating = ratings[`e:${key}`] || 0
   const isWatched = !!(watched && watched[key])
-  const label = `S${sNum} · ${term(work.category).ep} ${eNum}${ep.title && !/^Épisode /.test(ep.title) ? ' · ' + ep.title : ''}`
+  const epWord = t('term.' + work.category + '.ep')
+  const label = `S${sNum} · ${epWord} ${eNum}${ep.title && !/^Épisode /.test(ep.title) ? ' · ' + ep.title : ''}`
 
   const [overview, setOverview] = useState(null)
   const [revealed, setRevealed] = useState(false)
@@ -135,7 +137,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
                 onClick={() => setRevealed(true)}
                 style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}
               >
-                Voir quand même
+                {t('episode.reveal')}
               </div>
             </div>
           )}

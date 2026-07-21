@@ -1,7 +1,8 @@
+import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
-import { CAT } from '../../lib/domain'
 
 export default function WorkCard({ work, watchedCount, totalCount, rating, isFavorite, onClick }) {
+  const { t } = useTranslation()
   const pct = totalCount ? Math.round((watchedCount / totalCount) * 100) : 0
   const showProgress = work.seasons && watchedCount > 0 && watchedCount < totalCount
   return (
@@ -20,7 +21,7 @@ export default function WorkCard({ work, watchedCount, totalCount, rating, isFav
       </PosterBox>
       <div style={{ marginTop: 9, fontWeight: 600, fontSize: 14.5 }}>{work.title}</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 3 }}>
-        <span style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{CAT[work.category]} · {work.year}</span>
+        <span style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{t('cat.' + work.category)} · {work.year}</span>
         {rating > 0 && <span style={{ fontSize: 12.5, color: 'var(--color-gold)', fontWeight: 600, marginLeft: 'auto' }}>★ {rating}</span>}
       </div>
     </div>

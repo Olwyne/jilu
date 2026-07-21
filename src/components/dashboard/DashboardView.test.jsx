@@ -7,6 +7,6 @@ describe('DashboardView', () => {
     const works = { w1: { id: 'w1', title: 'X', status: 'en_cours', seasons: null } }
     render(<DashboardView works={works} watched={{}} reviews={[]} ratings={{}} onOpenWork={() => {}} onWatchNext={() => {}} />)
     expect(screen.getAllByText('1')[0]).toBeInTheDocument()
-    expect(screen.getByText('Œuvres suivies')).toBeInTheDocument()
+    expect(screen.getByText('Works tracked')).toBeInTheDocument()
   })
 })

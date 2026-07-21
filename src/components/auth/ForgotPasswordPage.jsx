@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './ForgotPasswordPage.module.css'
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation()
   const { resetPassword } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -17,7 +19,7 @@ export default function ForgotPasswordPage() {
       await resetPassword(email)
       setSent(true)
     } catch {
-      setError("Impossible d'envoyer l'e-mail. Vérifie l'adresse saisie.")
+      setError(t('auth.sendError'))
     }
   }
 
@@ -25,28 +27,28 @@ export default function ForgotPasswordPage() {
     <div className={styles.wrap}>
       <form className={styles.card} onSubmit={handleSubmit}>
         <div className={styles.brand}>Jilu</div>
-        <h1 className={styles.title}>Mot de passe oublié</h1>
+        <h1 className={styles.title}>{t('auth.forgotTitle')}</h1>
         {!sent ? (
           <>
-            <p className={styles.subtitle}>Saisis ton adresse e-mail pour recevoir un lien de réinitialisation.</p>
+            <p className={styles.subtitle}>{t('auth.forgotSubtitle')}</p>
             <input
               className={styles.input}
               type="email"
-              placeholder="Adresse e-mail"
+              placeholder={t('auth.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             {error && <div className={styles.error}>{error}</div>}
-            <button className={styles.button} type="submit">Envoyer le lien</button>
+            <button className={styles.button} type="submit">{t('auth.sendLink')}</button>
           </>
         ) : (
           <p className={styles.success}>
-            E-mail envoyé ! Vérifie ta boîte de réception et clique sur le lien pour réinitialiser ton mot de passe.
+            {t('auth.emailSent')}
           </p>
         )}
         <div className={styles.switch} onClick={() => navigate('/login')}>
-          Retour à la connexion
+          {t('auth.backToLogin')}
         </div>
       </form>
     </div>

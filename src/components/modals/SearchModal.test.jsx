@@ -8,17 +8,17 @@ describe('SearchModal', () => {
   it('debounces input and shows results from searchCatalog', async () => {
     vi.spyOn(searchModule, 'searchCatalog').mockResolvedValue([{ id: 'tmdb-tv-1', title: 'Shōgun', category: 'series', year: 2024 }])
     render(<SearchModal works={{}} onAdd={() => {}} onClose={() => {}} />)
-    await userEvent.type(screen.getByPlaceholderText('Ajouter une série, un film, un animé…'), 'shogun')
+    await userEvent.type(screen.getByPlaceholderText('Add a series, movie, anime…'), 'shogun')
     await waitFor(() => expect(screen.getByText('Shōgun')).toBeInTheDocument(), { timeout: 1000 })
   })
 
-  it('clicking "+ Ajouter" calls onAdd with the result', async () => {
+  it('clicking "+ Add" calls onAdd with the result', async () => {
     vi.spyOn(searchModule, 'searchCatalog').mockResolvedValue([{ id: 'tmdb-tv-1', title: 'Shōgun', category: 'series', year: 2024 }])
     const onAdd = vi.fn()
     render(<SearchModal works={{}} onAdd={onAdd} onClose={() => {}} />)
-    await userEvent.type(screen.getByPlaceholderText('Ajouter une série, un film, un animé…'), 'shogun')
-    await waitFor(() => screen.getByText('+ Ajouter'))
-    await userEvent.click(screen.getByText('+ Ajouter'))
+    await userEvent.type(screen.getByPlaceholderText('Add a series, movie, anime…'), 'shogun')
+    await waitFor(() => screen.getByText('+ Add'))
+    await userEvent.click(screen.getByText('+ Add'))
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'tmdb-tv-1' }))
   })
 })

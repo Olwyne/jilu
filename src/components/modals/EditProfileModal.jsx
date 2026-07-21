@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -18,17 +19,18 @@ const inputStyle = {
   outline: 'none', color: 'var(--color-text)', fontFamily: 'inherit', boxSizing: 'border-box'
 }
 
-const STATUS_MSG = {
-  idle: null,
-  self: null,
-  checking: { text: 'Vérification…', color: 'var(--color-muted-3)' },
-  available: { text: '✓ Disponible', color: '#4ade80' },
-  taken: { text: '✗ Déjà utilisé', color: '#f87171' },
-  invalid: { text: 'Uniquement lettres, chiffres et _ (2–20 caractères)', color: '#f87171' }
-}
-
 export default function EditProfileModal({ profile, onSave, onClose }) {
+  const { t } = useTranslation()
   const { user, changePassword } = useAuth()
+
+  const STATUS_MSG = {
+    idle: null,
+    self: null,
+    checking: { text: t('editProfile.checking'), color: 'var(--color-muted-3)' },
+    available: { text: t('editProfile.available'), color: '#4ade80' },
+    taken: { text: t('editProfile.taken'), color: '#f87171' },
+    invalid: { text: t('editProfile.invalidHandle'), color: '#f87171' },
+  }
   const [handle, setHandle] = useState(profile.handle || '')
   const [email, setEmail] = useState(profile.email || '')
   const [handleStatus, setHandleStatus] = useState('self')
@@ -58,9 +60,9 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
     e.preventDefault()
     if (handleStatus === 'taken' || handleStatus === 'invalid' || handleStatus === 'checking') return
     if (passwordFilled) {
-      if (!currentPassword) { setError('Saisis ton mot de passe actuel.'); return }
-      if (newPassword.length < 6) { setError('Le nouveau mot de passe doit faire au moins 6 caractères.'); return }
-      if (newPassword !== confirmPassword) { setError('Les mots de passe ne correspondent pas.'); return }
+      if (!currentPassword) { setError(t('editProfile.wrongPassword')); return }
+      if (newPassword.length < 6) { setError(t('editProfile.passwordTooShort')); return }
+      if (newPassword !== confirmPassword) { setError(t('editProfile.passwordMismatch')); return }
     }
     setSaving(true)
     setError(null)
@@ -76,9 +78,9 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
     } catch (err) {
       const code = err.code
       if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-        setError('Mot de passe actuel incorrect.')
+        setError(t('editProfile.wrongPassword'))
       } else {
-        setError(err.message || 'Erreur lors de la sauvegarde')
+        setError(err.message || t('editProfile.saveError'))
       }
     }
     setSaving(false)
@@ -90,9 +92,9 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 24 }}>Modifier le profil</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 24 }}>{t('editProfile.title')}</div>
         <form onSubmit={handleSubmit}>
-          <Field label="Pseudo">
+          <Field label={t('editProfile.pseudo')}>
             <div style={{ position: 'relative' }}>
               <input
                 value={handle}
@@ -104,7 +106,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
             </div>
             {msg && <div style={{ fontSize: 12.5, marginTop: 6, color: msg.color }}>{msg.text}</div>}
           </Field>
-          <Field label="Adresse e-mail">
+          <Field label={t('editProfile.email')}>
             <input
               type="email"
               value={email}
@@ -113,13 +115,13 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
               style={inputStyle}
             />
           </Field>
-          <Field label="Changer le mot de passe">
+          <Field label={t('editProfile.changePassword')}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <input
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Mot de passe actuel"
+                placeholder={t('editProfile.currentPassword')}
                 style={inputStyle}
                 autoComplete="current-password"
               />
@@ -127,7 +129,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nouveau mot de passe"
+                placeholder={t('editProfile.newPassword')}
                 style={inputStyle}
                 minLength={6}
                 autoComplete="new-password"
@@ -136,7 +138,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirmer le nouveau mot de passe"
+                placeholder={t('editProfile.confirmPassword')}
                 style={inputStyle}
                 autoComplete="new-password"
               />
@@ -144,9 +146,9 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
           </Field>
           {error && <div style={{ fontSize: 13, color: '#f87171', marginBottom: 14 }}>{error}</div>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-            <div onClick={onClose} style={{ padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-muted-2)', background: 'var(--color-chip-bg)' }}>Annuler</div>
+            <div onClick={onClose} style={{ padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-muted-2)', background: 'var(--color-chip-bg)' }}>{t('editProfile.cancel')}</div>
             <button type="submit" disabled={!canSave} style={{ padding: '11px 22px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed', border: 'none', background: canSave ? 'var(--color-accent)' : 'var(--color-border-btn)', color: canSave ? '#fff' : 'var(--color-muted-3)' }}>
-              {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+              {saving ? t('editProfile.saving') : t('editProfile.save')}
             </button>
           </div>
         </form>

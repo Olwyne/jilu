@@ -18,7 +18,7 @@ describe('AccountView', () => {
   it('calls onToggleSetting when the publicProfile switch is clicked', async () => {
     const onToggleSetting = vi.fn()
     render(<AccountView profile={profile} settings={settings} onToggleSetting={onToggleSetting} onMarkAll={() => {}} onReset={() => {}} onLogout={() => {}} />)
-    await userEvent.click(screen.getByText('Profil public').parentElement.nextElementSibling.firstElementChild)
+    await userEvent.click(screen.getByText('Public profile').parentElement.nextElementSibling.firstElementChild)
     expect(onToggleSetting).toHaveBeenCalledWith('publicProfile')
   })
 
@@ -26,7 +26,7 @@ describe('AccountView', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     const onReset = vi.fn()
     render(<AccountView profile={profile} settings={settings} onToggleSetting={() => {}} onMarkAll={() => {}} onReset={onReset} onLogout={() => {}} />)
-    await userEvent.click(screen.getByText('Réinitialiser la progression'))
+    await userEvent.click(screen.getByText('Reset progress'))
     expect(onReset).toHaveBeenCalled()
     vi.restoreAllMocks()
   })
@@ -34,7 +34,7 @@ describe('AccountView', () => {
   it('calls onLogout when the logout button is clicked', async () => {
     const onLogout = vi.fn()
     render(<AccountView profile={profile} settings={settings} onToggleSetting={() => {}} onMarkAll={() => {}} onReset={() => {}} onLogout={onLogout} />)
-    await userEvent.click(screen.getByText('Se déconnecter'))
+    await userEvent.click(screen.getByText('Log out'))
     expect(onLogout).toHaveBeenCalled()
   })
 })

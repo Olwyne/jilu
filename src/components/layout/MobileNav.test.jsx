@@ -12,13 +12,13 @@ vi.mock('react-router-dom', () => ({
 describe('MobileNav', () => {
   it('renders nav items and highlights the active one', () => {
     render(<MobileNav />)
-    const libraryItem = screen.getByText('Biblio').closest('div')
+    const libraryItem = screen.getByText('Library').closest('div')
     expect(libraryItem.className).toMatch(/active/)
   })
 
   it('navigates to the clicked section', async () => {
     render(<MobileNav />)
-    await userEvent.click(screen.getByText('Calendrier'))
+    await userEvent.click(screen.getByText('Calendar'))
     expect(mockNavigate).toHaveBeenCalledWith('/calendar')
   })
 })

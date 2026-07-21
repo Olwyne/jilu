@@ -18,9 +18,9 @@ describe('JournalThread', () => {
   it('typing in the input and clicking Publier calls onPost(text) and clears the input', async () => {
     const onPost = vi.fn()
     render(<JournalThread commentsKey="w:w1" feed={[]} onPost={onPost} onToggleLike={() => {}} onDelete={() => {}} />)
-    const input = screen.getByPlaceholderText('Partage ta réaction…')
+    const input = screen.getByPlaceholderText('Share your reaction…')
     await userEvent.type(input, 'Nice twist')
-    await userEvent.click(screen.getByText('Publier'))
+    await userEvent.click(screen.getByText('Post'))
     expect(onPost).toHaveBeenCalledWith('Nice twist')
     expect(input.value).toBe('')
   })
@@ -28,7 +28,7 @@ describe('JournalThread', () => {
   it('does not call onPost when the draft is empty or whitespace', async () => {
     const onPost = vi.fn()
     render(<JournalThread commentsKey="w:w1" feed={[]} onPost={onPost} onToggleLike={() => {}} onDelete={() => {}} />)
-    await userEvent.click(screen.getByText('Publier'))
+    await userEvent.click(screen.getByText('Post'))
     expect(onPost).not.toHaveBeenCalled()
   })
 
@@ -42,7 +42,7 @@ describe('JournalThread', () => {
   it('clicking Supprimer calls onDelete(commentId)', async () => {
     const onDelete = vi.fn()
     render(<JournalThread commentsKey="w:w1" feed={feed} onPost={() => {}} onToggleLike={() => {}} onDelete={onDelete} />)
-    await userEvent.click(screen.getByText('Supprimer'))
+    await userEvent.click(screen.getByText('Delete'))
     expect(onDelete).toHaveBeenCalledWith('c1')
   })
 })

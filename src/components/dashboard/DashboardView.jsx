@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { relText } from '../../lib/domain'
 
@@ -13,6 +14,7 @@ function nextEpisode(work, watched) {
 }
 
 export default function DashboardView({ works, watched, reviews, feed, onOpenWork, onWatchNext }) {
+  const { t, i18n } = useTranslation()
   const list = Object.values(works)
   const enCours = list.filter((w) => w.status === 'en_cours')
   let totalEps = 0, toCatch = 0
@@ -54,10 +56,10 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 14, marginBottom: 32 }}>
         {[
-          [String(list.length), 'Œuvres suivies'],
-          [String(enCours.length), 'En cours'],
-          [String(totalEps), 'Épisodes vus'],
-          [String(toCatch), 'À rattraper']
+          [String(list.length), t('dashboard.worksTracked')],
+          [String(enCours.length), t('dashboard.watching')],
+          [String(totalEps), t('dashboard.episodesSeen')],
+          [String(toCatch), t('dashboard.toCatchUp')]
         ].map(([value, label]) => (
           <div key={label} style={{ padding: 18, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30 }}>{value}</div>
@@ -66,30 +68,30 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
         ))}
       </div>
 
-      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>Prochain épisode à regarder</h3>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{t('dashboard.upNext')}</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 34 }}>
         {upNext.map(({ w, nx }) => (
           <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 12, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
             <PosterBox id={w.id} title={w.title} poster={w.poster} width={54} height={78} radius={11} fontSize={22} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
-              <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, marginTop: 3 }}>S{nx.s.n} · Épisode {nx.e.n}</div>
+              <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, marginTop: 3 }}>{t('dashboard.ep', { s: nx.s.n, e: nx.e.n })}</div>
             </div>
             <div onClick={(ev) => { ev.stopPropagation(); onWatchNext(w.id, nx.s.n, nx.e.n) }} style={{ alignSelf: 'center', width: 38, height: 38, borderRadius: '50%', background: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✓</div>
           </div>
         ))}
       </div>
 
-      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>Dernières notes & commentaires</h3>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.activity')}</h3>
       {allActivity.length === 0
-        ? <div style={{ color: 'var(--color-muted-3)', fontSize: 14, padding: '16px 0' }}>Aucune note ou commentaire sur des épisodes vus.</div>
+        ? <div style={{ color: 'var(--color-muted-3)', fontSize: 14, padding: '16px 0' }}>{t('dashboard.noActivity')}</div>
         : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {allActivity.map((item) => {
               const w = works[item._type === 'review' ? item.id : item.workId]
               const subtitle = item._type === 'comment' && item.sNum
                 ? `S${item.sNum} · Ep. ${item.eNum}`
-                : item._type === 'review' ? 'Avis global' : null
+                : item._type === 'review' ? t('dashboard.globalReview') : null
               return (
                 <div key={item.id || item._type + item.ts} onClick={() => w && onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 14, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
                   <PosterBox id={w?.id || item.workId || item.id} title={w?.title || ''} poster={w?.poster} width={46} height={66} radius={10} />
@@ -99,7 +101,7 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
                       {subtitle && <span style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600 }}>{subtitle}</span>}
                     </div>
                     <div style={{ fontSize: 14, lineHeight: 1.5 }}>{item.text || item.note}</div>
-                    <div style={{ fontSize: 12, color: 'var(--color-muted-3)', marginTop: 6 }}>{relText(item.ts, Date.now())}</div>
+                    <div style={{ fontSize: 12, color: 'var(--color-muted-3)', marginTop: 6 }}>{relText(item.ts, Date.now(), i18n.language)}</div>
                   </div>
                 </div>
               )

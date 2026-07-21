@@ -11,8 +11,8 @@ describe('StatsView', () => {
     }
     const watched = { 'w2-1-1': true }
     render(<StatsView works={works} watched={watched} ratings={{}} onOpenWork={() => {}} />)
-    expect(screen.getByText('de visionnage')).toBeInTheDocument()
-    expect(screen.getByText('Séries')).toBeInTheDocument()
+    expect(screen.getByText('watch time')).toBeInTheDocument()
+    expect(screen.getByText('Series')).toBeInTheDocument()
     expect(screen.getByText('Films')).toBeInTheDocument()
   })
 })

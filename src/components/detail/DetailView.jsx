@@ -1,11 +1,13 @@
+import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import StatusSelect from '../ui/StatusSelect'
-import { CAT, STATUS, term, epTotals } from '../../lib/domain'
+import { STATUS, epTotals } from '../../lib/domain'
 import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
 import JournalThread from './JournalThread'
 
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites }) {
+  const { t } = useTranslation()
   const { total, watchedCount } = epTotals(work, watched)
   const rating = ratings[`w:${work.id}`] || 0
   const isFav = !!(favorites && favorites[work.id])
@@ -16,11 +18,11 @@ export default function DetailView({ work, watched, ratings, games, feed, action
         <PosterBox id={work.id} title={work.title} poster={work.poster} width={150} height={220} radius={18} fontSize={52} />
         <div style={{ flex: 1, minWidth: 260 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <span style={{ padding: '5px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: STATUS[work.status].color, background: `${STATUS[work.status].color}22` }}>{STATUS[work.status].label}</span>
+            <span style={{ padding: '5px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: STATUS[work.status].color, background: `${STATUS[work.status].color}22` }}>{t('status.' + work.status)}</span>
             <span style={{ fontSize: 13, color: 'var(--color-muted-2)' }}>
-              {CAT[work.category]} · {work.genre} · {work.year}
-              {work.ended === true && <span style={{ marginLeft: 6, color: '#4ade80', fontWeight: 600 }}>· Terminée</span>}
-              {work.ended === false && <span style={{ marginLeft: 6, color: '#f59e0b', fontWeight: 600 }}>· En cours</span>}
+              {t('cat.' + work.category)} · {work.genre} · {work.year}
+              {work.ended === true && <span style={{ marginLeft: 6, color: '#4ade80', fontWeight: 600 }}>{t('detail.ended')}</span>}
+              {work.ended === false && <span style={{ marginLeft: 6, color: '#f59e0b', fontWeight: 600 }}>{t('detail.ongoing')}</span>}
             </span>
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, margin: '0 0 12px' }}>{work.title}</h2>
@@ -28,8 +30,8 @@ export default function DetailView({ work, watched, ratings, games, feed, action
           {work.seasons && (
             <div style={{ maxWidth: 420, marginBottom: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 7 }}>
-                <span style={{ color: 'var(--color-muted)' }}>Progression</span>
-                <span style={{ fontWeight: 600 }}>{watchedCount} / {total} {term(work.category).unit}</span>
+                <span style={{ color: 'var(--color-muted)' }}>{t('detail.progress')}</span>
+                <span style={{ fontWeight: 600 }}>{watchedCount} / {total} {t('term.' + work.category + '.unit')}</span>
               </div>
               <div style={{ height: 8, borderRadius: 8, background: 'var(--color-progress-track)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${total ? Math.round((watchedCount / total) * 100) : 0}%`, background: 'linear-gradient(90deg, var(--color-accent), var(--color-pink))' }} />
@@ -38,7 +40,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 13, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)' }}>
-              <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>Ma note</span>
+              <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('detail.myRating')}</span>
               <div style={{ display: 'flex', gap: 3 }}>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <span key={n} onClick={() => actions.setRating('w', work.id, n)} style={{ fontSize: 20, cursor: 'pointer', color: n <= rating ? 'var(--color-gold)' : '#4a4a58' }}>{n <= rating ? '★' : '☆'}</span>
@@ -47,7 +49,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
             </div>
             <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} />
             {actions.toggleFavorite && (
-              <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? '★ Favori' : '☆ Favori'}</div>
+              <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
             )}
           </div>
         </div>

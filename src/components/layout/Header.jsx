@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import styles from './Header.module.css'
 
 export default function Header({
   title, subtitle, showBack, onBack, onOpenSearch, onOpenAccount, isMobile, avatarInitials
 }) {
+  const { t } = useTranslation()
   return (
     <header className={styles.header}>
       {isMobile && (
@@ -13,7 +15,7 @@ export default function Header({
       )}
       <div className={styles.titleBlock}>
         {showBack && (
-          <div className={styles.back} onClick={onBack}>‹ Retour</div>
+          <div className={styles.back} onClick={onBack}>{t('header.back')}</div>
         )}
         <h1 className={styles.title}>{title}</h1>
         <div className={styles.subtitle}>{subtitle}</div>

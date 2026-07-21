@@ -15,9 +15,9 @@ vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => ({ signup }) }))
 describe('SignupPage', () => {
   it('submits email and password to signup()', async () => {
     render(<SignupPage onSwitchToLogin={() => {}} />)
-    await userEvent.type(screen.getByPlaceholderText('Adresse e-mail'), 'alex@example.com')
-    await userEvent.type(screen.getByPlaceholderText('Mot de passe'), 'hunter22')
-    await userEvent.click(screen.getByRole('button', { name: 'Créer mon compte' }))
+    await userEvent.type(screen.getByPlaceholderText('Email address'), 'alex@example.com')
+    await userEvent.type(screen.getByPlaceholderText('Password'), 'hunter22')
+    await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
     expect(signup).toHaveBeenCalledWith('alex@example.com', 'hunter22')
   })
 })

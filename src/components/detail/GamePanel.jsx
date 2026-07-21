@@ -1,13 +1,19 @@
-const TIERS = [['main', 'Quête principale'], ['extra', 'Extras & secondaires'], ['full', 'Complétion 100 %']]
+import { useTranslation } from 'react-i18next'
 
 export default function GamePanel({ workId, game, onAddHours, onToggleTier }) {
+  const { t } = useTranslation()
+  const TIERS = [
+    ['main', t('game.main')],
+    ['extra', t('game.extra')],
+    ['full', t('game.full')],
+  ]
   const g = game || { hours: 0, done: {} }
   return (
     <div style={{ border: '1px solid var(--color-border-btn)', borderRadius: 18, background: 'var(--color-surface)', padding: 22, marginBottom: 22 }}>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>Mon temps de jeu</h3>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('game.title')}</h3>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22 }}>
         <div onClick={() => onAddHours(workId, -5)} style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid var(--color-border-btn)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 20 }}>−</div>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, minWidth: 74, textAlign: 'center' }}>{g.hours || 0} h de jeu</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, minWidth: 74, textAlign: 'center' }}>{t('game.hours', { hours: g.hours || 0 })}</span>
         <div onClick={() => onAddHours(workId, 5)} style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid var(--color-border-btn)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 20 }}>+</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
