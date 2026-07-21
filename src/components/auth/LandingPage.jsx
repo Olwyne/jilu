@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n/index.js'
-import heroScreenshot from '../../assets/hero-screenshot.png'
+import heroScreenshot from '../../assets/hero-screenshot.webp'
 
 const css = `
 .lp { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f9; color: #1a1a2e; min-height: 100vh; }

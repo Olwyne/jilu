@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 const css = `
@@ -23,6 +24,11 @@ const css = `
 `
 
 export default function LegalLayout({ title, date, children }) {
+  useEffect(() => {
+    document.title = `${title} — Jilu`
+    return () => { document.title = 'Jilu — Your whole culture, tracked in one place' }
+  }, [title])
+
   return (
     <div className="legal-page">
       <style>{css}</style>
