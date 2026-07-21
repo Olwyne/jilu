@@ -4,6 +4,24 @@ import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { initials, relText } from '../../lib/domain'
 
+const RUNTIME = { animes: 24, series: 45, films: 120 }
+
+function formatWatchTime(totalMins) {
+  let m = totalMins
+  const y = Math.floor(m / 525600); m %= 525600
+  const mo = Math.floor(m / 43200); m %= 43200
+  const d = Math.floor(m / 1440); m %= 1440
+  const h = Math.floor(m / 60)
+  const mn = m % 60
+  const parts = []
+  if (y) parts.push(`${y}a`)
+  if (mo) parts.push(`${mo}m`)
+  if (d) parts.push(`${d}j`)
+  if (h) parts.push(`${h}h`)
+  if (mn || !parts.length) parts.push(`${mn}min`)
+  return parts.join(' ')
+}
+
 export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, onShare, readOnly }) {
   const { t, i18n } = useTranslation()
   const { works, watched, ratings, favorites, feed, profile, settings } = data
@@ -31,6 +49,15 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
   const ratingsCount = Object.keys(ratings).length
   const isPublic = !!settings.publicProfile
   const pseudo = profile.handle || profile.name || '?'
+
+  let totalMinutes = 0
+  worksArr.forEach(w => {
+    if (w.category === 'films' && w.status === 'termine') totalMinutes += 120
+    if (w.seasons) w.seasons.forEach(s => s.episodes.forEach(e => {
+      if (watched[`${w.id}-${s.n}-${e.n}`]) totalMinutes += RUNTIME[w.category] || 42
+    }))
+  })
+  const watchTimeStr = formatWatchTime(totalMinutes)
 
   const favWorks = worksArr.filter(w => favorites && favorites[w.id])
   const recentFeed = [...(feed || [])].sort((a, b) => b.ts - a.ts).slice(0, 20)
@@ -65,6 +92,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
           <div style={{ display: 'flex', gap: 20, marginTop: 12, flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{worksCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>œuvres</div></div>
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{episodesCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>vus</div></div>
+            <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14 }}>{watchTimeStr}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>visionnage</div></div>
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{ratingsCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>avis</div></div>
           </div>
         </div>
