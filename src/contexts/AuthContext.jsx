@@ -3,7 +3,8 @@ import {
   onAuthStateChanged, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, signOut,
   sendPasswordResetEmail, confirmPasswordReset,
-  updatePassword, EmailAuthProvider, reauthenticateWithCredential
+  updatePassword, EmailAuthProvider, reauthenticateWithCredential,
+  deleteUser
 } from 'firebase/auth'
 import { auth } from '../firebase'
 
@@ -30,6 +31,7 @@ export function AuthProvider({ children }) {
       await reauthenticateWithCredential(auth.currentUser, credential)
       await updatePassword(auth.currentUser, newPassword)
     },
+    deleteAccount: () => deleteUser(auth.currentUser),
   }
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>

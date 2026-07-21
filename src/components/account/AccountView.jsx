@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n/index.js'
 import emailjs from '@emailjs/browser'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, getDocs, deleteDoc, collection, query, where } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import { initials } from '../../lib/domain'
@@ -147,6 +147,7 @@ function Section({ rows, settings, onToggleSetting }) {
 
 export default function AccountView({ profile, settings, onToggleSetting, onSaveProfile, onMarkAll, onReset, onLogout, onSync, onClearAll, onImportTVTime, onImportTVTimeOut, onRefreshAll, onChangeLanguage }) {
   const { t, i18n: i18nInstance } = useTranslation()
+  const { user, deleteAccount } = useAuth()
   const [syncLabel, setSyncLabel] = useState(null)
   const [refreshLabel, setRefreshLabel] = useState(null)
   const [importLabel, setImportLabel] = useState(null)
@@ -154,6 +155,8 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
   const [failedItems, setFailedItems] = useState([])
   const [failedOutItems, setFailedOutItems] = useState([])
   const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteStatus, setDeleteStatus] = useState('idle')
 
   const PREF_ROWS = [
     ['notifNewEp', t('settings.notifNewEp'), t('settings.notifNewEpDesc'), true],
@@ -192,6 +195,26 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
     setTimeout(() => setImportOutLabel(null), 6000)
   }
 
+  async function handleDeleteAccount() {
+    if (!user) return
+    setDeleteStatus('loading')
+    try {
+      const deleteSubcollection = async (name) => {
+        const snap = await getDocs(collection(db, 'users', user.uid, name))
+        await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
+      }
+      await deleteSubcollection('works')
+      await deleteSubcollection('watched')
+      const reviewsSnap = await getDocs(query(collection(db, 'reviews'), where('userId', '==', user.uid)))
+      await Promise.all(reviewsSnap.docs.map(d => deleteDoc(d.ref)))
+      await deleteDoc(doc(db, 'users', user.uid))
+      await deleteAccount()
+    } catch {
+      setDeleteStatus('error')
+      setTimeout(() => setDeleteStatus('idle'), 6000)
+    }
+  }
+
   const isDark = settings.darkMode !== false
 
   return (
@@ -202,6 +225,33 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           onSave={onSaveProfile}
           onClose={() => setEditOpen(false)}
         />
+      )}
+      {deleteOpen && (
+        <div onClick={() => { if (deleteStatus !== 'loading') setDeleteOpen(false) }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 12 }}>{t('settings.deleteAccountTitle')}</div>
+            <div style={{ fontSize: 14, color: 'var(--color-muted)', lineHeight: 1.6, marginBottom: 24 }}>{t('settings.deleteAccountDesc')}</div>
+            {deleteStatus === 'error' && (
+              <div style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 16, fontWeight: 600 }}>{t('settings.deleteAccountError')}</div>
+            )}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => setDeleteOpen(false)}
+                disabled={deleteStatus === 'loading'}
+                style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-text)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+              >
+                {t('settings.deleteAccountCancel')}
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteStatus === 'loading'}
+                style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: 'none', background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 600, cursor: deleteStatus === 'loading' ? 'wait' : 'pointer', opacity: deleteStatus === 'loading' ? 0.7 : 1 }}
+              >
+                {deleteStatus === 'loading' ? t('settings.deleteAccountDeleting') : t('settings.deleteAccountConfirm')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', padding: 24, borderRadius: 20, background: 'var(--color-surface)', border: '1px solid var(--color-border)', marginBottom: 26 }}>
         <div style={{ width: 76, height: 76, flexShrink: 0, borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), var(--color-pink))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30, color: '#fff' }}>
@@ -292,7 +342,11 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
       <FeedbackSection profile={profile} />
 
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 24 }}>
-        <div onClick={onLogout} style={{ display: 'inline-block', padding: '11px 20px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.logout')}</div>
+        <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12 }}>{t('settings.dangerZone')}</div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div onClick={onLogout} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.logout')}</div>
+          <div onClick={() => setDeleteOpen(true)} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid #ef4444', background: 'rgba(239,68,68,.08)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ef4444' }}>{t('settings.deleteAccount')}</div>
+        </div>
       </div>
     </div>
   )
