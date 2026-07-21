@@ -14,11 +14,11 @@ function formatWatchTime(totalMins) {
   const h = Math.floor(m / 60)
   const mn = m % 60
   const parts = []
-  if (y) parts.push(`${y}a`)
-  if (mo) parts.push(`${mo}m`)
-  if (d) parts.push(`${d}j`)
-  if (h) parts.push(`${h}h`)
-  if (mn || !parts.length) parts.push(`${mn}min`)
+  if (y) parts.push(`${y} ${y > 1 ? 'ans' : 'an'}`)
+  if (mo) parts.push(`${mo} ${mo > 1 ? 'mois' : 'mois'}`)
+  if (d) parts.push(`${d} ${d > 1 ? 'jours' : 'jour'}`)
+  if (h) parts.push(`${h} ${h > 1 ? 'heures' : 'heure'}`)
+  if (mn || !parts.length) parts.push(`${mn} ${mn > 1 ? 'minutes' : 'minute'}`)
   return parts.join(' ')
 }
 
