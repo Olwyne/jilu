@@ -84,7 +84,7 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
                 <div style={{ position: 'relative', zIndex: 1, flexShrink: 0, width: 76, alignSelf: 'stretch', borderRadius: '14px 0 0 14px', overflow: 'hidden', boxShadow: '2px 0 8px rgba(0,0,0,0.2)' }}>
                   {w.poster
                     ? <img src={w.poster} alt={w.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    : <PosterBox id={w.id} title={w.title} poster={null} width={60} height={88} radius={8} fontSize={22} />
+                    : <PosterBox id={w.id} title={w.title} poster={null} width="100%" height="100%" radius={0} fontSize={22} style={{ flexShrink: 1 }} />
                   }
                 </div>
                 {/* Contenu */}
@@ -141,7 +141,7 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
                 <div style={{ position: 'relative', zIndex: 1, flexShrink: 0, width: 76, alignSelf: 'stretch', borderRadius: '14px 0 0 14px', overflow: 'hidden', boxShadow: '2px 0 8px rgba(0,0,0,0.2)' }}>
                   {w.poster
                     ? <img src={w.poster} alt={w.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    : <PosterBox id={w.id} title={w.title} poster={null} width={60} height={88} radius={8} fontSize={22} />
+                    : <PosterBox id={w.id} title={w.title} poster={null} width="100%" height="100%" radius={0} fontSize={22} style={{ flexShrink: 1 }} />
                   }
                 </div>
                 <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', padding: '12px 14px 12px 12px' }}>
