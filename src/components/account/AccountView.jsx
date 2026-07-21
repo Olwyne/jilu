@@ -338,6 +338,20 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         <div onClick={onClearAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border-2)', background: 'var(--color-danger-bg-2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.clearAll')}</div>
       </div>
 
+      <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.about')}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', borderRadius: 14, border: '1px solid var(--color-border)', overflow: 'hidden', marginBottom: 24 }}>
+        {[
+          [t('settings.legalNotice'), '/legal'],
+          [t('settings.privacy_policy'), '/privacy'],
+          [t('settings.terms'), '/terms'],
+        ].map(([label, href], i, arr) => (
+          <a key={href} href={href} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', fontSize: 14, color: 'var(--color-text)', textDecoration: 'none', background: 'var(--color-surface)', borderTop: i > 0 ? '1px solid var(--color-border)' : 'none' }}>
+            <span>{label}</span>
+            <span style={{ color: 'var(--color-muted-3)', fontSize: 16 }}>›</span>
+          </a>
+        ))}
+      </div>
+
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.feedback')}</div>
       <FeedbackSection profile={profile} />
 
