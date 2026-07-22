@@ -3,7 +3,7 @@ import PosterBox from '../ui/PosterBox'
 import { STATUS, DAY } from '../../lib/domain'
 
 const RUNTIME = { animes: 24, series: 45 }
-const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: '#c46dff' }
+const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', mangas: '#f97316', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: '#c46dff' }
 const HEAT = ['var(--color-border)', 'var(--heat-1)', 'var(--heat-2)', 'var(--heat-3)', 'var(--heat-4)']
 const MONTHS_FR = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jul', 'aoû', 'sep', 'oct', 'nov', 'déc']
 const HEATMAP_WEEKS = 52
@@ -22,7 +22,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
   const { t } = useTranslation()
   const now = Date.now()
 
-  let totalEps = 0, minutes = 0, seriesVues = 0, filmsSeen = 0, animesVus = 0, livresLus = 0, jeuxFinis = 0
+  let totalEps = 0, minutes = 0, seriesVues = 0, filmsSeen = 0, animesVus = 0, mangasLus = 0, livresLus = 0, jeuxFinis = 0
   let ratedSum = 0, ratedN = 0
   const catCount = {}, statusCount = { a_voir: 0, en_cours: 0, termine: 0, abandonne: 0 }, genreCount = {}
   const ratingDist = [0, 0, 0, 0, 0]
@@ -43,6 +43,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
     if (w.category === 'series' && w.status === 'termine') seriesVues++
     if (w.category === 'films' && w.status === 'termine') { filmsSeen++; minutes += 120 }
     if (w.category === 'animes' && w.status === 'termine') animesVus++
+    if (w.category === 'mangas' && w.status === 'termine') mangasLus++
     if (w.category === 'livres' && w.status === 'termine') livresLus++
     if (w.category === 'jeux' && w.status === 'termine') jeuxFinis++
     if (w.year) {
@@ -121,6 +122,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           [String(seriesVues), t('stats.seriesWatched'), CAT_COLORS.series],
           [String(filmsSeen), t('stats.filmsSeen'), CAT_COLORS.films],
           [String(animesVus), t('stats.animesWatched'), CAT_COLORS.animes],
+          [String(mangasLus), t('stats.mangasRead'), CAT_COLORS.mangas],
           [String(livresLus), t('stats.livresRead'), CAT_COLORS.livres],
           [String(jeuxFinis), t('stats.gamesFinished'), CAT_COLORS.jeux],
         ].map(([value, label, color]) => (

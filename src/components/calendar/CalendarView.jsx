@@ -5,7 +5,7 @@ import { relText, DAY } from '../../lib/domain'
 import { posterGradient } from '../../lib/posterBox'
 
 const TABS = ['rattraper', 'venir', 'abandonne']
-const CAT_KEYS = ['all', 'series', 'films', 'animes', 'livres', 'jeux']
+const CAT_KEYS = ['all', 'series', 'films', 'animes', 'mangas', 'livres', 'jeux']
 
 function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
   const { w } = item
@@ -13,7 +13,7 @@ function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
   const subtitle = w.release
     ? new Date(w.release).toLocaleDateString(language, { day: 'numeric', month: 'short', year: 'numeric' })
     : w.year ? String(w.year) : null
-  const markLabel = w.category === 'livres'
+  const markLabel = w.category === 'livres' || w.category === 'mangas'
     ? t('calendar.markRead')
     : w.category === 'jeux'
     ? t('calendar.markPlayed')
@@ -144,7 +144,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
     const cat = w.category
     if (category !== 'all' && cat !== category) return
 
-    if (w.seasons && (cat === 'series' || cat === 'animes' || !cat)) {
+    if (w.seasons && (cat === 'series' || cat === 'animes' || cat === 'mangas' || !cat)) {
       // Series / animes: episode-based logic
       let first = null, remaining = 0
       w.seasons.forEach((s) => s.episodes.forEach((e) => {
