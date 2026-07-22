@@ -1,4 +1,4 @@
-const BASE = 'https://api.mangadex.org'
+const BASE = import.meta.env.DEV ? '/mangadex-proxy' : 'https://api.mangadex.org'
 
 export async function mangadexGetChapterMap(mangaTitle) {
   try {

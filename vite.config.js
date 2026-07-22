@@ -38,6 +38,11 @@ export default defineConfig(({ mode }) => {
         target: 'https://graphql.anilist.co',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/anilist-proxy/, '')
+      },
+      '/mangadex-proxy': {
+        target: 'https://api.mangadex.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/mangadex-proxy/, '')
       }
     }
   },
