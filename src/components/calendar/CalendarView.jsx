@@ -6,7 +6,7 @@ import { posterGradient } from '../../lib/posterBox'
 
 const TABS = ['rattraper', 'venir', 'abandonne']
 
-export default function CalendarView({ works, watched, onOpenWork, onMarkWatched }) {
+export default function CalendarView({ works, watched, onOpenWork, isMobile, onMarkWatched }) {
   const { t, i18n } = useTranslation()
   const [tab, setTab] = useState('rattraper')
   const now = Date.now()
@@ -91,10 +91,15 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
                 <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px 12px 12px' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
-                    <div style={{ marginTop: 5, overflow: 'hidden' }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap' }}>
-                        S{s.n} · {t('term.series.ep')} {e.n}{remaining > 1 ? ` · ${t('calendar.remaining', { count: remaining - 1 })}` : ''}
+                    <div style={{ marginTop: 5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6, display: 'inline-block' }}>
+                        S{s.n} · {t('term.series.ep')} {e.n}
                       </span>
+                      {remaining > 1 && (
+                        <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.75)', background: 'rgba(0,0,0,0.35)', padding: '2px 7px', borderRadius: 5, display: 'inline-block' }}>
+                          {t('calendar.remaining', { count: remaining - 1 })}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div onClick={(ev) => { ev.stopPropagation(); onMarkWatched(w.id, s.n, e.n) }} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>{t('calendar.markWatched')}</div>
@@ -148,10 +153,15 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
                 <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', padding: '12px 14px 12px 12px' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
-                    <div style={{ marginTop: 5, overflow: 'hidden' }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap' }}>
-                        S{s.n} · {t('term.series.ep')} {e.n}{remaining > 1 ? ` · ${t('calendar.remainingUnseen', { count: remaining - 1 })}` : ''}
+                    <div style={{ marginTop: 5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6, display: 'inline-block' }}>
+                        S{s.n} · {t('term.series.ep')} {e.n}
                       </span>
+                      {remaining > 1 && (
+                        <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.75)', background: 'rgba(0,0,0,0.35)', padding: '2px 7px', borderRadius: 5, display: 'inline-block' }}>
+                          {t('calendar.remainingUnseen', { count: remaining - 1 })}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
