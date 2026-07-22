@@ -133,7 +133,7 @@ function Shell() {
           onOpenSearch={() => setSearchOpen(true)}
           isMobile={isMobile}
         />
-        <main style={{ padding: '22px 30px 40px', maxWidth: 1240, width: '100%' }}>
+        <main style={{ padding: `22px ${isMobile ? 16 : 30}px 40px`, maxWidth: 1240, width: '100%', margin: '0 auto' }}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/library" element={
@@ -170,6 +170,7 @@ function Shell() {
                 watched={data.watched}
                 ratings={data.ratings}
                 onOpenWork={openWork}
+                isMobile={isMobile}
               />
             } />
             <Route path="/account" element={
@@ -195,6 +196,7 @@ function Shell() {
                 onOpenWork={(id) => id === '__library' ? navigate('/library') : openWork(id)}
                 onToggleLike={workActions.toggleLike}
                 onDelete={workActions.deleteComment}
+                isMobile={isMobile}
               />
             } />
             <Route path="/work/:workId" element={

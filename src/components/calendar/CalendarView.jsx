@@ -91,8 +91,8 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
                 <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px 12px 12px' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
-                    <div style={{ marginTop: 5 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6 }}>
+                    <div style={{ marginTop: 5, overflow: 'hidden' }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap' }}>
                         S{s.n} · {t('term.series.ep')} {e.n}{remaining > 1 ? ` · ${t('calendar.remaining', { count: remaining - 1 })}` : ''}
                       </span>
                     </div>
@@ -148,8 +148,8 @@ export default function CalendarView({ works, watched, onOpenWork, onMarkWatched
                 <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', padding: '12px 14px 12px 12px' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
-                    <div style={{ marginTop: 5 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6 }}>
+                    <div style={{ marginTop: 5, overflow: 'hidden' }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap' }}>
                         S{s.n} · {t('term.series.ep')} {e.n}{remaining > 1 ? ` · ${t('calendar.remainingUnseen', { count: remaining - 1 })}` : ''}
                       </span>
                     </div>

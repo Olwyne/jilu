@@ -30,6 +30,12 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
     return () => { cancelled = true; clearTimeout(t) }
   }, [query, cat])
 
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '12vh 20px 20px' }}>
       <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'color-mix(in srgb, var(--color-bg) 96%, var(--color-text))', border: '1px solid var(--color-border-btn)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 30px 80px var(--color-shadow-lg)' }}>

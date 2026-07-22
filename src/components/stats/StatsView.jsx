@@ -18,7 +18,7 @@ function heatLevel(n) {
 
 const CARD = { padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }
 
-export default function StatsView({ works, watched, ratings, onOpenWork }) {
+export default function StatsView({ works, watched, ratings, onOpenWork, isMobile }) {
   const { t } = useTranslation()
   const now = Date.now()
 
@@ -137,22 +137,34 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 3px' }}>{t('stats.recentActivity')}</h3>
           <div style={{ fontSize: 12, color: 'var(--color-muted-2)' }}>{t('stats.activityNote')}</div>
         </div>
-        <div style={{ display: 'flex', gap: 3, width: '100%' }}>
-          {heatCols.map((col, ci) => (
-            <div key={ci} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <div style={{ height: 14, fontSize: 10, color: 'var(--color-muted-3)', overflow: 'hidden' }}>
-                {monthLabels[ci] || ''}
+        {isMobile ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+            {heatCols.slice(-13).flatMap((col) => col.days).map((day, i) => (
+              <div
+                key={i}
+                title={day.count ? `${day.day}/${day.month + 1}: ${day.count} ép.` : ''}
+                style={{ width: '100%', aspectRatio: '1', borderRadius: 3, background: HEAT[heatLevel(day.count)] }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 3, width: '100%' }}>
+            {heatCols.map((col, ci) => (
+              <div key={ci} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <div style={{ height: 14, fontSize: 10, color: 'var(--color-muted-3)', overflow: 'hidden' }}>
+                  {monthLabels[ci] || ''}
+                </div>
+                {col.days.map((day, di) => (
+                  <div
+                    key={di}
+                    title={day.count ? `${day.day}/${day.month + 1}: ${day.count} ép.` : ''}
+                    style={{ width: '100%', aspectRatio: '1', borderRadius: 2, background: HEAT[heatLevel(day.count)] }}
+                  />
+                ))}
               </div>
-              {col.days.map((day, di) => (
-                <div
-                  key={di}
-                  title={day.count ? `${day.day}/${day.month + 1}: ${day.count} ép.` : ''}
-                  style={{ width: '100%', aspectRatio: '1', borderRadius: 2, background: HEAT[heatLevel(day.count)] }}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Category + Status */}
@@ -206,14 +218,16 @@ export default function StatsView({ works, watched, ratings, onOpenWork }) {
           {sortedDecades.length === 0
             ? <div style={{ fontSize: 13, color: 'var(--color-muted-2)' }}>—</div>
             : (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 110 }}>
+              <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 110, minWidth: sortedDecades.length * 44 }}>
                 {sortedDecades.map((decade) => (
-                  <div key={decade} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, height: '100%', justifyContent: 'flex-end' }}>
+                  <div key={decade} style={{ flex: 1, minWidth: 38, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, height: '100%', justifyContent: 'flex-end' }}>
                     <span style={{ fontSize: 11, color: 'var(--color-muted)' }}>{decadeCount[decade]}</span>
                     <div style={{ width: '100%', borderRadius: '4px 4px 0 0', height: `${Math.round(decadeCount[decade] / decMax * 70)}%`, background: 'linear-gradient(180deg, var(--color-blue), #1a5a8a)', minHeight: 4 }} />
                     <span style={{ fontSize: 10, color: 'var(--color-muted-2)', whiteSpace: 'nowrap' }}>{decade}s</span>
                   </div>
                 ))}
+              </div>
               </div>
             )}
         </div>
