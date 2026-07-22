@@ -103,6 +103,8 @@
   "feedback.error": "Error — try again",
   "feedback.rateLimit": "Limit reached (3/day)",
   "status.a_voir": "Plan to watch",
+  "status.a_voir_livres": "Plan to read",
+  "status.a_voir_jeux": "Plan to play",
   "status.en_cours": "Watching",
   "status.termine": "Completed",
   "status.abandonne": "Dropped",

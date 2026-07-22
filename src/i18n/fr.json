@@ -103,6 +103,8 @@
   "feedback.error": "Erreur — réessaie",
   "feedback.rateLimit": "Limite atteinte (3/jour)",
   "status.a_voir": "À voir",
+  "status.a_voir_livres": "À lire",
+  "status.a_voir_jeux": "À jouer",
   "status.en_cours": "En cours",
   "status.termine": "Terminé",
   "status.abandonne": "Abandonné",
