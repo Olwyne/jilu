@@ -151,6 +151,7 @@ function Shell() {
                 watched={data.watched}
                 onOpenWork={openWork}
                 onMarkWatched={(id, s, e) => workActions.markWatchedToast(data.works[id], s, e, setToast)}
+                onMarkDone={(id) => workActions.setStatus(id, 'termine')}
                 isMobile={isMobile}
               />
             } />

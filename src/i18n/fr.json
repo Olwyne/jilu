@@ -172,6 +172,8 @@
   "calendar.upcoming": "À venir",
   "calendar.dropped": "Abandonné",
   "calendar.markWatched": "Marquer vu",
+  "calendar.markRead": "Marquer lu",
+  "calendar.markPlayed": "Marquer joué",
   "calendar.remaining": "+{{count}} en attente",
   "calendar.remainingUnseen": "+{{count}} non vus",
   "calendar.upToDate": "Tu es à jour ! 🎉",

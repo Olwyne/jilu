@@ -7,12 +7,17 @@ import { posterGradient } from '../../lib/posterBox'
 const TABS = ['rattraper', 'venir', 'abandonne']
 const CAT_KEYS = ['all', 'series', 'films', 'animes', 'livres', 'jeux']
 
-function SimpleCard({ item, onOpenWork, language }) {
+function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
   const { w } = item
   const { from, to } = posterGradient(w.id)
   const subtitle = w.release
     ? new Date(w.release).toLocaleDateString(language, { day: 'numeric', month: 'short', year: 'numeric' })
     : w.year ? String(w.year) : null
+  const markLabel = w.category === 'livres'
+    ? t('calendar.markRead')
+    : w.category === 'jeux'
+    ? t('calendar.markPlayed')
+    : t('calendar.markWatched')
   return (
     <div onClick={() => onOpenWork(w.id)} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
       {w.poster
@@ -26,7 +31,7 @@ function SimpleCard({ item, onOpenWork, language }) {
           : <PosterBox id={w.id} title={w.title} poster={null} width="100%" height="100%" radius={0} fontSize={22} style={{ flexShrink: 1 }} />
         }
       </div>
-      <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', padding: '12px 14px 12px 12px' }}>
+      <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px 12px 12px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
           {subtitle && (
@@ -35,6 +40,11 @@ function SimpleCard({ item, onOpenWork, language }) {
             </span>
           )}
         </div>
+        {onMarkDone && (
+          <div onClick={(ev) => { ev.stopPropagation(); onMarkDone(w.id) }} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>
+            {markLabel}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -113,7 +123,7 @@ function UpcomingReleaseRow({ item, onOpenWork, language, now }) {
   )
 }
 
-export default function CalendarView({ works, watched, onOpenWork, isMobile, onMarkWatched }) {
+export default function CalendarView({ works, watched, onOpenWork, isMobile, onMarkWatched, onMarkDone }) {
   const { t, i18n } = useTranslation()
   const [tab, setTab] = useState('rattraper')
   const [category, setCategory] = useState('all')
@@ -233,7 +243,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
           {catchGroups.map((item, i) =>
             item.type === 'episode'
               ? <EpisodeCard key={item.w.id} item={item} showMarkWatched={true} onOpenWork={onOpenWork} onMarkWatched={onMarkWatched} t={t} />
-              : <SimpleCard key={item.w.id} item={item} onOpenWork={onOpenWork} language={i18n.language} />
+              : <SimpleCard key={item.w.id} item={item} onOpenWork={onOpenWork} onMarkDone={onMarkDone} t={t} language={i18n.language} />
           )}
         </div>
       )}

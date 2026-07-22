@@ -172,6 +172,8 @@
   "calendar.upcoming": "Upcoming",
   "calendar.dropped": "Dropped",
   "calendar.markWatched": "Mark watched",
+  "calendar.markRead": "Mark read",
+  "calendar.markPlayed": "Mark played",
   "calendar.remaining": "+{{count}} more",
   "calendar.remainingUnseen": "+{{count}} unseen",
   "calendar.upToDate": "You're all caught up! 🎉",
