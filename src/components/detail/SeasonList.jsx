@@ -60,7 +60,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <span style={{ fontWeight: 600, fontSize: 14.5, textDecoration: isWatched ? 'line-through' : 'none', color: isWatched ? 'var(--color-muted)' : 'inherit' }}>{epLabel(work, s, e, t)}</span>
-                        {e.air > 0 && <span style={{ marginLeft: 8, fontSize: 12, color: aired2 ? 'var(--color-muted)' : 'var(--color-accent)', fontWeight: 500 }}>{fmtFull(e.air)}</span>}
+                        {e.air > 1000 && <span style={{ marginLeft: 8, fontSize: 12, color: aired2 ? 'var(--color-muted)' : 'var(--color-accent)', fontWeight: 500 }}>{fmtFull(e.air)}</span>}
                       </div>
                       <div onClick={() => aired2 && onOpenEpisode(work, s, e)} style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: aired2 ? 'pointer' : 'default', color: aired2 ? 'var(--color-muted)' : 'transparent', fontSize: 20, lineHeight: 1 }}>›</div>
                     </div>

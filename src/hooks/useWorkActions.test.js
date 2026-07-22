@@ -83,8 +83,18 @@ describe('useWorkActions', () => {
     expect(stored.title).toBe('Blue Lock')
   })
 
-  it('anilistGetMangaDetail mock is defined for anilist-manga routing', () => {
-    expect(anilistGetMangaDetail).toBeDefined()
+  it('addWork with source anilist-manga calls anilistGetMangaDetail with sourceId', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    anilistGetMangaDetail.mockResolvedValue({
+      seasons: [{ n: 1, name: 'Tome 1', episodes: [{ n: 1, title: '', air: 1 }] }],
+      ended: false, chapters: 1, volumes: 1
+    })
+    const data = { works: {} }
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+    await act(async () => {
+      await result.current.addWork({ source: 'anilist-manga', sourceId: 13, id: 'anilist-manga-13', title: 'One Piece', category: 'mangas', status: 'a_voir' })
+    })
+    expect(anilistGetMangaDetail).toHaveBeenCalledWith(13)
   })
 
   it('addWork falls back to TMDB seasons when anilistFindId returns null', async () => {
