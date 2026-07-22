@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import PosterBox from '../ui/PosterBox'
 import StatusSelect from '../ui/StatusSelect'
 import { STATUS, epTotals } from '../../lib/domain'
@@ -8,6 +9,7 @@ import JournalThread from './JournalThread'
 
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { total, watchedCount } = epTotals(work, watched)
   const rating = ratings[`w:${work.id}`] || 0
   const isFav = !!(favorites && favorites[work.id])
@@ -54,6 +56,9 @@ export default function DetailView({ work, watched, ratings, games, feed, action
             <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} disabled={isUnreleased} />
             {actions.toggleFavorite && (
               <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
+            )}
+            {actions.removeWork && (
+              <div onClick={async () => { await actions.removeWork(work.id); navigate('/library') }} style={{ padding: '11px 16px', borderRadius: 13, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', color: '#ef4444', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{t('detail.removeWork')}</div>
             )}
           </div>
         </div>

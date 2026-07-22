@@ -148,6 +148,17 @@ export function useWorkActions(data, mutate) {
     }
   }
 
+  async function removeWork(workId) {
+    const works = { ...data.works }
+    delete works[workId]
+    const watched = Object.fromEntries(Object.entries(data.watched).filter(([k]) => !k.startsWith(workId + '-')))
+    const ratings = { ...data.ratings }
+    delete ratings[`w:${workId}`]
+    const favorites = { ...(data.favorites || {}) }
+    delete favorites[workId]
+    await mutate({ works, watched, ratings, favorites })
+  }
+
   async function toggleFavorite(workId) {
     const favorites = { ...(data.favorites || {}) }
     if (favorites[workId]) delete favorites[workId]; else favorites[workId] = true
@@ -218,5 +229,5 @@ export function useWorkActions(data, mutate) {
     onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
   }
 
-  return { addWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
+  return { addWork, removeWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
 }
