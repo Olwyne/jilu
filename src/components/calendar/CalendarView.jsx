@@ -233,7 +233,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
           {catchGroups.map((item, i) =>
             item.type === 'episode'
               ? <EpisodeCard key={item.w.id} item={item} showMarkWatched={true} onOpenWork={onOpenWork} onMarkWatched={onMarkWatched} t={t} />
-              : <SimpleCard key={item.w.id + i} item={item} onOpenWork={onOpenWork} language={i18n.language} />
+              : <SimpleCard key={item.w.id} item={item} onOpenWork={onOpenWork} language={i18n.language} />
           )}
         </div>
       )}
@@ -244,7 +244,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
           {upcoming.slice(0, 14).map((item, i) =>
             item.type === 'episode'
               ? <UpcomingEpisodeRow key={`${item.w.id}-${item.s.n}-${item.e.n}`} item={item} onOpenWork={onOpenWork} language={i18n.language} t={t} now={now} />
-              : <UpcomingReleaseRow key={item.w.id + i} item={item} onOpenWork={onOpenWork} language={i18n.language} now={now} />
+              : <UpcomingReleaseRow key={item.w.id} item={item} onOpenWork={onOpenWork} language={i18n.language} now={now} />
           )}
         </div>
       )}
@@ -255,7 +255,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
           {abandoned.map((item, i) =>
             item.type === 'episode'
               ? <EpisodeCard key={item.w.id} item={item} showMarkWatched={false} onOpenWork={onOpenWork} onMarkWatched={onMarkWatched} t={t} />
-              : <SimpleCard key={item.w.id + i} item={item} onOpenWork={onOpenWork} language={i18n.language} />
+              : <SimpleCard key={item.w.id} item={item} onOpenWork={onOpenWork} language={i18n.language} />
           )}
         </div>
       )}

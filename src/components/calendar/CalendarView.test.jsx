@@ -19,8 +19,7 @@ describe('CalendarView', () => {
     expect(screen.getByText('From')).toBeInTheDocument()
   })
 
-  it('shows released a_voir film in À rattraper', async () => {
-    const user = userEvent.setup()
+  it('shows released a_voir film in À rattraper', () => {
     const works = {
       w1: { id: 'w1', title: 'Dune', category: 'films', status: 'a_voir', release: now - DAY, seasons: null },
     }
