@@ -16,6 +16,7 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
     ['series', t('cat.series')],
     ['films', t('cat.films')],
     ['animes', t('cat.animes')],
+    ['mangas', t('cat.mangas')],
     ['livres', t('cat.livres')],
     ['jeux', t('cat.jeux')],
     ['musique', t('cat.musique')],
