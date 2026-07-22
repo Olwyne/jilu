@@ -11,7 +11,9 @@ Cas d'usage principal : One Piece — ~1 scan (chapitre) par semaine, tomes publ
 
 | Décision | Choix |
 |---|---|
-| Catégorie | `mangas` — séparée de `animes` |
+| Catégorie | `mangas` — séparée de `animes` et `livres` |
+| Périmètre mangas | Manga japonais, manhwa (coréen), manhua (chinois) |
+| Périmètre livres | BD franco-belge, comics américains, graphic novels restent dans `livres` |
 | Source primaire | AniList (type: MANGA) |
 | Mapping chapitre→tome | MangaDex API (complément) |
 | Modèle de données | Réutilisation season=tome / episode=chapitre |
@@ -89,7 +91,8 @@ Branche `mangas` ajoutée, appelle `anilistSearchManga`.
 
 ### `src/catalog/googleBooks.js` + Open Library — filtre manga
 
-Résultats dont les subjects/categories contiennent `manga`, `comics`, `graphic novel`, `bande dessinée` (insensible à la casse) → exclus des résultats `livres`. Évite doublons entre catégories `livres` et `mangas`.
+Résultats dont les subjects/categories contiennent `manga`, `manhwa`, `manhua` (insensible à la casse) → exclus des résultats `livres`.
+BD franco-belge, comics, graphic novels restent dans `livres`. Évite doublons entre `livres` et `mangas`.
 
 ### `src/hooks/useWorkActions.js`
 
