@@ -20,10 +20,16 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
     ['jeux', t('cat.jeux')],
     ['musique', t('cat.musique')],
   ]
+  const aVoirLabel = category === 'livres'
+    ? t('status.a_voir_livres')
+    : category === 'jeux'
+    ? t('status.a_voir_jeux')
+    : t('status.a_voir')
+
   const STATUSES = [
     ['all', t('cat.all')],
     ['en_cours', t('status.en_cours')],
-    ['a_voir', t('status.a_voir')],
+    ['a_voir', aVoirLabel],
     ['termine', t('status.termine')],
     ['abandonne', t('status.abandonne')],
   ]
