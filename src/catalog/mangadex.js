@@ -1,12 +1,21 @@
 const BASE = import.meta.env.DEV ? '/mangadex-proxy' : 'https://api.mangadex.org'
 
+function bestMatch(results, title) {
+  const norm = (s) => s.toLowerCase().trim()
+  const target = norm(title)
+  return results.find((r) => {
+    const titles = Object.values(r.attributes?.title || {})
+    return titles.some((t) => norm(t) === target)
+  }) || results[0]
+}
+
 export async function mangadexGetChapterMap(mangaTitle) {
   try {
     const searchRes = await fetch(
-      `${BASE}/manga?title=${encodeURIComponent(mangaTitle)}&limit=1`
+      `${BASE}/manga?title=${encodeURIComponent(mangaTitle)}&limit=10`
     )
     const searchJson = await searchRes.json()
-    const manga = searchJson.data?.[0]
+    const manga = bestMatch(searchJson.data || [], mangaTitle)
     if (!manga) return new Map()
 
     const aggRes = await fetch(
