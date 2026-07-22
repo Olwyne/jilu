@@ -33,6 +33,35 @@ export async function tmdbSearch(query) {
     })
 }
 
+export async function tmdbTrending(cat) {
+  const type = cat === 'films' ? 'movie' : 'tv'
+  const res = await fetch(`${BASE}/trending/${type}/week?api_key=${KEY}&language=fr-FR`)
+  const json = await res.json()
+  const isAnimeGenre = (ids) => (ids || []).includes(16)
+  return (json.results || [])
+    .filter((r) => cat === 'series' ? !isAnimeGenre(r.genre_ids) : true)
+    .slice(0, 5)
+    .map((r) => {
+      const isTv = type === 'tv'
+      const dateStr = isTv ? r.first_air_date : r.release_date
+      const year = dateStr ? Number(dateStr.slice(0, 4)) : null
+      return {
+        source: 'tmdb',
+        sourceId: r.id,
+        id: `tmdb-${isTv ? 'tv' : 'movie'}-${r.id}`,
+        title: isTv ? r.name : r.title,
+        originalTitle: r.original_name || null,
+        category: cat,
+        genre: genreLabel(r.genre_ids),
+        year,
+        overview: r.overview || '',
+        poster: r.poster_path ? `https://image.tmdb.org/t/p/w300${r.poster_path}` : null,
+        seasons: null,
+        release: dateStr ? Date.parse(dateStr) : null
+      }
+    })
+}
+
 export async function tmdbGetDetail(work) {
   if (work.category === 'films') return { ...work, seasons: null }
   const showRes = await fetch(`${BASE}/tv/${work.sourceId}?api_key=${KEY}&language=fr-FR`)

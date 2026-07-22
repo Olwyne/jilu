@@ -186,6 +186,7 @@
   "search.searching": "Searching…",
   "search.noResults": "No results for « {{query}} »",
   "search.comingSoon": "Coming soon",
+  "search.trending": "Trending",
   "episode.reveal": "Reveal",
   "profile.works": "works",
   "profile.seen": "seen",

@@ -46,6 +46,30 @@ export async function anilistSearch(query) {
   }))
 }
 
+export async function anilistTrending() {
+  const q = `{
+    Page(perPage: 5) {
+      media(sort: TRENDING_DESC, type: ANIME, isAdult: false) {
+        id title { romaji } genres startDate { year } description coverImage { large }
+      }
+    }
+  }`
+  const json = await gql(q, {})
+  return (json.data?.Page?.media || []).map((m) => ({
+    source: 'anilist',
+    sourceId: m.id,
+    id: `anilist-${m.id}`,
+    title: m.title.romaji,
+    category: 'animes',
+    genre: (m.genres || [])[0] || 'Divers',
+    year: m.startDate?.year || null,
+    overview: (m.description || '').replace(/<[^>]+>/g, ''),
+    poster: m.coverImage?.large || null,
+    seasons: null,
+    release: null
+  }))
+}
+
 export async function anilistFindId(originalTitle, year) {
   const q = `query ($search: String) {
     Page(perPage: 5) {

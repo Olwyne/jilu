@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { searchCatalog } from './search'
 
-vi.mock('./tmdb', () => ({ tmdbSearch: vi.fn() }))
-vi.mock('./anilist', () => ({ anilistSearch: vi.fn() }))
-vi.mock('./googleBooks', () => ({ googleBooksSearch: vi.fn() }))
-vi.mock('./rawg', () => ({ rawgSearch: vi.fn() }))
+vi.mock('./tmdb', () => ({ tmdbSearch: vi.fn(), tmdbTrending: vi.fn() }))
+vi.mock('./anilist', () => ({ anilistSearch: vi.fn(), anilistTrending: vi.fn() }))
+vi.mock('./googleBooks', () => ({ googleBooksSearch: vi.fn(), googleBooksTrending: vi.fn() }))
+vi.mock('./rawg', () => ({ rawgSearch: vi.fn(), rawgTrending: vi.fn() }))
 vi.mock('./spotify', () => ({ spotifySearch: vi.fn() }))
 
 import { tmdbSearch } from './tmdb'

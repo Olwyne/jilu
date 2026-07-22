@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { searchCatalog } from '../../catalog/search'
+import { searchCatalog, fetchTrending } from '../../catalog/search'
 import PosterBox from '../ui/PosterBox'
 
 export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
@@ -18,6 +18,8 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
   const [cat, setCat] = useState('series')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+  const trendingCache = useRef({})
+  const [trending, setTrending] = useState([])
 
   useEffect(() => {
     if (query.trim().length < 2) { setResults([]); return }
@@ -29,6 +31,16 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
     }, 400)
     return () => { cancelled = true; clearTimeout(t) }
   }, [query, cat])
+
+  useEffect(() => {
+    if (cat === 'all') { setTrending([]); return }
+    if (trendingCache.current[cat]) { setTrending(trendingCache.current[cat]); return }
+    let cancelled = false
+    fetchTrending(cat).then((r) => {
+      if (!cancelled) { trendingCache.current[cat] = r; setTrending(r) }
+    })
+    return () => { cancelled = true }
+  }, [cat])
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -74,7 +86,12 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
           {!loading && query.trim().length >= 2 && results.length === 0 && (
             <div style={{ padding: 32, textAlign: 'center', color: 'var(--color-muted-3)', fontSize: 14 }}>{t('search.noResults', { query })}</div>
           )}
-          {results.map((r) => {
+          {!loading && query.trim().length < 2 && trending.length > 0 && (
+            <div style={{ padding: '8px 12px 4px', fontSize: 11, fontWeight: 700, color: 'var(--color-muted-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+              {t('search.trending')}
+            </div>
+          )}
+          {(!loading && query.trim().length < 2 ? trending : results).map((r) => {
             const added = !!works[r.id]
             return (
               <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', borderRadius: 12 }}>
