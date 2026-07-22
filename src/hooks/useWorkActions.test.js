@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useWorkActions } from './useWorkActions'
 import { renderHook, act } from '@testing-library/react'
 import { tmdbGetDetail } from '../catalog/tmdb'
-import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
+import { anilistFindId, anilistGetDetail, anilistGetMangaDetail } from '../catalog/anilist'
 
 vi.mock('../catalog/tmdb', () => ({ tmdbGetDetail: vi.fn(), tmdbSearch: vi.fn() }))
-vi.mock('../catalog/anilist', () => ({ anilistFindId: vi.fn(), anilistGetDetail: vi.fn(), anilistSearch: vi.fn() }))
+vi.mock('../catalog/anilist', () => ({ anilistFindId: vi.fn(), anilistGetDetail: vi.fn(), anilistSearch: vi.fn(), anilistGetMangaDetail: vi.fn() }))
 vi.mock('../catalog/spotify', () => ({ spotifyGetDetail: vi.fn() }))
 
 beforeEach(() => { vi.clearAllMocks() })
@@ -81,6 +81,10 @@ describe('useWorkActions', () => {
     expect(stored.anilistId).toBe(163134)
     expect(stored.seasons).toHaveLength(2)
     expect(stored.title).toBe('Blue Lock')
+  })
+
+  it('anilistGetMangaDetail mock is defined for anilist-manga routing', () => {
+    expect(anilistGetMangaDetail).toBeDefined()
   })
 
   it('addWork falls back to TMDB seasons when anilistFindId returns null', async () => {

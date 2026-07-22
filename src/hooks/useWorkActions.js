@@ -1,10 +1,11 @@
 import { tmdbGetDetail } from '../catalog/tmdb'
-import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
+import { anilistFindId, anilistGetDetail, anilistGetMangaDetail } from '../catalog/anilist'
 import { spotifyGetDetail } from '../catalog/spotify'
 
 const DETAIL_FETCHERS = {
   tmdb: tmdbGetDetail,
   anilist: (work) => anilistGetDetail(work.anilistId || work.sourceId).then((d) => ({ ...work, ...d })),
+  'anilist-manga': (work) => anilistGetMangaDetail(work.sourceId).then((d) => ({ ...work, ...d })),
   spotify: spotifyGetDetail
 }
 
