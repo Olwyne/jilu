@@ -176,7 +176,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
     } else if (cat === 'livres') {
       // Livres: year-based
       if (w.status === 'a_voir') {
-        if (w.year && w.year > currentYear) {
+        if (w.year && w.year >= currentYear) {
           upcoming.push({ w, type: 'livre' })
         } else {
           catchGroups.push({ w, type: 'livre' })

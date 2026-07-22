@@ -48,6 +48,17 @@ describe('CalendarView', () => {
     expect(screen.getByText('Future Book')).toBeInTheDocument()
   })
 
+  it('shows a_voir livre with current year in À venir', async () => {
+    const user = userEvent.setup()
+    const currentYear = new Date().getFullYear()
+    const works = {
+      w1: { id: 'w1', title: 'Current Year Book', category: 'livres', status: 'a_voir', year: currentYear, release: null, seasons: null },
+    }
+    render(<CalendarView works={works} watched={{}} onOpenWork={() => {}} onMarkWatched={() => {}} />)
+    await user.click(screen.getByText(/Upcoming/))
+    expect(screen.getByText('Current Year Book')).toBeInTheDocument()
+  })
+
   it('shows category chips row', () => {
     render(<CalendarView works={{}} watched={{}} onOpenWork={() => {}} onMarkWatched={() => {}} />)
     expect(screen.getByText('All')).toBeInTheDocument()
