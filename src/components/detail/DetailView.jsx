@@ -73,7 +73,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
         />
       </div>
 
-      {work.seasons && (
+      {work.seasons && work.seasons.length > 0 && (
         <SeasonList
           work={work}
           watched={watched}

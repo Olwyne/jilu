@@ -18,7 +18,8 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
   const { t } = useTranslation()
   const now = Date.now()
   const firstUnwatched = work.seasons.find((s) => s.episodes.some((e) => e.air > 0 && e.air <= now && !watched[`${work.id}-${s.n}-${e.n}`]))
-  const [expanded, setExpanded] = useState(() => new Set([firstUnwatched ? firstUnwatched.n : work.seasons[work.seasons.length - 1].n]))
+  const lastSeason = work.seasons[work.seasons.length - 1]
+  const [expanded, setExpanded] = useState(() => new Set(lastSeason ? [firstUnwatched ? firstUnwatched.n : lastSeason.n] : []))
 
   function toggleExpanded(n) {
     const next = new Set(expanded)
