@@ -1,5 +1,5 @@
 import { tmdbSearch, tmdbTrending } from './tmdb'
-import { anilistSearch, anilistTrending } from './anilist'
+import { anilistSearch, anilistTrending, anilistSearchManga, anilistTrendingManga } from './anilist'
 import { googleBooksSearch, googleBooksTrending } from './googleBooks'
 import { rawgSearch, rawgTrending } from './rawg'
 import { spotifySearch } from './spotify'
@@ -7,6 +7,7 @@ import { spotifySearch } from './spotify'
 const SOURCE_CATS = [
   { fn: tmdbSearch, cats: ['series', 'films', 'animes'] },
   { fn: anilistSearch, cats: ['animes'] },
+  { fn: anilistSearchManga, cats: ['mangas'] },
   { fn: googleBooksSearch, cats: ['livres'] },
   { fn: rawgSearch, cats: ['jeux'] },
   { fn: spotifySearch, cats: ['musique'] }
@@ -16,6 +17,7 @@ const TRENDING_FN = {
   series: () => tmdbTrending('series'),
   films: () => tmdbTrending('films'),
   animes: anilistTrending,
+  mangas: anilistTrendingManga,
   livres: googleBooksTrending,
   jeux: rawgTrending,
 }
