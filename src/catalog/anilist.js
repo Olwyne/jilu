@@ -1,3 +1,5 @@
+import { mangadexGetChapterMap } from './mangadex'
+
 const ENDPOINT = import.meta.env.DEV ? '/anilist-proxy' : 'https://graphql.anilist.co'
 const DAY = 86400000
 const MIN_INTERVAL = 800
@@ -136,4 +138,92 @@ export async function anilistGetDetail(anilistId) {
   }
 
   return { seasons, ended }
+}
+
+export async function anilistSearchManga(query) {
+  const q = `query ($search: String) {
+    Page(perPage: 10) {
+      media(search: $search, type: MANGA, isAdult: false) {
+        id title { romaji } genres startDate { year } description coverImage { large }
+      }
+    }
+  }`
+  const json = await gql(q, { search: query })
+  return (json.data?.Page?.media || []).map((m) => ({
+    source: 'anilist-manga',
+    sourceId: m.id,
+    id: `anilist-manga-${m.id}`,
+    title: m.title.romaji,
+    category: 'mangas',
+    genre: (m.genres || [])[0] || 'Divers',
+    year: m.startDate?.year || null,
+    overview: (m.description || '').replace(/<[^>]+>/g, ''),
+    poster: m.coverImage?.large || null,
+    seasons: null,
+    release: null
+  }))
+}
+
+export async function anilistTrendingManga() {
+  const q = `{
+    Page(perPage: 5) {
+      media(sort: TRENDING_DESC, type: MANGA, isAdult: false) {
+        id title { romaji } genres startDate { year } description coverImage { large }
+      }
+    }
+  }`
+  const json = await gql(q, {})
+  return (json.data?.Page?.media || []).map((m) => ({
+    source: 'anilist-manga',
+    sourceId: m.id,
+    id: `anilist-manga-${m.id}`,
+    title: m.title.romaji,
+    category: 'mangas',
+    genre: (m.genres || [])[0] || 'Divers',
+    year: m.startDate?.year || null,
+    overview: (m.description || '').replace(/<[^>]+>/g, ''),
+    poster: m.coverImage?.large || null,
+    seasons: null,
+    release: null
+  }))
+}
+
+export async function anilistGetMangaDetail(anilistId) {
+  const q = `query ($id: Int) {
+    Media(id: $id, type: MANGA) {
+      chapters volumes status title { romaji }
+    }
+  }`
+  const json = await gql(q, { id: anilistId })
+  const m = json.data?.Media
+  if (!m) return { seasons: [], ended: false, chapters: 0, volumes: 0 }
+
+  const totalChapters = m.chapters || 0
+  const ended = m.status === 'FINISHED' || m.status === 'CANCELLED'
+  const chapterMap = await mangadexGetChapterMap(m.title.romaji)
+
+  const volumeEpisodes = {}
+  const scanEpisodes = []
+
+  for (let n = 1; n <= totalChapters; n++) {
+    const volNum = chapterMap.get(n) ?? null
+    const ep = { n, title: '', air: 1 }
+    if (volNum !== null) {
+      if (!volumeEpisodes[volNum]) volumeEpisodes[volNum] = []
+      volumeEpisodes[volNum].push(ep)
+    } else {
+      scanEpisodes.push(ep)
+    }
+  }
+
+  const seasons = []
+  if (scanEpisodes.length > 0) {
+    seasons.push({ n: 0, name: 'Scans', episodes: scanEpisodes })
+  }
+  const sortedVols = Object.keys(volumeEpisodes).map(Number).sort((a, b) => a - b)
+  for (const v of sortedVols) {
+    seasons.push({ n: v, name: `Tome ${v}`, episodes: volumeEpisodes[v] })
+  }
+
+  return { seasons, ended, chapters: totalChapters, volumes: m.volumes || 0 }
 }
