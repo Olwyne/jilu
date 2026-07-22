@@ -3,7 +3,7 @@ const BASE = 'https://www.googleapis.com/books/v1/volumes'
 export async function googleBooksTrending() {
   const key = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
   const keyParam = key ? `&key=${key}` : ''
-  const res = await fetch(`${BASE}?q=bestseller&orderBy=relevance&maxResults=5&langRestrict=fr${keyParam}`)
+  const res = await fetch(`${BASE}?q=subject:fiction+bestseller&orderBy=relevance&maxResults=5${keyParam}`)
   const json = await res.json()
   return (json.items || []).map((it) => {
     const v = it.volumeInfo || {}
