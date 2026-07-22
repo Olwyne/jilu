@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { STATUS } from '../../lib/domain'
 
-export default function StatusSelect({ value, onChange }) {
+export default function StatusSelect({ value, onChange, disabled }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -20,26 +20,27 @@ export default function StatusSelect({ value, onChange }) {
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => !disabled && setOpen((o) => !o)}
         style={{
           display: 'flex', alignItems: 'center', gap: 8,
           padding: '11px 16px',
           borderRadius: 13,
-          background: `${current.color}18`,
-          border: `1px solid ${current.color}55`,
-          color: current.color,
+          background: disabled ? 'var(--color-chip-bg)' : `${current.color}18`,
+          border: `1px solid ${disabled ? 'var(--color-border-btn)' : current.color + '55'}`,
+          color: disabled ? 'var(--color-muted)' : current.color,
           fontWeight: 600, fontSize: 14,
-          cursor: 'pointer',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? 0.5 : 1,
           transition: 'border-color .18s, background .18s',
           whiteSpace: 'nowrap',
         }}
       >
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: current.color, flexShrink: 0 }} />
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: disabled ? 'var(--color-muted)' : current.color, flexShrink: 0 }} />
         {t('status.' + value)}
-        <span style={{ fontSize: 10, opacity: .7, marginLeft: 2 }}>▾</span>
+        {!disabled && <span style={{ fontSize: 10, opacity: .7, marginLeft: 2 }}>▾</span>}
       </button>
 
-      {open && (
+      {!disabled && open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 100,
           background: 'var(--color-dropdown-bg)',

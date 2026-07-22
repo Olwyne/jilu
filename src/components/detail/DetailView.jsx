@@ -11,6 +11,10 @@ export default function DetailView({ work, watched, ratings, games, feed, action
   const { total, watchedCount } = epTotals(work, watched)
   const rating = ratings[`w:${work.id}`] || 0
   const isFav = !!(favorites && favorites[work.id])
+  const now = Date.now()
+  const currentYear = new Date().getFullYear()
+  const isUnreleased = (work.release && work.release > now) ||
+    (work.category === 'livres' && work.year && work.year > currentYear)
 
   return (
     <div>
@@ -47,7 +51,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
                 ))}
               </div>
             </div>
-            <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} />
+            <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} disabled={isUnreleased} />
             {actions.toggleFavorite && (
               <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
             )}
