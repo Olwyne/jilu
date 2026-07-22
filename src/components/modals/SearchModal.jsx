@@ -8,6 +8,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
   const CATS = [
     { k: 'series', label: t('cat.series') },
     { k: 'animes', label: t('cat.animes') },
+    { k: 'mangas', label: t('cat.mangas') },
     { k: 'films', label: t('cat.films') },
     { k: 'livres', label: t('cat.livres') },
     { k: 'jeux', label: t('cat.jeux') },
