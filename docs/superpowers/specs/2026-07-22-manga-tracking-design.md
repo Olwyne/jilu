@@ -87,6 +87,10 @@ Exemple chapitre 1109 (tome Scans) : `anilist-manga-13-0-1109`.
 
 Branche `mangas` ajoutée, appelle `anilistSearchManga`.
 
+### `src/catalog/googleBooks.js` + Open Library — filtre manga
+
+Résultats dont les subjects/categories contiennent `manga`, `comics`, `graphic novel`, `bande dessinée` (insensible à la casse) → exclus des résultats `livres`. Évite doublons entre catégories `livres` et `mangas`.
+
 ### `src/hooks/useWorkActions.js`
 
 ```js
