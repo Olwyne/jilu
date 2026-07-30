@@ -25,7 +25,11 @@ function computeAutoStatus(work, watched) {
 function buildStatusPatch(work, watched, works) {
   const auto = computeAutoStatus(work, watched)
   if (!auto || auto === work.status) return {}
-  return { works: { ...works, [work.id]: { ...work, status: auto } } }
+  const updatedWork = { ...work, status: auto }
+  if (auto === 'termine' && !work.finishedAt) {
+    updatedWork.finishedAt = Date.now()
+  }
+  return { works: { ...works, [work.id]: updatedWork } }
 }
 
 export function useWorkActions(data, mutate) {
@@ -85,7 +89,11 @@ export function useWorkActions(data, mutate) {
 
   async function setStatus(workId, status) {
     const work = data.works[workId]
-    const works = { ...data.works, [workId]: { ...work, status } }
+    const updatedWork = { ...work, status }
+    if (status === 'termine' && !work.finishedAt) {
+      updatedWork.finishedAt = Date.now()
+    }
+    const works = { ...data.works, [workId]: updatedWork }
     await mutate({ works })
   }
 

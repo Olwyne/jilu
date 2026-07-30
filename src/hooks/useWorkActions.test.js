@@ -4,7 +4,7 @@ import { renderHook, act } from '@testing-library/react'
 import { tmdbGetDetail } from '../catalog/tmdb'
 import { anilistFindId, anilistGetDetail, anilistGetMangaDetail } from '../catalog/anilist'
 
-vi.mock('../catalog/tmdb', () => ({ tmdbGetDetail: vi.fn(), tmdbSearch: vi.fn() }))
+vi.mock('../catalog/tmdb', () => ({ tmdbGetDetail: vi.fn(), tmdbGetBothMeta: vi.fn().mockResolvedValue({}), tmdbSearch: vi.fn() }))
 vi.mock('../catalog/anilist', () => ({ anilistFindId: vi.fn(), anilistGetDetail: vi.fn(), anilistSearch: vi.fn(), anilistGetMangaDetail: vi.fn() }))
 vi.mock('../catalog/spotify', () => ({ spotifyGetDetail: vi.fn() }))
 
@@ -113,5 +113,45 @@ describe('useWorkActions', () => {
     const stored = mutate.mock.calls[0][0].works['tmdb-tv-999']
     expect(stored.anilistId).toBeUndefined()
     expect(stored.seasons).toHaveLength(1)
+  })
+
+  it('stamps finishedAt when setting status to termine on a work that lacks it', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const work = { id: 'w1', title: 'Film', category: 'films', status: 'a_voir' }
+    const data = { works: { w1: work }, watched: {}, feed: [] }
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+
+    const before = Date.now()
+    await act(async () => { await result.current.setStatus('w1', 'termine') })
+    const after = Date.now()
+
+    const saved = mutate.mock.calls[0][0].works.w1
+    expect(saved.status).toBe('termine')
+    expect(saved.finishedAt).toBeGreaterThanOrEqual(before)
+    expect(saved.finishedAt).toBeLessThanOrEqual(after)
+  })
+
+  it('does not overwrite finishedAt when already set', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const work = { id: 'w1', title: 'Film', category: 'films', status: 'en_cours', finishedAt: 999 }
+    const data = { works: { w1: work }, watched: {}, feed: [] }
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+
+    await act(async () => { await result.current.setStatus('w1', 'termine') })
+
+    const saved = mutate.mock.calls[0][0].works.w1
+    expect(saved.finishedAt).toBe(999)
+  })
+
+  it('does not stamp finishedAt when status is not termine', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const work = { id: 'w1', title: 'Film', category: 'films', status: 'a_voir' }
+    const data = { works: { w1: work }, watched: {}, feed: [] }
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+
+    await act(async () => { await result.current.setStatus('w1', 'en_cours') })
+
+    const saved = mutate.mock.calls[0][0].works.w1
+    expect(saved.finishedAt).toBeUndefined()
   })
 })

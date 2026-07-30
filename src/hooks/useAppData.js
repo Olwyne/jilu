@@ -32,7 +32,7 @@ async function batchWrite(ops) {
 
 const EMPTY_DATA = {
   works: {}, watched: {}, ratings: {}, reviews: [],
-  settings: { startPage: 'library', autoNext: true, spoilerFree: true, notifNewEp: true, notifCalendar: true, notifWeekly: false, publicProfile: false, adult: false, darkMode: true, language: null },
+  settings: { startPage: 'library', autoNext: true, spoilerFree: true, notifNewEp: true, notifCalendar: true, notifWeekly: false, publicProfile: false, adult: false, darkMode: true, language: null, goals: {} },
   profile: { name: '', handle: '', email: '', memberSince: '' },
   feed: [], games: {}, ccLikes: {}, favorites: {}
 }
