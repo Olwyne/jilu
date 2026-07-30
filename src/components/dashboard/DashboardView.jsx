@@ -4,31 +4,8 @@ import { relText } from '../../lib/domain'
 import QuizWidget from './QuizWidget'
 import RecoRow from './RecoRow'
 
-function nextEpisode(work, watched) {
-  if (!work.seasons) return null
-  const now = Date.now()
-  for (const s of work.seasons) {
-    for (const e of s.episodes) {
-      if (!watched[`${work.id}-${s.n}-${e.n}`] && e.air > 0 && e.air <= now) return { s, e }
-    }
-  }
-  return null
-}
-
 export default function DashboardView({ works, watched, reviews, feed, onOpenWork, onWatchNext, user, handle, onAddWork }) {
   const { t, i18n } = useTranslation()
-  const list = Object.values(works)
-  const enCours = list.filter((w) => w.status === 'en_cours')
-  let totalEps = 0, toCatch = 0
-  list.forEach((w) => {
-    if (!w.seasons) return
-    w.seasons.forEach((s) => s.episodes.forEach((e) => {
-      const key = `${w.id}-${s.n}-${e.n}`
-      if (watched[key]) totalEps++
-      else if (e.air > 0 && e.air <= Date.now() && w.status === 'en_cours') toCatch++
-    }))
-  })
-  const upNext = enCours.map((w) => ({ w, nx: nextEpisode(w, watched) })).filter((x) => x.nx).slice(0, 4)
 
   const activeStatuses = new Set(['en_cours', 'termine'])
   const feedItems = (feed || []).filter((f) => {
@@ -48,52 +25,12 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
 
   return (
     <div>
-      {/* Stat tiles */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 14, marginBottom: 32 }}>
-        {[
-          [String(list.length), t('dashboard.worksTracked')],
-          [String(enCours.length), t('dashboard.watching')],
-          [String(totalEps), t('dashboard.episodesSeen')],
-          [String(toCatch), t('dashboard.toCatchUp')]
-        ].map(([value, label]) => (
-          <div key={label} style={{ padding: 18, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30 }}>{value}</div>
-            <div style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 4 }}>{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Quiz du jour */}
-      <QuizWidget user={user} handle={handle} />
-
-      {/* Up Next */}
-      {upNext.length > 0 && (
-        <>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.upNext')}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 34 }}>
-            {upNext.map(({ w, nx }) => (
-              <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 12, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
-                <PosterBox id={w.id} title={w.title} poster={w.poster} width={54} height={78} radius={11} fontSize={22} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
-                  <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, marginTop: 3 }}>{t('dashboard.ep', { s: nx.s.n, e: nx.e.n })}</div>
-                </div>
-                <div onClick={(ev) => { ev.stopPropagation(); onWatchNext(w.id, nx.s.n, nx.e.n) }} style={{ alignSelf: 'center', width: 38, height: 38, borderRadius: '50%', background: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✓</div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Recommandations */}
-      {onAddWork && <RecoRow works={works} onAddWork={onAddWork} />}
-
       {/* Activity feed */}
       <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.activity')}</h3>
       {allActivity.length === 0
-        ? <div style={{ color: 'var(--color-muted-3)', fontSize: 14, padding: '16px 0' }}>{t('dashboard.noActivity')}</div>
+        ? <div style={{ color: 'var(--color-muted-3)', fontSize: 14, padding: '16px 0', marginBottom: 28 }}>{t('dashboard.noActivity')}</div>
         : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
             {allActivity.map((item) => {
               const w = works[item._type === 'review' ? item.id : item.workId]
               const subtitle = item._type === 'comment' && item.sNum
@@ -116,6 +53,12 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
           </div>
         )
       }
+
+      {/* Quiz du jour */}
+      <QuizWidget user={user} handle={handle} />
+
+      {/* Recommandations */}
+      {onAddWork && <RecoRow works={works} onAddWork={onAddWork} />}
     </div>
   )
 }
