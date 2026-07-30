@@ -38,42 +38,60 @@ async function fetchPool(works, cat) {
   return pool
 }
 
-function RecoSection({ title, pool, works, onAddWork }) {
+function RecoCard({ r, works, onAddWork }) {
   const navigate = useNavigate()
-  const [adding, setAdding] = useState(null)
-  const visible = pool.filter((r) => !works[r.id]).slice(0, 12)
-  if (visible.length === 0) return null
+  const { t } = useTranslation()
+  const [adding, setAdding] = useState(false)
+  const [hovered, setHovered] = useState(false)
 
-  async function handleClick(r) {
+  async function handleClick() {
     if (adding) return
     if (works[r.id]) { navigate('/work/' + r.id); return }
-    setAdding(r.id)
+    setAdding(true)
     try {
       await onAddWork(r)
       navigate('/work/' + r.id)
     } catch { /* silently ignore */ } finally {
-      setAdding(null)
+      setAdding(false)
     }
   }
 
   return (
+    <div
+      onClick={handleClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ flexShrink: 0, width: 110, cursor: adding ? 'wait' : 'pointer', opacity: adding ? 0.6 : 1, transition: 'opacity .15s' }}
+    >
+      <div style={{ position: 'relative', width: 110, height: 160, borderRadius: 12, overflow: 'hidden' }}>
+        <PosterBox id={r.id} title={r.title} poster={r.poster} width={110} height={160} radius={12} fontSize={32} />
+        {hovered && !adding && (
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 10 }}>
+            <span style={{ background: 'var(--color-accent)', color: '#fff', fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 20 }}>
+              + {t('search.add')}
+            </span>
+          </div>
+        )}
+        {adding && (
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 18 }}>⏳</span>
+          </div>
+        )}
+      </div>
+      <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{r.title}</div>
+      <div style={{ fontSize: 11.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>
+    </div>
+  )
+}
+
+function RecoSection({ title, pool, works, onAddWork }) {
+  const visible = pool.filter((r) => !works[r.id]).slice(0, 12)
+  if (visible.length === 0) return null
+  return (
     <div style={{ marginBottom: 24 }}>
       <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 12 }}>{title}</div>
       <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
-        {visible.map((r) => {
-          const isAdding = adding === r.id
-          return (
-            <div
-              key={r.id}
-              onClick={() => handleClick(r)}
-              style={{ flexShrink: 0, width: 110, cursor: isAdding ? 'wait' : 'pointer', opacity: isAdding ? 0.6 : 1, transition: 'opacity .15s' }}
-            >
-              <PosterBox id={r.id} title={r.title} poster={r.poster} width={110} height={160} radius={12} fontSize={32} />
-              <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{r.title}</div>
-              <div style={{ fontSize: 11.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>
-            </div>
-          )
-        })}
+        {visible.map((r) => <RecoCard key={r.id} r={r} works={works} onAddWork={onAddWork} />)}
       </div>
     </div>
   )
