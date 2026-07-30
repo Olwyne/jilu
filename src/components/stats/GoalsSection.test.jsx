@@ -58,6 +58,6 @@ describe('GoalsSection', () => {
       f2: { id: 'f2', category: 'films', status: 'termine', finishedAt: JAN_THIS_YEAR },
     }
     render(<GoalsSection works={works} settings={{ goals: { films: 2 } }} onSaveSettings={() => {}} />)
-    expect(screen.getByText('✓')).toBeInTheDocument()
+    expect(screen.getByText('Goal reached!')).toBeInTheDocument()
   })
 })

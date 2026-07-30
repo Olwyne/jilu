@@ -83,7 +83,7 @@ export default function GoalsSection({ works, settings, onSaveSettings }) {
                     {goal === 0 ? t('stats.setGoal') : goal}
                   </button>
                 )}
-                {reached && <span style={{ fontSize: 14, marginLeft: 2 }}>✓</span>}
+                {reached && <span style={{ fontSize: 14, marginLeft: 2 }}>{t('stats.goalsReached')}</span>}
               </div>
               {goal > 0 && (
                 <div style={{ height: 5, borderRadius: 5, background: 'var(--color-border)', overflow: 'hidden' }}>

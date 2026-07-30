@@ -154,4 +154,31 @@ describe('useWorkActions', () => {
     const saved = mutate.mock.calls[0][0].works.w1
     expect(saved.finishedAt).toBeUndefined()
   })
+
+  it('toggleEpisode stamps finishedAt when the last episode becomes watched', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const work = { id: 'w1', status: 'a_voir', seasons: [{ n: 1, episodes: [{ n: 1 }] }] }
+    const data = { works: { w1: work }, watched: {} }
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+
+    const before = Date.now()
+    await act(async () => { await result.current.toggleEpisode('w1', 1, 1) })
+    const after = Date.now()
+
+    const saved = mutate.mock.calls[0][0].works.w1
+    expect(saved.finishedAt).toBeGreaterThanOrEqual(before)
+    expect(saved.finishedAt).toBeLessThanOrEqual(after)
+  })
+
+  it('toggleEpisode does not overwrite finishedAt when already set', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const work = { id: 'w1', status: 'a_voir', finishedAt: 999, seasons: [{ n: 1, episodes: [{ n: 1 }] }] }
+    const data = { works: { w1: work }, watched: {} }
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+
+    await act(async () => { await result.current.toggleEpisode('w1', 1, 1) })
+
+    const saved = mutate.mock.calls[0][0].works.w1
+    expect(saved.finishedAt).toBe(999)
+  })
 })
