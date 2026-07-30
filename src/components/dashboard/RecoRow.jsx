@@ -2,100 +2,110 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { tmdbDiscover } from '../../catalog/tmdb'
 import PosterBox from '../ui/PosterBox'
-import WorkPreviewModal from '../modals/WorkPreviewModal'
 
 const GENRE_TO_ID = {
   Action: 28, Drame: 18, Drama: 18, Comédie: 35, Comedy: 35,
   Horreur: 27, Horror: 27, SF: 878, 'Sci-Fi': 878,
   Animation: 16, Mystère: 9648, Mystery: 9648,
+  Thriller: 53, Romance: 10749, Aventure: 12, Adventure: 12,
 }
 
-function topGenresFromWorks(works) {
+const FALLBACK_GENRE_IDS = [18, 28, 35, 878, 27]
+
+function topGenreIds(works, cat) {
   const count = {}
-  Object.values(works).forEach((w) => {
-    if (!w.genre) return
-    const g = w.genre.split(/[/,]/)[0].trim()
-    count[g] = (count[g] || 0) + 1
-  })
-  return Object.entries(count).sort((a, b) => b[1] - a[1]).map(([g]) => g)
+  Object.values(works)
+    .filter((w) => w.category === cat)
+    .forEach((w) => {
+      const g = (w.genre || '').split(/[/,]/)[0].trim()
+      const id = GENRE_TO_ID[g]
+      if (id) count[id] = (count[id] || 0) + 1
+    })
+  const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]).map(([id]) => Number(id))
+  const unique = [...new Set([...sorted, ...FALLBACK_GENRE_IDS])]
+  return unique.slice(0, 5)
 }
 
-function topCatFromWorks(works) {
-  const count = { films: 0, series: 0 }
-  Object.values(works).forEach((w) => {
-    if (w.category === 'films') count.films++
-    else if (w.category === 'series') count.series++
-  })
-  return count.films >= count.series ? 'films' : 'series'
+async function fetchRecos(works, cat, minCount = 8) {
+  const genreIds = topGenreIds(works, cat)
+  const existingIds = new Set(Object.keys(works))
+  let results = []
+  for (const genreId of genreIds) {
+    if (results.length >= minCount) break
+    try {
+      const res = await tmdbDiscover(genreId, cat)
+      for (const r of res) {
+        if (!existingIds.has(r.id) && !results.find((x) => x.id === r.id)) {
+          results.push(r)
+        }
+      }
+    } catch { /* skip */ }
+  }
+  return results.slice(0, 12)
 }
 
-export default function RecoRow({ works, onAdd, onOpenWork }) {
-  const { t } = useTranslation()
-  const [recos, setRecos] = useState([])
+function RecoSection({ title, works, cat, onOpenWork, onAddWork }) {
+  const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
-  const [preview, setPreview] = useState(null)
+  const [adding, setAdding] = useState(null)
 
   useEffect(() => {
     let cancelled = false
-    async function load() {
-      setLoading(true)
-      const genres = topGenresFromWorks(works)
-      const cat = topCatFromWorks(works)
-      let results = []
-      for (const genre of genres.slice(0, 3)) {
-        const genreId = GENRE_TO_ID[genre]
-        if (!genreId) continue
-        try {
-          const res = await tmdbDiscover(genreId, cat)
-          results = [...results, ...res]
-          if (results.length >= 10) break
-        } catch { /* skip */ }
-      }
-      if (!cancelled) {
-        const existingIds = new Set(Object.keys(works))
-        const unique = results.filter((r) => !existingIds.has(r.id)).slice(0, 8)
-        setRecos(unique)
-        setLoading(false)
-      }
-    }
-    if (Object.keys(works).length > 0) load()
-    else setLoading(false)
+    fetchRecos(works, cat).then((res) => {
+      if (!cancelled) { setItems(res); setLoading(false) }
+    })
     return () => { cancelled = true }
   }, [])
 
-  if (loading) return (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.recos')}</div>
-      <div style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>{t('dashboard.recoLoading')}</div>
-    </div>
-  )
-
-  if (recos.length === 0) return null
-
-  function handleClick(r) {
-    if (works[r.id]) onOpenWork(r.id)
-    else setPreview(r)
+  async function handleClick(r) {
+    if (adding) return
+    if (works[r.id]) { onOpenWork(r.id); return }
+    setAdding(r.id)
+    try {
+      await onAddWork(r)
+      onOpenWork(r.id)
+    } catch { /* silently ignore */ }
+    setAdding(null)
   }
+
+  if (!loading && items.length === 0) return null
 
   return (
     <div style={{ marginBottom: 28 }}>
-      {preview && (
-        <WorkPreviewModal
-          work={preview}
-          onAdd={onAdd}
-          onClose={() => setPreview(null)}
-        />
-      )}
-      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.recos')}</div>
-      <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 6 }}>
-        {recos.map((r) => (
-          <div key={r.id} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }} onClick={() => handleClick(r)}>
-            <PosterBox id={r.id} title={r.title} poster={r.poster} width={110} height={160} radius={12} fontSize={32} />
-            <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{r.title}</div>
-            <div style={{ fontSize: 11.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 12 }}>{title}</div>
+      {loading
+        ? <div style={{ fontSize: 13, color: 'var(--color-muted-3)', padding: '8px 0' }}>…</div>
+        : (
+          <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
+            {items.map((r) => {
+              const isAdding = adding === r.id
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => handleClick(r)}
+                  style={{ flexShrink: 0, width: 110, cursor: isAdding ? 'wait' : 'pointer', opacity: isAdding ? 0.6 : 1, transition: 'opacity .15s' }}
+                >
+                  <PosterBox id={r.id} title={r.title} poster={r.poster} width={110} height={160} radius={12} fontSize={32} />
+                  <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{r.title}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>
+                </div>
+              )
+            })}
           </div>
-        ))}
-      </div>
+        )
+      }
+    </div>
+  )
+}
+
+export default function RecoRow({ works, onAddWork, onOpenWork }) {
+  const { t } = useTranslation()
+
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 18 }}>{t('dashboard.recos')}</div>
+      <RecoSection title={t('cat.films')} works={works} cat="films" onOpenWork={onOpenWork} onAddWork={onAddWork} />
+      <RecoSection title={t('cat.series')} works={works} cat="series" onOpenWork={onOpenWork} onAddWork={onAddWork} />
     </div>
   )
 }
