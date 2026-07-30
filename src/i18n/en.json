@@ -271,6 +271,7 @@
   "dashboard.noActivity": "No rating or comment on watched episodes.",
   "dashboard.globalReview": "Global review",
   "dashboard.ep": "S{{s}} · Episode {{e}}",
+  "dashboard.showMore": "See more",
   "dashboard.recos": "Recommendations",
   "dashboard.recoLoading": "Loading recommendations…",
   "preview.back": "Back",

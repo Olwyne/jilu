@@ -112,7 +112,8 @@ function RecoCard({ r, works, onAddWork }) {
 }
 
 function RecoSection({ title, pool, works, onAddWork }) {
-  const visible = pool.filter((r) => !works[r.id]).slice(0, 12)
+  const libraryTitles = new Set(Object.values(works).map((w) => w.title?.toLowerCase().trim()).filter(Boolean))
+  const visible = pool.filter((r) => !works[r.id] && !libraryTitles.has(r.title?.toLowerCase().trim())).slice(0, 12)
   if (visible.length === 0) return null
   return (
     <div style={{ marginBottom: 24 }}>

@@ -271,6 +271,7 @@
   "dashboard.noActivity": "Aucune note ou commentaire sur des épisodes vus.",
   "dashboard.globalReview": "Avis global",
   "dashboard.ep": "S{{s}} · Épisode {{e}}",
+  "dashboard.showMore": "Voir plus",
   "dashboard.recos": "Recommandations",
   "dashboard.recoLoading": "Chargement des recommandations…",
   "preview.back": "Retour",
