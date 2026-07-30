@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { STATUS, DAY } from '../../lib/domain'
+import AchievementsGrid from '../ui/AchievementsGrid'
 
 const RUNTIME = { animes: 24, series: 45 }
 const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', mangas: '#f97316', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: '#c46dff' }
@@ -210,6 +211,12 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
             </div>
           </div>
         )}
+      </div>
+
+      {/* Achievements */}
+      <div style={{ ...CARD, marginBottom: 30 }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 20px' }}>{t('achievements.title')}</h3>
+        <AchievementsGrid works={works} watched={watched} ratings={ratings} />
       </div>
 
       {/* Category + Status */}

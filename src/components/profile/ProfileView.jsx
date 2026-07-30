@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { initials, relText } from '../../lib/domain'
+import AchievementsGrid from '../ui/AchievementsGrid'
 
 const RUNTIME = { animes: 24, series: 45, films: 120 }
 
@@ -146,6 +147,13 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Succès */}
+      {!readOnly && (
+        <div style={{ padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+          <AchievementsGrid works={works} watched={watched} ratings={ratings} compact />
         </div>
       )}
 
