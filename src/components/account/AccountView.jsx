@@ -145,7 +145,7 @@ function Section({ rows, settings, onToggleSetting }) {
   )
 }
 
-export default function AccountView({ profile, settings, onToggleSetting, onSaveProfile, onMarkAll, onReset, onLogout, onSync, onClearAll, onImportTVTime, onImportTVTimeOut, onRefreshAll, onChangeLanguage }) {
+export default function AccountView({ profile, settings, onToggleSetting, onSaveProfile, onMarkAll, onReset, onLogout, onSync, onClearAll, onImportTVTime, onImportTVTimeOut, onRefreshAll, onChangeLanguage, onExportJSON, onExportCSV }) {
   const { t, i18n: i18nInstance } = useTranslation()
   const { user, deleteAccount } = useAuth()
   const [syncLabel, setSyncLabel] = useState(null)
@@ -343,12 +343,17 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
       )}
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.data')}</div>
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
         <div onClick={handleSync} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{syncLabel ?? t('settings.sync')}</div>
         <div onClick={handleRefreshAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{refreshLabel ?? t('settings.refresh')}</div>
         <div onClick={onMarkAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.markAll')}</div>
         <div onClick={onReset} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.reset')}</div>
         <div onClick={onClearAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border-2)', background: 'var(--color-danger-bg-2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.clearAll')}</div>
+      </div>
+      <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.export')}</div>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
+        <div onClick={onExportJSON} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.exportJSON')}</div>
+        <div onClick={onExportCSV} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.exportCSV')}</div>
       </div>
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.about')}</div>

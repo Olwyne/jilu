@@ -65,7 +65,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
       </div>
 
       {work.category === 'jeux' && (
-        <GamePanel workId={work.id} game={games[work.id]} onAddHours={actions.addGameHours} onToggleTier={actions.toggleGameTier} />
+        <GamePanel workId={work.id} game={games[work.id]} onAddMinutes={actions.addGameMinutes} onToggleTier={actions.toggleGameTier} />
       )}
 
       <div style={{ marginBottom: 22 }}>

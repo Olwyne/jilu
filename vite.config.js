@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
   return {
   plugins: [react(), spotifyTokenPlugin(env)],
   server: {
+    port: process.env.PORT ? parseInt(process.env.PORT) : 5173,
     allowedHosts: ['jilu.localhost', 'localhost'],
     proxy: {
       '/anilist-proxy': {

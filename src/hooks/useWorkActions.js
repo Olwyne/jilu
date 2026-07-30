@@ -107,10 +107,12 @@ export function useWorkActions(data, mutate) {
     await mutate({ feed })
   }
 
-  async function addGameHours(workId, delta) {
+  async function addGameMinutes(workId, deltaMinutes) {
     const games = { ...data.games }
-    const g = { hours: 0, done: {}, ...(games[workId] || {}) }
-    g.hours = Math.max(0, (g.hours || 0) + delta)
+    const raw = games[workId] || {}
+    const currentMinutes = raw.minutes != null ? raw.minutes : (raw.hours || 0) * 60
+    const g = { done: {}, ...raw, minutes: Math.max(0, currentMinutes + deltaMinutes) }
+    delete g.hours
     games[workId] = g
     await mutate({ games })
   }
@@ -234,5 +236,5 @@ export function useWorkActions(data, mutate) {
     onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
   }
 
-  return { addWork, removeWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameHours, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
+  return { addWork, removeWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
 }

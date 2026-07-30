@@ -114,6 +114,50 @@ function Shell() {
     mutate({ settings: { ...data.settings, language: lang } })
   }
 
+  function handleExportJSON() {
+    const payload = {
+      exported: new Date().toISOString(),
+      works: data.works,
+      watched: data.watched,
+      ratings: data.ratings,
+      games: data.games,
+      feed: data.feed,
+      reviews: data.reviews,
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `jilu-export-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleExportCSV() {
+    const headers = ['title', 'category', 'status', 'year', 'rating', 'minutes_played']
+    const rows = Object.values(data.works).map((w) => {
+      const rating = data.ratings?.[`w:${w.id}`] || ''
+      const g = data.games?.[w.id]
+      const mins = g ? (g.minutes != null ? g.minutes : (g.hours || 0) * 60) : ''
+      return [
+        `"${(w.title || '').replace(/"/g, '""')}"`,
+        w.category || '',
+        w.status || '',
+        w.year || '',
+        rating,
+        mins,
+      ].join(',')
+    })
+    const csv = [headers.join(','), ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `jilu-export-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   if (loading) return null
 
   const routeCopy = getRouteCopy(t)
@@ -188,6 +232,8 @@ function Shell() {
                 onRefreshAll={workActions.refreshAllWorks}
                 onImportTVTime={importTVTime}
                 onImportTVTimeOut={importTVTimeOut}
+                onExportJSON={handleExportJSON}
+                onExportCSV={handleExportCSV}
                 onLogout={logout}
                 onChangeLanguage={handleChangeLanguage}
               />
