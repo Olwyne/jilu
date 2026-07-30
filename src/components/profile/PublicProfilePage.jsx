@@ -3,14 +3,20 @@ import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore'
 import { db } from '../../firebase'
+import { useAuth } from '../../contexts/AuthContext'
+import { useFollows } from '../../hooks/useFollows'
 import ProfileView from './ProfileView'
+import FollowButton from '../social/FollowButton'
 
 const EMPTY = { works: {}, watched: {}, ratings: {}, favorites: {}, feed: [], settings: {}, profile: {} }
 
 export default function PublicProfilePage() {
   const { t } = useTranslation()
   const { handle } = useParams()
+  const { user } = useAuth()
+  const { following, isFollowing, follow, unfollow } = useFollows(user)
   const [profileData, setProfileData] = useState(null)
+  const [targetUid, setTargetUid] = useState(null)
   const [status, setStatus] = useState('loading')
 
   useEffect(() => {
@@ -45,6 +51,7 @@ export default function PublicProfilePage() {
           })
         })
 
+        setTargetUid(uid)
         setProfileData({ ...base, works, watched })
         setStatus('found')
       } catch { setStatus('notfound') }
@@ -67,13 +74,27 @@ export default function PublicProfilePage() {
   if (status === 'notfound') return wrap(<div style={{ color: 'var(--color-muted-3)', padding: 40, textAlign: 'center' }}>{t('profile.notFound')}</div>)
   if (status === 'private') return wrap(<div style={{ color: 'var(--color-muted-3)', padding: 40, textAlign: 'center' }}>{t('profile.privateMsg')}</div>)
 
+  const isOwnProfile = user && targetUid && user.uid === targetUid
   return wrap(
-    <ProfileView
-      data={profileData}
-      onOpenWork={() => {}}
-      onToggleLike={() => {}}
-      onDelete={() => {}}
-      readOnly
-    />
+    <>
+      {user && targetUid && !isOwnProfile && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <FollowButton
+            targetUid={targetUid}
+            targetHandle={profileData?.profile?.handle}
+            isFollowing={isFollowing(targetUid)}
+            onFollow={follow}
+            onUnfollow={unfollow}
+          />
+        </div>
+      )}
+      <ProfileView
+        data={profileData}
+        onOpenWork={() => {}}
+        onToggleLike={() => {}}
+        onDelete={() => {}}
+        readOnly
+      />
+    </>
   )
 }

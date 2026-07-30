@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useAppData } from './hooks/useAppData'
 import { useWorkActions } from './hooks/useWorkActions'
 import { useImport } from './hooks/useImport'
+import { useFollows } from './hooks/useFollows'
 import LoginPage from './components/auth/LoginPage'
 import LandingPage from './components/auth/LandingPage'
 import SignupPage from './components/auth/SignupPage'
@@ -76,6 +77,7 @@ function Shell() {
   const workActions = useWorkActions(data, mutate)
   const { importTVTime, importTVTimeOut } = useImport(data, mutate)
   const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
+  const { following, follow, unfollow, isFollowing } = useFollows(user)
 
   useKeyboardShortcuts({
     navigate,
@@ -221,6 +223,7 @@ function Shell() {
                 user={user}
                 handle={data.profile?.handle}
                 onAddWork={workActions.addWork}
+                following={following}
               />
             } />
             <Route path="/stats" element={

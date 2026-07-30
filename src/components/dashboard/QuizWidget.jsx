@@ -6,7 +6,7 @@ import { getTodayQuestion, getTodayKey } from '../../lib/quizQuestions'
 
 const MAX_LEADERS = 10
 
-export default function QuizWidget({ user, handle }) {
+export default function QuizWidget({ user, handle, following }) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
   const todayKey = getTodayKey()
@@ -18,6 +18,7 @@ export default function QuizWidget({ user, handle }) {
   const [timeMs, setTimeMs] = useState(null)
   const [leaders, setLeaders] = useState([])
   const [loadingLeaders, setLoadingLeaders] = useState(false)
+  const [leaderTab, setLeaderTab] = useState('global')
   const startRef = useRef(null)
   const timerRef = useRef(null)
   const [elapsed, setElapsed] = useState(0)
@@ -144,32 +145,42 @@ export default function QuizWidget({ user, handle }) {
 
       {phase === 'done' && (
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-muted-2)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 10 }}>
-            {t('quiz.leaderboard')}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-muted-2)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
+              {t('quiz.leaderboard')}
+            </div>
+            {Object.keys(following || {}).length > 0 && (
+              <div style={{ display: 'flex', gap: 3, background: 'var(--color-chip-bg)', borderRadius: 16, padding: 3 }}>
+                {['global', 'friends'].map((tab) => (
+                  <button key={tab} type="button" onClick={() => setLeaderTab(tab)} style={{ padding: '4px 12px', borderRadius: 12, border: 'none', fontWeight: 600, fontSize: 12, cursor: 'pointer', background: leaderTab === tab ? 'var(--color-accent)' : 'transparent', color: leaderTab === tab ? '#fff' : 'var(--color-muted)' }}>
+                    {t('social.' + tab)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          {loadingLeaders
-            ? <div style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>{t('quiz.loading')}</div>
-            : leaders.length === 0
-              ? <div style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>{t('quiz.noScores')}</div>
-              : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {leaders.map((l, i) => {
-                    const isMe = user && l.uid === user.uid
-                    return (
-                      <div key={l.uid} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, background: isMe ? 'rgba(var(--color-accent-rgb, 111,80,255),.12)' : 'var(--color-surface-row, var(--color-chip-bg))', border: isMe ? '1px solid var(--color-accent)' : '1px solid transparent' }}>
-                        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: i < 3 ? ['#ffd700', '#c0c0c0', '#cd7f32'][i] : 'var(--color-muted)', minWidth: 22 }}>
-                          {i + 1}
-                        </span>
-                        <span style={{ flex: 1, fontSize: 14, fontWeight: isMe ? 700 : 500 }}>{l.handle}</span>
-                        <span style={{ fontSize: 13, color: l.correct ? '#4ade80' : '#ef4444', fontWeight: 600 }}>
-                          {l.correct ? (l.timeMs / 1000).toFixed(2) + 's' : t('quiz.incorrect')}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-              )
-          }
+          {(() => {
+            const friendUids = new Set([...(user ? [user.uid] : []), ...Object.keys(following || {})])
+            const filtered = leaderTab === 'friends' ? leaders.filter((l) => friendUids.has(l.uid)) : leaders
+            if (loadingLeaders) return <div style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>{t('quiz.loading')}</div>
+            if (filtered.length === 0) return <div style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>{t('quiz.noScores')}</div>
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {filtered.map((l, i) => {
+                  const isMe = user && l.uid === user.uid
+                  return (
+                    <div key={l.uid} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, background: isMe ? 'rgba(var(--color-accent-rgb, 111,80,255),.12)' : 'var(--color-chip-bg)', border: isMe ? '1px solid var(--color-accent)' : '1px solid transparent' }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: i < 3 ? ['#ffd700', '#c0c0c0', '#cd7f32'][i] : 'var(--color-muted)', minWidth: 22 }}>{i + 1}</span>
+                      <span style={{ flex: 1, fontSize: 14, fontWeight: isMe ? 700 : 500 }}>{l.handle}</span>
+                      <span style={{ fontSize: 13, color: l.correct ? '#4ade80' : '#ef4444', fontWeight: 600 }}>
+                        {l.correct ? (l.timeMs / 1000).toFixed(2) + 's' : t('quiz.incorrect')}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })()}
         </div>
       )}
     </div>
