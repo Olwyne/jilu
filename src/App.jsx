@@ -29,6 +29,8 @@ import SearchModal from './components/modals/SearchModal'
 import PrivacyPage from './components/legal/PrivacyPage'
 import TermsPage from './components/legal/TermsPage'
 import LegalNoticePage from './components/legal/LegalNoticePage'
+import KeyboardHelpModal from './components/ui/KeyboardHelpModal'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 
 function getRouteCopy(t) {
   return {
@@ -70,9 +72,16 @@ function Shell() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [episodeModal, setEpisodeModal] = useState(null)
   const [toast, setToast] = useState(null)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const workActions = useWorkActions(data, mutate)
   const { importTVTime, importTVTimeOut } = useImport(data, mutate)
   const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
+
+  useKeyboardShortcuts({
+    navigate,
+    onToggleHelp: () => setShortcutsOpen((v) => !v),
+    onBack: () => navigate(-1),
+  })
 
   useEffect(() => {
     const meta = document.querySelector('meta[name="robots"]')
@@ -302,6 +311,7 @@ function Shell() {
           onClose={() => setEpisodeModal(null)}
         />
       )}
+      {shortcutsOpen && <KeyboardHelpModal onClose={() => setShortcutsOpen(false)} />}
     </div>
   )
 }
