@@ -86,7 +86,7 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
       )}
 
       {/* Recommandations */}
-      <RecoRow works={works} />
+      {onAddWork && <RecoRow works={works} onAddWork={onAddWork} />}
 
       {/* Activity feed */}
       <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.activity')}</h3>

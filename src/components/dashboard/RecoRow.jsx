@@ -38,31 +38,48 @@ async function fetchPool(works, cat) {
   return pool
 }
 
-function RecoSection({ title, pool, works }) {
+function RecoSection({ title, pool, works, onAddWork }) {
   const navigate = useNavigate()
+  const [adding, setAdding] = useState(null)
   const visible = pool.filter((r) => !works[r.id]).slice(0, 12)
   if (visible.length === 0) return null
+
+  async function handleClick(r) {
+    if (adding) return
+    if (works[r.id]) { navigate('/work/' + r.id); return }
+    setAdding(r.id)
+    try {
+      await onAddWork(r)
+      navigate('/work/' + r.id)
+    } catch { /* silently ignore */ } finally {
+      setAdding(null)
+    }
+  }
+
   return (
     <div style={{ marginBottom: 24 }}>
       <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 12 }}>{title}</div>
       <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
-        {visible.map((r) => (
-          <div
-            key={r.id}
-            onClick={() => navigate('/preview/' + r.id, { state: { work: r } })}
-            style={{ flexShrink: 0, width: 110, cursor: 'pointer' }}
-          >
-            <PosterBox id={r.id} title={r.title} poster={r.poster} width={110} height={160} radius={12} fontSize={32} />
-            <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{r.title}</div>
-            <div style={{ fontSize: 11.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>
-          </div>
-        ))}
+        {visible.map((r) => {
+          const isAdding = adding === r.id
+          return (
+            <div
+              key={r.id}
+              onClick={() => handleClick(r)}
+              style={{ flexShrink: 0, width: 110, cursor: isAdding ? 'wait' : 'pointer', opacity: isAdding ? 0.6 : 1, transition: 'opacity .15s' }}
+            >
+              <PosterBox id={r.id} title={r.title} poster={r.poster} width={110} height={160} radius={12} fontSize={32} />
+              <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{r.title}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
-export default function RecoRow({ works }) {
+export default function RecoRow({ works, onAddWork }) {
   const { t } = useTranslation()
   const [filmPool, setFilmPool] = useState([])
   const [seriePool, setSeriePool] = useState([])
@@ -76,8 +93,8 @@ export default function RecoRow({ works }) {
     return () => { cancelled = true }
   }, [])
 
-  const filmsVisible = filmPool.filter((r) => !works[r.id]).slice(0, 12)
-  const seriesVisible = seriePool.filter((r) => !works[r.id]).slice(0, 12)
+  const filmsVisible = filmPool.filter((r) => !works[r.id])
+  const seriesVisible = seriePool.filter((r) => !works[r.id])
 
   if (loading) return (
     <div style={{ marginBottom: 28 }}>
@@ -91,8 +108,8 @@ export default function RecoRow({ works }) {
   return (
     <div style={{ marginBottom: 8 }}>
       <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 18 }}>{t('dashboard.recos')}</div>
-      <RecoSection title={t('cat.films')} pool={filmPool} works={works} />
-      <RecoSection title={t('cat.series')} pool={seriePool} works={works} />
+      <RecoSection title={t('cat.films')} pool={filmPool} works={works} onAddWork={onAddWork} />
+      <RecoSection title={t('cat.series')} pool={seriePool} works={works} onAddWork={onAddWork} />
     </div>
   )
 }
