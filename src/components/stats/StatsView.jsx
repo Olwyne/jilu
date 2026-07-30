@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { STATUS, DAY } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
+import GoalsSection from './GoalsSection'
 
 const RUNTIME = { animes: 24, series: 45 }
 const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', mangas: '#f97316', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: '#c46dff' }
@@ -20,7 +21,7 @@ function heatLevel(n) {
 
 const CARD = { padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }
 
-export default function StatsView({ works, watched, ratings, onOpenWork, isMobile }) {
+export default function StatsView({ works, watched, ratings, onOpenWork, isMobile, settings = {}, onSaveSettings }) {
   const { t } = useTranslation()
   const now = Date.now()
 
@@ -106,6 +107,9 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
 
   return (
     <div>
+      {settings && onSaveSettings && (
+        <GoalsSection works={works} settings={settings} onSaveSettings={onSaveSettings} />
+      )}
       {/* Top KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: 14 }}>
         {[

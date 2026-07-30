@@ -233,6 +233,8 @@ function Shell() {
                 ratings={data.ratings}
                 onOpenWork={openWork}
                 isMobile={isMobile}
+                settings={data.settings}
+                onSaveSettings={(updates) => mutate({ settings: { ...data.settings, ...updates } })}
               />
             } />
             <Route path="/account" element={
