@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { relText } from '../../lib/domain'
+import QuizWidget from './QuizWidget'
+import RecoRow from './RecoRow'
 
 function nextEpisode(work, watched) {
   if (!work.seasons) return null
@@ -13,7 +15,7 @@ function nextEpisode(work, watched) {
   return null
 }
 
-export default function DashboardView({ works, watched, reviews, feed, onOpenWork, onWatchNext }) {
+export default function DashboardView({ works, watched, reviews, feed, onOpenWork, onWatchNext, user, handle, onAddWork }) {
   const { t, i18n } = useTranslation()
   const list = Object.values(works)
   const enCours = list.filter((w) => w.status === 'en_cours')
@@ -28,25 +30,17 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
   })
   const upNext = enCours.map((w) => ({ w, nx: nextEpisode(w, watched) })).filter((x) => x.nx).slice(0, 4)
 
-  // Feed entries on watched episodes + work-level feed on en_cours/termine
   const activeStatuses = new Set(['en_cours', 'termine'])
   const feedItems = (feed || []).filter((f) => {
     const w = works[f.workId]
     if (!w || !activeStatuses.has(w.status)) return false
-    if (f.sNum) {
-      const key = `${f.workId}-${f.sNum}-${f.eNum}`
-      return !!watched[key]
-    }
+    if (f.sNum) return !!watched[`${f.workId}-${f.sNum}-${f.eNum}`]
     return true
   })
-
-  // Reviews on en_cours/termine works
   const reviewItems = (reviews || []).filter((r) => {
     const w = works[r.id]
     return w && activeStatuses.has(w.status)
   })
-
-  // Merge + sort by ts desc
   const allActivity = [
     ...feedItems.map((f) => ({ ...f, _type: 'comment' })),
     ...reviewItems.map((r) => ({ ...r, _type: 'review' })),
@@ -54,6 +48,7 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
 
   return (
     <div>
+      {/* Stat tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 14, marginBottom: 32 }}>
         {[
           [String(list.length), t('dashboard.worksTracked')],
@@ -68,20 +63,32 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
         ))}
       </div>
 
-      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{t('dashboard.upNext')}</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 34 }}>
-        {upNext.map(({ w, nx }) => (
-          <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 12, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
-            <PosterBox id={w.id} title={w.title} poster={w.poster} width={54} height={78} radius={11} fontSize={22} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
-              <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, marginTop: 3 }}>{t('dashboard.ep', { s: nx.s.n, e: nx.e.n })}</div>
-            </div>
-            <div onClick={(ev) => { ev.stopPropagation(); onWatchNext(w.id, nx.s.n, nx.e.n) }} style={{ alignSelf: 'center', width: 38, height: 38, borderRadius: '50%', background: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✓</div>
-          </div>
-        ))}
-      </div>
+      {/* Quiz du jour */}
+      <QuizWidget user={user} handle={handle} />
 
+      {/* Up Next */}
+      {upNext.length > 0 && (
+        <>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.upNext')}</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 34 }}>
+            {upNext.map(({ w, nx }) => (
+              <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', gap: 14, padding: 12, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
+                <PosterBox id={w.id} title={w.title} poster={w.poster} width={54} height={78} radius={11} fontSize={22} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
+                  <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, marginTop: 3 }}>{t('dashboard.ep', { s: nx.s.n, e: nx.e.n })}</div>
+                </div>
+                <div onClick={(ev) => { ev.stopPropagation(); onWatchNext(w.id, nx.s.n, nx.e.n) }} style={{ alignSelf: 'center', width: 38, height: 38, borderRadius: '50%', background: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✓</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Recommandations */}
+      {onAddWork && <RecoRow works={works} onAdd={onAddWork} />}
+
+      {/* Activity feed */}
       <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.activity')}</h3>
       {allActivity.length === 0
         ? <div style={{ color: 'var(--color-muted-3)', fontSize: 14, padding: '16px 0' }}>{t('dashboard.noActivity')}</div>

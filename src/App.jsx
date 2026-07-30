@@ -208,6 +208,9 @@ function Shell() {
                 feed={data.feed}
                 onOpenWork={openWork}
                 onWatchNext={(id, s, e) => workActions.markWatchedToast(data.works[id], s, e, setToast)}
+                user={user}
+                handle={data.profile?.handle}
+                onAddWork={workActions.addWork}
               />
             } />
             <Route path="/stats" element={

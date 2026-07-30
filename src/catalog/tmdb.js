@@ -73,6 +73,27 @@ export async function tmdbTrending(cat) {
     })
 }
 
+export async function tmdbDiscover(genreId, cat) {
+  const type = cat === 'films' ? 'movie' : 'tv'
+  const res = await fetch(`${BASE}/discover/${type}?api_key=${KEY}&language=${tmdbLocale()}&with_genres=${genreId}&sort_by=vote_average.desc&vote_count.gte=200&page=1`)
+  const json = await res.json()
+  return (json.results || []).slice(0, 10).map((r) => {
+    const isTv = type === 'tv'
+    const dateStr = isTv ? r.first_air_date : r.release_date
+    return {
+      source: 'tmdb',
+      sourceId: r.id,
+      id: `tmdb-${isTv ? 'tv' : 'movie'}-${r.id}`,
+      title: isTv ? r.name : r.title,
+      category: cat,
+      genre: genreLabel(r.genre_ids),
+      year: dateStr ? Number(dateStr.slice(0, 4)) : null,
+      overview: r.overview || '',
+      poster: r.poster_path ? `https://image.tmdb.org/t/p/w300${r.poster_path}` : null,
+    }
+  })
+}
+
 export async function tmdbGetBothMeta(work) {
   const type = work.category === 'films' ? 'movie' : 'tv'
   const [resFr, resEn] = await Promise.all([
