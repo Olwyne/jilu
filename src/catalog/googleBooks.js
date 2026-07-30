@@ -20,6 +20,35 @@ export async function googleBooksTrending() {
   }))
 }
 
+export async function googleBooksDiscover(subject) {
+  const key = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
+  const keyParam = key ? `&key=${key}` : ''
+  const q = subject ? `subject:${encodeURIComponent(subject)}` : 'fiction'
+  const res = await fetch(`${BASE}?q=${q}&orderBy=relevance&maxResults=20&langRestrict=fr${keyParam}`)
+  const json = await res.json()
+  return (json.items || [])
+    .filter((it) => {
+      const cats = (it.volumeInfo?.categories || []).join(' ')
+      return !MANGA_CAT_RE.test(cats)
+    })
+    .map((it) => {
+      const v = it.volumeInfo || {}
+      return {
+        source: 'googlebooks',
+        sourceId: it.id,
+        id: `googlebooks-${it.id}`,
+        title: v.title || 'Sans titre',
+        category: 'livres',
+        genre: (v.categories || [])[0] || 'Divers',
+        year: v.publishedDate ? Number(v.publishedDate.slice(0, 4)) : null,
+        overview: v.description || '',
+        poster: v.imageLinks?.thumbnail?.replace('http:', 'https:') || null,
+        seasons: null,
+        release: null
+      }
+    })
+}
+
 export async function googleBooksSearch(query) {
   const key = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
   const keyParam = key ? `&key=${key}` : ''

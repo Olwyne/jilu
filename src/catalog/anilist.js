@@ -72,6 +72,34 @@ export async function anilistTrending() {
   }))
 }
 
+export async function anilistDiscoverAnime(genres) {
+  const genreFilter = genres?.length ? `, genre_in: ${JSON.stringify(genres)}` : ''
+  const q = `{ Page(perPage: 20) { media(sort: POPULARITY_DESC, type: ANIME, isAdult: false${genreFilter}) { id title { romaji } genres startDate { year } description coverImage { large } } } }`
+  const json = await gql(q, {})
+  return (json.data?.Page?.media || []).map((m) => ({
+    source: 'anilist', sourceId: m.id, id: `anilist-${m.id}`,
+    title: m.title.romaji, category: 'animes',
+    genre: (m.genres || [])[0] || 'Divers',
+    year: m.startDate?.year || null,
+    overview: (m.description || '').replace(/<[^>]+>/g, ''),
+    poster: m.coverImage?.large || null, seasons: null, release: null
+  }))
+}
+
+export async function anilistDiscoverManga(genres) {
+  const genreFilter = genres?.length ? `, genre_in: ${JSON.stringify(genres)}` : ''
+  const q = `{ Page(perPage: 20) { media(sort: POPULARITY_DESC, type: MANGA, isAdult: false${genreFilter}) { id title { romaji } genres startDate { year } description coverImage { large } } } }`
+  const json = await gql(q, {})
+  return (json.data?.Page?.media || []).map((m) => ({
+    source: 'anilist-manga', sourceId: m.id, id: `anilist-manga-${m.id}`,
+    title: m.title.romaji, category: 'mangas',
+    genre: (m.genres || [])[0] || 'Divers',
+    year: m.startDate?.year || null,
+    overview: (m.description || '').replace(/<[^>]+>/g, ''),
+    poster: m.coverImage?.large || null, seasons: null, release: null
+  }))
+}
+
 export async function anilistFindId(originalTitle, year) {
   const q = `query ($search: String) {
     Page(perPage: 5) {
