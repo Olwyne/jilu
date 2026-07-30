@@ -16,6 +16,7 @@ import MobileNav from './components/layout/MobileNav'
 import Header from './components/layout/Header'
 import LibraryView from './components/library/LibraryView'
 import DetailView from './components/detail/DetailView'
+import PreviewView from './components/detail/PreviewView'
 import EpisodeModal from './components/modals/EpisodeModal'
 import CalendarView from './components/calendar/CalendarView'
 import DashboardView from './components/dashboard/DashboardView'
@@ -256,6 +257,9 @@ function Shell() {
                 workActions={workActions}
                 onOpenEpisode={(w, s, e) => setEpisodeModal({ workId: w.id, sNum: s.n, eNum: e.n })}
               />
+            } />
+            <Route path="/preview/:workId" element={
+              <PreviewView works={data.works} onAddWork={workActions.addWork} />
             } />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
