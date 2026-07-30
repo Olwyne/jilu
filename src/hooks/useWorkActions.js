@@ -1,4 +1,4 @@
-import { tmdbGetDetail } from '../catalog/tmdb'
+import { tmdbGetDetail, tmdbGetBothMeta } from '../catalog/tmdb'
 import { anilistFindId, anilistGetDetail, anilistGetMangaDetail } from '../catalog/anilist'
 import { spotifyGetDetail } from '../catalog/spotify'
 
@@ -174,22 +174,26 @@ export function useWorkActions(data, mutate) {
   async function addWork(searchResult) {
     if (data.works[searchResult.id]) return
     const fetchDetail = DETAIL_FETCHERS[searchResult.source]
-    let detailed = fetchDetail ? await fetchDetail(searchResult) : searchResult
+    const [detailed, bothMeta] = await Promise.all([
+      fetchDetail ? fetchDetail(searchResult) : Promise.resolve(searchResult),
+      searchResult.source === 'tmdb' ? tmdbGetBothMeta(searchResult) : Promise.resolve({})
+    ])
+    let work = { ...detailed, ...bothMeta }
 
     if (searchResult.category === 'animes' && searchResult.source === 'tmdb') {
       try {
         const anilistId = await anilistFindId(searchResult.originalTitle || searchResult.title, searchResult.year)
         if (anilistId) {
           const anilistDetail = await anilistGetDetail(anilistId)
-          const keepTmdb = anilistDetail.seasons.length <= 1 && (detailed.seasons?.length || 0) > 1
-          detailed = keepTmdb
-            ? { ...detailed, anilistId }
-            : { ...detailed, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
+          const keepTmdb = anilistDetail.seasons.length <= 1 && (work.seasons?.length || 0) > 1
+          work = keepTmdb
+            ? { ...work, anilistId }
+            : { ...work, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
         }
       } catch { /* keep TMDB seasons on failure */ }
     }
 
-    const works = { ...data.works, [searchResult.id]: { ...detailed, status: 'a_voir', added: Date.now() } }
+    const works = { ...data.works, [searchResult.id]: { ...work, status: 'a_voir', added: Date.now() } }
     await mutate({ works })
   }
 
@@ -204,7 +208,8 @@ export function useWorkActions(data, mutate) {
       try {
         const fetcher = DETAIL_FETCHERS[work.source]
         const fresh = await fetcher(work)
-        let next = { ...work, ...fresh, status: work.status, added: work.added }
+        const meta = work.source === 'tmdb' ? await tmdbGetBothMeta(work) : {}
+        let next = { ...work, ...fresh, ...meta, status: work.status, added: work.added }
 
         if (work.category === 'animes') {
           let anilistId = work.anilistId

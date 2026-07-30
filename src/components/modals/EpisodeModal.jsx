@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import JournalThread from '../detail/JournalThread'
 import { useReviews } from '../../hooks/useReviews'
+import { localizedTitle } from '../../lib/domain'
 
 const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY
 
@@ -18,7 +19,7 @@ function avgRating(reviews) {
 }
 
 export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions, watched, currentUser, onClose }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const season = work.seasons.find((s) => s.n === sNum)
   const ep = season.episodes.find((e) => e.n === eNum)
   const key = `${work.id}-${sNum}-${eNum}`
@@ -37,7 +38,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
 
   useEffect(() => {
     if (!work.sourceId || work.source !== 'tmdb' || work.category === 'films') return
-    fetch(`https://api.themoviedb.org/3/tv/${work.sourceId}/season/${sNum}/episode/${eNum}?api_key=${TMDB_KEY}&language=fr-FR`)
+    fetch(`https://api.themoviedb.org/3/tv/${work.sourceId}/season/${sNum}/episode/${eNum}?api_key=${TMDB_KEY}&language=${i18n.language?.startsWith('fr') ? 'fr-FR' : 'en-US'}`)
       .then((r) => r.json())
       .then((d) => { if (d.overview) setOverview(d.overview) })
       .catch(() => {})
@@ -52,7 +53,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 15, padding: '20px 22px', borderBottom: '1px solid var(--color-border)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{work.title}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{localizedTitle(work, i18n.language)}</div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19, marginTop: 2 }}>{label}</div>
             {ep.air && ep.air !== Infinity && (
               <div style={{ fontSize: 12.5, color: 'var(--color-muted)', marginTop: 5 }}>{fmtDate(ep.air)}</div>

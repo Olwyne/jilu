@@ -51,6 +51,16 @@ export function relText(ts, now, lang = 'fr') {
   return new Intl.DateTimeFormat(l, { day: 'numeric', month: 'short' }).format(new Date(ts))
 }
 
+export function localizedTitle(work, lang) {
+  const code = lang?.startsWith('fr') ? 'fr' : 'en'
+  return work.titles?.[code] || work.title
+}
+
+export function localizedPoster(work, lang) {
+  const code = lang?.startsWith('fr') ? 'fr' : 'en'
+  return work.posters?.[code] || work.poster
+}
+
 export function epTotals(work, watched) {
   if (!work.seasons) return { total: 0, watchedCount: 0 }
   let total = 0, watchedCount = 0

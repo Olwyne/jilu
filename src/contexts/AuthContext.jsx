@@ -31,7 +31,11 @@ export function AuthProvider({ children }) {
       await reauthenticateWithCredential(auth.currentUser, credential)
       await updatePassword(auth.currentUser, newPassword)
     },
-    deleteAccount: () => deleteUser(auth.currentUser),
+    deleteAccount: async (password) => {
+      const credential = EmailAuthProvider.credential(auth.currentUser.email, password)
+      await reauthenticateWithCredential(auth.currentUser, credential)
+      await deleteUser(auth.currentUser)
+    },
   }
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>

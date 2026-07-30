@@ -157,6 +157,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteStatus, setDeleteStatus] = useState('idle')
+  const [deletePassword, setDeletePassword] = useState('')
 
   const PREF_ROWS = [
     ['notifNewEp', t('settings.notifNewEp'), t('settings.notifNewEpDesc'), true],
@@ -199,18 +200,20 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
     if (!user) return
     setDeleteStatus('loading')
     try {
+      const uid = user.uid
+      await deleteAccount(deletePassword)
       const deleteSubcollection = async (name) => {
-        const snap = await getDocs(collection(db, 'users', user.uid, name))
+        const snap = await getDocs(collection(db, 'users', uid, name))
         await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
       }
       await deleteSubcollection('works')
       await deleteSubcollection('watched')
-      const reviewsSnap = await getDocs(query(collection(db, 'reviews'), where('userId', '==', user.uid)))
+      const reviewsSnap = await getDocs(query(collection(db, 'reviews'), where('userId', '==', uid)))
       await Promise.all(reviewsSnap.docs.map(d => deleteDoc(d.ref)))
-      await deleteDoc(doc(db, 'users', user.uid))
-      await deleteAccount()
-    } catch {
-      setDeleteStatus('error')
+      await deleteDoc(doc(db, 'users', uid))
+    } catch (e) {
+      const wrongPw = e?.code === 'auth/wrong-password' || e?.code === 'auth/invalid-credential'
+      setDeleteStatus(wrongPw ? 'wrongPassword' : 'error')
       setTimeout(() => setDeleteStatus('idle'), 6000)
     }
   }
@@ -227,16 +230,26 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         />
       )}
       {deleteOpen && (
-        <div onClick={() => { if (deleteStatus !== 'loading') setDeleteOpen(false) }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <div onClick={() => { if (deleteStatus !== 'loading') { setDeleteOpen(false); setDeletePassword('') } }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 12 }}>{t('settings.deleteAccountTitle')}</div>
-            <div style={{ fontSize: 14, color: 'var(--color-muted)', lineHeight: 1.6, marginBottom: 24 }}>{t('settings.deleteAccountDesc')}</div>
-            {deleteStatus === 'error' && (
-              <div style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 16, fontWeight: 600 }}>{t('settings.deleteAccountError')}</div>
+            <div style={{ fontSize: 14, color: 'var(--color-muted)', lineHeight: 1.6, marginBottom: 20 }}>{t('settings.deleteAccountDesc')}</div>
+            <input
+              type="password"
+              placeholder={t('settings.deleteAccountPassword')}
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              disabled={deleteStatus === 'loading'}
+              style={{ width: '100%', padding: '11px 14px', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'var(--color-input-bg, var(--color-surface))', color: 'var(--color-text)', fontSize: 14, marginBottom: 16, boxSizing: 'border-box', outline: 'none' }}
+            />
+            {(deleteStatus === 'error' || deleteStatus === 'wrongPassword') && (
+              <div style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 16, fontWeight: 600 }}>
+                {deleteStatus === 'wrongPassword' ? t('settings.deleteAccountWrongPassword') : t('settings.deleteAccountError')}
+              </div>
             )}
             <div style={{ display: 'flex', gap: 10 }}>
               <button
-                onClick={() => setDeleteOpen(false)}
+                onClick={() => { setDeleteOpen(false); setDeletePassword('') }}
                 disabled={deleteStatus === 'loading'}
                 style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-text)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
               >
@@ -244,8 +257,8 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
               </button>
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleteStatus === 'loading'}
-                style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: 'none', background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 600, cursor: deleteStatus === 'loading' ? 'wait' : 'pointer', opacity: deleteStatus === 'loading' ? 0.7 : 1 }}
+                disabled={deleteStatus === 'loading' || !deletePassword}
+                style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: 'none', background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 600, cursor: (deleteStatus === 'loading' || !deletePassword) ? 'not-allowed' : 'pointer', opacity: (deleteStatus === 'loading' || !deletePassword) ? 0.5 : 1 }}
               >
                 {deleteStatus === 'loading' ? t('settings.deleteAccountDeleting') : t('settings.deleteAccountConfirm')}
               </button>

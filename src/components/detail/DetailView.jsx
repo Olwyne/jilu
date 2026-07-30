@@ -2,13 +2,13 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import PosterBox from '../ui/PosterBox'
 import StatusSelect from '../ui/StatusSelect'
-import { STATUS, epTotals } from '../../lib/domain'
+import { STATUS, epTotals, localizedTitle, localizedPoster } from '../../lib/domain'
 import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
 import JournalThread from './JournalThread'
 
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { total, watchedCount } = epTotals(work, watched)
   const rating = ratings[`w:${work.id}`] || 0
@@ -21,7 +21,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
   return (
     <div>
       <div style={{ display: 'flex', gap: 26, flexWrap: 'wrap', marginBottom: 28 }}>
-        <PosterBox id={work.id} title={work.title} poster={work.poster} width={150} height={220} radius={18} fontSize={52} />
+        <PosterBox id={work.id} title={localizedTitle(work, i18n.language)} poster={localizedPoster(work, i18n.language)} width={150} height={220} radius={18} fontSize={52} />
         <div style={{ flex: 1, minWidth: 260 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <span style={{ padding: '5px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: STATUS[work.status].color, background: `${STATUS[work.status].color}22` }}>{t('status.' + work.status)}</span>
@@ -31,7 +31,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
               {work.ended === false && <span style={{ marginLeft: 6, color: '#f59e0b', fontWeight: 600 }}>{t('detail.ongoing')}</span>}
             </span>
           </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, margin: '0 0 12px' }}>{work.title}</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, margin: '0 0 12px' }}>{localizedTitle(work, i18n.language)}</h2>
           <p style={{ color: '#b9b9c8', fontSize: 15, lineHeight: 1.55, maxWidth: 560 }}>{work.overview}</p>
           {work.seasons && (
             <div style={{ maxWidth: 420, marginBottom: 20 }}>
