@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { tmdbDiscover } from '../../catalog/tmdb'
 import PosterBox from '../ui/PosterBox'
+import WorkPreviewModal from '../modals/WorkPreviewModal'
 
 const GENRE_TO_ID = {
   Action: 28, Drame: 18, Drama: 18, Comédie: 35, Comedy: 35,
@@ -28,10 +29,11 @@ function topCatFromWorks(works) {
   return count.films >= count.series ? 'films' : 'series'
 }
 
-export default function RecoRow({ works, onAdd }) {
+export default function RecoRow({ works, onAdd, onOpenWork }) {
   const { t } = useTranslation()
   const [recos, setRecos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [preview, setPreview] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -70,12 +72,24 @@ export default function RecoRow({ works, onAdd }) {
 
   if (recos.length === 0) return null
 
+  function handleClick(r) {
+    if (works[r.id]) onOpenWork(r.id)
+    else setPreview(r)
+  }
+
   return (
     <div style={{ marginBottom: 28 }}>
+      {preview && (
+        <WorkPreviewModal
+          work={preview}
+          onAdd={onAdd}
+          onClose={() => setPreview(null)}
+        />
+      )}
       <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.recos')}</div>
       <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 6 }}>
         {recos.map((r) => (
-          <div key={r.id} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }} onClick={() => onAdd(r)}>
+          <div key={r.id} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }} onClick={() => handleClick(r)}>
             <PosterBox id={r.id} title={r.title} poster={r.poster} width={110} height={160} radius={12} fontSize={32} />
             <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{r.title}</div>
             <div style={{ fontSize: 11.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>

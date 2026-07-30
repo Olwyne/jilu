@@ -273,6 +273,8 @@
   "dashboard.ep": "S{{s}} · Episode {{e}}",
   "dashboard.recos": "Recommendations",
   "dashboard.recoLoading": "Loading recommendations…",
+  "preview.close": "Close",
+  "preview.add": "Add to my library",
   "quiz.title": "Question of the Day",
   "quiz.subtitle": "Same question for everyone — fastest wins",
   "quiz.hint": "A culture question awaits. Your timer starts when you click.",
