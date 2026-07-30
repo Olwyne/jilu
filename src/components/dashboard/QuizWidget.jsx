@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { collection, doc, getDoc, setDoc, getDocs, orderBy, query, limit } from 'firebase/firestore'
+import { collection, doc, getDoc, setDoc, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { getTodayQuestion, getTodayKey } from '../../lib/quizQuestions'
 
@@ -32,7 +32,7 @@ export default function QuizWidget({ user, handle }) {
         setPhase('done')
         fetchLeaders()
       }
-    })
+    }).catch(() => { /* permissions not deployed yet — stay idle */ })
   }, [user, todayKey])
 
   useEffect(() => {
@@ -48,8 +48,16 @@ export default function QuizWidget({ user, handle }) {
   async function fetchLeaders() {
     setLoadingLeaders(true)
     try {
-      const snap = await getDocs(query(collection(db, 'quiz', todayKey, 'scores'), orderBy('timeMs'), limit(MAX_LEADERS)))
-      setLeaders(snap.docs.map((d) => ({ uid: d.id, ...d.data() })))
+      const snap = await getDocs(collection(db, 'quiz', todayKey, 'scores'))
+      const sorted = snap.docs
+        .map((d) => ({ uid: d.id, ...d.data() }))
+        .sort((a, b) => {
+          if (a.correct && !b.correct) return -1
+          if (!a.correct && b.correct) return 1
+          return a.timeMs - b.timeMs
+        })
+        .slice(0, MAX_LEADERS)
+      setLeaders(sorted)
     } catch { /* silently ignore */ }
     setLoadingLeaders(false)
   }

@@ -25,6 +25,9 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
 
   return (
     <div>
+      {/* Quiz du jour */}
+      <QuizWidget user={user} handle={handle} />
+
       {/* Activity feed */}
       <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, marginBottom: 14 }}>{t('dashboard.activity')}</h3>
       {allActivity.length === 0
