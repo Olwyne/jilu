@@ -82,7 +82,6 @@ export default function RecoRow({ works, onAdd }) {
           </div>
         ))}
       </div>
-      <div style={{ fontSize: 12, color: 'var(--color-muted-3)', marginTop: 8 }}>{t('dashboard.recoHint')}</div>
     </div>
   )
 }
