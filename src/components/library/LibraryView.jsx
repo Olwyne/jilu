@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import WorkCard from './WorkCard'
 import { epTotals } from '../../lib/domain'
@@ -10,6 +10,12 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
   const [status, setStatus] = useState('all')
   const [sort, setSort] = useState('recent')
   const [sortDir, setSortDir] = useState('desc')
+  const PAGE = 48
+  const [visibleCount, setVisibleCount] = useState(PAGE)
+  const sentinelRef = useRef(null)
+  const observerRef = useRef(null)
+
+  useEffect(() => { setVisibleCount(PAGE) }, [category, status, sort, sortDir])
 
   const CATS = [
     ['all', t('cat.all')],
@@ -55,6 +61,17 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
   function handleSort(key) {
     if (key === sort) setSortDir(d => d === 'desc' ? 'asc' : 'desc')
     else { setSort(key); setSortDir('desc') }
+  }
+
+  const setSentinel = (el) => {
+    if (observerRef.current) { observerRef.current.disconnect(); observerRef.current = null }
+    sentinelRef.current = el
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setVisibleCount((n) => n + PAGE)
+    }, { rootMargin: '200px' })
+    observer.observe(el)
+    observerRef.current = observer
   }
 
   const list = Object.values(works)
@@ -110,7 +127,7 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
       </div>
       {list.length === 0 && <div className={styles.empty}>{t('library.noResults')}</div>}
       <div className={styles.grid}>
-        {list.map((w) => {
+        {list.slice(0, visibleCount).map((w) => {
           const { total, watchedCount } = epTotals(w, watched)
           return (
             <WorkCard
@@ -125,6 +142,7 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
           )
         })}
       </div>
+      {visibleCount < list.length && <div ref={setSentinel} style={{ height: 1 }} />}
     </div>
   )
 }
