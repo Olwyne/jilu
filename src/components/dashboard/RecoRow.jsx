@@ -68,7 +68,7 @@ function RecoCard({ r, works, onAddWork }) {
         {hovered && !adding && (
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 10 }}>
             <span style={{ background: 'var(--color-accent)', color: '#fff', fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 20 }}>
-              + {t('search.add')}
+              {t('search.add')}
             </span>
           </div>
         )}
