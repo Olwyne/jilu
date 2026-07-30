@@ -106,7 +106,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{episodesCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>vus</div></div>
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{ratingsCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>avis</div></div>
           </div>
-          <div style={{ marginTop: 8, display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'baseline', gap: isMobile ? 2 : 6 }}>
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15 }}>{watchTimeStr}</span>
             <span style={{ fontSize: 12, color: 'var(--color-muted)' }}>de visionnage</span>
           </div>
