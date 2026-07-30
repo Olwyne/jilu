@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { STATUS, DAY } from '../../lib/domain'
@@ -28,6 +29,8 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
   const ratingDist = [0, 0, 0, 0, 0]
   const decadeCount = {}
   const dayMap = {}
+  const dayWorks = {}
+  const [selectedDay, setSelectedDay] = useState(null)
   const totalWorks = Object.values(works).length
 
   Object.values(works).forEach((w) => {
@@ -60,6 +63,8 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
             const d = new Date(watchTs)
             const dk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
             dayMap[dk] = (dayMap[dk] || 0) + 1
+            if (!dayWorks[dk]) dayWorks[dk] = []
+            dayWorks[dk].push({ workId: w.id, sNum: s.n, eNum: e.n })
           }
         }
       }))
@@ -89,7 +94,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
     const days = []
     for (let dow = 0; dow < 7; dow++) {
       const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`
-      days.push({ count: dayMap[key] || 0, month: cur.getMonth(), day: cur.getDate() })
+      days.push({ count: dayMap[key] || 0, month: cur.getMonth(), day: cur.getDate(), dk: key })
       cur.setDate(cur.getDate() + 1)
     }
     heatCols.push({ days, month: days[0].month })
@@ -144,8 +149,13 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
             {heatCols.slice(-13).flatMap((col) => col.days).map((day, i) => (
               <div
                 key={i}
+                role={day.count ? 'button' : undefined}
+                tabIndex={day.count ? 0 : undefined}
+                aria-label={day.count ? `${day.day}/${day.month + 1} : ${day.count} épisode${day.count > 1 ? 's' : ''}` : undefined}
+                onClick={() => day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
                 title={day.count ? `${day.day}/${day.month + 1}: ${day.count} ép.` : ''}
-                style={{ width: '100%', aspectRatio: '1', borderRadius: 3, background: HEAT[heatLevel(day.count)] }}
+                style={{ width: '100%', aspectRatio: '1', borderRadius: 3, background: HEAT[heatLevel(day.count)], cursor: day.count ? 'pointer' : 'default', outline: selectedDay === day.dk ? '2px solid var(--color-accent)' : 'none', outlineOffset: 1 }}
               />
             ))}
           </div>
@@ -159,12 +169,45 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
                 {col.days.map((day, di) => (
                   <div
                     key={di}
+                    role={day.count ? 'button' : undefined}
+                    tabIndex={day.count ? 0 : undefined}
+                    aria-label={day.count ? `${day.day}/${day.month + 1} : ${day.count} épisode${day.count > 1 ? 's' : ''}` : undefined}
+                    onClick={() => day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
                     title={day.count ? `${day.day}/${day.month + 1}: ${day.count} ép.` : ''}
-                    style={{ width: '100%', aspectRatio: '1', borderRadius: 2, background: HEAT[heatLevel(day.count)] }}
+                    style={{ width: '100%', aspectRatio: '1', borderRadius: 2, background: HEAT[heatLevel(day.count)], cursor: day.count ? 'pointer' : 'default', outline: selectedDay === day.dk ? '2px solid var(--color-accent)' : 'none', outlineOffset: 1 }}
                   />
                 ))}
               </div>
             ))}
+          </div>
+        )}
+        {selectedDay && dayWorks[selectedDay] && (
+          <div style={{ marginTop: 18, borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-muted-2)', marginBottom: 12 }}>
+              {new Date(selectedDay + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              {' — '}{dayWorks[selectedDay].length} épisode{dayWorks[selectedDay].length > 1 ? 's' : ''}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {dayWorks[selectedDay].map(({ workId, sNum, eNum }, i) => {
+                const w = works[workId]
+                if (!w) return null
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => onOpenWork(workId)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'var(--color-chip-bg)', cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <PosterBox id={workId} title={w.title} poster={w.poster} width={32} height={46} radius={6} fontSize={14} />
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.3 }}>{w.title}</div>
+                      <div style={{ fontSize: 12, color: 'var(--color-accent)' }}>S{sNum} · Ep. {eNum}</div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
