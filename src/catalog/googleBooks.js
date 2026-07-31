@@ -20,7 +20,7 @@ export async function googleBooksTrending() {
 
 export async function googleBooksDiscover(subject) {
   const q = subject ? `subject:${encodeURIComponent(subject)}` : 'fiction'
-  const res = await fetch(`/api/books?q=${q}&orderBy=relevance&maxResults=20&langRestrict=fr`)
+  const res = await fetch(`/api/books?q=${q}&orderBy=relevance&maxResults=20`)
   const json = await res.json()
   return (json.items || [])
     .filter((it) => {
