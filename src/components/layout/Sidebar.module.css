@@ -1,5 +1,5 @@
 .aside { width: 236px; flex-shrink: 0; background: var(--color-surface-nav, transparent); border-right: 1px solid var(--color-border); padding: 26px 18px 18px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
-.brand { display: flex; align-items: center; gap: 11px; padding: 0 8px 22px; }
+.brand { display: flex; align-items: center; gap: 11px; padding: 0 8px 22px; background: none; border: none; font-family: inherit; cursor: pointer; width: 100%; text-align: left; }
 .mark { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--color-accent), var(--color-pink)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 19px; color: #fff; }
 .name { font-family: var(--font-display); font-weight: 700; font-size: 21px; letter-spacing: -.02em; }
 .navItem { display: flex; align-items: center; gap: 13px; padding: 11px 14px; border-radius: 12px; cursor: pointer; font-weight: 500; font-size: 15px; color: var(--color-muted); width: 100%; background: none; border: none; text-align: left; font-family: inherit; }

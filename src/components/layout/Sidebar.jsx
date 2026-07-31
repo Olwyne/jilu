@@ -18,10 +18,10 @@ export default function Sidebar({ profile = {}, toCatch = 0 }) {
 
   return (
     <aside className={styles.aside}>
-      <div className={styles.brand}>
+      <button className={styles.brand} onClick={() => navigate('/dashboard')} aria-label={t('nav.home')}>
         <div className={styles.mark}>J</div>
         <div className={styles.name}>Jilu</div>
-      </div>
+      </button>
       {ITEMS.map((item) => (
         <button
           key={item.path}
