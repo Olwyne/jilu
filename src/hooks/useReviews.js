@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
-  collection, query, where, orderBy, onSnapshot,
-  addDoc, deleteDoc, doc
+  collection, query, where, onSnapshot,
+  addDoc, deleteDoc, doc, setDoc
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
@@ -12,11 +12,12 @@ export function useReviews(workId, currentUser) {
     if (!workId || !currentUser?.uid) return
     const q = query(
       collection(db, 'reviews'),
-      where('workId', '==', workId),
-      orderBy('ts', 'desc')
+      where('workId', '==', workId)
     )
     return onSnapshot(q, snap => {
-      setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      docs.sort((a, b) => b.ts - a.ts)
+      setReviews(docs)
     })
   }, [workId, currentUser?.uid])
 
@@ -36,10 +37,25 @@ export function useReviews(workId, currentUser) {
     })
   }
 
+  async function upsertReview({ sNum = null, eNum = null, text = '', rating = null }) {
+    if (!currentUser?.uid) return
+    const id = [workId, sNum, eNum, currentUser.uid].filter((x) => x != null).join('-')
+    await setDoc(doc(db, 'reviews', id), {
+      workId,
+      sNum,
+      eNum,
+      userId: currentUser.uid,
+      handle: currentUser.handle || 'Anonyme',
+      text: text?.trim() || '',
+      rating,
+      ts: Date.now()
+    })
+  }
+
   async function deleteReview(reviewId) {
     if (!currentUser?.uid) return
     await deleteDoc(doc(db, 'reviews', reviewId))
   }
 
-  return { episodeReviews, addReview, deleteReview }
+  return { episodeReviews, addReview, upsertReview, deleteReview }
 }
