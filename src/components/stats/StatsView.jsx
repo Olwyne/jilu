@@ -107,9 +107,6 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
 
   return (
     <div>
-      {settings && onSaveSettings && (
-        <GoalsSection works={works} settings={settings} onSaveSettings={onSaveSettings} />
-      )}
       {/* Top KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: 14 }}>
         {[
@@ -216,6 +213,10 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           </div>
         )}
       </div>
+
+      {settings && onSaveSettings && (
+        <GoalsSection works={works} settings={settings} onSaveSettings={onSaveSettings} />
+      )}
 
       {/* Achievements */}
       <div style={{ ...CARD, marginBottom: 30 }}>
