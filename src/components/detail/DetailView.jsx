@@ -5,9 +5,9 @@ import StatusSelect from '../ui/StatusSelect'
 import { STATUS, epTotals, localizedTitle, localizedPoster } from '../../lib/domain'
 import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
-import JournalThread from './JournalThread'
+import ReviewFeed from './ReviewFeed'
 
-export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites }) {
+export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites, currentUser }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { total, watchedCount } = epTotals(work, watched)
@@ -69,12 +69,10 @@ export default function DetailView({ work, watched, ratings, games, feed, action
       )}
 
       <div style={{ marginBottom: 22 }}>
-        <JournalThread
-          commentsKey={`w:${work.id}`}
-          feed={feed}
-          onPost={(text) => actions.postComment(work.id, null, null, text)}
-          onToggleLike={actions.toggleLike}
-          onDelete={actions.deleteComment}
+        <ReviewFeed
+          workId={work.id}
+          currentUser={currentUser}
+          myRating={rating}
         />
       </div>
 

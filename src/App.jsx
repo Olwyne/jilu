@@ -45,7 +45,7 @@ function getRouteCopy(t) {
   }
 }
 
-function DetailRoute({ data, workActions, onOpenEpisode }) {
+function DetailRoute({ data, workActions, currentUser, onOpenEpisode }) {
   const { workId } = useParams()
   const work = data.works[workId]
   if (!work) return <Navigate to="/library" replace />
@@ -58,6 +58,7 @@ function DetailRoute({ data, workActions, onOpenEpisode }) {
       feed={data.feed}
       actions={workActions}
       favorites={data.favorites}
+      currentUser={currentUser}
       onOpenEpisode={onOpenEpisode}
     />
   )
@@ -265,6 +266,7 @@ function Shell() {
               <DetailRoute
                 data={data}
                 workActions={workActions}
+                currentUser={currentUser}
                 onOpenEpisode={(w, s, e) => setEpisodeModal({ workId: w.id, sNum: s.n, eNum: e.n })}
               />
             } />

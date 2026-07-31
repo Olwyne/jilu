@@ -22,6 +22,7 @@ export function useReviews(workId, currentUser) {
   }, [workId, currentUser?.uid])
 
   const episodeReviews = reviews.filter(r => r.sNum != null)
+  const workReviews = reviews.filter(r => r.sNum == null)
 
   async function addReview({ sNum = null, eNum = null, text, rating = null }) {
     if (!currentUser?.uid || !text?.trim()) return
@@ -57,5 +58,5 @@ export function useReviews(workId, currentUser) {
     await deleteDoc(doc(db, 'reviews', reviewId))
   }
 
-  return { episodeReviews, addReview, upsertReview, deleteReview }
+  return { episodeReviews, workReviews, addReview, upsertReview, deleteReview }
 }
