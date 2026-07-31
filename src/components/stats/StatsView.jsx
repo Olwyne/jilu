@@ -153,10 +153,10 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
                 key={i}
                 role={day.count ? 'button' : undefined}
                 tabIndex={day.count ? 0 : undefined}
-                aria-label={day.count ? `${day.day}/${day.month + 1} : ${day.count} épisode${day.count > 1 ? 's' : ''}` : undefined}
+                aria-label={day.count ? t('stats.heatmap.label', { day: day.day, month: day.month + 1, count: day.count }) : undefined}
                 onClick={() => day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
-                title={day.count ? `${day.day}/${day.month + 1}: ${day.count} ép.` : ''}
+                title={day.count ? t('stats.heatmap.label', { day: day.day, month: day.month + 1, count: day.count }) : ''}
                 style={{ width: '100%', aspectRatio: '1', borderRadius: 3, background: HEAT[heatLevel(day.count)], cursor: day.count ? 'pointer' : 'default', outline: selectedDay === day.dk ? '2px solid var(--color-accent)' : 'none', outlineOffset: 1 }}
               />
             ))}
@@ -173,10 +173,10 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
                     key={di}
                     role={day.count ? 'button' : undefined}
                     tabIndex={day.count ? 0 : undefined}
-                    aria-label={day.count ? `${day.day}/${day.month + 1} : ${day.count} épisode${day.count > 1 ? 's' : ''}` : undefined}
+                    aria-label={day.count ? t('stats.heatmap.label', { day: day.day, month: day.month + 1, count: day.count }) : undefined}
                     onClick={() => day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
-                    title={day.count ? `${day.day}/${day.month + 1}: ${day.count} ép.` : ''}
+                    title={day.count ? t('stats.heatmap.label', { day: day.day, month: day.month + 1, count: day.count }) : ''}
                     style={{ width: '100%', aspectRatio: '1', borderRadius: 2, background: HEAT[heatLevel(day.count)], cursor: day.count ? 'pointer' : 'default', outline: selectedDay === day.dk ? '2px solid var(--color-accent)' : 'none', outlineOffset: 1 }}
                   />
                 ))}
@@ -187,8 +187,8 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
         {selectedDay && dayWorks[selectedDay] && (
           <div style={{ marginTop: 18, borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-muted-2)', marginBottom: 12 }}>
-              {new Date(selectedDay + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-              {' — '}{dayWorks[selectedDay].length} épisode{dayWorks[selectedDay].length > 1 ? 's' : ''}
+              {new Date(selectedDay + 'T12:00:00').toLocaleDateString(t('locale') || 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              {' — '}{t('stats.heatmap.dayCount', { count: dayWorks[selectedDay].length })}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               {dayWorks[selectedDay].map(({ workId, sNum, eNum }, i) => {

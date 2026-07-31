@@ -2,7 +2,7 @@
 .brand { display: flex; align-items: center; gap: 11px; padding: 0 8px 22px; }
 .mark { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--color-accent), var(--color-pink)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 19px; color: #fff; }
 .name { font-family: var(--font-display); font-weight: 700; font-size: 21px; letter-spacing: -.02em; }
-.navItem { display: flex; align-items: center; gap: 13px; padding: 11px 14px; border-radius: 12px; cursor: pointer; font-weight: 500; font-size: 15px; color: var(--color-muted); }
+.navItem { display: flex; align-items: center; gap: 13px; padding: 11px 14px; border-radius: 12px; cursor: pointer; font-weight: 500; font-size: 15px; color: var(--color-muted); width: 100%; background: none; border: none; text-align: left; font-family: inherit; }
 .navItem.active { font-weight: 600; color: var(--color-text); background: rgba(139,109,255,.14); }
 .divider { height: 1px; background: var(--color-border); margin: 14px 8px; }
 .search { display: flex; align-items: center; gap: 13px; padding: 11px 14px; border-radius: 12px; cursor: pointer; color: var(--color-muted); font-weight: 500; font-size: 15px; border: 1px solid var(--color-border-btn); }
@@ -12,7 +12,7 @@
 .statValueAccent { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--color-accent); }
 .statValuePink { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--color-pink); }
 .statSub { font-size: 11px; color: var(--color-muted); }
-.accountChip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); margin-top: 8px; transition: background .15s; }
+.accountChip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); margin-top: 8px; transition: background .15s; width: 100%; font-family: inherit; }
 .accountChip:hover { background: var(--color-chip-bg); }
 .accountChip.active { background: rgba(139,109,255,.14); border-color: rgba(139,109,255,.25); }
 .chipAvatar { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, var(--color-accent), var(--color-pink)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: #fff; }

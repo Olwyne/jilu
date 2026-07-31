@@ -438,5 +438,11 @@
   "shortcuts.title": "Keyboard shortcuts",
   "shortcuts.back": "Back / close",
   "shortcuts.help": "Show this help",
-  "shortcuts.close": "Close"
+  "shortcuts.close": "Close",
+  "a11y.skipToContent": "Skip to main content",
+  "stats.heatmap.label": "{{day}}/{{month}}: {{count}} episode",
+  "stats.heatmap.label_plural": "{{day}}/{{month}}: {{count}} episodes",
+  "stats.heatmap.dayCount": "{{count}} episode",
+  "stats.heatmap.dayCount_plural": "{{count}} episodes",
+  "locale": "en-GB"
 }

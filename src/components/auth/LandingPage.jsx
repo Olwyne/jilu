@@ -139,6 +139,9 @@ export default function LandingPage() {
     document.querySelector('meta[name="description"]')?.setAttribute('content', desc)
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', desc)
+    document.querySelector('meta[property="og:locale"]')?.setAttribute('content', lang === 'fr' ? 'fr_FR' : 'en_US')
+    document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title)
+    document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', desc)
   }, [lang])
 
   function toggleLang() {
@@ -159,7 +162,7 @@ export default function LandingPage() {
           <a href="#import" className="nav-link">{t('landing.nav.import')}</a>
         </div>
         <div className="nav-right">
-          <button className="lang-btn" onClick={toggleLang} title={other.toUpperCase()}>
+          <button className="lang-btn" onClick={toggleLang} aria-label={lang === 'fr' ? 'Switch to English' : 'Passer en français'}>
             {FLAGS[other]} {other.toUpperCase()}
           </button>
           <Link to="/signup" className="nav-cta">{t('landing.nav.cta')}</Link>

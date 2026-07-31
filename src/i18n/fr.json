@@ -438,5 +438,11 @@
   "shortcuts.title": "Raccourcis clavier",
   "shortcuts.back": "Retour / fermer",
   "shortcuts.help": "Afficher cette aide",
-  "shortcuts.close": "Fermer"
+  "shortcuts.close": "Fermer",
+  "a11y.skipToContent": "Aller au contenu principal",
+  "stats.heatmap.label": "{{day}}/{{month}} : {{count}} épisode",
+  "stats.heatmap.label_plural": "{{day}}/{{month}} : {{count}} épisodes",
+  "stats.heatmap.dayCount": "{{count}} épisode",
+  "stats.heatmap.dayCount_plural": "{{count}} épisodes",
+  "locale": "fr-FR"
 }

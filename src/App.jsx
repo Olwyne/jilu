@@ -85,11 +85,6 @@ function Shell() {
     onBack: () => navigate(-1),
   })
 
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="robots"]')
-    if (meta) meta.setAttribute('content', 'noindex, nofollow')
-    return () => { if (meta) meta.setAttribute('content', 'index, follow') }
-  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.theme = data.settings.darkMode === false ? 'light' : 'dark'
@@ -179,6 +174,7 @@ function Shell() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
+      <a href="#main-content" className="skip-link">{t('a11y.skipToContent')}</a>
       {!isMobile && <Sidebar profile={data.profile} toCatch={toCatch} />}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 74 : 0 }}>
         <Header
@@ -189,7 +185,7 @@ function Shell() {
           onOpenSearch={() => setSearchOpen(true)}
           isMobile={isMobile}
         />
-        <main style={{ padding: `22px ${isMobile ? 16 : 30}px 40px`, maxWidth: 1240, width: '100%', margin: '0 auto' }}>
+        <main id="main-content" style={{ padding: `22px ${isMobile ? 16 : 30}px 40px`, maxWidth: 1240, width: '100%', margin: '0 auto' }}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/library" element={
