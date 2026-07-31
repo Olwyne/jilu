@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import DOMPurify from 'dompurify'
 import { useReviews } from '../../hooks/useReviews'
 import { localizedTitle } from '../../lib/domain'
 import { tmdbFetchEpisode } from '../../catalog/tmdb'
@@ -202,7 +203,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
                       </div>
                       {r.text && (
                         <div
-                          dangerouslySetInnerHTML={{ __html: r.text }}
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(r.text) }}
                           style={{ fontSize: 14, lineHeight: 1.6 }}
                           className="review-prose"
                         />
