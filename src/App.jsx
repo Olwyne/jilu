@@ -280,7 +280,7 @@ function Shell() {
         </main>
       </div>
       {isMobile && <MobileNav />}
-      <Toast toast={toast} onClose={() => setToast(null)} onOpenRating={() => setToast(null)} />
+      <Toast toast={toast} onClose={() => setToast(null)} onOpenRating={() => { if (toast?.workId) setEpisodeModal({ workId: toast.workId, sNum: toast.sNum, eNum: toast.eNum }); setToast(null) }} />
       {searchOpen && (
         <SearchModal
           works={data.works}

@@ -19,7 +19,7 @@ export default function Toast({ toast, onClose, onOpenRating }) {
       </div>
       <button
         onClick={handleAction}
-        style={{ padding: '7px 13px', borderRadius: 10, background: 'var(--color-accent)', fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0, border: 'none', color: 'inherit' }}
+        style={{ padding: '7px 13px', borderRadius: 10, background: 'var(--color-accent)', fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0, border: 'none', color: '#fff' }}
       >
         {actionLabel}
       </button>

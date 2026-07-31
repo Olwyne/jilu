@@ -176,9 +176,13 @@ export function useWorkActions(data, mutate) {
   }
 
   async function markWatchedToast(work, sNum, eNum, setToast) {
-    await toggleEpisode(work.id, sNum, eNum)
+    try {
+      await toggleEpisode(work.id, sNum, eNum)
+    } catch (e) {
+      console.error('markWatchedToast:', e)
+    }
     const label = (sNum != null && eNum != null) ? `S${sNum} · E${eNum}` : null
-    setToast({ workId: work.id, title: work.title, label })
+    setToast({ workId: work.id, title: work.title, label, sNum, eNum })
   }
 
   async function addWork(searchResult) {
