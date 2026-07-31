@@ -1,5 +1,3 @@
-const BASE = 'https://www.googleapis.com/books/v1/volumes'
-
 const MANGA_CAT_RE = /manga|manhwa|manhua/i
 
 export async function googleBooksTrending() {
@@ -21,10 +19,8 @@ export async function googleBooksTrending() {
 }
 
 export async function googleBooksDiscover(subject) {
-  const key = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
-  const keyParam = key ? `&key=${key}` : ''
   const q = subject ? `subject:${encodeURIComponent(subject)}` : 'fiction'
-  const res = await fetch(`${BASE}?q=${q}&orderBy=relevance&maxResults=20&langRestrict=fr${keyParam}`)
+  const res = await fetch(`/api/books?q=${q}&orderBy=relevance&maxResults=20&langRestrict=fr`)
   const json = await res.json()
   return (json.items || [])
     .filter((it) => {
@@ -50,9 +46,7 @@ export async function googleBooksDiscover(subject) {
 }
 
 export async function googleBooksSearch(query) {
-  const key = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
-  const keyParam = key ? `&key=${key}` : ''
-  const res = await fetch(`${BASE}?q=${encodeURIComponent(query)}&maxResults=10&langRestrict=fr${keyParam}`)
+  const res = await fetch(`/api/books?q=${encodeURIComponent(query)}&maxResults=10&langRestrict=fr`)
   const json = await res.json()
   return (json.items || [])
     .filter((it) => {

@@ -1,7 +1,6 @@
 import i18n from '../i18n/index.js'
 
-const KEY = import.meta.env.VITE_TMDB_API_KEY
-const BASE = 'https://api.themoviedb.org/3'
+const BASE = '/api/tmdb'
 
 function tmdbLocale() {
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
@@ -17,9 +16,14 @@ function genreLabel(ids) {
   return ids && ids.length ? (MAP[ids[0]] || fallback) : fallback
 }
 
+async function tmdbFetch(path, params = {}) {
+  const qs = new URLSearchParams({ path, ...params }).toString()
+  const res = await fetch(`${BASE}?${qs}`)
+  return res.json()
+}
+
 export async function tmdbSearch(query) {
-  const res = await fetch(`${BASE}/search/multi?api_key=${KEY}&language=${tmdbLocale()}&query=${encodeURIComponent(query)}`)
-  const json = await res.json()
+  const json = await tmdbFetch('/search/multi', { language: tmdbLocale(), query })
   return (json.results || [])
     .filter((r) => r.media_type === 'tv' || r.media_type === 'movie')
     .map((r) => {
@@ -46,8 +50,7 @@ export async function tmdbSearch(query) {
 
 export async function tmdbTrending(cat) {
   const type = cat === 'films' ? 'movie' : 'tv'
-  const res = await fetch(`${BASE}/trending/${type}/week?api_key=${KEY}&language=${tmdbLocale()}`)
-  const json = await res.json()
+  const json = await tmdbFetch(`/trending/${type}/week`, { language: tmdbLocale() })
   const isAnimeGenre = (ids) => (ids || []).includes(16)
   return (json.results || [])
     .filter((r) => cat === 'series' ? !isAnimeGenre(r.genre_ids) : true)
@@ -75,8 +78,7 @@ export async function tmdbTrending(cat) {
 
 export async function tmdbDiscover(genreId, cat) {
   const type = cat === 'films' ? 'movie' : 'tv'
-  const res = await fetch(`${BASE}/discover/${type}?api_key=${KEY}&language=${tmdbLocale()}&with_genres=${genreId}&sort_by=vote_average.desc&vote_count.gte=200&page=1`)
-  const json = await res.json()
+  const json = await tmdbFetch(`/discover/${type}`, { language: tmdbLocale(), with_genres: genreId, sort_by: 'vote_average.desc', 'vote_count.gte': 200, page: 1 })
   return (json.results || []).slice(0, 10).map((r) => {
     const isTv = type === 'tv'
     const dateStr = isTv ? r.first_air_date : r.release_date
@@ -96,11 +98,10 @@ export async function tmdbDiscover(genreId, cat) {
 
 export async function tmdbGetBothMeta(work) {
   const type = work.category === 'films' ? 'movie' : 'tv'
-  const [resFr, resEn] = await Promise.all([
-    fetch(`${BASE}/${type}/${work.sourceId}?api_key=${KEY}&language=fr-FR`),
-    fetch(`${BASE}/${type}/${work.sourceId}?api_key=${KEY}&language=en-US`)
+  const [fr, en] = await Promise.all([
+    tmdbFetch(`/${type}/${work.sourceId}`, { language: 'fr-FR' }),
+    tmdbFetch(`/${type}/${work.sourceId}`, { language: 'en-US' }),
   ])
-  const [fr, en] = await Promise.all([resFr.json(), resEn.json()])
   const titleFr = type === 'tv' ? fr.name : fr.title
   const titleEn = type === 'tv' ? en.name : en.title
   const posterFr = fr.poster_path ? `https://image.tmdb.org/t/p/w300${fr.poster_path}` : null
@@ -113,13 +114,11 @@ export async function tmdbGetBothMeta(work) {
 
 export async function tmdbGetDetail(work) {
   if (work.category === 'films') return { ...work, seasons: null }
-  const showRes = await fetch(`${BASE}/tv/${work.sourceId}?api_key=${KEY}&language=${tmdbLocale()}`)
-  const show = await showRes.json()
+  const show = await tmdbFetch(`/tv/${work.sourceId}`, { language: tmdbLocale() })
   const seasons = []
   for (const s of show.seasons || []) {
     if (s.season_number === 0) continue
-    const seasonRes = await fetch(`${BASE}/tv/${work.sourceId}/season/${s.season_number}?api_key=${KEY}&language=${tmdbLocale()}`)
-    const seasonJson = await seasonRes.json()
+    const seasonJson = await tmdbFetch(`/tv/${work.sourceId}/season/${s.season_number}`, { language: tmdbLocale() })
     seasons.push({
       n: s.season_number,
       name: s.name || null,
@@ -132,4 +131,8 @@ export async function tmdbGetDetail(work) {
   }
   const ended = show.status === 'Ended' || show.status === 'Canceled'
   return { ...work, seasons, ended }
+}
+
+export async function tmdbFetchEpisode(sourceId, sNum, eNum, language) {
+  return tmdbFetch(`/tv/${sourceId}/season/${sNum}/episode/${eNum}`, { language })
 }

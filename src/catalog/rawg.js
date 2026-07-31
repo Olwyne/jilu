@@ -1,8 +1,5 @@
-const KEY = import.meta.env.VITE_RAWG_API_KEY
-const BASE = 'https://api.rawg.io/api'
-
 export async function rawgTrending() {
-  const res = await fetch(`${BASE}/games?key=${KEY}&ordering=-added&page_size=5`)
+  const res = await fetch('/api/rawg?ordering=-added&page_size=5')
   const json = await res.json()
   return (json.results || []).map((g) => ({
     source: 'rawg',
@@ -20,8 +17,9 @@ export async function rawgTrending() {
 }
 
 export async function rawgDiscover(genre) {
-  const genreParam = genre ? `&genres=${encodeURIComponent(genre.toLowerCase())}` : ''
-  const res = await fetch(`${BASE}/games?key=${KEY}&ordering=-rating&page_size=20${genreParam}`)
+  const params = new URLSearchParams({ ordering: '-rating', page_size: 20 })
+  if (genre) params.set('genres', genre.toLowerCase())
+  const res = await fetch(`/api/rawg?${params}`)
   const json = await res.json()
   return (json.results || []).map((g) => ({
     source: 'rawg',
@@ -39,7 +37,7 @@ export async function rawgDiscover(genre) {
 }
 
 export async function rawgSearch(query) {
-  const res = await fetch(`${BASE}/games?key=${KEY}&search=${encodeURIComponent(query)}&page_size=10`)
+  const res = await fetch(`/api/rawg?search=${encodeURIComponent(query)}&page_size=10`)
   const json = await res.json()
   return (json.results || []).map((g) => ({
     source: 'rawg',

@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next'
 import JournalThread from '../detail/JournalThread'
 import { useReviews } from '../../hooks/useReviews'
 import { localizedTitle } from '../../lib/domain'
-
-const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY
+import { tmdbFetchEpisode } from '../../catalog/tmdb'
 
 function fmtDate(ts) {
   if (!ts || ts === Infinity) return null
@@ -38,8 +37,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
 
   useEffect(() => {
     if (!work.sourceId || work.source !== 'tmdb' || work.category === 'films') return
-    fetch(`https://api.themoviedb.org/3/tv/${work.sourceId}/season/${sNum}/episode/${eNum}?api_key=${TMDB_KEY}&language=${i18n.language?.startsWith('fr') ? 'fr-FR' : 'en-US'}`)
-      .then((r) => r.json())
+    tmdbFetchEpisode(work.sourceId, sNum, eNum, i18n.language?.startsWith('fr') ? 'fr-FR' : 'en-US')
       .then((d) => { if (d.overview) setOverview(d.overview) })
       .catch(() => {})
   }, [work.sourceId, work.source, work.category, sNum, eNum])

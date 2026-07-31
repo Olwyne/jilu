@@ -1,6 +1,9 @@
 import JSZip from 'jszip'
 
-const KEY = import.meta.env.VITE_TMDB_API_KEY
+function tmdbFetch(path, params = {}) {
+  const qs = new URLSearchParams({ path, ...params }).toString()
+  return fetch(`/api/tmdb?${qs}`).then(r => r.json())
+}
 const GENRES_TV = { 10759: 'Action/Aventure', 16: 'Animation', 35: 'Comédie', 80: 'Crime', 99: 'Documentaire', 18: 'Drame', 10751: 'Famille', 10762: 'Enfants', 9648: 'Mystère', 10765: 'SF & Fantastique', 10764: 'Réalité', 10766: 'Feuilleton', 37: 'Western', 10768: 'Guerre & Politique' }
 const GENRES_MOVIE = { 28: 'Action', 12: 'Aventure', 16: 'Animation', 35: 'Comédie', 80: 'Crime', 99: 'Documentaire', 18: 'Drame', 10751: 'Famille', 14: 'Fantastique', 36: 'Histoire', 27: 'Horreur', 10402: 'Musique', 9648: 'Mystère', 10749: 'Romance', 878: 'Science-Fiction', 53: 'Thriller', 10752: 'Guerre', 37: 'Western' }
 const BATCH = 5
@@ -37,7 +40,6 @@ function autoStatus(importedWorks, watched) {
 
 export function useImport(data, mutate) {
   async function importTVTime(onStatus, onFailed) {
-    if (!import.meta.env.VITE_TMDB_API_KEY) { onStatus('Erreur : clé TMDB manquante (VITE_TMDB_API_KEY).'); return }
     const file = await pickFile('.zip')
     if (!file) return
     onStatus('Lecture du fichier…')
@@ -109,9 +111,7 @@ export function useImport(data, mutate) {
           const tvData = showData.get(showName)
           const nName = norm(showName)
           try {
-            const res = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${KEY}&query=${encodeURIComponent(showName)}&language=fr-FR&page=1`)
-            if (!res.ok) return
-            const { results } = await res.json()
+            const { results } = await tmdbFetch('/search/tv', { query: showName, language: 'fr-FR', page: 1 })
             const hit = results && results[0]; if (!hit) return
             const tmdbId = String(hit.id)
             if (existingByTmdb.has(tmdbId)) { applyEps(existingByTmdb.get(tmdbId).id, tvData, nName); return }
@@ -157,9 +157,7 @@ export function useImport(data, mutate) {
           await Promise.all(movieNames.slice(i, i + BATCH).map(async movieName => {
             const watchedAt = movieData.get(movieName)
             try {
-              const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${KEY}&query=${encodeURIComponent(movieName)}&language=fr-FR&page=1`)
-              if (!res.ok) return
-              const { results } = await res.json()
+              const { results } = await tmdbFetch('/search/movie', { query: movieName, language: 'fr-FR', page: 1 })
               const hit = results?.[0]; if (!hit) return
               const workId = `tmdb-movie-${hit.id}`
               if (works[workId]) return
@@ -187,7 +185,6 @@ export function useImport(data, mutate) {
   }
 
   async function importTVTimeOut(onStatus, onFailed) {
-    if (!import.meta.env.VITE_TMDB_API_KEY) { onStatus('Erreur : clé TMDB manquante (VITE_TMDB_API_KEY).'); return }
     const file = await pickFile('.zip')
     if (!file) return
     onStatus('Lecture du fichier…')
@@ -213,8 +210,8 @@ export function useImport(data, mutate) {
           try {
             let hit = null
             if (tvdbId) {
-              const res = await fetch(`https://api.themoviedb.org/3/find/${tvdbId}?api_key=${KEY}&external_source=tvdb_id&language=fr-FR`)
-              if (res.ok) { const d = await res.json(); hit = (d.tv_results || [])[0] }
+              const d = await tmdbFetch(`/find/${tvdbId}`, { external_source: 'tvdb_id', language: 'fr-FR' })
+              hit = (d.tv_results || [])[0]
             }
             const title = hit?.name || show.title; if (!title) return
             const workId = hit ? `tmdb-tv-${hit.id}` : slug(title)
@@ -262,12 +259,12 @@ export function useImport(data, mutate) {
             try {
               let hit = null
               if (imdbId) {
-                const res = await fetch(`https://api.themoviedb.org/3/find/${imdbId}?api_key=${KEY}&external_source=imdb_id&language=fr-FR`)
-                if (res.ok) { const d = await res.json(); hit = (d.movie_results || [])[0] }
+                const d = await tmdbFetch(`/find/${imdbId}`, { external_source: 'imdb_id', language: 'fr-FR' })
+                hit = (d.movie_results || [])[0]
               }
               if (!hit && movie.title) {
-                const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${KEY}&query=${encodeURIComponent(movie.title)}&language=fr-FR`)
-                if (res.ok) { const d = await res.json(); hit = d.results?.[0] }
+                const d = await tmdbFetch('/search/movie', { query: movie.title, language: 'fr-FR' })
+                hit = d.results?.[0]
               }
               const title = hit?.title || movie.title; if (!title) return
               const workId = hit ? `tmdb-movie-${hit.id}` : slug(title)

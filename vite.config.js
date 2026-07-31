@@ -2,6 +2,71 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+function tmdbProxyPlugin(env) {
+  return {
+    name: 'tmdb-proxy',
+    configureServer(server) {
+      server.middlewares.use('/api/tmdb', async (req, res) => {
+        const url = new URL(req.url, 'http://localhost')
+        const path = url.searchParams.get('path')
+        url.searchParams.delete('path')
+        url.searchParams.set('api_key', env.TMDB_API_KEY)
+        try {
+          const upstream = await fetch(`https://api.themoviedb.org/3${path}?${url.searchParams}`)
+          const json = await upstream.json()
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify(json))
+        } catch (e) {
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: e.message }))
+        }
+      })
+    }
+  }
+}
+
+function rawgProxyPlugin(env) {
+  return {
+    name: 'rawg-proxy',
+    configureServer(server) {
+      server.middlewares.use('/api/rawg', async (req, res) => {
+        const url = new URL(req.url, 'http://localhost')
+        url.searchParams.set('key', env.RAWG_API_KEY)
+        try {
+          const upstream = await fetch(`https://api.rawg.io/api/games?${url.searchParams}`)
+          const json = await upstream.json()
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify(json))
+        } catch (e) {
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: e.message }))
+        }
+      })
+    }
+  }
+}
+
+function booksProxyPlugin(env) {
+  return {
+    name: 'books-proxy',
+    configureServer(server) {
+      server.middlewares.use('/api/books', async (req, res) => {
+        const url = new URL(req.url, 'http://localhost')
+        url.searchParams.set('key', env.GOOGLE_BOOKS_API_KEY)
+        try {
+          const upstream = await fetch(`https://www.googleapis.com/books/v1/volumes?${url.searchParams}`)
+          const json = await upstream.json()
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify(json))
+        } catch (e) {
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: e.message }))
+        }
+      })
+    }
+  }
+}
+
 function spotifyTokenPlugin(env) {
   return {
     name: 'spotify-token',
@@ -33,6 +98,9 @@ export default defineConfig(({ mode }) => {
   return {
   plugins: [
     react(),
+    tmdbProxyPlugin(env),
+    rawgProxyPlugin(env),
+    booksProxyPlugin(env),
     spotifyTokenPlugin(env),
     VitePWA({
       registerType: 'autoUpdate',
