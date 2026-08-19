@@ -78,7 +78,9 @@ export function useWorkActions(data, mutate) {
     if (scope === 'w') {
       const idx = reviews.findIndex((r) => r.id === id)
       if (next > 0) {
-        const entry = { id, note: idx >= 0 ? reviews[idx].note : 'Note mise à jour.', ts: Date.now() }
+        const prevNote = idx >= 0 ? reviews[idx].note : ''
+        const note = prevNote === 'Note mise à jour.' ? '' : prevNote
+        const entry = { id, note, rating: next, ts: Date.now() }
         reviews = [entry, ...reviews.filter((r) => r.id !== id)]
       }
     }

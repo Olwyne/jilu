@@ -26,7 +26,7 @@ function ActivityList({ items, works, onOpenWork, emptyKey }) {
           const w = works[workId]
           const subtitle = item._type === 'comment' && item.sNum
             ? `S${item.sNum} · Ep. ${item.eNum}`
-            : item._type === 'review' ? t('dashboard.globalReview') : null
+            : null
           return (
             <div
               key={item.id || item._type + item.ts + idx}
@@ -42,7 +42,14 @@ function ActivityList({ items, works, onOpenWork, emptyKey }) {
                   <span style={{ fontWeight: 600, fontSize: 14 }}>{w?.title || workId}</span>
                   {subtitle && <span style={{ fontSize: 12, color: 'var(--color-muted-2)', fontWeight: 600 }}>{subtitle}</span>}
                 </div>
-                <div style={{ fontSize: 14, lineHeight: 1.5 }}>{item.text || item.note}</div>
+                {item._type === 'review' && item.rating > 0 && (
+                  <div style={{ fontSize: 15, color: 'var(--color-gold)', marginBottom: 2, letterSpacing: 1 }}>
+                    {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
+                  </div>
+                )}
+                {(item.text || item.note) && (
+                  <div style={{ fontSize: 14, lineHeight: 1.5 }}>{item.text || item.note}</div>
+                )}
                 <div style={{ fontSize: 12, color: 'var(--color-muted-3)', marginTop: 6 }}>{relText(item.ts, Date.now(), i18n.language)}</div>
               </div>
             </div>

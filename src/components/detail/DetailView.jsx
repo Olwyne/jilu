@@ -73,6 +73,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
           workId={work.id}
           currentUser={currentUser}
           myRating={rating}
+          onFeedPost={(text) => actions.postComment(work.id, null, null, text)}
         />
       </div>
 

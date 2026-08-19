@@ -33,7 +33,7 @@ function RichToolbar({ editor }) {
   )
 }
 
-export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUser, myRating = 0 }) {
+export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUser, myRating = 0, onFeedPost }) {
   const { episodeReviews, workReviews, addReview, deleteReview } = useReviews(workId, currentUser)
 
   const reviews = sNum != null
@@ -59,6 +59,12 @@ export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUs
     const isEmpty = !html || html === '<p></p>'
     if (isEmpty) return
     await addReview({ sNum, eNum, text: html })
+    if (onFeedPost) {
+      const tmp = document.createElement('div')
+      tmp.innerHTML = DOMPurify.sanitize(html)
+      const plain = (tmp.textContent || tmp.innerText || '').trim()
+      if (plain) onFeedPost(plain)
+    }
     editor?.commands.clearContent()
   }
 
