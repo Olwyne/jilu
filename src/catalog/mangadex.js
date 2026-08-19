@@ -75,8 +75,12 @@ export async function mangadexGetChapterMap(mangaTitle) {
       for (const [chKey, chData] of chapters) {
         const n = Math.round(parseFloat(chKey))
         if (!isNaN(n)) {
-          map.set(n, volumeNum)
-          if (volumeNum === null) scanIdToChNum[chData.id] = n
+          const existing = map.get(n)
+          // real volume always wins over null/"none"
+          if (existing === undefined || (existing === null && volumeNum !== null)) {
+            map.set(n, volumeNum)
+          }
+          if (volumeNum === null && map.get(n) === null) scanIdToChNum[chData.id] = n
         }
       }
     }
