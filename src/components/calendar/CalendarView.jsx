@@ -149,7 +149,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
       let first = null, remaining = 0
       w.seasons.forEach((s) => s.episodes.forEach((e) => {
         const key = `${w.id}-${s.n}-${e.n}`
-        if (!watched[key] && e.air > 0 && e.air <= now && w.status === 'en_cours') {
+        if (!watched[key] && e.air > 0 && e.air <= now && (w.status === 'en_cours' || w.status === 'a_voir')) {
           if (!first) first = { s, e }
           remaining++
         }
