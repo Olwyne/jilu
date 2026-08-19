@@ -4,7 +4,7 @@ import PosterBox from '../ui/PosterBox'
 import { relText, DAY } from '../../lib/domain'
 import { posterGradient } from '../../lib/posterBox'
 
-const TABS = ['rattraper', 'venir', 'abandonne']
+const TABS = ['rattraper', 'commencer', 'venir', 'abandonne']
 const CAT_KEYS = ['all', 'series', 'films', 'animes', 'mangas', 'livres', 'jeux']
 
 function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
@@ -132,11 +132,13 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
 
   const TAB_LABELS = {
     rattraper: t('calendar.catchUp'),
+    commencer: t('calendar.toStart'),
     venir: t('calendar.upcoming'),
     abandonne: t('calendar.dropped'),
   }
 
   const catchGroups = []
+  const toStart = []
   const upcoming = []
   const abandoned = []
 
@@ -149,12 +151,22 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
       let first = null, remaining = 0
       w.seasons.forEach((s) => s.episodes.forEach((e) => {
         const key = `${w.id}-${s.n}-${e.n}`
-        if (!watched[key] && e.air > 0 && e.air <= now && (w.status === 'en_cours' || w.status === 'a_voir')) {
+        if (!watched[key] && e.air > 0 && e.air <= now && w.status === 'en_cours') {
           if (!first) first = { s, e }
           remaining++
         }
       }))
       if (first) catchGroups.push({ w, ...first, remaining, type: 'episode' })
+
+      let sFirst = null, sRemaining = 0
+      w.seasons.forEach((s) => s.episodes.forEach((e) => {
+        const key = `${w.id}-${s.n}-${e.n}`
+        if (!watched[key] && e.air > 0 && e.air <= now && w.status === 'a_voir') {
+          if (!sFirst) sFirst = { s, e }
+          sRemaining++
+        }
+      }))
+      if (sFirst) toStart.push({ w, ...sFirst, remaining: sRemaining, type: 'episode' })
 
       let nextUp = null
       w.seasons.forEach((s) => s.episodes.forEach((e) => {
@@ -211,7 +223,12 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
     return 0
   })
 
-  const counts = { rattraper: catchGroups.length, venir: upcoming.length, abandonne: abandoned.length }
+  toStart.sort((a, b) => {
+    if (a.e && b.e) return b.e.air - a.e.air
+    return 0
+  })
+
+  const counts = { rattraper: catchGroups.length, commencer: toStart.length, venir: upcoming.length, abandonne: abandoned.length }
 
   return (
     <div>
@@ -244,6 +261,15 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
             item.type === 'episode'
               ? <EpisodeCard key={item.w.id} item={item} showMarkWatched={true} onOpenWork={onOpenWork} onMarkWatched={onMarkWatched} t={t} />
               : <SimpleCard key={item.w.id} item={item} onOpenWork={onOpenWork} onMarkDone={onMarkDone} t={t} language={i18n.language} />
+          )}
+        </div>
+      )}
+
+      {tab === 'commencer' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {toStart.length === 0 && <div style={{ color: 'var(--color-muted-3)', fontSize: 14 }}>{t('calendar.nothingToStart')}</div>}
+          {toStart.map((item) =>
+            <EpisodeCard key={item.w.id} item={item} showMarkWatched={false} onOpenWork={onOpenWork} onMarkWatched={onMarkWatched} t={t} />
           )}
         </div>
       )}
