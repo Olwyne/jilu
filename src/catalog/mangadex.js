@@ -19,7 +19,7 @@ export async function mangadexGetChapterMap(mangaTitle) {
     if (!manga) return new Map()
 
     const aggRes = await fetch(
-      `${BASE}/manga/${manga.id}/aggregate?translatedLanguage[]=en&translatedLanguage[]=fr`
+      `${BASE}/manga/${manga.id}/aggregate`
     )
     const aggJson = await aggRes.json()
 
