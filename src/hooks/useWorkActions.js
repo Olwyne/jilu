@@ -248,10 +248,12 @@ export function useWorkActions(data, mutate) {
     await mutate({ works: { ...data.works, [workId]: { ...next, refreshedAt: Date.now() } } })
   }
 
-  async function refreshStaleWorks(maxAgeMs) {
-    const entries = Object.values(data.works).filter(
-      (w) => w.sourceId && DETAIL_FETCHERS[w.source] && Date.now() - (w.refreshedAt || 0) > maxAgeMs
-    )
+  async function refreshStaleWorks(maxAgeMs, batchSize = 5) {
+    const now = Date.now()
+    const entries = Object.values(data.works)
+      .filter((w) => w.sourceId && DETAIL_FETCHERS[w.source] && now - (w.refreshedAt || 0) > maxAgeMs)
+      .sort((a, b) => (a.refreshedAt || 0) - (b.refreshedAt || 0)) // oldest first
+      .slice(0, batchSize)
     if (!entries.length) return
     const works = { ...data.works }
     for (const work of entries) {
