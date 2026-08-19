@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import PosterBox from '../ui/PosterBox'
@@ -10,6 +11,28 @@ import ReviewFeed from './ReviewFeed'
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites, currentUser }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    function handleClick(e) { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false) }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [menuOpen])
+
+  async function handleRefresh() {
+    setMenuOpen(false)
+    setRefreshing(true)
+    try { await actions.refreshWork(work.id) } finally { setRefreshing(false) }
+  }
+
+  async function handleRemove() {
+    setMenuOpen(false)
+    await actions.removeWork(work.id)
+    navigate('/library')
+  }
   const { total, watchedCount } = epTotals(work, watched)
   const rating = ratings[`w:${work.id}`] || 0
   const isFav = !!(favorites && favorites[work.id])
@@ -57,8 +80,22 @@ export default function DetailView({ work, watched, ratings, games, feed, action
             {actions.toggleFavorite && (
               <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
             )}
-            {actions.removeWork && (
-              <div onClick={async () => { await actions.removeWork(work.id); navigate('/library') }} style={{ padding: '11px 16px', borderRadius: 13, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', color: '#ef4444', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{t('detail.removeWork')}</div>
+            {(actions.removeWork || actions.refreshWork) && (
+              <div ref={menuRef} style={{ position: 'relative' }}>
+                <div onClick={() => setMenuOpen((o) => !o)} style={{ padding: '11px 14px', borderRadius: 13, background: menuOpen ? 'var(--color-border-btn)' : 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', color: 'var(--color-muted)', fontWeight: 700, fontSize: 17, cursor: 'pointer', lineHeight: 1, letterSpacing: 1 }}>⋯</div>
+                {menuOpen && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: 200, background: 'var(--color-surface)', border: '1px solid var(--color-border-btn)', borderRadius: 13, boxShadow: '0 8px 32px rgba(0,0,0,.28)', zIndex: 100, overflow: 'hidden' }}>
+                    {actions.refreshWork && (
+                      <div onClick={handleRefresh} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: refreshing ? 'wait' : 'pointer', opacity: refreshing ? 0.6 : 1, color: 'var(--color-text)', borderBottom: actions.removeWork ? '1px solid var(--color-border)' : 'none' }}>
+                        {refreshing ? t('detail.refreshing') : t('detail.refreshMeta')}
+                      </div>
+                    )}
+                    {actions.removeWork && (
+                      <div onClick={handleRemove} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ef4444' }}>{t('detail.removeWork')}</div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>

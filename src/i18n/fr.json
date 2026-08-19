@@ -161,6 +161,8 @@
   "detail.progress": "Progression",
   "detail.myRating": "Ma note",
   "detail.removeWork": "Retirer de la bibliothèque",
+  "detail.refreshMeta": "Rafraîchir les métadonnées",
+  "detail.refreshing": "Rafraîchissement…",
   "detail.favorite": "★ Favori",
   "detail.notFavorite": "☆ Favori",
   "detail.ended": "· Terminée",

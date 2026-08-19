@@ -213,6 +213,25 @@ export function useWorkActions(data, mutate) {
     await mutate({ works })
   }
 
+  async function refreshWork(workId) {
+    const work = data.works[workId]
+    if (!work?.sourceId || !DETAIL_FETCHERS[work.source]) return
+    const fetcher = DETAIL_FETCHERS[work.source]
+    const fresh = await fetcher(work)
+    const meta = work.source === 'tmdb' ? await tmdbGetBothMeta(work) : {}
+    let next = { ...work, ...fresh, ...meta, status: work.status, added: work.added }
+    if (work.category === 'animes') {
+      let anilistId = work.anilistId
+      if (!anilistId) anilistId = await anilistFindId(work.originalTitle || work.title, work.year)
+      if (anilistId) {
+        const anilistDetail = await anilistGetDetail(anilistId)
+        const keepTmdb = anilistDetail.seasons.length <= 1 && (next.seasons?.length || 0) > 1
+        next = keepTmdb ? { ...next, anilistId } : { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
+      }
+    }
+    await mutate({ works: { ...data.works, [workId]: next } })
+  }
+
   async function refreshAllWorks(onProgress) {
     const entries = Object.values(data.works).filter((w) => w.sourceId && DETAIL_FETCHERS[w.source])
     if (!entries.length) { onProgress?.('Aucune œuvre à rafraîchir'); return }
@@ -250,5 +269,5 @@ export function useWorkActions(data, mutate) {
     onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
   }
 
-  return { addWork, removeWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
+  return { addWork, removeWork, refreshWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
 }
