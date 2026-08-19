@@ -9,19 +9,24 @@ function bestMatch(results, title) {
   }) || results[0]
 }
 
+// Returns { map: Map<chapterNum, volumeNum|null>, lastChapter: number }
 export async function mangadexGetChapterMap(mangaTitle) {
+  const empty = { map: new Map(), lastChapter: 0 }
   try {
     const searchRes = await fetch(
       `${BASE}/manga?title=${encodeURIComponent(mangaTitle)}&limit=10`
     )
     const searchJson = await searchRes.json()
     const manga = bestMatch(searchJson.data || [], mangaTitle)
-    if (!manga) return new Map()
+    if (!manga) return empty
 
-    const aggRes = await fetch(
-      `${BASE}/manga/${manga.id}/aggregate`
-    )
-    const aggJson = await aggRes.json()
+    const lastChapter = Math.round(parseFloat(manga.attributes?.lastChapter || '0')) || 0
+
+    let aggJson = { volumes: {} }
+    try {
+      const aggRes = await fetch(`${BASE}/manga/${manga.id}/aggregate`)
+      aggJson = await aggRes.json()
+    } catch { /* aggregate failed — still have lastChapter */ }
 
     const map = new Map()
     for (const [volKey, volData] of Object.entries(aggJson.volumes || {})) {
@@ -31,8 +36,8 @@ export async function mangadexGetChapterMap(mangaTitle) {
         if (!isNaN(n)) map.set(n, volumeNum)
       }
     }
-    return map
+    return { map, lastChapter: Math.max(lastChapter, map.size > 0 ? Math.max(...map.keys()) : 0) }
   } catch {
-    return new Map()
+    return empty
   }
 }
