@@ -161,6 +161,8 @@
   "detail.progress": "Progress",
   "detail.myRating": "My rating",
   "detail.removeWork": "Remove from library",
+  "detail.checkAll": "Mark all as watched",
+  "detail.uncheckAll": "Unmark all",
   "detail.refreshMeta": "Refresh metadata",
   "detail.refreshing": "Refreshing…",
   "detail.favorite": "★ Favorite",

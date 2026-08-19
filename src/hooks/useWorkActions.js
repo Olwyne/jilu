@@ -135,6 +135,22 @@ export function useWorkActions(data, mutate) {
     await mutate({ games })
   }
 
+  async function markWorkWatched(workId) {
+    const work = data.works[workId]
+    if (!work?.seasons) return
+    const now = Date.now()
+    const aired = []
+    work.seasons.forEach((s) => s.episodes.forEach((e) => {
+      if (e.air <= now) aired.push(`${workId}-${s.n}-${e.n}`)
+    }))
+    const allDone = aired.every((k) => data.watched[k])
+    const watched = { ...data.watched }
+    if (allDone) aired.forEach((k) => delete watched[k])
+    else aired.forEach((k) => { watched[k] = watched[k] || Date.now() })
+    const statusPatch = buildStatusPatch(work, watched, data.works)
+    await mutate({ watched, ...statusPatch })
+  }
+
   async function markAllWatched() {
     const watched = {}
     const now = Date.now()
@@ -269,5 +285,5 @@ export function useWorkActions(data, mutate) {
     onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
   }
 
-  return { addWork, removeWork, refreshWork, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
+  return { addWork, removeWork, refreshWork, markWorkWatched, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
 }

@@ -37,6 +37,10 @@ export default function DetailView({ work, watched, ratings, games, feed, action
   const rating = ratings[`w:${work.id}`] || 0
   const isFav = !!(favorites && favorites[work.id])
   const now = Date.now()
+  const hasEpisodes = work.seasons?.some((s) => s.episodes.some((e) => e.air <= now))
+  const allWatched = hasEpisodes && work.seasons.every((s) =>
+    s.episodes.filter((e) => e.air <= now).every((e) => watched[`${work.id}-${s.n}-${e.n}`])
+  )
   const currentYear = new Date().getFullYear()
   const isUnreleased = (work.release && work.release > now) ||
     (work.category === 'livres' && work.year && work.year > currentYear)
@@ -80,11 +84,16 @@ export default function DetailView({ work, watched, ratings, games, feed, action
             {actions.toggleFavorite && (
               <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
             )}
-            {(actions.removeWork || actions.refreshWork) && (
+            {(actions.removeWork || actions.refreshWork || (actions.markWorkWatched && hasEpisodes)) && (
               <div ref={menuRef} style={{ position: 'relative' }}>
                 <div onClick={() => setMenuOpen((o) => !o)} style={{ padding: '11px 14px', borderRadius: 13, background: menuOpen ? 'var(--color-border-btn)' : 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', color: 'var(--color-muted)', fontWeight: 700, fontSize: 17, cursor: 'pointer', lineHeight: 1, letterSpacing: 1 }}>⋯</div>
                 {menuOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: 200, background: 'var(--color-surface)', border: '1px solid var(--color-border-btn)', borderRadius: 13, boxShadow: '0 8px 32px rgba(0,0,0,.28)', zIndex: 100, overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: 210, background: 'var(--color-surface)', border: '1px solid var(--color-border-btn)', borderRadius: 13, boxShadow: '0 8px 32px rgba(0,0,0,.28)', zIndex: 100, overflow: 'hidden' }}>
+                    {actions.markWorkWatched && hasEpisodes && (
+                      <div onClick={() => { setMenuOpen(false); actions.markWorkWatched(work.id) }} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-text)', borderBottom: '1px solid var(--color-border)' }}>
+                        {allWatched ? t('detail.uncheckAll') : t('detail.checkAll')}
+                      </div>
+                    )}
                     {actions.refreshWork && (
                       <div onClick={handleRefresh} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: refreshing ? 'wait' : 'pointer', opacity: refreshing ? 0.6 : 1, color: 'var(--color-text)', borderBottom: actions.removeWork ? '1px solid var(--color-border)' : 'none' }}>
                         {refreshing ? t('detail.refreshing') : t('detail.refreshMeta')}
