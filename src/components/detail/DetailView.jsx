@@ -25,7 +25,12 @@ export default function DetailView({ work, watched, ratings, games, feed, action
   async function handleRefresh() {
     setMenuOpen(false)
     setRefreshing(true)
-    try { await actions.refreshWork(work.id) } finally { setRefreshing(false) }
+    try {
+      await Promise.race([
+        actions.refreshWork(work.id),
+        new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 30000))
+      ])
+    } catch {} finally { setRefreshing(false) }
   }
 
   async function handleRemove() {

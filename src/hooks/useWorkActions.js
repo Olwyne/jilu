@@ -229,9 +229,14 @@ export function useWorkActions(data, mutate) {
     await mutate({ works })
   }
 
-  async function refreshWork(workId) {
-    const work = data.works[workId]
-    if (!work?.sourceId || !DETAIL_FETCHERS[work.source]) return
+  function getRefreshedAt(workId) {
+    try { return parseInt(localStorage.getItem(`refreshedAt:${workId}`) || '0', 10) || 0 } catch { return 0 }
+  }
+  function setRefreshedAt(workId) {
+    try { localStorage.setItem(`refreshedAt:${workId}`, String(Date.now())) } catch {}
+  }
+
+  async function fetchFreshWork(work) {
     const fetcher = DETAIL_FETCHERS[work.source]
     const fresh = await fetcher(work)
     const meta = work.source === 'tmdb' ? await tmdbGetBothMeta(work) : {}
@@ -245,36 +250,32 @@ export function useWorkActions(data, mutate) {
         next = keepTmdb ? { ...next, anilistId } : { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
       }
     }
-    await mutate({ works: { ...data.works, [workId]: { ...next, refreshedAt: Date.now() } } })
+    return next
   }
 
-  async function refreshStaleWorks(maxAgeMs, batchSize = 5) {
+  async function refreshWork(workId) {
+    const work = data.works[workId]
+    if (!work?.sourceId || !DETAIL_FETCHERS[work.source]) return
+    const next = await fetchFreshWork(work)
+    setRefreshedAt(workId)
+    await mutate({ works: { ...data.works, [workId]: next } })
+  }
+
+  async function refreshStaleWorks(maxAgeMs, batchSize = 100) {
     const now = Date.now()
     const entries = Object.values(data.works)
-      .filter((w) => w.sourceId && DETAIL_FETCHERS[w.source] && now - (w.refreshedAt || 0) > maxAgeMs)
-      .sort((a, b) => (a.refreshedAt || 0) - (b.refreshedAt || 0)) // oldest first
+      .filter((w) => w.sourceId && DETAIL_FETCHERS[w.source] && now - getRefreshedAt(w.id) > maxAgeMs)
+      .sort((a, b) => getRefreshedAt(a.id) - getRefreshedAt(b.id))
       .slice(0, batchSize)
     if (!entries.length) return
     const works = { ...data.works }
     for (const work of entries) {
       try {
-        const fetcher = DETAIL_FETCHERS[work.source]
-        const fresh = await fetcher(work)
-        const meta = work.source === 'tmdb' ? await tmdbGetBothMeta(work) : {}
-        let next = { ...work, ...fresh, ...meta, status: work.status, added: work.added, refreshedAt: Date.now() }
-        if (work.category === 'animes') {
-          let anilistId = work.anilistId
-          if (!anilistId) anilistId = await anilistFindId(work.originalTitle || work.title, work.year)
-          if (anilistId) {
-            const anilistDetail = await anilistGetDetail(anilistId)
-            const keepTmdb = anilistDetail.seasons.length <= 1 && (next.seasons?.length || 0) > 1
-            next = keepTmdb ? { ...next, anilistId } : { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
-          }
-        }
-        works[work.id] = next
+        works[work.id] = await fetchFreshWork(work)
+        setRefreshedAt(work.id)
       } catch (e) { console.error('[auto-refresh]', work.title, e) }
     }
-    await mutate({ works }) // single Firestore write for all stale works
+    await mutate({ works })
   }
 
   async function refreshAllWorks(onProgress) {
@@ -305,7 +306,9 @@ export function useWorkActions(data, mutate) {
           }
         }
 
-        works[work.id] = next
+        const { refreshedAt: _, ...cleanNext } = next
+        works[work.id] = cleanNext
+        setRefreshedAt(work.id)
       } catch (e) { console.error('[refresh]', work.title, e) }
       done++
     }
