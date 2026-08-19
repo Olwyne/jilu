@@ -6,6 +6,10 @@ function fmtFull(ts) {
   return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear()
 }
 
+function fmtYear(ts) {
+  return new Date(ts).getFullYear()
+}
+
 function epLabel(work, season, ep, t) {
   const cat = work.category
   const epWord = t('term.' + cat + '.ep')
@@ -37,6 +41,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
           <div key={s.n} style={{ border: '1px solid var(--color-border-btn)', borderRadius: 16, overflow: 'hidden', background: 'var(--color-surface)' }}>
             <div onClick={() => toggleExpanded(s.n)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', cursor: 'pointer' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17 }}>{s.name || t('season.default', { n: s.n })}</span>
+              {s.release && <span style={{ fontSize: 12, color: 'var(--color-muted-2)' }}>{fmtYear(s.release)}</span>}
               <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('season.seen', { done, total: s.episodes.length })}</span>
               <div
                 onClick={(e) => { e.stopPropagation(); onMarkSeason(work.id, s.n) }}

@@ -1,9 +1,15 @@
 function apiUrl(path, params = {}) {
-  if (import.meta.env.DEV) {
-    const qs = Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : ''
-    return `/mangadex-proxy${path}${qs}`
+  const qs = new URLSearchParams()
+  for (const [k, v] of Object.entries(params)) {
+    if (Array.isArray(v)) v.forEach((val) => qs.append(k, val))
+    else qs.set(k, v)
   }
-  return '/api/mangadex?' + new URLSearchParams({ path, ...params }).toString()
+  const qsStr = qs.toString()
+  if (import.meta.env.DEV) {
+    return `/mangadex-proxy${path}${qsStr ? '?' + qsStr : ''}`
+  }
+  qs.set('path', path)
+  return '/api/mangadex?' + qs.toString()
 }
 
 function bestMatch(results, title) {
@@ -15,9 +21,9 @@ function bestMatch(results, title) {
   }) || results[0]
 }
 
-// Returns { map: Map<chapterNum, volumeNum|null>, lastChapter: number }
+// Returns { map: Map<chapterNum, volumeNum|null>, lastChapter: number, volumeDates: Map<volumeNum, timestamp> }
 export async function mangadexGetChapterMap(mangaTitle) {
-  const empty = { map: new Map(), lastChapter: 0 }
+  const empty = { map: new Map(), lastChapter: 0, volumeDates: new Map() }
   try {
     const searchRes = await fetch(apiUrl('/manga', { title: mangaTitle, limit: 10 }))
     const searchJson = await searchRes.json()
@@ -33,14 +39,42 @@ export async function mangadexGetChapterMap(mangaTitle) {
     } catch { /* aggregate failed — still have lastChapter */ }
 
     const map = new Map()
+    // first chapter ID per volume (to fetch publication dates)
+    const volumeFirstChapterId = {}
+
     for (const [volKey, volData] of Object.entries(aggJson.volumes || {})) {
       const volumeNum = volKey === 'none' ? null : parseInt(volKey, 10)
+      const chapters = Object.entries(volData.chapters || {})
+      if (volumeNum !== null && chapters.length > 0) {
+        const [, firstChData] = chapters.reduce(([minKey, minVal], [k, v]) =>
+          parseFloat(k) < parseFloat(minKey) ? [k, v] : [minKey, minVal]
+        )
+        volumeFirstChapterId[volumeNum] = firstChData.id
+      }
       for (const chKey of Object.keys(volData.chapters || {})) {
         const n = Math.round(parseFloat(chKey))
         if (!isNaN(n)) map.set(n, volumeNum)
       }
     }
-    return { map, lastChapter: Math.max(lastChapter, map.size > 0 ? Math.max(...map.keys()) : 0) }
+
+    // Batch fetch chapter dates
+    const volumeDates = new Map()
+    const ids = Object.values(volumeFirstChapterId)
+    if (ids.length > 0) {
+      try {
+        const chapRes = await fetch(apiUrl('/chapter', { 'ids[]': ids.slice(0, 100), limit: 100 }))
+        const chapJson = await chapRes.json()
+        const idToDate = {}
+        for (const ch of chapJson.data || []) {
+          idToDate[ch.id] = ch.attributes?.publishAt ? new Date(ch.attributes.publishAt).getTime() : null
+        }
+        for (const [volNum, id] of Object.entries(volumeFirstChapterId)) {
+          if (idToDate[id]) volumeDates.set(Number(volNum), idToDate[id])
+        }
+      } catch { /* dates optional */ }
+    }
+
+    return { map, lastChapter: Math.max(lastChapter, map.size > 0 ? Math.max(...map.keys()) : 0), volumeDates }
   } catch {
     return empty
   }
