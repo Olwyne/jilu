@@ -1,4 +1,10 @@
-const BASE = import.meta.env.DEV ? '/mangadex-proxy' : 'https://api.mangadex.org'
+function apiUrl(path, params = {}) {
+  if (import.meta.env.DEV) {
+    const qs = Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : ''
+    return `/mangadex-proxy${path}${qs}`
+  }
+  return '/api/mangadex?' + new URLSearchParams({ path, ...params }).toString()
+}
 
 function bestMatch(results, title) {
   const norm = (s) => s.toLowerCase().trim()
@@ -13,9 +19,7 @@ function bestMatch(results, title) {
 export async function mangadexGetChapterMap(mangaTitle) {
   const empty = { map: new Map(), lastChapter: 0 }
   try {
-    const searchRes = await fetch(
-      `${BASE}/manga?title=${encodeURIComponent(mangaTitle)}&limit=10`
-    )
+    const searchRes = await fetch(apiUrl('/manga', { title: mangaTitle, limit: 10 }))
     const searchJson = await searchRes.json()
     const manga = bestMatch(searchJson.data || [], mangaTitle)
     if (!manga) return empty
@@ -24,7 +28,7 @@ export async function mangadexGetChapterMap(mangaTitle) {
 
     let aggJson = { volumes: {} }
     try {
-      const aggRes = await fetch(`${BASE}/manga/${manga.id}/aggregate`)
+      const aggRes = await fetch(apiUrl(`/manga/${manga.id}/aggregate`))
       aggJson = await aggRes.json()
     } catch { /* aggregate failed — still have lastChapter */ }
 
