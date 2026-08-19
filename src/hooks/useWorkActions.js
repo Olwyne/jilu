@@ -245,7 +245,7 @@ export function useWorkActions(data, mutate) {
         next = keepTmdb ? { ...next, anilistId } : { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
       }
     }
-    await mutate({ works: { ...data.works, [workId]: next } })
+    await mutate({ works: { ...data.works, [workId]: { ...next, refreshedAt: Date.now() } } })
   }
 
   async function refreshAllWorks(onProgress) {

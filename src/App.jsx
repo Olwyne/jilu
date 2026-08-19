@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from './i18n/index.js'
@@ -116,6 +116,16 @@ function Shell() {
   }, [toast])
 
   useEffect(() => { setEpisodeModal(null) }, [pathname])
+
+  const autoRefreshDone = useRef(false)
+  useEffect(() => {
+    if (loading || autoRefreshDone.current) return
+    autoRefreshDone.current = true
+    const DAY = 24 * 60 * 60 * 1000
+    const stale = Object.values(data.works).filter((w) => w.sourceId && Date.now() - (w.refreshedAt || 0) > DAY)
+    if (!stale.length) return
+    ;(async () => { for (const w of stale) await workActions.refreshWork(w.id) })()
+  }, [loading])
 
   function handleChangeLanguage(lang) {
     i18n.changeLanguage(lang)
