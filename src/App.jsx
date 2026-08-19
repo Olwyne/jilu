@@ -121,10 +121,7 @@ function Shell() {
   useEffect(() => {
     if (loading || autoRefreshDone.current) return
     autoRefreshDone.current = true
-    const DAY = 24 * 60 * 60 * 1000
-    const stale = Object.values(data.works).filter((w) => w.sourceId && Date.now() - (w.refreshedAt || 0) > DAY)
-    if (!stale.length) return
-    ;(async () => { for (const w of stale) await workActions.refreshWork(w.id) })()
+    workActions.refreshStaleWorks(24 * 60 * 60 * 1000)
   }, [loading])
 
   function handleChangeLanguage(lang) {

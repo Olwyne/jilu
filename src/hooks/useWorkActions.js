@@ -248,6 +248,33 @@ export function useWorkActions(data, mutate) {
     await mutate({ works: { ...data.works, [workId]: { ...next, refreshedAt: Date.now() } } })
   }
 
+  async function refreshStaleWorks(maxAgeMs) {
+    const entries = Object.values(data.works).filter(
+      (w) => w.sourceId && DETAIL_FETCHERS[w.source] && Date.now() - (w.refreshedAt || 0) > maxAgeMs
+    )
+    if (!entries.length) return
+    const works = { ...data.works }
+    for (const work of entries) {
+      try {
+        const fetcher = DETAIL_FETCHERS[work.source]
+        const fresh = await fetcher(work)
+        const meta = work.source === 'tmdb' ? await tmdbGetBothMeta(work) : {}
+        let next = { ...work, ...fresh, ...meta, status: work.status, added: work.added, refreshedAt: Date.now() }
+        if (work.category === 'animes') {
+          let anilistId = work.anilistId
+          if (!anilistId) anilistId = await anilistFindId(work.originalTitle || work.title, work.year)
+          if (anilistId) {
+            const anilistDetail = await anilistGetDetail(anilistId)
+            const keepTmdb = anilistDetail.seasons.length <= 1 && (next.seasons?.length || 0) > 1
+            next = keepTmdb ? { ...next, anilistId } : { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
+          }
+        }
+        works[work.id] = next
+      } catch (e) { console.error('[auto-refresh]', work.title, e) }
+    }
+    await mutate({ works }) // single Firestore write for all stale works
+  }
+
   async function refreshAllWorks(onProgress) {
     const entries = Object.values(data.works).filter((w) => w.sourceId && DETAIL_FETCHERS[w.source])
     if (!entries.length) { onProgress?.('Aucune œuvre à rafraîchir'); return }
@@ -285,5 +312,5 @@ export function useWorkActions(data, mutate) {
     onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
   }
 
-  return { addWork, removeWork, refreshWork, markWorkWatched, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
+  return { addWork, removeWork, refreshWork, refreshStaleWorks, markWorkWatched, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
 }
