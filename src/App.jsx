@@ -119,9 +119,15 @@ function Shell() {
 
   const autoRefreshDone = useRef(false)
   useEffect(() => {
-    if (loading || autoRefreshDone.current) return
-    autoRefreshDone.current = true
-    workActions.refreshStaleWorks(24 * 60 * 60 * 1000)
+    if (loading) return
+    const DAY = 24 * 60 * 60 * 1000
+    const HOUR = 60 * 60 * 1000
+    if (!autoRefreshDone.current) {
+      autoRefreshDone.current = true
+      workActions.refreshStaleWorks(DAY, 100)
+    }
+    const interval = setInterval(() => workActions.refreshStaleWorks(DAY, 100), HOUR)
+    return () => clearInterval(interval)
   }, [loading])
 
   function handleChangeLanguage(lang) {
