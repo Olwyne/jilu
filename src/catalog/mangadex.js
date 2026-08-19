@@ -49,41 +49,46 @@ export async function mangadexGetChapterMap(mangaTitle) {
 
     const lastChapter = Math.round(parseFloat(manga.attributes?.lastChapter || '0')) || 0
 
-    let aggJson = { volumes: {} }
-    try {
-      const aggRes = await fetch(apiUrl(`/manga/${manga.id}/aggregate`))
-      aggJson = await aggRes.json()
-    } catch { /* aggregate failed — still have lastChapter */ }
+    // Fetch both aggregates in parallel: all languages + ja-only (tankobon volumes are most reliable)
+    const [allRes, jaRes] = await Promise.allSettled([
+      fetch(apiUrl(`/manga/${manga.id}/aggregate`)).then((r) => r.json()),
+      fetch(apiUrl(`/manga/${manga.id}/aggregate`, { 'translatedLanguage[]': ['ja'] })).then((r) => r.json()),
+    ])
+    const aggAll = allRes.status === 'fulfilled' ? allRes.value : { volumes: {} }
+    const aggJa  = jaRes.status  === 'fulfilled' ? jaRes.value  : { volumes: {} }
 
     const map = new Map()
-    // id → volumeNum (for first chapter of each volume)
     const volIdToVolNum = {}
-    // id → chapterNum (for scan/none chapters)
     const scanIdToChNum = {}
 
-    for (const [volKey, volData] of Object.entries(aggJson.volumes || {})) {
-      const volumeNum = volKey === 'none' ? null : parseInt(volKey, 10)
-      const chapters = Object.entries(volData.chapters || {})
+    // Helper: merge one aggregate into map; real volume always wins over null
+    function mergeAgg(aggJson) {
+      for (const [volKey, volData] of Object.entries(aggJson.volumes || {})) {
+        const volumeNum = volKey === 'none' ? null : parseInt(volKey, 10)
+        const chapters = Object.entries(volData.chapters || {})
 
-      if (volumeNum !== null && chapters.length > 0) {
-        const [, firstChData] = chapters.reduce(([mk, mv], [k, v]) =>
-          parseFloat(k) < parseFloat(mk) ? [k, v] : [mk, mv]
-        )
-        volIdToVolNum[firstChData.id] = volumeNum
-      }
+        if (volumeNum !== null && chapters.length > 0) {
+          const [, firstChData] = chapters.reduce(([mk, mv], [k, v]) =>
+            parseFloat(k) < parseFloat(mk) ? [k, v] : [mk, mv]
+          )
+          if (!volIdToVolNum[volumeNum]) volIdToVolNum[firstChData.id] = volumeNum
+        }
 
-      for (const [chKey, chData] of chapters) {
-        const n = Math.round(parseFloat(chKey))
-        if (!isNaN(n)) {
-          const existing = map.get(n)
-          // real volume always wins over null/"none"
-          if (existing === undefined || (existing === null && volumeNum !== null)) {
-            map.set(n, volumeNum)
+        for (const [chKey, chData] of chapters) {
+          const n = Math.round(parseFloat(chKey))
+          if (!isNaN(n)) {
+            const existing = map.get(n)
+            if (existing === undefined || (existing === null && volumeNum !== null)) {
+              map.set(n, volumeNum)
+            }
+            if (volumeNum === null && map.get(n) === null) scanIdToChNum[chData.id] = n
           }
-          if (volumeNum === null && map.get(n) === null) scanIdToChNum[chData.id] = n
         }
       }
     }
+
+    mergeAgg(aggAll) // base pass
+    mergeAgg(aggJa)  // ja pass overwrites nulls with real volumes
 
     const [volDatesRaw, scanDatesRaw] = await Promise.all([
       batchFetchDates(volIdToVolNum),
