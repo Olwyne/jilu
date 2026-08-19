@@ -21,9 +21,26 @@ function bestMatch(results, title) {
   }) || results[0]
 }
 
-// Returns { map: Map<chapterNum, volumeNum|null>, lastChapter: number, volumeDates: Map<volumeNum, timestamp> }
+async function batchFetchDates(idToKey) {
+  const ids = Object.keys(idToKey)
+  const result = {}
+  for (let i = 0; i < ids.length; i += 100) {
+    try {
+      const batch = ids.slice(i, i + 100)
+      const res = await fetch(apiUrl('/chapter', { 'ids[]': batch, limit: 100 }))
+      const json = await res.json()
+      for (const ch of json.data || []) {
+        if (ch.attributes?.publishAt) result[idToKey[ch.id]] = new Date(ch.attributes.publishAt).getTime()
+      }
+    } catch { /* dates optional */ }
+  }
+  return result
+}
+
+// Returns { map: Map<chapterNum, volumeNum|null>, lastChapter: number,
+//           volumeDates: Map<volumeNum, timestamp>, chapterDates: Map<chapterNum, timestamp> }
 export async function mangadexGetChapterMap(mangaTitle) {
-  const empty = { map: new Map(), lastChapter: 0, volumeDates: new Map() }
+  const empty = { map: new Map(), lastChapter: 0, volumeDates: new Map(), chapterDates: new Map() }
   try {
     const searchRes = await fetch(apiUrl('/manga', { title: mangaTitle, limit: 10 }))
     const searchJson = await searchRes.json()
@@ -39,42 +56,40 @@ export async function mangadexGetChapterMap(mangaTitle) {
     } catch { /* aggregate failed — still have lastChapter */ }
 
     const map = new Map()
-    // first chapter ID per volume (to fetch publication dates)
-    const volumeFirstChapterId = {}
+    // id → volumeNum (for first chapter of each volume)
+    const volIdToVolNum = {}
+    // id → chapterNum (for scan/none chapters)
+    const scanIdToChNum = {}
 
     for (const [volKey, volData] of Object.entries(aggJson.volumes || {})) {
       const volumeNum = volKey === 'none' ? null : parseInt(volKey, 10)
       const chapters = Object.entries(volData.chapters || {})
+
       if (volumeNum !== null && chapters.length > 0) {
-        const [, firstChData] = chapters.reduce(([minKey, minVal], [k, v]) =>
-          parseFloat(k) < parseFloat(minKey) ? [k, v] : [minKey, minVal]
+        const [, firstChData] = chapters.reduce(([mk, mv], [k, v]) =>
+          parseFloat(k) < parseFloat(mk) ? [k, v] : [mk, mv]
         )
-        volumeFirstChapterId[volumeNum] = firstChData.id
+        volIdToVolNum[firstChData.id] = volumeNum
       }
-      for (const chKey of Object.keys(volData.chapters || {})) {
+
+      for (const [chKey, chData] of chapters) {
         const n = Math.round(parseFloat(chKey))
-        if (!isNaN(n)) map.set(n, volumeNum)
+        if (!isNaN(n)) {
+          map.set(n, volumeNum)
+          if (volumeNum === null) scanIdToChNum[chData.id] = n
+        }
       }
     }
 
-    // Batch fetch chapter dates
-    const volumeDates = new Map()
-    const ids = Object.values(volumeFirstChapterId)
-    if (ids.length > 0) {
-      try {
-        const chapRes = await fetch(apiUrl('/chapter', { 'ids[]': ids.slice(0, 100), limit: 100 }))
-        const chapJson = await chapRes.json()
-        const idToDate = {}
-        for (const ch of chapJson.data || []) {
-          idToDate[ch.id] = ch.attributes?.publishAt ? new Date(ch.attributes.publishAt).getTime() : null
-        }
-        for (const [volNum, id] of Object.entries(volumeFirstChapterId)) {
-          if (idToDate[id]) volumeDates.set(Number(volNum), idToDate[id])
-        }
-      } catch { /* dates optional */ }
-    }
+    const [volDatesRaw, scanDatesRaw] = await Promise.all([
+      batchFetchDates(volIdToVolNum),
+      batchFetchDates(scanIdToChNum),
+    ])
 
-    return { map, lastChapter: Math.max(lastChapter, map.size > 0 ? Math.max(...map.keys()) : 0), volumeDates }
+    const volumeDates = new Map(Object.entries(volDatesRaw).map(([k, v]) => [Number(k), v]))
+    const chapterDates = new Map(Object.entries(scanDatesRaw).map(([k, v]) => [Number(k), v]))
+
+    return { map, lastChapter: Math.max(lastChapter, map.size > 0 ? Math.max(...map.keys()) : 0), volumeDates, chapterDates }
   } catch {
     return empty
   }

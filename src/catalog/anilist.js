@@ -227,7 +227,7 @@ export async function anilistGetMangaDetail(anilistId) {
   if (!m) return { seasons: [], ended: false, chapters: 0, volumes: 0 }
 
   const ended = m.status === 'FINISHED' || m.status === 'CANCELLED'
-  const { map: chapterMap, lastChapter: mangadexChapters, volumeDates } = await mangadexGetChapterMap(m.title.romaji)
+  const { map: chapterMap, lastChapter: mangadexChapters, volumeDates, chapterDates } = await mangadexGetChapterMap(m.title.romaji)
 
   // AniList chapters is null for ongoing manga — fall back to MangaDex lastChapter
   const totalChapters = m.chapters || mangadexChapters || 0
@@ -237,7 +237,8 @@ export async function anilistGetMangaDetail(anilistId) {
 
   for (let n = 1; n <= totalChapters; n++) {
     const volNum = chapterMap.get(n) ?? null
-    const ep = { n, title: '', air: 1 }
+    const air = (volNum === null ? chapterDates?.get(n) : null) || 1
+    const ep = { n, title: '', air }
     if (volNum !== null) {
       if (!volumeEpisodes[volNum]) volumeEpisodes[volNum] = []
       volumeEpisodes[volNum].push(ep)
