@@ -3,15 +3,11 @@ import { db } from '../firebase'
 
 export const HANDLE_RE = /^[a-z0-9_]{2,20}$/
 
-// "Sophie.Martin+tv@gmail.com" -> "sophie_martin_tv"
-export function handleFromEmail(email) {
-  const local = String(email || '').split('@')[0]
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9_]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 20)
-  return local.length >= 2 ? local : 'user'
+// Pseudo neutre (ne révèle rien de l'identité) : "membre_" + 6 caractères aléatoires
+export function neutralHandle(random = Math.random) {
+  let suffix = ''
+  while (suffix.length < 6) suffix += random().toString(36).slice(2)
+  return 'membre_' + suffix.slice(0, 6)
 }
 
 // base, base2, base3… (le suffixe est pris sur la longueur max de 20 caractères)
@@ -22,14 +18,15 @@ export function handleCandidate(base, attempt) {
 }
 
 // Garantit que l'utilisateur possède un pseudo enregistré dans `pseudos/`.
-// Garde le pseudo du profil s'il est valide, sinon dérive un pseudo de l'e-mail.
+// Garde le pseudo du profil s'il est valide ; sinon en attribue un neutre (membre_xxxxxx),
+// jamais dérivé de l'e-mail : le pseudo est public (avis, profil).
 // Renvoie le pseudo (déjà à lui, ou nouvellement réservé), ou null si rien n'a pu être réservé.
-export async function ensureHandle(user, currentHandle) {
+export async function ensureHandle(user, currentHandle, random = Math.random) {
   const existing = String(currentHandle || '').toLowerCase()
-  const base = HANDLE_RE.test(existing) ? existing : handleFromEmail(user.email)
+  const keepExisting = HANDLE_RE.test(existing)
 
   for (let attempt = 0; attempt < 20; attempt++) {
-    const candidate = handleCandidate(base, attempt)
+    const candidate = keepExisting ? handleCandidate(existing, attempt) : neutralHandle(random)
     const ref = doc(db, 'pseudos', candidate)
     const snap = await getDoc(ref)
     if (snap.exists()) {

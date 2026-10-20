@@ -119,7 +119,7 @@ function Shell() {
   useEffect(() => { setEpisodeModal(null) }, [pathname])
 
   // Comptes sans pseudo (inscription sans étape pseudo, anciens comptes) : on réserve un pseudo
-  // dérivé de l'e-mail une seule fois par appareil ; l'utilisateur peut le changer ensuite.
+  // neutre (membre_xxxxxx) une seule fois par appareil ; l'utilisateur peut le changer ensuite.
   useEffect(() => {
     if (loading || !user) return
     const flag = `handleChecked:${user.uid}`
