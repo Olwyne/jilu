@@ -5,28 +5,35 @@ stages:
 
 default:
   image: node:20-alpine
+  before_script:
+    - corepack enable
+    - pnpm config set store-dir .pnpm-store
+    - pnpm install --frozen-lockfile
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
-      - .npm/
+      - .pnpm-store/
 
 lint:
   stage: lint
   script:
-    - npm ci --cache .npm --prefer-offline
-    - npm run lint
+    - pnpm run lint
 
 test:
   stage: test
   script:
-    - npm ci --cache .npm --prefer-offline
-    - npm test
+    - pnpm test
+
+audit:
+  stage: test
+  script:
+    - pnpm audit --prod
+  allow_failure: true
 
 build:
   stage: build
   script:
-    - npm ci --cache .npm --prefer-offline
-    - npm run build
+    - pnpm run build
   artifacts:
     paths:
       - dist/
