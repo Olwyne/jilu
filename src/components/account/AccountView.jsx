@@ -8,6 +8,7 @@ import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import { initials } from '../../lib/domain'
 import EditProfileModal from '../modals/EditProfileModal'
+import MigrationPanel from './MigrationPanel'
 
 const TYPE_EMOJI = { bug: '🐛', suggestion: '💡', other: '💬' }
 
@@ -240,6 +241,8 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           onClose={() => setEditOpen(false)}
         />
       )}
+      <MigrationPanel />
+
       {deleteOpen && (
         <div onClick={() => { if (deleteStatus !== 'loading') { setDeleteOpen(false); setDeletePassword('') } }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>

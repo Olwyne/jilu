@@ -21,6 +21,29 @@ service cloud.firestore {
         allow read, write: if isOwner(uid);
         allow read: if get(/databases/$(database)/documents/users/$(uid)).data.settings.publicProfile == true;
       }
+
+      // Modèle v2 : un document par œuvre suivie, privé à son propriétaire
+      match /library/{workId} {
+        allow read, write: if isOwner(uid);
+      }
+      match /migrations/{id} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Catalogue partagé : création seule (jamais de modification par un utilisateur).
+    // Les fiches « local-{uid}-… » ne peuvent être créées que par leur propriétaire.
+    match /catalog/{catalogId} {
+      function validCatalog(d) {
+        return d.title is string && d.title.size() > 0 && d.title.size() <= 300
+          && d.category is string
+          && d.keys().size() <= 40;
+      }
+      allow read: if signedIn();
+      allow create: if signedIn() && validCatalog(request.resource.data)
+        && (!catalogId.matches('^local-.*')
+            || catalogId.matches('^local-' + request.auth.uid + '-.*'));
+      allow update, delete: if false;
     }
 
     // Un pseudo ne peut être créé que s'il est libre, jamais réécrit par un autre
