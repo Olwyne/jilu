@@ -185,7 +185,10 @@ export default defineConfig(({ mode }) => {
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: './src/setupTests.js'
+    setupFiles: './src/setupTests.js',
+    exclude: ['**/node_modules/**', 'tests/rules/**'],
+    // classes lisibles pour les CSS modules (ex. "active") dans les assertions
+    css: { include: /\.module\.css$/, modules: { classNameStrategy: 'non-scoped' } }
   }
   }
 })

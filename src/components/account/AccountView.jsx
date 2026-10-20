@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n/index.js'
 import emailjs from '@emailjs/browser'
-import { doc, getDoc, setDoc, getDocs, deleteDoc, collection, query, where } from 'firebase/firestore'
+import { doc, getDoc, setDoc, getDocs, writeBatch, collection, query, where } from 'firebase/firestore'
+import { getTodayKey } from '../../lib/quizQuestions'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import { initials } from '../../lib/domain'
@@ -201,16 +202,26 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
     setDeleteStatus('loading')
     try {
       const uid = user.uid
-      await deleteAccount(deletePassword)
-      const deleteSubcollection = async (name) => {
-        const snap = await getDocs(collection(db, 'users', uid, name))
-        await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
-      }
-      await deleteSubcollection('works')
-      await deleteSubcollection('watched')
-      const reviewsSnap = await getDocs(query(collection(db, 'reviews'), where('userId', '==', uid)))
-      await Promise.all(reviewsSnap.docs.map(d => deleteDoc(d.ref)))
-      await deleteDoc(doc(db, 'users', uid))
+      await deleteAccount(deletePassword, async () => {
+        const deleteAll = async (docs) => {
+          for (let i = 0; i < docs.length; i += 499) {
+            const batch = writeBatch(db)
+            docs.slice(i, i + 499).forEach((d) => batch.delete(d.ref))
+            await batch.commit()
+          }
+        }
+        for (const name of ['works', 'watched']) {
+          await deleteAll((await getDocs(collection(db, 'users', uid, name))).docs)
+        }
+        await deleteAll((await getDocs(query(collection(db, 'reviews'), where('userId', '==', uid)))).docs)
+        const handle = (profile?.handle || '').toLowerCase()
+        const last = writeBatch(db)
+        if (handle) last.delete(doc(db, 'pseudos', handle))
+        last.delete(doc(db, 'follows', uid))
+        last.delete(doc(db, 'quiz', getTodayKey(), 'scores', uid))
+        last.delete(doc(db, 'users', uid))
+        await last.commit()
+      })
     } catch (e) {
       const wrongPw = e?.code === 'auth/wrong-password' || e?.code === 'auth/invalid-credential'
       setDeleteStatus(wrongPw ? 'wrongPassword' : 'error')
@@ -275,7 +286,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>{profile.handle || '—'}</h2>
             <span onClick={() => setEditOpen(true)} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>{t('settings.modify')}</span>
           </div>
-          <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{profile.email}</div>
+          <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{user?.email || profile.email}</div>
           <div style={{ color: 'var(--color-muted-3)', fontSize: 12.5, marginTop: 8 }}>{t('settings.memberSince') + ' '}{profile.memberSince}</div>
         </div>
       </div>

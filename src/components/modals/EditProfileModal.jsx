@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore'
+import { doc, getDoc, writeBatch } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -32,7 +32,6 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
     invalid: { text: t('editProfile.invalidHandle'), color: '#f87171' },
   }
   const [handle, setHandle] = useState(profile.handle || '')
-  const [email, setEmail] = useState(profile.email || '')
   const [handleStatus, setHandleStatus] = useState('self')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -68,11 +67,15 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
     setError(null)
     try {
       const h = handle.trim().toLowerCase()
-      if (h !== profile.handle) {
-        if (profile.handle) await deleteDoc(doc(db, 'pseudos', profile.handle))
-        await setDoc(doc(db, 'pseudos', h), { uid: user.uid })
+      const previous = (profile.handle || '').toLowerCase()
+      if (h !== previous) {
+        // Atomique : si le nouveau pseudo est déjà pris, rien n'est modifié.
+        const batch = writeBatch(db)
+        if (previous) batch.delete(doc(db, 'pseudos', previous))
+        batch.set(doc(db, 'pseudos', h), { uid: user.uid })
+        await batch.commit()
       }
-      await onSave({ handle: h, email: email.trim() })
+      await onSave({ handle: h })
       if (passwordFilled) await changePassword(currentPassword, newPassword)
       onClose()
     } catch (err) {
@@ -105,15 +108,6 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
               />
             </div>
             {msg && <div style={{ fontSize: 12.5, marginTop: 6, color: msg.color }}>{msg.text}</div>}
-          </Field>
-          <Field label={t('editProfile.email')}>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ton@email.com"
-              style={inputStyle}
-            />
           </Field>
           <Field label={t('editProfile.changePassword')}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

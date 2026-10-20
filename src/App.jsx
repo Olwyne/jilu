@@ -189,7 +189,7 @@ function Shell() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
       <a href="#main-content" className="skip-link">{t('a11y.skipToContent')}</a>
-      {!isMobile && <Sidebar profile={data.profile} toCatch={toCatch} />}
+      {!isMobile && <Sidebar profile={{ ...data.profile, email: user?.email }} toCatch={toCatch} />}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 74 : 0 }}>
         <Header
           title={copy.title}

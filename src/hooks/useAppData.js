@@ -85,6 +85,12 @@ export function useAppData(user) {
         const raw = snap.exists() ? snap.data() : {}
         const { works: _w, watched: _ww, ...rest } = raw
         mainData = rest
+        if (rest.profile && 'email' in rest.profile) {
+          // L'e-mail vit dans Firebase Auth ; le retirer de Firestore (document lisible si profil public)
+          const { email: _email, ...profileWithoutEmail } = rest.profile
+          mainData = { ...rest, profile: profileWithoutEmail }
+          setDoc(userRef, { profile: { email: deleteField() } }, { merge: true }).catch(() => {})
+        }
         loaded.main = true
         if (raw.works || raw.watched) migrateOldData(raw)
         merge()

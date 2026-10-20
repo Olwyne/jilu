@@ -31,9 +31,13 @@ export function AuthProvider({ children }) {
       await reauthenticateWithCredential(auth.currentUser, credential)
       await updatePassword(auth.currentUser, newPassword)
     },
-    deleteAccount: async (password) => {
+    // `cleanup` supprime les données Firestore : il doit s'exécuter avant deleteUser,
+    // car les règles exigent un utilisateur authentifié. La ré-authentification
+    // passe d'abord pour ne rien effacer si le mot de passe est faux.
+    deleteAccount: async (password, cleanup) => {
       const credential = EmailAuthProvider.credential(auth.currentUser.email, password)
       await reauthenticateWithCredential(auth.currentUser, credential)
+      if (cleanup) await cleanup()
       await deleteUser(auth.currentUser)
     },
   }
