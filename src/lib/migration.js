@@ -10,24 +10,15 @@ import {
   collection, doc, documentId, getDoc, getDocs, query, where, writeBatch,
 } from 'firebase/firestore'
 
+import { clean, totalEpisodes } from './catalogUtils.js'
+export { clean, totalEpisodes }
+
 export const MIGRATION_VERSION = 1
 const USER_FIELDS = ['status', 'added', 'finishedAt', 'refreshedAt'] // propres à l'utilisateur : hors catalogue
 const BATCH_SIZE = 400
 const IN_LIMIT = 30
 
 // --- Partie pure ------------------------------------------------------------
-
-// Firestore refuse `undefined` ; on retire les clés vides et remplace les trous de tableau par null.
-export function clean(v) {
-  if (v === undefined) return null
-  if (v === null || typeof v !== 'object') return v
-  if (Array.isArray(v)) return v.map(clean)
-  return Object.fromEntries(Object.entries(v).filter(([, x]) => x !== undefined).map(([k, x]) => [k, clean(x)]))
-}
-
-export function totalEpisodes(work) {
-  return (work?.seasons || []).reduce((n, s) => n + (s.episodes?.length || 0), 0)
-}
 
 // Une œuvre sans sourceId (import sans correspondance) n'entre pas dans le catalogue partagé :
 // elle est issue de l'historique de l'utilisateur, pas d'une source fiable.

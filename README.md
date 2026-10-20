@@ -39,6 +39,7 @@ Copier `.env.example` en `.env.local` et renseigner chaque valeur.
 | `RAWG_API_KEY` | serveur | Clé RAWG (jeux vidéo) |
 | `GOOGLE_BOOKS_API_KEY` | serveur | Clé Google Books |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | serveur | Spotify (**ne pas préfixer `VITE_`**) |
+| `FIREBASE_SERVICE_ACCOUNT` | serveur | Clé de compte de service (JSON ou base64) : permet à `api/refresh-work.js` de mettre à jour le catalogue partagé. Jamais dans le dépôt ni côté client |
 
 > Les variables « serveur » sont lues par les fonctions Vercel de `api/` (et par le plugin de dev dans `vite.config.js`). Un préfixe `VITE_` les ferait entrer dans le bundle client.
 

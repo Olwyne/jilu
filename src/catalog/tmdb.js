@@ -1,14 +1,15 @@
-import i18n from '../i18n/index.js'
+import { http } from './http.js'
+import { currentLanguage } from './locale.js'
 
 const BASE = '/api/tmdb'
 
 function tmdbLocale() {
-  const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
+  const lang = currentLanguage()?.startsWith('fr') ? 'fr' : 'en'
   return lang === 'fr' ? 'fr-FR' : 'en-US'
 }
 
 function genreLabel(ids) {
-  const isFr = i18n.language?.startsWith('fr')
+  const isFr = currentLanguage()?.startsWith('fr')
   const MAP = isFr
     ? { 18: 'Drame', 878: 'SF', 28: 'Action', 35: 'Comédie', 27: 'Horreur', 9648: 'Mystère', 16: 'Animation' }
     : { 18: 'Drama', 878: 'Sci-Fi', 28: 'Action', 35: 'Comedy', 27: 'Horror', 9648: 'Mystery', 16: 'Animation' }
@@ -18,7 +19,7 @@ function genreLabel(ids) {
 
 async function tmdbFetch(path, params = {}) {
   const qs = new URLSearchParams({ path, ...params }).toString()
-  const res = await fetch(`${BASE}?${qs}`)
+  const res = await http(`${BASE}?${qs}`)
   return res.json()
 }
 

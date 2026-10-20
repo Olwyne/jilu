@@ -104,6 +104,13 @@ Retour arrière avant l'étape 6 : redéployer le site précédent. Les ancienne
 - Le site lit encore l'ancien modèle : les données v2 sont écrites mais pas encore utilisées.
 - À retirer après migration : bloc `isMigrationAdmin` et règles `{path=**}` dans `firestore.rules`, `MigrationPanel.jsx`, `src/lib/migration.js`.
 
+## 8ter. Étape 1 de la bascule : fonction serveur de rafraîchissement (faite, non utilisée par le site)
+- `POST /api/refresh-work { id }` + jeton Firebase : met à jour **une fiche du catalogue partagé**. Aucun effet tant que le site ne l'appelle pas.
+- Garde-fous : une fiche rafraîchie depuis moins de 6 h n'appelle jamais les API ; verrou transactionnel (2 min) contre les requêtes simultanées ; un résultat vide ou sans titre ne remplace jamais une fiche ; les champs propres à l'utilisateur ne vont jamais dans le catalogue.
+- Les modules `src/catalog/*` sont utilisables côté navigateur et côté serveur (transport `http.js`, langue `locale.js`, imports avec extension `.js`).
+- Configuration Vercel requise : variable `FIREBASE_SERVICE_ACCOUNT`, plus `TMDB_API_KEY` (déjà en place) ; durée max de la fonction : 60 s (`vercel.json`).
+- Limite connue : les titres d'épisodes du catalogue partagé sont récupérés en français (langue par défaut de l'application) ; une version bilingue pourra être ajoutée.
+
 ## 9. Décisions
 Tranchées :
 - **Méthode de migration** : depuis le site, dans le navigateur, avec la session de l'utilisateur (aucune clé de compte de service, aucun script local). D'abord un bouton visible uniquement pour le compte du propriétaire (essai grandeur nature), puis exécution automatique à la connexion de chaque utilisateur, une seule fois, avec contrôle avant/après. Le code de migration est retiré une fois tous les comptes actifs migrés.

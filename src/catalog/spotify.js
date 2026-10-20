@@ -1,10 +1,12 @@
+import { http } from './http.js'
+
 const BASE = 'https://api.spotify.com/v1'
 
 let cachedToken = { value: null, expiresAt: 0 }
 
 async function getToken() {
   if (cachedToken.value && Date.now() < cachedToken.expiresAt) return cachedToken.value
-  const res = await fetch('/api/spotify-token')
+  const res = await http('/api/spotify-token')
   const json = await res.json()
   cachedToken = { value: json.access_token, expiresAt: Date.now() + 25 * 60 * 1000 }
   return json.access_token
@@ -12,7 +14,7 @@ async function getToken() {
 
 export async function spotifySearch(query) {
   const token = await getToken()
-  const res = await fetch(`${BASE}/search?type=artist&q=${encodeURIComponent(query)}`, {
+  const res = await http(`${BASE}/search?type=artist&q=${encodeURIComponent(query)}`, {
     headers: { Authorization: `Bearer ${token}` }
   })
   const json = await res.json()
@@ -33,14 +35,14 @@ export async function spotifySearch(query) {
 
 export async function spotifyGetDetail(work) {
   const token = await getToken()
-  const albumsRes = await fetch(`${BASE}/artists/${work.sourceId}/albums?include_groups=album&limit=20`, {
+  const albumsRes = await http(`${BASE}/artists/${work.sourceId}/albums?include_groups=album&limit=20`, {
     headers: { Authorization: `Bearer ${token}` }
   })
   const albumsJson = await albumsRes.json()
   const seasons = []
   let n = 1
   for (const album of albumsJson.items || []) {
-    const tracksRes = await fetch(`${BASE}/albums/${album.id}/tracks?limit=50`, {
+    const tracksRes = await http(`${BASE}/albums/${album.id}/tracks?limit=50`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     const tracksJson = await tracksRes.json()

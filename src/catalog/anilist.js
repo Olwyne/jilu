@@ -1,6 +1,7 @@
-import { mangadexGetChapterMap } from './mangadex'
+import { mangadexGetChapterMap } from './mangadex.js'
+import { http } from './http.js'
 
-const ENDPOINT = import.meta.env.DEV ? '/anilist-proxy' : 'https://graphql.anilist.co'
+const ENDPOINT = import.meta.env?.DEV ? '/anilist-proxy' : 'https://graphql.anilist.co'
 const DAY = 86400000
 const MIN_INTERVAL = 800
 let lastGqlCall = 0
@@ -10,7 +11,7 @@ async function gql(query, variables, attempt = 0) {
   if (wait > 0) await new Promise((r) => setTimeout(r, wait))
   lastGqlCall = Date.now()
 
-  const res = await fetch(ENDPOINT, {
+  const res = await http(ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables })

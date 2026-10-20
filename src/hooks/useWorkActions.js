@@ -1,14 +1,7 @@
 import { useRef } from 'react'
-import { tmdbGetDetail, tmdbGetBothMeta } from '../catalog/tmdb'
-import { anilistFindId, anilistGetDetail, anilistGetMangaDetail } from '../catalog/anilist'
-import { spotifyGetDetail } from '../catalog/spotify'
-
-const DETAIL_FETCHERS = {
-  tmdb: tmdbGetDetail,
-  anilist: (work) => anilistGetDetail(work.anilistId || work.sourceId).then((d) => ({ ...work, ...d })),
-  'anilist-manga': (work) => anilistGetMangaDetail(work.sourceId).then((d) => ({ ...work, ...d })),
-  spotify: spotifyGetDetail
-}
+import { tmdbGetBothMeta } from '../catalog/tmdb'
+import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
+import { DETAIL_FETCHERS, fetchFreshWork } from '../catalog/refresh'
 
 function computeAutoStatus(work, watched) {
   if (!work.seasons || !work.seasons.length) return null
@@ -250,23 +243,6 @@ export function useWorkActions(data, mutate) {
   }
   function setRefreshedAt(workId) {
     try { localStorage.setItem(`refreshedAt:${workId}`, String(Date.now())) } catch {}
-  }
-
-  async function fetchFreshWork(work) {
-    const fetcher = DETAIL_FETCHERS[work.source]
-    const fresh = await fetcher(work)
-    const meta = work.source === 'tmdb' ? await tmdbGetBothMeta(work) : {}
-    let next = { ...work, ...fresh, ...meta, status: work.status, added: work.added }
-    if (work.category === 'animes') {
-      let anilistId = work.anilistId
-      if (!anilistId) anilistId = await anilistFindId(work.originalTitle || work.title, work.year)
-      if (anilistId) {
-        const anilistDetail = await anilistGetDetail(anilistId)
-        const keepTmdb = anilistDetail.seasons.length <= 1 && (next.seasons?.length || 0) > 1
-        next = keepTmdb ? { ...next, anilistId } : { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
-      }
-    }
-    return next
   }
 
   async function refreshWork(workId) {

@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import en from './en.json'
 import fr from './fr.json'
+import { setLanguageProvider } from '../catalog/locale.js'
 
 i18n
   .use(LanguageDetector)
@@ -20,6 +21,8 @@ i18n
       cacheUserLanguage: true,
     },
   })
+
+setLanguageProvider(() => i18n.language)
 
 i18n.on('initialized', () => {
   document.documentElement.lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'

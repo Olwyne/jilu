@@ -1,3 +1,5 @@
+import { http } from './http.js'
+
 function apiUrl(path, params = {}) {
   const qs = new URLSearchParams()
   for (const [k, v] of Object.entries(params)) {
@@ -5,7 +7,7 @@ function apiUrl(path, params = {}) {
     else qs.set(k, v)
   }
   const qsStr = qs.toString()
-  if (import.meta.env.DEV) {
+  if (import.meta.env?.DEV) {
     return `/mangadex-proxy${path}${qsStr ? '?' + qsStr : ''}`
   }
   qs.set('path', path)
@@ -27,7 +29,7 @@ async function batchFetchDates(idToKey) {
   for (let i = 0; i < ids.length; i += 100) {
     try {
       const batch = ids.slice(i, i + 100)
-      const res = await fetch(apiUrl('/chapter', { 'ids[]': batch, limit: 100 }))
+      const res = await http(apiUrl('/chapter', { 'ids[]': batch, limit: 100 }))
       const json = await res.json()
       for (const ch of json.data || []) {
         if (ch.attributes?.publishAt) result[idToKey[ch.id]] = new Date(ch.attributes.publishAt).getTime()
@@ -42,7 +44,7 @@ async function batchFetchDates(idToKey) {
 export async function mangadexGetChapterMap(mangaTitle) {
   const empty = { map: new Map(), lastChapter: 0, volumeDates: new Map(), chapterDates: new Map() }
   try {
-    const searchRes = await fetch(apiUrl('/manga', { title: mangaTitle, limit: 10 }))
+    const searchRes = await http(apiUrl('/manga', { title: mangaTitle, limit: 10 }))
     const searchJson = await searchRes.json()
     const manga = bestMatch(searchJson.data || [], mangaTitle)
     if (!manga) return empty
@@ -51,8 +53,8 @@ export async function mangadexGetChapterMap(mangaTitle) {
 
     // Fetch both aggregates in parallel: all languages + ja-only (tankobon volumes are most reliable)
     const [allRes, jaRes] = await Promise.allSettled([
-      fetch(apiUrl(`/manga/${manga.id}/aggregate`)).then((r) => r.json()),
-      fetch(apiUrl(`/manga/${manga.id}/aggregate`, { 'translatedLanguage[]': ['ja'] })).then((r) => r.json()),
+      http(apiUrl(`/manga/${manga.id}/aggregate`)).then((r) => r.json()),
+      http(apiUrl(`/manga/${manga.id}/aggregate`, { 'translatedLanguage[]': ['ja'] })).then((r) => r.json()),
     ])
     const aggAll = allRes.status === 'fulfilled' ? allRes.value : { volumes: {} }
     const aggJa  = jaRes.status  === 'fulfilled' ? jaRes.value  : { volumes: {} }
