@@ -111,6 +111,13 @@ Retour arrière avant l'étape 6 : redéployer le site précédent. Les ancienne
 - Configuration Vercel requise : variable `FIREBASE_SERVICE_ACCOUNT`, plus `TMDB_API_KEY` (déjà en place) ; durée max de la fonction : 60 s (`vercel.json`).
 - Limite connue : les titres d'épisodes du catalogue partagé sont récupérés en français (langue par défaut de l'application) ; une version bilingue pourra être ajoutée.
 
+## 8quater. Étape 2a : couche de lecture v2 (faite, pas branchée sur l'interface)
+- `src/data/assemble.js` : reconstitue `works / watched / ratings / favorites / games / reviews` **au même format que l'ancien modèle** à partir de la bibliothèque + catalogue → les écrans n'ont pas à changer. Test d'aller-retour ancien → v2 → reconstitué (identique, `Infinity` compris).
+- `src/data/library.js` : synchronisation par delta (`updatedAt`) depuis un cache IndexedDB : 1re ouverture = tout lire, ouvertures suivantes = 0 lecture si rien n'a changé ; fenêtre de recouvrement de 10 min (horloges), relecture complète hebdomadaire (filet de sécurité), suppression douce, cache effaçable à la déconnexion.
+- `src/data/catalog.js` : fiches du catalogue en cache 24 h, lecture par lots de 30, fiches absentes mémorisées.
+- Au démarrage on charge le catalogue des œuvres « en cours » / « à voir » (badge « à rattraper », calendrier) ; le reste à la demande (fiche d'une œuvre, statistiques).
+- Test de bout en bout sur l'émulateur : ancien modèle → vraie migration → lecture v2 → reconstitution identique.
+
 ## 9. Décisions
 Tranchées :
 - **Méthode de migration** : depuis le site, dans le navigateur, avec la session de l'utilisateur (aucune clé de compte de service, aucun script local). D'abord un bouton visible uniquement pour le compte du propriétaire (essai grandeur nature), puis exécution automatique à la connexion de chaque utilisateur, une seule fois, avec contrôle avant/après. Le code de migration est retiré une fois tous les comptes actifs migrés.
