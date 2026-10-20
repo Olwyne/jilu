@@ -181,4 +181,37 @@ describe('useWorkActions', () => {
     const saved = mutate.mock.calls[0][0].works.w1
     expect(saved.finishedAt).toBe(999)
   })
+  it('markAllWatched keeps existing watch dates and never stores booleans', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const data = {
+      works: { w1: { id: 'w1', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }, { n: 2, air: 0 }, { n: 3, air: Infinity }] }] } },
+      watched: { 'w1-1-1': 123, 'other-1-1': 456 }
+    }
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+    await act(async () => { await result.current.markAllWatched() })
+    const { watched } = mutate.mock.calls[0][0]
+    expect(watched['w1-1-1']).toBe(123)
+    expect(watched['other-1-1']).toBe(456)
+    expect(watched['w1-1-2']).toEqual(expect.any(Number))
+    expect(watched['w1-1-2']).toBeGreaterThan(1)
+    expect(watched['w1-1-3']).toBeUndefined()
+  })
+
+  it('refreshStaleWorks does not resurrect a work removed during the refresh nor revert its status', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    const w1 = { id: 'w1', source: 'tmdb', sourceId: 1, category: 'series', status: 'a_voir', added: 1, title: 'A' }
+    const w2 = { id: 'w2', source: 'tmdb', sourceId: 2, category: 'series', status: 'a_voir', added: 1, title: 'B' }
+    const data = { works: { w1, w2 }, watched: {} }
+    const { result } = renderHook(() => useWorkActions(data, mutate))
+    tmdbGetDetail.mockImplementation(async (work) => {
+      // pendant le rafraîchissement : w1 est supprimé, w2 passe en "termine"
+      // (la ref du hook pointe vers cet objet : on simule le re-rendu en le modifiant)
+      data.works = { w2: { ...w2, status: 'termine' } }
+      return { ...work, title: work.title + ' (maj)', seasons: [] }
+    })
+    await act(async () => { await result.current.refreshStaleWorks(0, 100) })
+    const { works } = mutate.mock.calls[0][0]
+    expect(works.w1).toBeUndefined()
+    expect(works.w2).toMatchObject({ title: 'B (maj)', status: 'termine' })
+  })
 })

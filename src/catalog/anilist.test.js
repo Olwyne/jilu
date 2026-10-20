@@ -162,6 +162,8 @@ describe('anilistTrendingManga', () => {
   })
 })
 
+const chapterResult = (map) => ({ map, lastChapter: 0, volumeDates: new Map(), chapterDates: new Map() })
+
 describe('anilistGetMangaDetail', () => {
   it('builds seasons with Scans tome first, then numbered volumes', async () => {
     global.fetch = vi.fn().mockResolvedValueOnce({
@@ -169,11 +171,11 @@ describe('anilistGetMangaDetail', () => {
         chapters: 5, volumes: 2, status: 'RELEASING', title: { romaji: 'Test Manga' }
       } } })
     })
-    mangadexGetChapterMap.mockResolvedValueOnce(new Map([
+    mangadexGetChapterMap.mockResolvedValueOnce(chapterResult(new Map([
       [1, 1], [2, 1],   // volume 1
       [3, 2], [4, 2],   // volume 2
       // chapter 5 → no volume (scan)
-    ]))
+    ])))
 
     const result = await anilistGetMangaDetail(999)
     expect(result.ended).toBe(false)
@@ -204,7 +206,7 @@ describe('anilistGetMangaDetail', () => {
         chapters: 1, volumes: 1, status: 'FINISHED', title: { romaji: 'Finished Manga' }
       } } })
     })
-    mangadexGetChapterMap.mockResolvedValueOnce(new Map([[1, 1]]))
+    mangadexGetChapterMap.mockResolvedValueOnce(chapterResult(new Map([[1, 1]])))
     const result = await anilistGetMangaDetail(1)
     expect(result.ended).toBe(true)
   })
@@ -215,7 +217,7 @@ describe('anilistGetMangaDetail', () => {
         chapters: 3, volumes: 1, status: 'FINISHED', title: { romaji: 'Complete' }
       } } })
     })
-    mangadexGetChapterMap.mockResolvedValueOnce(new Map([[1, 1], [2, 1], [3, 1]]))
+    mangadexGetChapterMap.mockResolvedValueOnce(chapterResult(new Map([[1, 1], [2, 1], [3, 1]])))
     const result = await anilistGetMangaDetail(2)
     expect(result.seasons.find((s) => s.n === 0)).toBeUndefined()
     expect(result.seasons).toHaveLength(1)

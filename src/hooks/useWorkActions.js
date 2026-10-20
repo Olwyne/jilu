@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { tmdbGetDetail, tmdbGetBothMeta } from '../catalog/tmdb'
 import { anilistFindId, anilistGetDetail, anilistGetMangaDetail } from '../catalog/anilist'
 import { spotifyGetDetail } from '../catalog/spotify'
@@ -32,7 +33,21 @@ function buildStatusPatch(work, watched, works) {
   return { works: { ...works, [work.id]: updatedWork } }
 }
 
+// Champs propres à l'utilisateur : ils priment toujours sur les données fraîches du catalogue.
+const USER_WORK_FIELDS = ['status', 'added', 'finishedAt']
+
+function applyFresh(fresh, current) {
+  const merged = { ...fresh }
+  for (const k of USER_WORK_FIELDS) if (current[k] !== undefined) merged[k] = current[k]
+  return merged
+}
+
 export function useWorkActions(data, mutate) {
+  // Les rafraîchissements durent plusieurs secondes : on relit l'état le plus récent à la fin
+  // pour ne pas écraser ni ressusciter ce que l'utilisateur a modifié entre-temps.
+  const dataRef = useRef(data)
+  dataRef.current = data
+
   async function toggleEpisode(workId, sNum, eNum) {
     const key = `${workId}-${sNum}-${eNum}`
     const watched = { ...data.watched }
@@ -152,12 +167,13 @@ export function useWorkActions(data, mutate) {
   }
 
   async function markAllWatched() {
-    const watched = {}
     const now = Date.now()
+    const watched = { ...data.watched }
     Object.values(data.works).forEach((w) => {
       if (w.seasons) {
         w.seasons.forEach((s) => s.episodes.forEach((e) => {
-          if (e.air <= now) watched[`${w.id}-${s.n}-${e.n}`] = true
+          const key = `${w.id}-${s.n}-${e.n}`
+          if (e.air <= now && !watched[key]) watched[key] = now
         }))
       }
     })
@@ -258,7 +274,9 @@ export function useWorkActions(data, mutate) {
     if (!work?.sourceId || !DETAIL_FETCHERS[work.source]) return
     const next = await fetchFreshWork(work)
     setRefreshedAt(workId)
-    await mutate({ works: { ...data.works, [workId]: next } })
+    const latest = dataRef.current.works
+    if (!latest[workId]) return
+    await mutate({ works: { ...latest, [workId]: applyFresh(next, latest[workId]) } })
   }
 
   async function refreshStaleWorks(maxAgeMs, batchSize = 100) {
@@ -268,12 +286,17 @@ export function useWorkActions(data, mutate) {
       .sort((a, b) => getRefreshedAt(a.id) - getRefreshedAt(b.id))
       .slice(0, batchSize)
     if (!entries.length) return
-    const works = { ...data.works }
+    const fetched = {}
     for (const work of entries) {
       try {
-        works[work.id] = await fetchFreshWork(work)
+        fetched[work.id] = await fetchFreshWork(work)
         setRefreshedAt(work.id)
       } catch (e) { console.error('[auto-refresh]', work.title, e) }
+    }
+    const latest = dataRef.current.works
+    const works = { ...latest }
+    for (const [id, fresh] of Object.entries(fetched)) {
+      if (latest[id]) works[id] = applyFresh(fresh, latest[id])
     }
     await mutate({ works })
   }
@@ -282,37 +305,23 @@ export function useWorkActions(data, mutate) {
     const entries = Object.values(data.works).filter((w) => w.sourceId && DETAIL_FETCHERS[w.source])
     if (!entries.length) { onProgress?.('Aucune œuvre à rafraîchir'); return }
     let done = 0
-    const works = { ...data.works }
+    const fetched = {}
 
     for (const work of entries) {
       onProgress?.(`Rafraîchissement… ${done}/${entries.length}`)
       try {
-        const fetcher = DETAIL_FETCHERS[work.source]
-        const fresh = await fetcher(work)
-        const meta = work.source === 'tmdb' ? await tmdbGetBothMeta(work) : {}
-        let next = { ...work, ...fresh, ...meta, status: work.status, added: work.added }
-
-        if (work.category === 'animes') {
-          let anilistId = work.anilistId
-          if (!anilistId) {
-            anilistId = await anilistFindId(work.originalTitle || work.title, work.year)
-          }
-          if (anilistId) {
-            const anilistDetail = await anilistGetDetail(anilistId)
-            const keepTmdb = anilistDetail.seasons.length <= 1 && (next.seasons?.length || 0) > 1
-            next = keepTmdb
-              ? { ...next, anilistId }
-              : { ...next, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
-          }
-        }
-
-        const { refreshedAt: _, ...cleanNext } = next
-        works[work.id] = cleanNext
+        const { refreshedAt: _, ...cleanNext } = await fetchFreshWork(work)
+        fetched[work.id] = cleanNext
         setRefreshedAt(work.id)
       } catch (e) { console.error('[refresh]', work.title, e) }
       done++
     }
 
+    const latest = dataRef.current.works
+    const works = { ...latest }
+    for (const [id, fresh] of Object.entries(fetched)) {
+      if (latest[id]) works[id] = applyFresh(fresh, latest[id])
+    }
     await mutate({ works })
     onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
   }

@@ -12,7 +12,7 @@ vi.mock('react-router-dom', () => ({
 describe('MobileNav', () => {
   it('renders nav items and highlights the active one', () => {
     render(<MobileNav />)
-    const libraryItem = screen.getByText('Library').closest('div')
+    const libraryItem = screen.getByText('Library').closest('button')
     expect(libraryItem.className).toMatch(/active/)
   })
 
