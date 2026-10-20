@@ -9,6 +9,13 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    // ---- TEMPORAIRE (migration v2) : à retirer dès que tous les comptes sont migrés ----
+    // Administrateur de la migration : LECTURE de l'ancien modèle, écriture du nouveau modèle uniquement.
+    function isMigrationAdmin() {
+      return signedIn() && request.auth.uid == 'pNGd2tM8Gmg3BSlebv4ZYN8m2yj2';
+    }
+    // -------------------------------------------------------------------------------------
+
     match /users/{uid} {
       allow read, write: if isOwner(uid);
       allow read: if resource.data.settings.publicProfile == true;
@@ -24,12 +31,22 @@ service cloud.firestore {
 
       // Modèle v2 : un document par œuvre suivie, privé à son propriétaire
       match /library/{workId} {
-        allow read, write: if isOwner(uid);
+        allow read, write: if isOwner(uid) || isMigrationAdmin();
       }
       match /migrations/{id} {
-        allow read, write: if isOwner(uid);
+        allow read, write: if isOwner(uid) || isMigrationAdmin();
       }
+
+      // TEMPORAIRE : lecture de l'ancien modèle par l'administrateur de la migration (jamais d'écriture)
+      allow read: if isMigrationAdmin();
+      match /works/{workId} { allow read: if isMigrationAdmin(); }
+      match /watched/{workId} { allow read: if isMigrationAdmin(); }
     }
+
+    // TEMPORAIRE : lectures transversales pour migrer tous les comptes en une fois
+    match /{path=**}/works/{workId} { allow read: if isMigrationAdmin(); }
+    match /{path=**}/watched/{workId} { allow read: if isMigrationAdmin(); }
+    match /{path=**}/library/{workId} { allow read: if isMigrationAdmin(); }
 
     // Catalogue partagé : création seule (jamais de modification par un utilisateur).
     // Les fiches « local-{uid}-… » ne peuvent être créées que par leur propriétaire.
@@ -42,7 +59,8 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if signedIn() && validCatalog(request.resource.data)
         && (!catalogId.matches('^local-.*')
-            || catalogId.matches('^local-' + request.auth.uid + '-.*'));
+            || catalogId.matches('^local-' + request.auth.uid + '-.*')
+            || isMigrationAdmin());
       allow update, delete: if false;
     }
 

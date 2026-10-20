@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MigrationPanel, { MIGRATION_OWNER_UID } from './MigrationPanel'
-import { migrateAccount } from '../../lib/migration'
+import { migrateAccount, migrateAllAccounts } from '../../lib/migration'
 
 let mockUser = { uid: MIGRATION_OWNER_UID }
 vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => ({ user: mockUser }) }))
 vi.mock('../../firebase', () => ({ db: {} }))
-vi.mock('../../lib/migration', () => ({ migrateAccount: vi.fn() }))
+vi.mock('../../lib/migration', () => ({ migrateAccount: vi.fn(), migrateAllAccounts: vi.fn() }))
 
 beforeEach(() => { vi.clearAllMocks(); mockUser = { uid: MIGRATION_OWNER_UID } })
 
@@ -47,5 +47,27 @@ describe('MigrationPanel', () => {
     render(<MigrationPanel />)
     await userEvent.click(screen.getByRole('button', { name: 'Migrer mon compte' }))
     await waitFor(() => expect(screen.getByText(/permission-denied/)).toBeInTheDocument())
+  })
+
+  it('migre tous les comptes après confirmation et affiche le bilan', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    migrateAllAccounts.mockResolvedValue({
+      accounts: 2, catalogWritten: 7,
+      results: {
+        aaaaaaaa11: { report: { works: 3, episodesWatched: 5 }, verification: { ok: true, missing: [], mismatched: [] } },
+        bbbbbbbb22: { report: { works: 1, episodesWatched: 0 }, verification: { ok: true, missing: [], mismatched: [] } },
+      },
+    })
+    render(<MigrationPanel />)
+    await userEvent.click(screen.getByRole('button', { name: 'Migrer tous les comptes' }))
+    await waitFor(() => expect(screen.getByText(/2 compte\(s\) migrés, contrôle OK/)).toBeInTheDocument())
+    expect(migrateAllAccounts).toHaveBeenCalledWith({}, expect.objectContaining({ onBackup: expect.any(Function) }))
+  })
+
+  it('ne fait rien si la confirmation est refusée', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    render(<MigrationPanel />)
+    await userEvent.click(screen.getByRole('button', { name: 'Migrer tous les comptes' }))
+    expect(migrateAllAccounts).not.toHaveBeenCalled()
   })
 })

@@ -97,6 +97,13 @@ Retour arrière avant l'étape 6 : redéployer le site précédent. Les ancienne
 4. **Œuvres sans `sourceId`** (imports sans correspondance) : migrer telles quelles avec `catalog` local à l'utilisateur (`catalog/local-{uid}-{slug}`).
 5. **Très grosses bibliothèques** (4 010 œuvres) : écritures en lots de 400, reprise possible après interruption, durée estimée quelques minutes.
 
+## 8bis. État d'avancement (étape 1 faite)
+- `src/lib/migration.js` : copie `works` + `watched` + notes/favoris/jeux vers `catalog` + `users/{uid}/library`, sans écrire dans l'ancien modèle ; idempotente ; contrôle avant/après.
+- Règles : `catalog` (création seule, validée), `library` et `migrations` ; bloc **TEMPORAIRE** `isMigrationAdmin()` (lecture de l'ancien modèle, écriture du nouveau uniquement) à retirer après la migration.
+- Boutons « Migrer mon compte » et « Migrer tous les comptes » (compte du propriétaire uniquement), sauvegarde JSON téléchargée avant toute écriture.
+- Le site lit encore l'ancien modèle : les données v2 sont écrites mais pas encore utilisées.
+- À retirer après migration : bloc `isMigrationAdmin` et règles `{path=**}` dans `firestore.rules`, `MigrationPanel.jsx`, `src/lib/migration.js`.
+
 ## 9. Décisions
 Tranchées :
 - **Méthode de migration** : depuis le site, dans le navigateur, avec la session de l'utilisateur (aucune clé de compte de service, aucun script local). D'abord un bouton visible uniquement pour le compte du propriétaire (essai grandeur nature), puis exécution automatique à la connexion de chaque utilisateur, une seule fois, avec contrôle avant/après. Le code de migration est retiré une fois tous les comptes actifs migrés.
