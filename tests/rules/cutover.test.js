@@ -9,7 +9,7 @@ import { syncLibrary } from '../../src/data/library.js'
 import { loadCatalog } from '../../src/data/catalog.js'
 import { assembleData } from '../../src/data/assemble.js'
 import { migrateAccount } from '../../src/lib/migration.js'
-import { ensureCutover, isV2Enabled, readFeatureFlags } from '../../src/data/features.js'
+import { ensureCutover } from '../../src/data/cutover.js'
 
 let env
 const as = (uid) => env.authenticatedContext(uid).firestore()
@@ -86,22 +86,5 @@ describe('ensureCutover : rattrape ce qui a changé dans l’ancien modèle depu
     await migrateAccount(db, 'alice')
     const res = await migrateAccount(db, 'alice', { overwrite: 'changed' })
     expect(res.written).toMatchObject({ libraryWritten: 0, catalogWritten: 0, libraryRemoved: 0 })
-  })
-})
-
-describe('interrupteur config/features', () => {
-  it('lisible par les connectés, jamais modifiable depuis l’application', async () => {
-    await seed((d) => setDoc(doc(d, 'config/features'), { v2Users: ['alice'] }))
-    const flags = await readFeatureFlags(as('alice'))
-    expect(isV2Enabled(flags, 'alice')).toBe(true)
-    expect(isV2Enabled(flags, 'bob')).toBe(false)
-    await expect(setDoc(doc(as('alice'), 'config/features'), { v2All: true })).rejects.toMatchObject({ code: 'permission-denied' })
-    await expect(readFeatureFlags(env.unauthenticatedContext().firestore())).rejects.toMatchObject({ code: 'permission-denied' })
-  })
-  it('v2All active tout le monde ; absence du document = modèle actuel', async () => {
-    expect(isV2Enabled({}, 'x')).toBe(false)
-    expect(isV2Enabled({ v2All: true }, 'x')).toBe(true)
-    expect(isV2Enabled(undefined, 'x')).toBe(false)
-    expect(await readFeatureFlags(as('alice'))).toEqual({})
   })
 })

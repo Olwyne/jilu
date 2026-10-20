@@ -3,9 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, usePa
 import { useTranslation } from 'react-i18next'
 import i18n from './i18n/index.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { useAppData } from './hooks/useAppData'
-import { useAppDataV2, clearV2Caches } from './hooks/useAppDataV2'
-import { useDataMode } from './data/useDataMode'
+import { useAppData, clearLocalCaches } from './hooks/useAppData'
+import { useCutover } from './data/useCutover'
 import { useWorkActions } from './hooks/useWorkActions'
 import { useImport } from './hooks/useImport'
 import { useFollows } from './hooks/useFollows'
@@ -67,25 +66,32 @@ function DetailRoute({ data, workActions, currentUser, onOpenEpisode }) {
   )
 }
 
-// Choisit le modèle de données (actuel ou nouveau catalogue partagé) avant d'afficher l'application.
-// `key={mode}` : changer de modèle recharge proprement l'application.
+// Prépare le compte (rattrapage à la première ouverture) avant d'afficher l'application.
 function Shell() {
-  const { user } = useAuth()
-  const { mode, progress } = useDataMode(user)
-  if (mode === 'loading') {
-    return progress ? (
-      <div role="status" style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--color-muted)', fontSize: 15, padding: 24, textAlign: 'center' }}>
-        {progress}
+  const { user, logout } = useAuth()
+  const { status, progress, retry } = useCutover(user)
+  if (status === 'ready') return <ShellInner />
+  const box = { minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--color-muted)', fontSize: 15, padding: 24, textAlign: 'center' }
+  if (status === 'error') {
+    return (
+      <div role="alert" style={box}>
+        <div>
+          <p style={{ marginBottom: 14 }}>Impossible de mettre à jour ta bibliothèque pour le moment. Tes données sont intactes.</p>
+          <button onClick={retry} style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: 'var(--color-accent)', color: '#fff', fontWeight: 600, cursor: 'pointer', marginRight: 10 }}>Réessayer</button>
+          <button onClick={logout} style={{ padding: '10px 20px', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-text)', fontWeight: 600, cursor: 'pointer' }}>Se déconnecter</button>
+        </div>
       </div>
-    ) : null
+    )
   }
-  return <ShellInner key={mode} mode={mode} />
+  return <div role="status" style={box}>{progress || 'Mise à jour de ta bibliothèque…'}</div>
 }
 
-function ShellInner({ mode }) {
+function ShellInner() {
   const { user, logout } = useAuth()
-  const useData = mode === 'v2' ? useAppDataV2 : useAppData
-  const { data, loading, mutate, syncAll, ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog } = useData(user)
+  const {
+    data, loading, mutate, syncAll, getFullData, getCatalogDoc,
+    ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog, refreshWork, refreshStale, refreshAll,
+  } = useAppData(user)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { t } = useTranslation()
@@ -94,7 +100,7 @@ function ShellInner({ mode }) {
   const [episodeModal, setEpisodeModal] = useState(null)
   const [toast, setToast] = useState(null)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
-  const workActions = useWorkActions(data, mutate)
+  const workActions = useWorkActions(data, mutate, { getCatalogDoc, refreshWork, refreshAll })
   const { importTVTime, importTVTimeOut } = useImport(data, mutate)
   const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
   const { following, follow, unfollow, isFollowing } = useFollows(user)
@@ -150,41 +156,38 @@ function ShellInner({ mode }) {
     }).catch((e) => console.warn('[handle]', e))
   }, [loading, user?.uid])
 
-  // Nouveau modèle : les épisodes viennent du catalogue partagé, chargés selon l'écran affiché
+  // Les épisodes viennent du catalogue partagé, chargés selon l'écran affiché
   useEffect(() => {
-    if (mode !== 'v2' || loading) return
-    if (pathname.startsWith('/work/')) ensureWorkCatalog?.(pathname.split('/')[2])
-    else if (pathname.startsWith('/stats') || pathname.startsWith('/profile') || pathname.startsWith('/account')) ensureAllCatalog?.()
-    else if (pathname.startsWith('/library')) ensureProgressCatalog?.()
-  }, [pathname, loading, mode])
+    if (loading) return
+    if (pathname.startsWith('/work/')) ensureWorkCatalog(pathname.split('/')[2])
+    else if (pathname.startsWith('/stats') || pathname.startsWith('/profile') || pathname.startsWith('/account')) ensureAllCatalog()
+    else if (pathname.startsWith('/library')) ensureProgressCatalog()
+  }, [pathname, loading])
 
+  // Rafraîchissement automatique : quelques œuvres en cours de diffusion par session, via le serveur
+  // (qui ne rappelle les API que si la fiche partagée date de plus de 24 h)
   const autoRefreshDone = useRef(false)
   useEffect(() => {
-    if (loading || mode === 'v2') return // nouveau modèle : le rafraîchissement est partagé et se fait côté serveur
-    const DAY = 24 * 60 * 60 * 1000
-    const HOUR = 60 * 60 * 1000
-    if (!autoRefreshDone.current) {
-      autoRefreshDone.current = true
-      workActions.refreshStaleWorks(DAY, 100)
-    }
-    const interval = setInterval(() => workActions.refreshStaleWorks(DAY, 100), HOUR)
-    return () => clearInterval(interval)
-  }, [loading, mode])
+    if (loading || autoRefreshDone.current) return
+    autoRefreshDone.current = true
+    refreshStale().catch((e) => console.warn('[auto-refresh]', e))
+  }, [loading])
 
   function handleChangeLanguage(lang) {
     i18n.changeLanguage(lang)
     mutate({ settings: { ...data.settings, language: lang } })
   }
 
-  function handleExportJSON() {
+  async function handleExportJSON() {
+    const full = await getFullData() // tous les épisodes chargés, même ceux qu'on n'a pas encore ouverts
     const payload = {
       exported: new Date().toISOString(),
-      works: data.works,
-      watched: data.watched,
-      ratings: data.ratings,
-      games: data.games,
-      feed: data.feed,
-      reviews: data.reviews,
+      works: full.works,
+      watched: full.watched,
+      ratings: full.ratings,
+      games: full.games,
+      feed: full.feed,
+      reviews: full.reviews,
     }
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -303,7 +306,7 @@ function ShellInner({ mode }) {
                 onImportTVTimeOut={importTVTimeOut}
                 onExportJSON={handleExportJSON}
                 onExportCSV={handleExportCSV}
-                onLogout={async () => { try { await clearV2Caches(user.uid) } catch { /* cache indisponible */ } await logout() }}
+                onLogout={async () => { try { await clearLocalCaches(user.uid) } catch { /* cache indisponible */ } await logout() }}
                 onChangeLanguage={handleChangeLanguage}
               />
             } />

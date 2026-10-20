@@ -31,7 +31,7 @@ export function createHandler({ verifyToken, store, fetchFresh, now = Date.now }
     }
 
     try {
-      const result = await refreshCatalogWork({ store, fetchFresh, id, now: now() })
+      const result = await refreshCatalogWork({ store, fetchFresh, id, now: now(), minAgeMs: body?.minAgeMs })
       res.status(HTTP_STATUS[result.status] ?? 500).json(result)
     } catch (e) {
       console.error('[refresh-work]', id, e)

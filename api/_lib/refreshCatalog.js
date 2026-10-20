@@ -7,6 +7,7 @@ import { clean, totalEpisodes } from '../../src/lib/catalogUtils.js'
 import { DETAIL_FETCHERS } from '../../src/catalog/refresh.js'
 
 export const MIN_AGE_MS = 6 * 60 * 60 * 1000
+export const MAX_REQUESTED_AGE_MS = 7 * 24 * 60 * 60 * 1000
 export const LEASE_MS = 2 * 60 * 1000
 const USER_FIELDS = ['status', 'added', 'finishedAt', 'refreshedAt', 'leaseUntil']
 
@@ -17,13 +18,16 @@ export class RefreshError extends Error {
   }
 }
 
-export async function refreshCatalogWork({ store, fetchFresh, id, now = Date.now() }) {
+// minAgeMs : l'appelant peut demander une fraîcheur plus exigeante que le plancher (ex. rafraîchissement automatique : 24 h),
+// jamais moins que MIN_AGE_MS : le serveur reste maître de la protection des quotas.
+export async function refreshCatalogWork({ store, fetchFresh, id, now = Date.now(), minAgeMs = MIN_AGE_MS }) {
+  const minAge = Math.min(MAX_REQUESTED_AGE_MS, Math.max(MIN_AGE_MS, Number(minAgeMs) || MIN_AGE_MS))
   const current = await store.get(id)
   if (!current) return { status: 'not_found' }
   if (current.sourceId == null || !current.source || !DETAIL_FETCHERS[current.source]) return { status: 'unsupported' }
-  if (current.refreshedAt && now - current.refreshedAt < MIN_AGE_MS) return { status: 'fresh', refreshedAt: current.refreshedAt }
+  if (current.refreshedAt && now - current.refreshedAt < minAge) return { status: 'fresh', refreshedAt: current.refreshedAt }
 
-  const lease = await store.acquireLease(id, now, LEASE_MS, MIN_AGE_MS)
+  const lease = await store.acquireLease(id, now, LEASE_MS, minAge)
   if (!lease.ok) return { status: lease.reason, refreshedAt: lease.refreshedAt }
 
   try {

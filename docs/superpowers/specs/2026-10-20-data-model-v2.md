@@ -118,13 +118,16 @@ Retour arrière avant l'étape 6 : redéployer le site précédent. Les ancienne
 - Au démarrage on charge le catalogue des œuvres « en cours » / « à voir » (badge « à rattraper », calendrier) ; le reste à la demande (fiche d'une œuvre, statistiques).
 - Test de bout en bout sur l'émulateur : ancien modèle → vraie migration → lecture v2 → reconstitution identique.
 
-## 8quinquies. Étapes 2b + 3 : lecture/écriture v2 branchées, derrière un interrupteur (faites, interrupteur éteint)
-- **Interrupteur** : document `config/features` (créé à la main dans la console Firebase) = `{ v2Users: ["<uid>"], v2All: false }`. Lecture réservée aux connectés, aucune écriture possible depuis l'application. Absent ou erreur = modèle actuel. **Retour arrière : retirer l'uid de `v2Users` (ou `v2All: false`), sans redéploiement.**
-- **Au premier passage en v2** d'un compte : rattrapage automatique (`ensureCutover`) de ce qui a changé dans l'ancien modèle depuis la première copie (progression, statuts, œuvres ajoutées ou retirées), puis marqueur `cutoverAt`. Écran « Mise à jour de ta bibliothèque… » pendant ce temps. Un contrôle en échec = on reste sur le modèle actuel.
-- **Lecture v2** (`useAppDataV2`) : synchronisation par delta depuis le cache local ; catalogue des œuvres « en cours / à voir » à l'ouverture (fraîcheur 24 h), épisodes des autres œuvres à la demande selon l'écran (fiche, statistiques, profil, compte, bibliothèque). Resynchronisation au retour sur l'application (> 2 min).
-- **Écriture v2** (`planV2Writes` + `commitPlan`) : une écriture par document touché, champs ciblés (`eps.1-3`, `ratings.w`…), suppression douce, fiches de catalogue créées une seule fois. **Double écriture** : l'ancien modèle reçoit les mêmes modifications (retour arrière sans perte, profils publics inchangés).
-- Écart volontaire avec l'ancien modèle : retirer une œuvre efface aussi son avis personnel (l'ancien le laissait orphelin).
-- Pas encore fait : rafraîchissement des fiches via `api/refresh-work` (étape 4). En mode v2 le rafraîchissement automatique côté navigateur est désactivé ; les boutons « rafraîchir » ne modifient plus le catalogue partagé.
+## 8quinquies. Bascule définitive : tout le monde sur le nouveau modèle (faite)
+Décision du propriétaire : pas d'interrupteur, pas de double écriture, pas de retour au modèle précédent.
+- **Rattrapage à la première ouverture de chaque compte** (`useCutover` / `ensureCutover`) : ce qui a changé dans l'ancien modèle depuis la première copie est repris (progression, statuts, œuvres ajoutées ou retirées), contrôlé, puis marqué `cutoverAt`. Écran de progression ; en cas d'échec : message + « Réessayer » (rien n'est perdu, l'ancien modèle n'est pas touché).
+- **Une seule écriture** : `users/{uid}/library/{œuvre}` (une écriture par document touché) ; le document utilisateur ne reçoit plus que réglages, profil, fil d'activité… et une copie des avis personnels (le fil d'amis la lit). **L'ancien modèle n'est plus écrit** ; ses données restent en place, inutilisées (suppression à décider plus tard).
+- **Lecture** : cache local + synchronisation par delta ; catalogue des œuvres « en cours / à voir » à l'ouverture, avec durée de validité par fiche (24 h si encore en diffusion, 30 jours sinon) ; épisodes des autres œuvres à la demande selon l'écran ; export complet = charge tout avant d'exporter.
+- **Rafraîchissement 100 % côté serveur** (`api/refresh-work`) : le navigateur n'appelle plus TMDB/AniList/MangaDex pour mettre à jour une fiche. Automatique : au plus 5 œuvres en diffusion par ouverture, fraîcheur demandée 24 h ; manuel : bouton de la fiche et réglages (100 œuvres en diffusion max), plancher serveur 6 h. Le serveur ne rappelle les API qu'une fois par fiche et par période, quel que soit le nombre d'utilisateurs.
+- **Ajout d'une œuvre** : si la fiche existe déjà au catalogue, aucun appel aux API ; sinon le premier qui l'ajoute la crée pour tous (création seule).
+- **Profils publics** : lecture de la bibliothèque publique + catalogue (lisible par tous). **Suppression de compte** : efface aussi `library` et `migrations`.
+- Règles : `library` lisible si profil public ; `catalog` lisible par tous (métadonnées publiques) ; plus de document de configuration.
+- Limites connues : pas encore de tâche planifiée (les œuvres que personne n'ouvre ne sont pas rafraîchies) ; en développement local, `/api/refresh-work` n'existe pas (le serveur de dev ne le simule pas) ; la fiche créée par le premier utilisateur n'est pas vérifiée côté serveur (acceptable à petite échelle).
 
 ## 9. Décisions
 Tranchées :

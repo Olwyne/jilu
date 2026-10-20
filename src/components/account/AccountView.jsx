@@ -210,7 +210,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
             await batch.commit()
           }
         }
-        for (const name of ['works', 'watched']) {
+        for (const name of ['works', 'watched', 'library', 'migrations']) {
           await deleteAll((await getDocs(collection(db, 'users', uid, name))).docs)
         }
         await deleteAll((await getDocs(query(collection(db, 'reviews'), where('userId', '==', uid)))).docs)

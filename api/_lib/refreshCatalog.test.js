@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { refreshCatalogWork, MIN_AGE_MS, LEASE_MS, RefreshError } from './refreshCatalog.js'
+import { refreshCatalogWork, MIN_AGE_MS, MAX_REQUESTED_AGE_MS, LEASE_MS, RefreshError } from './refreshCatalog.js'
 
 const season = (count) => ({ n: 1, name: null, episodes: Array.from({ length: count }, (_, i) => ({ n: i + 1, title: `E${i + 1}`, air: 1000 })) })
 const NOW = 10 * MIN_AGE_MS
@@ -113,5 +113,19 @@ describe('refreshCatalogWork', () => {
     const store = fakeStore({ 'tmdb-movie-2': film })
     fetchFresh.mockResolvedValue({ ...film, title: 'Film (maj)', seasons: null })
     expect((await refreshCatalogWork({ store, fetchFresh, id: 'tmdb-movie-2', now: NOW })).status).toBe('refreshed')
+  })
+
+  it('l’appelant peut exiger une fraîcheur plus grande (24 h) mais jamais moins que le plancher', async () => {
+    const DAY = 24 * 60 * 60 * 1000
+    const recent = stale({ refreshedAt: NOW - 8 * 60 * 60 * 1000 }) // 8 h : périmée pour 6 h, récente pour 24 h
+    const store = fakeStore({ 'tmdb-tv-1': recent })
+    expect((await refreshCatalogWork({ store, fetchFresh, id: 'tmdb-tv-1', now: NOW, minAgeMs: DAY })).status).toBe('fresh')
+    expect(fetchFresh).not.toHaveBeenCalled()
+    expect((await refreshCatalogWork({ store, fetchFresh, id: 'tmdb-tv-1', now: NOW })).status).toBe('refreshed')
+
+    const veryRecent = fakeStore({ 'tmdb-tv-1': stale({ refreshedAt: NOW - 60_000 }) })
+    expect((await refreshCatalogWork({ store: veryRecent, fetchFresh, id: 'tmdb-tv-1', now: NOW, minAgeMs: 1 })).status).toBe('fresh') // plancher
+    expect((await refreshCatalogWork({ store: veryRecent, fetchFresh, id: 'tmdb-tv-1', now: NOW, minAgeMs: 'abc' })).status).toBe('fresh')
+    expect(MAX_REQUESTED_AGE_MS).toBeGreaterThan(DAY)
   })
 })

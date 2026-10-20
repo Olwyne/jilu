@@ -7,6 +7,7 @@ const IN_LIMIT = 30
 const key = (id) => `cat:${id}`
 
 // ids : ids de catalogue à charger · force : ids à relire même si le cache est récent
+// maxAgeMs : durée de validité du cache, nombre ou fonction (fiche) => durée (ex. courte pour une série en diffusion)
 export async function loadCatalog(db, ids, cache, { now = Date.now(), maxAgeMs = CATALOG_MAX_AGE_MS, force = [] } = {}) {
   const unique = [...new Set(ids)]
   const forced = new Set(force)
@@ -16,7 +17,8 @@ export async function loadCatalog(db, ids, cache, { now = Date.now(), maxAgeMs =
   for (const id of unique) {
     const entry = await cache.get(key(id))
     if (entry?.doc) result[id] = entry.doc
-    const fresh = entry && now - entry.at < maxAgeMs
+    const ttl = typeof maxAgeMs === 'function' ? maxAgeMs(entry?.doc) : maxAgeMs
+    const fresh = entry && now - entry.at < ttl
     if (!fresh || forced.has(id)) toFetch.push(id)
   }
 

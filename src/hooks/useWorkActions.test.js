@@ -197,21 +197,39 @@ describe('useWorkActions', () => {
     expect(watched['w1-1-3']).toBeUndefined()
   })
 
-  it('refreshStaleWorks does not resurrect a work removed during the refresh nor revert its status', async () => {
+  it('addWork réutilise la fiche du catalogue partagé sans appeler les API', async () => {
     const mutate = vi.fn().mockResolvedValue()
-    const w1 = { id: 'w1', source: 'tmdb', sourceId: 1, category: 'series', status: 'a_voir', added: 1, title: 'A' }
-    const w2 = { id: 'w2', source: 'tmdb', sourceId: 2, category: 'series', status: 'a_voir', added: 1, title: 'B' }
-    const data = { works: { w1, w2 }, watched: {} }
-    const { result } = renderHook(() => useWorkActions(data, mutate))
-    tmdbGetDetail.mockImplementation(async (work) => {
-      // pendant le rafraîchissement : w1 est supprimé, w2 passe en "termine"
-      // (la ref du hook pointe vers cet objet : on simule le re-rendu en le modifiant)
-      data.works = { w2: { ...w2, status: 'termine' } }
-      return { ...work, title: work.title + ' (maj)', seasons: [] }
-    })
-    await act(async () => { await result.current.refreshStaleWorks(0, 100) })
+    const shared = { id: 'tmdb-tv-7', source: 'tmdb', sourceId: 7, title: 'Partagée', category: 'series', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }], updatedAt: 5, refreshedAt: 4, leaseUntil: 0 }
+    const services = { getCatalogDoc: vi.fn().mockResolvedValue(shared) }
+    const { result } = renderHook(() => useWorkActions({ works: {}, watched: {} }, mutate, services))
+    await act(async () => { await result.current.addWork({ id: 'tmdb-tv-7', source: 'tmdb', sourceId: 7, category: 'series', title: 'Résultat de recherche' }) })
+    expect(tmdbGetDetail).not.toHaveBeenCalled()
+    expect(anilistFindId).not.toHaveBeenCalled()
     const { works } = mutate.mock.calls[0][0]
-    expect(works.w1).toBeUndefined()
-    expect(works.w2).toMatchObject({ title: 'B (maj)', status: 'termine' })
+    expect(works['tmdb-tv-7']).toMatchObject({ title: 'Partagée', status: 'a_voir', seasons: expect.any(Array) })
+    expect(works['tmdb-tv-7']).not.toHaveProperty('updatedAt')   // champs internes du catalogue
+    expect(works['tmdb-tv-7']).not.toHaveProperty('refreshedAt')
+    expect(works['tmdb-tv-7']).not.toHaveProperty('leaseUntil')
+  })
+
+  it('addWork interroge les API seulement si personne ne l’a encore ajoutée', async () => {
+    const mutate = vi.fn().mockResolvedValue()
+    tmdbGetDetail.mockResolvedValue({ id: 'tmdb-tv-8', title: 'Nouvelle', seasons: [{ n: 1, episodes: [] }] })
+    const services = { getCatalogDoc: vi.fn().mockResolvedValue(null) }
+    const { result } = renderHook(() => useWorkActions({ works: {}, watched: {} }, mutate, services))
+    await act(async () => { await result.current.addWork({ id: 'tmdb-tv-8', source: 'tmdb', sourceId: 8, category: 'series', title: 'Nouvelle' }) })
+    expect(tmdbGetDetail).toHaveBeenCalledTimes(1)
+    expect(mutate.mock.calls[0][0].works['tmdb-tv-8']).toMatchObject({ status: 'a_voir' })
+  })
+
+  it('le rafraîchissement est délégué au serveur (aucun appel d’API depuis le navigateur)', async () => {
+    const services = { refreshWork: vi.fn().mockResolvedValue({ refreshed: ['w1'] }), refreshAll: vi.fn().mockResolvedValue({ refreshed: [] }) }
+    const { result } = renderHook(() => useWorkActions({ works: { w1: { id: 'w1' } }, watched: {} }, vi.fn(), services))
+    await act(async () => { await result.current.refreshWork('w1') })
+    await act(async () => { await result.current.refreshAllWorks(() => {}) })
+    expect(services.refreshWork).toHaveBeenCalledWith('w1')
+    expect(services.refreshAll).toHaveBeenCalledTimes(1)
+    expect(tmdbGetDetail).not.toHaveBeenCalled()
+    expect(result.current.refreshStaleWorks).toBeUndefined()
   })
 })

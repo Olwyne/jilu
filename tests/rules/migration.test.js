@@ -96,9 +96,10 @@ describe('règles v2', () => {
     await assertFails(setDoc(doc(as('bob'), 'users/alice/library/w2'), { title: 'y' }))
     await assertFails(setDoc(doc(as('bob'), 'users/alice/migrations/v2'), { ok: true }))
   })
-  it('catalog : lecture pour les connectés, création seule, pas de modification', async () => {
+  it('catalog : lecture publique (profils publics), création seule, pas de modification', async () => {
     const fiche = { title: 'Série', category: 'series' }
-    await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), 'catalog/x')))
+    await assertSucceeds(getDoc(doc(env.unauthenticatedContext().firestore(), 'catalog/x')))
+    await assertFails(setDoc(doc(env.unauthenticatedContext().firestore(), 'catalog/x'), fiche)) // jamais d'écriture hors connexion
     await assertSucceeds(setDoc(doc(as('alice'), 'catalog/tmdb-tv-1'), fiche))
     await assertSucceeds(getDoc(doc(as('bob'), 'catalog/tmdb-tv-1')))
     await assertFails(setDoc(doc(as('bob'), 'catalog/tmdb-tv-1'), { ...fiche, title: 'Piraté' }))

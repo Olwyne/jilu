@@ -119,6 +119,20 @@ describe('loadCatalog (cache)', () => {
     expect((await loadCatalog(db, ['tmdb-tv-2'], cache, { now: 3000, force: ['tmdb-tv-2'] })).fetched).toBe(1)
   })
 
+  it('durée de validité par fiche : courte pour une série en diffusion, longue pour une œuvre terminée', async () => {
+    await seed(async (d) => {
+      await setDoc(doc(d, 'catalog/live-1'), work('live-1', { ended: false }))
+      await setDoc(doc(d, 'catalog/done-2'), work('done-2', { ended: true }))
+      await setDoc(doc(d, 'catalog/film-3'), work('film-3', { category: 'films', seasons: null }))
+    })
+    const db = as('alice')
+    const ids = ['live-1', 'done-2', 'film-3']
+    const ttl = (doc) => (doc?.ended === false ? 24 * 3600 * 1000 : 30 * 24 * 3600 * 1000)
+    expect((await loadCatalog(db, ids, cache, { now: 1000, maxAgeMs: ttl })).fetched).toBe(3)
+    expect((await loadCatalog(db, ids, cache, { now: 1000 + 2 * 24 * 3600 * 1000, maxAgeMs: ttl })).fetched).toBe(1) // seule la série en diffusion
+    expect((await loadCatalog(db, ids, cache, { now: 1000 + 31 * 24 * 3600 * 1000, maxAgeMs: ttl })).fetched).toBe(3)
+  })
+
   it('mémorise aussi les fiches absentes pour ne pas les redemander', async () => {
     const db = as('alice')
     const first = await loadCatalog(db, ['inconnue'], cache, { now: 1000 })

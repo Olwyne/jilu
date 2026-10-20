@@ -22,22 +22,18 @@ service cloud.firestore {
         allow read: if get(/databases/$(database)/documents/users/$(uid)).data.settings.publicProfile == true;
       }
 
-      // Modèle v2 : un document par œuvre suivie, privé à son propriétaire
+      // Une fiche de bibliothèque par œuvre suivie (progression, statut, notes) ; publique si le profil l'est
       match /library/{workId} {
         allow read, write: if isOwner(uid);
+        allow read: if get(/databases/$(database)/documents/users/$(uid)).data.settings.publicProfile == true;
       }
       match /migrations/{id} {
         allow read, write: if isOwner(uid);
       }
     }
 
-    // Interrupteur du nouveau modèle (v2) : lisible par les connectés, modifiable uniquement depuis la console Firebase
-    match /config/{docId} {
-      allow read: if signedIn();
-      allow write: if false;
-    }
-
-    // Catalogue partagé : création seule (jamais de modification par un utilisateur).
+    // Catalogue partagé (métadonnées publiques des œuvres, identiques pour tous) : lisible par tous, y compris
+    // sur un profil public. Création seule côté application ; les mises à jour sont faites par le serveur.
     // Les fiches « local-{uid}-… » ne peuvent être créées que par leur propriétaire.
     match /catalog/{catalogId} {
       function validCatalog(d) {
@@ -45,7 +41,7 @@ service cloud.firestore {
           && d.category is string
           && d.keys().size() <= 40;
       }
-      allow read: if signedIn();
+      allow read: if true;
       allow create: if signedIn() && validCatalog(request.resource.data)
         && (!catalogId.matches('^local-.*')
             || catalogId.matches('^local-' + request.auth.uid + '-.*'));

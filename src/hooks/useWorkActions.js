@@ -1,7 +1,6 @@
-import { useRef } from 'react'
 import { tmdbGetBothMeta } from '../catalog/tmdb'
 import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
-import { DETAIL_FETCHERS, fetchFreshWork } from '../catalog/refresh'
+import { DETAIL_FETCHERS } from '../catalog/refresh'
 
 function computeAutoStatus(work, watched) {
   if (!work.seasons || !work.seasons.length) return null
@@ -26,21 +25,8 @@ function buildStatusPatch(work, watched, works) {
   return { works: { ...works, [work.id]: updatedWork } }
 }
 
-// Champs propres à l'utilisateur : ils priment toujours sur les données fraîches du catalogue.
-const USER_WORK_FIELDS = ['status', 'added', 'finishedAt']
-
-function applyFresh(fresh, current) {
-  const merged = { ...fresh }
-  for (const k of USER_WORK_FIELDS) if (current[k] !== undefined) merged[k] = current[k]
-  return merged
-}
-
-export function useWorkActions(data, mutate) {
-  // Les rafraîchissements durent plusieurs secondes : on relit l'état le plus récent à la fin
-  // pour ne pas écraser ni ressusciter ce que l'utilisateur a modifié entre-temps.
-  const dataRef = useRef(data)
-  dataRef.current = data
-
+// services (facultatif) : fournis par useAppData — fiche du catalogue partagé et rafraîchissement côté serveur
+export function useWorkActions(data, mutate, services = {}) {
   async function toggleEpisode(workId, sNum, eNum) {
     const key = `${workId}-${sNum}-${eNum}`
     const watched = { ...data.watched }
@@ -212,95 +198,51 @@ export function useWorkActions(data, mutate) {
     setToast({ workId: work.id, title: work.title, label, sNum, eNum })
   }
 
+  // Champs de la fiche du catalogue qui ne font pas partie de l'œuvre de l'utilisateur
+  const CATALOG_ONLY = ['updatedAt', 'refreshedAt', 'leaseUntil']
+
   async function addWork(searchResult) {
     if (data.works[searchResult.id]) return
-    const fetchDetail = DETAIL_FETCHERS[searchResult.source]
-    const [detailed, bothMeta] = await Promise.all([
-      fetchDetail ? fetchDetail(searchResult) : Promise.resolve(searchResult),
-      searchResult.source === 'tmdb' ? tmdbGetBothMeta(searchResult) : Promise.resolve({})
-    ])
-    let work = { ...detailed, ...bothMeta }
 
-    if (searchResult.category === 'animes' && searchResult.source === 'tmdb') {
-      try {
-        const anilistId = await anilistFindId(searchResult.originalTitle || searchResult.title, searchResult.year)
-        if (anilistId) {
-          const anilistDetail = await anilistGetDetail(anilistId)
-          const keepTmdb = anilistDetail.seasons.length <= 1 && (work.seasons?.length || 0) > 1
-          work = keepTmdb
-            ? { ...work, anilistId }
-            : { ...work, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
-        }
-      } catch { /* keep TMDB seasons on failure */ }
+    // Quelqu'un l'a déjà ajoutée : la fiche partagée existe, aucun appel aux API
+    const shared = await services.getCatalogDoc?.(searchResult.id).catch(() => null)
+    let work
+    if (shared) {
+      work = Object.fromEntries(Object.entries(shared).filter(([k]) => !CATALOG_ONLY.includes(k)))
+    } else {
+      const fetchDetail = DETAIL_FETCHERS[searchResult.source]
+      const [detailed, bothMeta] = await Promise.all([
+        fetchDetail ? fetchDetail(searchResult) : Promise.resolve(searchResult),
+        searchResult.source === 'tmdb' ? tmdbGetBothMeta(searchResult) : Promise.resolve({})
+      ])
+      work = { ...detailed, ...bothMeta }
+
+      if (searchResult.category === 'animes' && searchResult.source === 'tmdb') {
+        try {
+          const anilistId = await anilistFindId(searchResult.originalTitle || searchResult.title, searchResult.year)
+          if (anilistId) {
+            const anilistDetail = await anilistGetDetail(anilistId)
+            const keepTmdb = anilistDetail.seasons.length <= 1 && (work.seasons?.length || 0) > 1
+            work = keepTmdb
+              ? { ...work, anilistId }
+              : { ...work, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
+          }
+        } catch { /* keep TMDB seasons on failure */ }
+      }
     }
 
     const works = { ...data.works, [searchResult.id]: { ...work, status: 'a_voir', added: Date.now() } }
     await mutate({ works })
   }
 
-  function getRefreshedAt(workId) {
-    try { return parseInt(localStorage.getItem(`refreshedAt:${workId}`) || '0', 10) || 0 } catch { return 0 }
-  }
-  function setRefreshedAt(workId) {
-    try { localStorage.setItem(`refreshedAt:${workId}`, String(Date.now())) } catch {}
-  }
-
+  // Rafraîchissement : toujours côté serveur, qui ne rappelle les API que si la fiche partagée est périmée
   async function refreshWork(workId) {
-    const work = data.works[workId]
-    if (!work?.sourceId || !DETAIL_FETCHERS[work.source]) return
-    const next = await fetchFreshWork(work)
-    setRefreshedAt(workId)
-    const latest = dataRef.current.works
-    if (!latest[workId]) return
-    await mutate({ works: { ...latest, [workId]: applyFresh(next, latest[workId]) } })
-  }
-
-  async function refreshStaleWorks(maxAgeMs, batchSize = 100) {
-    const now = Date.now()
-    const entries = Object.values(data.works)
-      .filter((w) => w.sourceId && DETAIL_FETCHERS[w.source] && now - getRefreshedAt(w.id) > maxAgeMs)
-      .sort((a, b) => getRefreshedAt(a.id) - getRefreshedAt(b.id))
-      .slice(0, batchSize)
-    if (!entries.length) return
-    const fetched = {}
-    for (const work of entries) {
-      try {
-        fetched[work.id] = await fetchFreshWork(work)
-        setRefreshedAt(work.id)
-      } catch (e) { console.error('[auto-refresh]', work.title, e) }
-    }
-    const latest = dataRef.current.works
-    const works = { ...latest }
-    for (const [id, fresh] of Object.entries(fetched)) {
-      if (latest[id]) works[id] = applyFresh(fresh, latest[id])
-    }
-    await mutate({ works })
+    return services.refreshWork?.(workId)
   }
 
   async function refreshAllWorks(onProgress) {
-    const entries = Object.values(data.works).filter((w) => w.sourceId && DETAIL_FETCHERS[w.source])
-    if (!entries.length) { onProgress?.('Aucune œuvre à rafraîchir'); return }
-    let done = 0
-    const fetched = {}
-
-    for (const work of entries) {
-      onProgress?.(`Rafraîchissement… ${done}/${entries.length}`)
-      try {
-        const { refreshedAt: _, ...cleanNext } = await fetchFreshWork(work)
-        fetched[work.id] = cleanNext
-        setRefreshedAt(work.id)
-      } catch (e) { console.error('[refresh]', work.title, e) }
-      done++
-    }
-
-    const latest = dataRef.current.works
-    const works = { ...latest }
-    for (const [id, fresh] of Object.entries(fetched)) {
-      if (latest[id]) works[id] = applyFresh(fresh, latest[id])
-    }
-    await mutate({ works })
-    onProgress?.(`✓ ${done} œuvre${done > 1 ? 's' : ''} mises à jour`)
+    return services.refreshAll?.(onProgress)
   }
 
-  return { addWork, removeWork, refreshWork, refreshStaleWorks, markWorkWatched, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
+  return { addWork, removeWork, refreshWork, markWorkWatched, toggleEpisode, markSeason, setRating, setStatus, postComment, toggleLike, deleteComment, addGameMinutes, toggleGameTier, markAllWatched, resetProgress, clearAll, toggleFavorite, markWatchedToast, refreshAllWorks }
 }

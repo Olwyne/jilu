@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore'
+import { createCache } from '../../data/cache.js'
+import { loadCatalog } from '../../data/catalog.js'
+import { assembleData } from '../../data/assemble.js'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import { useFollows } from '../../hooks/useFollows'
@@ -38,21 +41,17 @@ export default function PublicProfilePage() {
         const base = { ...EMPTY, ...userSnap.data() }
         if (!base.settings?.publicProfile) { setStatus('private'); return }
 
-        const [worksSnap, watchedSnap] = await Promise.all([
-          getDocs(collection(db, 'users', uid, 'works')),
-          getDocs(collection(db, 'users', uid, 'watched'))
-        ])
-        const works = {}
-        worksSnap.forEach(d => { works[d.id] = d.data() })
-        const watched = {}
-        watchedSnap.forEach(d => {
-          Object.entries(d.data().eps || {}).forEach(([k, ts]) => {
-            watched[`${d.id}-${k}`] = ts
-          })
-        })
+        // Bibliothèque publique de l'utilisateur + fiches du catalogue partagé (épisodes pour les statistiques)
+        const libSnap = await getDocs(collection(db, 'users', uid, 'library'))
+        const library = {}
+        libSnap.forEach(d => { if (!d.data().deleted) library[d.id] = { ...d.data(), id: d.id } })
+        const catalogIds = Object.values(library).map(l => l.catalogId).filter(Boolean)
+        const cache = await createCache('jilu-public')
+        const { catalog } = await loadCatalog(db, catalogIds, cache, { maxAgeMs: 30 * 24 * 60 * 60 * 1000 })
+        const assembled = assembleData({ library, catalog })
 
         setTargetUid(uid)
-        setProfileData({ ...base, works, watched })
+        setProfileData({ ...base, ...assembled })
         setStatus('found')
       } catch { setStatus('notfound') }
     }

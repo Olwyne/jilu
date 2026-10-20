@@ -46,6 +46,14 @@ describe('POST /api/refresh-work', () => {
     expect(docs.get('tmdb-tv-1').title).toBe('S2')
     expect((await call(handler, { body: JSON.stringify({ id: 'tmdb-tv-1' }) })).status).toBe(200)
   })
+  it('transmet la fraîcheur demandée', async () => {
+    const { handler, deps, docs } = setup()
+    docs.set('tmdb-tv-1', { ...doc, refreshedAt: 1e12 - 8 * 3600 * 1000 }) // rafraîchie il y a 8 h
+    const day = await call(handler, { body: { id: 'tmdb-tv-1', minAgeMs: 24 * 3600 * 1000 } })
+    expect(day.body.status).toBe('fresh')
+    expect(deps.fetchFresh).not.toHaveBeenCalled()
+    expect((await call(handler, { body: { id: 'tmdb-tv-1' } })).body.status).toBe('refreshed')
+  })
   it('traduit les statuts : 404 inconnue, 502 en cas d’échec amont', async () => {
     const { handler, deps } = setup()
     expect((await call(handler, { body: { id: 'inconnue' } })).status).toBe(404)
