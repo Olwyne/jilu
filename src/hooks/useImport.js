@@ -10,6 +10,17 @@ const BATCH = 5
 const norm = s => (s || '').toLowerCase().replace(/[éèêë]/g, 'e').replace(/[àâä]/g, 'a').replace(/[ùûü]/g, 'u').replace(/[îï]/g, 'i').replace(/[ôö]/g, 'o').replace(/[^a-z0-9]/g, '')
 const slug = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
+const MAX_IMPORT_BYTES = 200 * 1024 * 1024 // garde-fou contre les archives piégées (zip bomb)
+
+async function loadZip(file) {
+  if (file.size > 50 * 1024 * 1024) throw new Error('Fichier trop volumineux')
+  const zip = await JSZip.loadAsync(file)
+  let total = 0
+  zip.forEach((_, entry) => { total += entry._data?.uncompressedSize || 0 })
+  if (total > MAX_IMPORT_BYTES) throw new Error('Archive trop volumineuse une fois décompressée')
+  return zip
+}
+
 function parseCSV(text) {
   const lines = text.trim().split('\n')
   const hdr = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
@@ -44,7 +55,7 @@ export function useImport(data, mutate) {
     if (!file) return
     onStatus('Lecture du fichier…')
     try {
-      const zip = await JSZip.loadAsync(file)
+      const zip = await loadZip(file)
 
       // Followed + special status
       const followedNames = new Set()
@@ -190,7 +201,7 @@ export function useImport(data, mutate) {
     onStatus('Lecture du fichier…')
     const STATUS_MAP = { up_to_date: 'en_cours', continuing: 'en_cours', watch_later: 'a_voir', not_started_yet: 'a_voir', stopped: 'abandonne' }
     try {
-      const zip = await JSZip.loadAsync(file)
+      const zip = await loadZip(file)
       const seriesJsonFile = zip.file(/^tvtime-series-.*\.json$/)[0]
       if (!seriesJsonFile) { onStatus('Erreur : tvtime-series-*.json introuvable.'); return }
 
@@ -215,6 +226,7 @@ export function useImport(data, mutate) {
             }
             const title = hit?.name || show.title; if (!title) return
             const workId = hit ? `tmdb-tv-${hit.id}` : slug(title)
+            if (!workId) return
             const tmdbId = hit ? String(hit.id) : null
             let work = tmdbId ? existingByTmdb.get(tmdbId) : works[workId]
             if (!work) {
@@ -268,7 +280,7 @@ export function useImport(data, mutate) {
               }
               const title = hit?.title || movie.title; if (!title) return
               const workId = hit ? `tmdb-movie-${hit.id}` : slug(title)
-              if (works[workId]) return
+              if (!workId || works[workId]) return
               const watchedAt = movie.watched_at ? new Date(movie.watched_at).getTime() : Date.now()
               works[workId] = {
                 id: workId, source: 'tmdb', sourceId: hit?.id, tmdbId: hit ? 'm' + hit.id : null,

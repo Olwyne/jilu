@@ -3,6 +3,14 @@ import StarterKit from '@tiptap/starter-kit'
 import DOMPurify from 'dompurify'
 import { useReviews } from '../../hooks/useReviews'
 
+// Les liens des avis ouvrent toujours un nouvel onglet, sans transmettre window.opener ni le referrer
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  if (node.tagName === 'A') {
+    node.setAttribute('target', '_blank')
+    node.setAttribute('rel', 'noopener noreferrer')
+  }
+})
+
 function avgRating(reviews) {
   const rated = reviews.filter((r) => r.rating > 0)
   if (!rated.length) return null

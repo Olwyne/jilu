@@ -1,8 +1,12 @@
 const BASE = 'https://api.spotify.com/v1'
 
+let cachedToken = { value: null, expiresAt: 0 }
+
 async function getToken() {
+  if (cachedToken.value && Date.now() < cachedToken.expiresAt) return cachedToken.value
   const res = await fetch('/api/spotify-token')
   const json = await res.json()
+  cachedToken = { value: json.access_token, expiresAt: Date.now() + 25 * 60 * 1000 }
   return json.access_token
 }
 

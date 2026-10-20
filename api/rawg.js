@@ -1,10 +1,10 @@
+import { onlyGet, pickParams, forward } from './_proxy.js'
+
+const PARAMS = ['search', 'ordering', 'page_size', 'page', 'genres']
+
 export default async function handler(req, res) {
-  const qs = new URLSearchParams({ key: process.env.RAWG_API_KEY, ...req.query }).toString()
-  try {
-    const upstream = await fetch(`https://api.rawg.io/api/games?${qs}`)
-    const json = await upstream.json()
-    res.status(upstream.status).json(json)
-  } catch (e) {
-    res.status(500).json({ error: e.message })
-  }
+  if (!onlyGet(req, res)) return
+  const qs = pickParams(req.query, PARAMS)
+  qs.set('key', process.env.RAWG_API_KEY)
+  await forward(res, `https://api.rawg.io/api/games?${qs}`)
 }
