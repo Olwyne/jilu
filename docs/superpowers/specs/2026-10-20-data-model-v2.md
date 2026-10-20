@@ -97,8 +97,12 @@ Retour arrière avant l'étape 6 : redéployer le site précédent. Les ancienne
 4. **Œuvres sans `sourceId`** (imports sans correspondance) : migrer telles quelles avec `catalog` local à l'utilisateur (`catalog/local-{uid}-{slug}`).
 5. **Très grosses bibliothèques** (4 010 œuvres) : écritures en lots de 400, reprise possible après interruption, durée estimée quelques minutes.
 
-## 9. Décisions à prendre
-1. Valider le schéma (en particulier : résumé copié dans `library` vs lecture du catalogue).
-2. Migration par bouton réservé à votre compte pour le premier essai, puis automatique à la connexion, ou script lancé par vous ?
-3. Sauvegarde : export natif (forfait Blaze) ou export JSON par script ?
-4. Date de l'étape 6 (suppression de l'ancien modèle) : combien de jours d'observation ?
+## 9. Décisions
+Tranchées :
+- **Méthode de migration** : depuis le site, dans le navigateur, avec la session de l'utilisateur (aucune clé de compte de service, aucun script local). D'abord un bouton visible uniquement pour le compte du propriétaire (essai grandeur nature), puis exécution automatique à la connexion de chaque utilisateur, une seule fois, avec contrôle avant/après. Le code de migration est retiré une fois tous les comptes actifs migrés.
+- **Sauvegarde** : export JSON des données de l'utilisateur téléchargé automatiquement avant la copie (fonction d'export déjà présente), en plus du fait que la migration ne supprime rien.
+- **Audit des comptes** : fait ; l'orphelin restant (sans donnée) est supprimé à la main dans la console.
+
+Restent à valider :
+1. Le schéma (en particulier : résumé copié dans `library` vs lecture du catalogue).
+2. Nombre de jours d'observation avant de supprimer l'ancien modèle (proposition : 14 jours).
