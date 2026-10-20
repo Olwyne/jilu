@@ -37,7 +37,7 @@ export function assembleData({ library = {}, catalog = {} }) {
       ratings[sep === -1 ? `${k}:${id}` : `${k.slice(0, sep)}:${id}-${k.slice(sep + 1)}`] = v
     }
 
-    if (lib.orphanProgress) continue // progression conservée, mais pas d'œuvre à afficher
+    if (lib.orphanProgress || !lib.catalogId) continue // progression conservée, mais pas d'œuvre à afficher
 
     works[id] = workFrom(lib, lib.catalogId ? catalog[lib.catalogId] : undefined)
     if (lib.favorite) favorites[id] = true

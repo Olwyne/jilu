@@ -31,6 +31,12 @@ service cloud.firestore {
       }
     }
 
+    // Interrupteur du nouveau modèle (v2) : lisible par les connectés, modifiable uniquement depuis la console Firebase
+    match /config/{docId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
     // Catalogue partagé : création seule (jamais de modification par un utilisateur).
     // Les fiches « local-{uid}-… » ne peuvent être créées que par leur propriétaire.
     match /catalog/{catalogId} {

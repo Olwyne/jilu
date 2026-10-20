@@ -118,6 +118,14 @@ Retour arrière avant l'étape 6 : redéployer le site précédent. Les ancienne
 - Au démarrage on charge le catalogue des œuvres « en cours » / « à voir » (badge « à rattraper », calendrier) ; le reste à la demande (fiche d'une œuvre, statistiques).
 - Test de bout en bout sur l'émulateur : ancien modèle → vraie migration → lecture v2 → reconstitution identique.
 
+## 8quinquies. Étapes 2b + 3 : lecture/écriture v2 branchées, derrière un interrupteur (faites, interrupteur éteint)
+- **Interrupteur** : document `config/features` (créé à la main dans la console Firebase) = `{ v2Users: ["<uid>"], v2All: false }`. Lecture réservée aux connectés, aucune écriture possible depuis l'application. Absent ou erreur = modèle actuel. **Retour arrière : retirer l'uid de `v2Users` (ou `v2All: false`), sans redéploiement.**
+- **Au premier passage en v2** d'un compte : rattrapage automatique (`ensureCutover`) de ce qui a changé dans l'ancien modèle depuis la première copie (progression, statuts, œuvres ajoutées ou retirées), puis marqueur `cutoverAt`. Écran « Mise à jour de ta bibliothèque… » pendant ce temps. Un contrôle en échec = on reste sur le modèle actuel.
+- **Lecture v2** (`useAppDataV2`) : synchronisation par delta depuis le cache local ; catalogue des œuvres « en cours / à voir » à l'ouverture (fraîcheur 24 h), épisodes des autres œuvres à la demande selon l'écran (fiche, statistiques, profil, compte, bibliothèque). Resynchronisation au retour sur l'application (> 2 min).
+- **Écriture v2** (`planV2Writes` + `commitPlan`) : une écriture par document touché, champs ciblés (`eps.1-3`, `ratings.w`…), suppression douce, fiches de catalogue créées une seule fois. **Double écriture** : l'ancien modèle reçoit les mêmes modifications (retour arrière sans perte, profils publics inchangés).
+- Écart volontaire avec l'ancien modèle : retirer une œuvre efface aussi son avis personnel (l'ancien le laissait orphelin).
+- Pas encore fait : rafraîchissement des fiches via `api/refresh-work` (étape 4). En mode v2 le rafraîchissement automatique côté navigateur est désactivé ; les boutons « rafraîchir » ne modifient plus le catalogue partagé.
+
 ## 9. Décisions
 Tranchées :
 - **Méthode de migration** : depuis le site, dans le navigateur, avec la session de l'utilisateur (aucune clé de compte de service, aucun script local). D'abord un bouton visible uniquement pour le compte du propriétaire (essai grandeur nature), puis exécution automatique à la connexion de chaque utilisateur, une seule fois, avec contrôle avant/après. Le code de migration est retiré une fois tous les comptes actifs migrés.

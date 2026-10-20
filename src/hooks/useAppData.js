@@ -1,36 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { doc, collection, onSnapshot, setDoc, writeBatch, deleteField } from 'firebase/firestore'
 import { db } from '../firebase'
+import { sanitize, groupWatched, batchWrite, writeV1, syncAllV1 } from '../data/writeV1.js'
 
-function sanitize(v) {
-  if (v === undefined) return null
-  if (v === null || typeof v !== 'object') return v
-  if (Array.isArray(v)) return v.map(sanitize)
-  return Object.fromEntries(Object.entries(v).filter(([, val]) => val !== undefined).map(([k, val]) => [k, sanitize(val)]))
-}
-
-function groupWatched(flat) {
-  const byWork = {}
-  for (const key of Object.keys(flat)) {
-    const parts = key.split('-')
-    const eNum = parts.pop()
-    const sNum = parts.pop()
-    const workId = parts.join('-')
-    if (!byWork[workId]) byWork[workId] = {}
-    byWork[workId][`${sNum}-${eNum}`] = flat[key]
-  }
-  return byWork
-}
-
-async function batchWrite(ops) {
-  for (let i = 0; i < ops.length; i += 499) {
-    const b = writeBatch(db)
-    ops.slice(i, i + 499).forEach(fn => fn(b))
-    await b.commit()
-  }
-}
-
-const EMPTY_DATA = {
+export const EMPTY_DATA = {
   works: {}, watched: {}, ratings: {}, reviews: [],
   settings: { startPage: 'library', autoNext: true, spoilerFree: true, notifNewEp: true, notifCalendar: true, notifWeekly: false, publicProfile: false, adult: false, darkMode: true, language: null, goals: {} },
   profile: { name: '', handle: '', email: '', memberSince: '' },
@@ -76,7 +49,7 @@ export function useAppData(user) {
         })
       }
       await setDoc(userRef, { works: deleteField(), watched: deleteField() }, { merge: true })
-      if (ops.length > 0) await batchWrite(ops)
+      if (ops.length > 0) await batchWrite(db, ops)
     }
 
     const unsubMain = onSnapshot(
@@ -129,69 +102,15 @@ export function useAppData(user) {
   }, [user])
 
   async function mutate(patch) {
-    const next = { ...dataRef.current, ...patch }
-    setData(next)
+    const prev = dataRef.current
+    setData({ ...prev, ...patch })
     if (!user) return
-
-    const ops = []
-    const userRef = doc(db, 'users', user.uid)
-    const { works, watched, ...mainPatch } = patch
-
-    if (works !== undefined) {
-      const current = dataRef.current.works || {}
-      const nextWorks = works || {}
-      Object.keys(current).forEach(id => {
-        if (!nextWorks[id]) ops.push(b => b.delete(doc(db, 'users', user.uid, 'works', id)))
-      })
-      Object.entries(nextWorks).forEach(([id, work]) => {
-        if (JSON.stringify(current[id]) !== JSON.stringify(work))
-          ops.push(b => b.set(doc(db, 'users', user.uid, 'works', id), sanitize(work)))
-      })
-    }
-
-    if (watched !== undefined) {
-      const currentByWork = groupWatched(dataRef.current.watched || {})
-      const nextByWork = groupWatched(watched || {})
-      const allIds = new Set([...Object.keys(currentByWork), ...Object.keys(nextByWork)])
-      allIds.forEach(workId => {
-        const cur = currentByWork[workId]
-        const nxt = nextByWork[workId]
-        if (!nxt) {
-          ops.push(b => b.delete(doc(db, 'users', user.uid, 'watched', workId)))
-        } else if (JSON.stringify(cur) !== JSON.stringify(nxt)) {
-          ops.push(b => b.set(doc(db, 'users', user.uid, 'watched', workId), { eps: sanitize(nxt) }))
-        }
-      })
-    }
-
-    if (Object.keys(mainPatch).length > 0) {
-      ops.push(b => b.set(userRef, sanitize(mainPatch), { merge: true }))
-    }
-
-    if (ops.length > 0) await batchWrite(ops)
+    await writeV1(db, user.uid, prev, patch)
   }
 
   async function syncAll() {
     if (!user) return
-    const d = dataRef.current
-    const ops = []
-    const userRef = doc(db, 'users', user.uid)
-
-    ops.push(b => b.set(userRef, sanitize({
-      ratings: d.ratings, reviews: d.reviews, settings: d.settings,
-      profile: d.profile, feed: d.feed, games: d.games, favorites: d.favorites, ccLikes: d.ccLikes
-    }), { merge: true }))
-
-    Object.entries(d.works || {}).forEach(([id, work]) => {
-      ops.push(b => b.set(doc(db, 'users', user.uid, 'works', id), sanitize(work)))
-    })
-
-    const byWork = groupWatched(d.watched || {})
-    Object.entries(byWork).forEach(([workId, eps]) => {
-      ops.push(b => b.set(doc(db, 'users', user.uid, 'watched', workId), { eps: sanitize(eps) }))
-    })
-
-    await batchWrite(ops)
+    await syncAllV1(db, user.uid, dataRef.current)
   }
 
   return { data, loading, mutate, syncAll, error }

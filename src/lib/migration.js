@@ -26,6 +26,28 @@ export function catalogIdFor(uid, work) {
   return work.source && work.sourceId != null ? work.id : `local-${uid}-${work.id}`
 }
 
+// Fiche de catalogue d'une œuvre : tout sauf les champs propres à l'utilisateur.
+export function catalogDocFrom(work, now = Date.now()) {
+  return clean({ ...Object.fromEntries(Object.entries(work).filter(([k]) => !USER_FIELDS.includes(k))), updatedAt: now })
+}
+
+// Résumé affiché dans la liste sans lire le catalogue
+export function summaryFrom(work) {
+  return {
+    title: work.title, titles: work.titles, poster: work.poster, posters: work.posters,
+    category: work.category, genre: work.genre, year: work.year, originalTitle: work.originalTitle,
+  }
+}
+
+// Égalité profonde qui accepte Infinity/NaN (JSON.stringify ne les représente pas)
+export function deepEqual(a, b) {
+  if (a === b || (Number.isNaN(a) && Number.isNaN(b))) return true
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false
+  const ka = Object.keys(a).filter((k) => a[k] !== undefined)
+  const kb = Object.keys(b).filter((k) => b[k] !== undefined)
+  return ka.length === kb.length && ka.every((k) => deepEqual(a[k], b[k]))
+}
+
 // Entre deux versions de la même fiche, garder la plus complète (plus d'épisodes) ; à égalité, la première.
 // (conservée pour d'éventuelles fusions de fiches ; testée)
 export function pickBestCatalog(a, b) {
@@ -34,10 +56,10 @@ export function pickBestCatalog(a, b) {
   return totalEpisodes(b) > totalEpisodes(a) ? b : a
 }
 
-const countTruthy = (eps) => Object.values(eps || {}).filter(Boolean).length
+export const countTruthy = (eps) => Object.values(eps || {}).filter(Boolean).length
 
 // Rattache chaque clé de note ("w:ID", "s:ID-1", "e:ID-1-2") à l'œuvre dont l'id est le plus long préfixe.
-function assignRatings(ratings, workIds) {
+export function assignRatings(ratings, workIds) {
   const ids = [...workIds].sort((a, b) => b.length - a.length)
   const byWork = {}
   const unassigned = []
@@ -65,16 +87,14 @@ export function buildUserMigration({ uid, works = {}, watchedDocs = {}, main = {
     const w = { ...works[id], id: works[id].id ?? id }
     const catalogId = catalogIdFor(uid, w)
     if (catalogId !== w.id) localWorks++
-    const catalogDoc = Object.fromEntries(Object.entries(w).filter(([k]) => !USER_FIELDS.includes(k)))
-    catalog[catalogId] = clean({ ...catalogDoc, updatedAt: now })
+    catalog[catalogId] = catalogDocFrom(w, now)
 
     const eps = watchedDocs[id] || {}
     library[id] = clean({
       id,
       catalogId,
       // résumé pour afficher la liste sans lire le catalogue
-      title: w.title, titles: w.titles, poster: w.poster, posters: w.posters,
-      category: w.category, genre: w.genre, year: w.year, originalTitle: w.originalTitle,
+      ...summaryFrom(w),
       // données propres à l'utilisateur
       status: w.status, added: w.added, finishedAt: w.finishedAt,
       ratings: ratingsByWork[id],
@@ -131,7 +151,7 @@ export function verifyUserMigration({ works = {}, watchedDocs = {} }, libraryDoc
 
 // --- Lecture / écriture Firestore -------------------------------------------
 
-async function idsThatExist(colRef, ids) {
+export async function idsThatExist(colRef, ids) {
   const found = new Set()
   for (let i = 0; i < ids.length; i += IN_LIMIT) {
     const snap = await getDocs(query(colRef, where(documentId(), 'in', ids.slice(i, i + IN_LIMIT))))
@@ -162,7 +182,14 @@ async function commitInBatches(db, ops, onProgress, label) {
   }
 }
 
-async function readLibrary(db, uid) {
+// Le contenu utile a-t-il changé ? (on ignore les champs de suivi de la migration)
+function libraryDiffers(existing, built) {
+  if (existing.deleted) return true // supprimée puis ré-ajoutée dans l'ancien modèle
+  const strip = ({ updatedAt, migration, deleted, ...rest }) => rest
+  return !deepEqual(strip(existing), strip(built))
+}
+
+export async function readLibrary(db, uid) {
   const snap = await getDocs(collection(db, 'users', uid, 'library'))
   const out = {}
   snap.forEach((d) => { out[d.id] = d.data() })
@@ -188,7 +215,9 @@ async function writeMarker(db, uid, report, verification) {
 }
 
 // Migre le compte `uid` (le propriétaire : utilisable avec les règles normales).
-export async function migrateAccount(db, uid, { onProgress, onBackup } = {}) {
+// overwrite: 'changed' (rattrapage au basculement) réécrit aussi les fiches de bibliothèque qui ont changé
+// dans l'ancien modèle depuis la première copie ; sinon les fiches déjà présentes sont ignorées.
+export async function migrateAccount(db, uid, { onProgress, onBackup, overwrite = false } = {}) {
   onProgress?.('Lecture des données…')
   const v1 = await readUserV1(db, uid)
   onBackup?.({ [uid]: v1 })
@@ -196,8 +225,22 @@ export async function migrateAccount(db, uid, { onProgress, onBackup } = {}) {
 
   onProgress?.('Vérification de l’existant…')
   const skipCatalog = await idsThatExist(collection(db, 'catalog'), Object.keys(built.catalog))
-  const skipLibrary = await idsThatExist(collection(db, 'users', uid, 'library'), Object.keys(built.library))
+  let skipLibrary
+  if (overwrite === 'changed') {
+    const existing = await readLibrary(db, uid)
+    skipLibrary = new Set(Object.keys(built.library).filter((id) => existing[id] && !libraryDiffers(existing[id], built.library[id])))
+  } else {
+    skipLibrary = await idsThatExist(collection(db, 'users', uid, 'library'), Object.keys(built.library))
+  }
   const written = await writeUser(db, uid, built, { skipCatalog, skipLibrary, onProgress })
+  if (overwrite === 'changed') {
+    // œuvres retirées de l'ancien modèle depuis la première copie : suppression douce dans le nouveau
+    const existing = await readLibrary(db, uid)
+    const now = Date.now()
+    const gone = Object.keys(existing).filter((id) => !existing[id].deleted && !built.library[id])
+    await commitInBatches(db, gone.map((id) => (b) => b.set(doc(db, 'users', uid, 'library', id), { deleted: true, updatedAt: now }, { merge: true })), onProgress, 'Nettoyage')
+    written.libraryRemoved = gone.length
+  }
 
   onProgress?.('Contrôle…')
   const verification = verifyUserMigration(v1, await readLibrary(db, uid))

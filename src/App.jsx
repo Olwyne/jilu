@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import i18n from './i18n/index.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useAppData } from './hooks/useAppData'
+import { useAppDataV2, clearV2Caches } from './hooks/useAppDataV2'
+import { useDataMode } from './data/useDataMode'
 import { useWorkActions } from './hooks/useWorkActions'
 import { useImport } from './hooks/useImport'
 import { useFollows } from './hooks/useFollows'
@@ -65,9 +67,25 @@ function DetailRoute({ data, workActions, currentUser, onOpenEpisode }) {
   )
 }
 
+// Choisit le modèle de données (actuel ou nouveau catalogue partagé) avant d'afficher l'application.
+// `key={mode}` : changer de modèle recharge proprement l'application.
 function Shell() {
+  const { user } = useAuth()
+  const { mode, progress } = useDataMode(user)
+  if (mode === 'loading') {
+    return progress ? (
+      <div role="status" style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--color-muted)', fontSize: 15, padding: 24, textAlign: 'center' }}>
+        {progress}
+      </div>
+    ) : null
+  }
+  return <ShellInner key={mode} mode={mode} />
+}
+
+function ShellInner({ mode }) {
   const { user, logout } = useAuth()
-  const { data, loading, mutate, syncAll } = useAppData(user)
+  const useData = mode === 'v2' ? useAppDataV2 : useAppData
+  const { data, loading, mutate, syncAll, ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog } = useData(user)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { t } = useTranslation()
@@ -132,9 +150,17 @@ function Shell() {
     }).catch((e) => console.warn('[handle]', e))
   }, [loading, user?.uid])
 
+  // Nouveau modèle : les épisodes viennent du catalogue partagé, chargés selon l'écran affiché
+  useEffect(() => {
+    if (mode !== 'v2' || loading) return
+    if (pathname.startsWith('/work/')) ensureWorkCatalog?.(pathname.split('/')[2])
+    else if (pathname.startsWith('/stats') || pathname.startsWith('/profile') || pathname.startsWith('/account')) ensureAllCatalog?.()
+    else if (pathname.startsWith('/library')) ensureProgressCatalog?.()
+  }, [pathname, loading, mode])
+
   const autoRefreshDone = useRef(false)
   useEffect(() => {
-    if (loading) return
+    if (loading || mode === 'v2') return // nouveau modèle : le rafraîchissement est partagé et se fait côté serveur
     const DAY = 24 * 60 * 60 * 1000
     const HOUR = 60 * 60 * 1000
     if (!autoRefreshDone.current) {
@@ -143,7 +169,7 @@ function Shell() {
     }
     const interval = setInterval(() => workActions.refreshStaleWorks(DAY, 100), HOUR)
     return () => clearInterval(interval)
-  }, [loading])
+  }, [loading, mode])
 
   function handleChangeLanguage(lang) {
     i18n.changeLanguage(lang)
@@ -277,7 +303,7 @@ function Shell() {
                 onImportTVTimeOut={importTVTimeOut}
                 onExportJSON={handleExportJSON}
                 onExportCSV={handleExportCSV}
-                onLogout={logout}
+                onLogout={async () => { try { await clearV2Caches(user.uid) } catch { /* cache indisponible */ } await logout() }}
                 onChangeLanguage={handleChangeLanguage}
               />
             } />
