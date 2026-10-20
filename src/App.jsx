@@ -32,6 +32,7 @@ import TermsPage from './components/legal/TermsPage'
 import LegalNoticePage from './components/legal/LegalNoticePage'
 import KeyboardHelpModal from './components/ui/KeyboardHelpModal'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import { ensureHandle } from './lib/handle'
 
 function getRouteCopy(t) {
   return {
@@ -116,6 +117,20 @@ function Shell() {
   }, [toast])
 
   useEffect(() => { setEpisodeModal(null) }, [pathname])
+
+  // Comptes sans pseudo (inscription sans étape pseudo, anciens comptes) : on réserve un pseudo
+  // dérivé de l'e-mail une seule fois par appareil ; l'utilisateur peut le changer ensuite.
+  useEffect(() => {
+    if (loading || !user) return
+    const flag = `handleChecked:${user.uid}`
+    try { if (localStorage.getItem(flag)) return } catch { /* stockage indisponible : on vérifie à chaque fois */ }
+    ensureHandle(user, data.profile?.handle).then((handle) => {
+      if (!handle) return
+      if (handle !== data.profile?.handle) return mutate({ profile: { ...data.profile, handle } })
+    }).then(() => {
+      try { localStorage.setItem(flag, '1') } catch { /* ignoré */ }
+    }).catch((e) => console.warn('[handle]', e))
+  }, [loading, user?.uid])
 
   const autoRefreshDone = useRef(false)
   useEffect(() => {
