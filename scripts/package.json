@@ -1,0 +1,9 @@
+{
+  "name": "jilu-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Scripts d'administration (Admin SDK) — isolés du site : pnpm install dans ce dossier",
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}
