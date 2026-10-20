@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
-import { migrateAccount, migrateAllAccounts } from '../../lib/migration'
+import { migrateAccount } from '../../lib/migration'
 
 // TEMPORAIRE (migration v2) : réservé au compte du propriétaire pour l'essai grandeur nature.
 // À retirer, avec src/lib/migration.js, quand tous les comptes sont migrés.
@@ -22,33 +22,12 @@ export default function MigrationPanel() {
   const [status, setStatus] = useState('idle') // idle | running | done | error
   const [progress, setProgress] = useState('')
   const [result, setResult] = useState(null)
-  const [allResult, setAllResult] = useState(null)
 
   if (!user || user.uid !== MIGRATION_OWNER_UID) return null
-
-  async function runAll() {
-    if (!window.confirm('Migrer TOUS les comptes ? Une sauvegarde JSON complète est téléchargée d’abord. Rien n’est supprimé dans l’ancien modèle.')) return
-    setStatus('running')
-    setResult(null)
-    setAllResult(null)
-    try {
-      const res = await migrateAllAccounts(db, {
-        onProgress: setProgress,
-        onBackup: (data) => downloadJSON(`jilu-sauvegarde-complete-${new Date().toISOString().slice(0, 10)}.json`, data),
-      })
-      setAllResult(res)
-      setStatus('done')
-    } catch (e) {
-      console.error('[migration]', e)
-      setProgress(e?.message || String(e))
-      setStatus('error')
-    }
-  }
 
   async function run() {
     setStatus('running')
     setResult(null)
-    setAllResult(null)
     try {
       const res = await migrateAccount(db, user.uid, {
         onProgress: setProgress,
@@ -78,30 +57,8 @@ export default function MigrationPanel() {
       >
         {status === 'running' ? 'Migration en cours…' : 'Migrer mon compte'}
       </button>
-      <button
-        onClick={runAll}
-        disabled={status === 'running'}
-        style={{ marginLeft: 10, padding: '10px 20px', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-text)', fontWeight: 600, cursor: status === 'running' ? 'wait' : 'pointer', opacity: status === 'running' ? 0.6 : 1 }}
-      >
-        Migrer tous les comptes
-      </button>
       {status === 'running' && <div style={{ fontSize: 13, marginTop: 10 }}>{progress}</div>}
       {status === 'error' && <div style={{ fontSize: 13, marginTop: 10, color: 'var(--color-danger-text)' }}>Erreur : {progress}</div>}
-      {status === 'done' && allResult && (() => {
-        const entries = Object.entries(allResult.results)
-        const failed = entries.filter(([, r]) => !r.verification.ok)
-        return (
-          <div style={{ fontSize: 13, marginTop: 10, lineHeight: 1.6 }}>
-            <div style={{ fontWeight: 600, color: failed.length ? 'var(--color-danger-text)' : 'var(--color-green, #22c55e)' }}>
-              {failed.length ? `⚠ ${failed.length} compte(s) avec un contrôle en échec` : `✓ ${entries.length} compte(s) migrés, contrôle OK`}
-            </div>
-            <div>{allResult.catalogWritten} fiches de catalogue créées</div>
-            {entries.map(([uid, r]) => (
-              <div key={uid}>{uid.slice(0, 8)}… : {r.report.works} œuvres, {r.report.episodesWatched} épisodes vus {r.verification.ok ? '✓' : `⚠ manquants: ${r.verification.missing.length}, différents: ${r.verification.mismatched.length}`}</div>
-            ))}
-          </div>
-        )
-      })()}
       {status === 'done' && result && (
         <div style={{ fontSize: 13, marginTop: 10, lineHeight: 1.6 }}>
           <div style={{ fontWeight: 600, color: v.ok ? 'var(--color-green, #22c55e)' : 'var(--color-danger-text)' }}>

@@ -7,7 +7,7 @@
 // Elle est idempotente : relancée, elle ignore ce qui existe déjà.
 // Code temporaire : à retirer quand tous les comptes sont migrés et le nouveau modèle validé.
 import {
-  collection, collectionGroup, doc, documentId, getDoc, getDocs, query, where, writeBatch,
+  collection, doc, documentId, getDoc, getDocs, query, where, writeBatch,
 } from 'firebase/firestore'
 
 export const MIGRATION_VERSION = 1
@@ -36,6 +36,7 @@ export function catalogIdFor(uid, work) {
 }
 
 // Entre deux versions de la même fiche, garder la plus complète (plus d'épisodes) ; à égalité, la première.
+// (conservée pour d'éventuelles fusions de fiches ; testée)
 export function pickBestCatalog(a, b) {
   if (!a) return b
   if (!b) return a
@@ -211,46 +212,4 @@ export async function migrateAccount(db, uid, { onProgress, onBackup } = {}) {
   const verification = verifyUserMigration(v1, await readLibrary(db, uid))
   await writeMarker(db, uid, built.report, verification)
   return { report: built.report, written, verification }
-}
-
-// Migre tous les comptes (réservé à l'administrateur désigné dans les règles).
-export async function migrateAllAccounts(db, { onProgress, onBackup } = {}) {
-  onProgress?.('Lecture de tous les comptes…')
-  const [worksSnap, watchedSnap, usersSnap] = await Promise.all([
-    getDocs(collectionGroup(db, 'works')),
-    getDocs(collectionGroup(db, 'watched')),
-    getDocs(collection(db, 'users')),
-  ])
-  const byUser = {}
-  const slot = (uid) => (byUser[uid] ||= { uid, main: {}, works: {}, watchedDocs: {} })
-  usersSnap.forEach((d) => { slot(d.id).main = d.data() })
-  worksSnap.forEach((d) => { slot(d.ref.parent.parent.id).works[d.id] = d.data() })
-  watchedSnap.forEach((d) => { slot(d.ref.parent.parent.id).watchedDocs[d.id] = d.data().eps || {} })
-  onBackup?.(byUser)
-
-  const uids = Object.keys(byUser)
-  const built = {}
-  let bestCatalog = {}
-  for (const uid of uids) {
-    built[uid] = buildUserMigration(byUser[uid])
-    for (const [id, data] of Object.entries(built[uid].catalog)) bestCatalog[id] = pickBestCatalog(bestCatalog[id], data)
-  }
-
-  onProgress?.('Vérification du catalogue existant…')
-  const skipCatalog = await idsThatExist(collection(db, 'catalog'), Object.keys(bestCatalog))
-  const catalogOps = Object.entries(bestCatalog)
-    .filter(([id]) => !skipCatalog.has(id))
-    .map(([id, data]) => (b) => b.set(doc(db, 'catalog', id), data))
-  await commitInBatches(db, catalogOps, onProgress, 'Catalogue')
-
-  const results = {}
-  for (const uid of uids) {
-    onProgress?.(`Compte ${Object.keys(results).length + 1}/${uids.length}…`)
-    const skipLibrary = await idsThatExist(collection(db, 'users', uid, 'library'), Object.keys(built[uid].library))
-    const written = await writeUser(db, uid, { catalog: {}, library: built[uid].library }, { skipCatalog: new Set(), skipLibrary, onProgress })
-    const verification = verifyUserMigration(byUser[uid], await readLibrary(db, uid))
-    await writeMarker(db, uid, built[uid].report, verification)
-    results[uid] = { report: built[uid].report, written, verification }
-  }
-  return { accounts: uids.length, catalogWritten: catalogOps.length, results }
 }
