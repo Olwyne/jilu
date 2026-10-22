@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from './i18n/index.js'
@@ -9,7 +9,6 @@ import { useWorkActions } from './hooks/useWorkActions'
 import { useImport } from './hooks/useImport'
 import { useFollows } from './hooks/useFollows'
 import LoginPage from './components/auth/LoginPage'
-import LandingPage from './components/auth/LandingPage'
 import SignupPage from './components/auth/SignupPage'
 import ForgotPasswordPage from './components/auth/ForgotPasswordPage'
 import ResetPasswordPage from './components/auth/ResetPasswordPage'
@@ -17,23 +16,30 @@ import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import Header from './components/layout/Header'
 import LibraryView from './components/library/LibraryView'
-import DetailView from './components/detail/DetailView'
-import PreviewView from './components/detail/PreviewView'
-import EpisodeModal from './components/modals/EpisodeModal'
-import CalendarView from './components/calendar/CalendarView'
 import DashboardView from './components/dashboard/DashboardView'
-import StatsView from './components/stats/StatsView'
-import AccountView from './components/account/AccountView'
-import ProfileView from './components/profile/ProfileView'
-import PublicProfilePage from './components/profile/PublicProfilePage'
 import Toast from './components/Toast'
 import SearchModal from './components/modals/SearchModal'
-import PrivacyPage from './components/legal/PrivacyPage'
-import TermsPage from './components/legal/TermsPage'
-import LegalNoticePage from './components/legal/LegalNoticePage'
 import KeyboardHelpModal from './components/ui/KeyboardHelpModal'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { ensureHandle } from './lib/handle'
+
+const EpisodeModal = lazy(() => import('./components/modals/EpisodeModal'))
+const LandingPage = lazy(() => import('./components/auth/LandingPage'))
+const DetailView = lazy(() => import('./components/detail/DetailView'))
+const PreviewView = lazy(() => import('./components/detail/PreviewView'))
+const CalendarView = lazy(() => import('./components/calendar/CalendarView'))
+const StatsView = lazy(() => import('./components/stats/StatsView'))
+const AccountView = lazy(() => import('./components/account/AccountView'))
+const ProfileView = lazy(() => import('./components/profile/ProfileView'))
+const PublicProfilePage = lazy(() => import('./components/profile/PublicProfilePage'))
+const PrivacyPage = lazy(() => import('./components/legal/PrivacyPage'))
+const TermsPage = lazy(() => import('./components/legal/TermsPage'))
+const LegalNoticePage = lazy(() => import('./components/legal/LegalNoticePage'))
+
+function RouteFallback() {
+  const { t } = useTranslation()
+  return <div role="status" aria-busy="true" style={{ padding: 40, color: 'var(--color-muted)', fontSize: 14 }}>{t('profile.loading')}</div>
+}
 
 function getRouteCopy(t) {
   return {
@@ -244,6 +250,7 @@ function ShellInner() {
           isMobile={isMobile}
         />
         <main id="main-content" style={{ padding: `22px ${isMobile ? 16 : 30}px 40px`, maxWidth: 1240, width: '100%', margin: '0 auto' }}>
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/library" element={
@@ -332,6 +339,7 @@ function ShellInner() {
             } />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
+          </Suspense>
         </main>
       </div>
       {isMobile && <MobileNav />}
@@ -359,6 +367,7 @@ function ShellInner() {
         />
       )}
       {episodeModal && data.works[episodeModal.workId] && (
+        <Suspense fallback={null}>
         <EpisodeModal
           work={data.works[episodeModal.workId]}
           sNum={episodeModal.sNum}
@@ -370,6 +379,7 @@ function ShellInner() {
           currentUser={currentUser}
           onClose={() => setEpisodeModal(null)}
         />
+        </Suspense>
       )}
       {shortcutsOpen && <KeyboardHelpModal onClose={() => setShortcutsOpen(false)} />}
     </div>
@@ -410,6 +420,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/u/:handle" element={<PublicProfilePage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
@@ -421,6 +432,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/*" element={<AuthGuard />} />
         </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   )

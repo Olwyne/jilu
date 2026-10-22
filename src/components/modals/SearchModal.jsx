@@ -69,7 +69,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
               >
                 {c.label}
                 {disabled && (
-                  <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--color-danger-fill)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                  <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--color-danger-fill)', color: '#fff', fontSize: 12, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
                     {t('search.comingSoon')}
                   </span>
                 )}
@@ -83,7 +83,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
             <div style={{ padding: 32, textAlign: 'center', color: 'var(--color-muted-3)', fontSize: 14 }}>{t('search.noResults', { query })}</div>
           )}
           {!loading && query.trim().length < 2 && trending.length > 0 && (
-            <div style={{ padding: '8px 12px 4px', fontSize: 11, fontWeight: 700, color: 'var(--color-muted-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+            <div style={{ padding: '8px 12px 4px', fontSize: 12, fontWeight: 700, color: 'var(--color-muted-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
               {t('search.trending')}
             </div>
           )}

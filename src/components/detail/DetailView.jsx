@@ -82,7 +82,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
               <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('detail.myRating')}</span>
               <div style={{ display: 'flex', gap: 3 }}>
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <span key={n} {...pressable(() => actions.setRating('w', work.id, n), { label: `${n}/5`, pressed: n <= rating })} style={{ fontSize: 20, cursor: 'pointer', color: n <= rating ? 'var(--color-gold)' : '#4a4a58' }}>{n <= rating ? '★' : '☆'}</span>
+                  <span key={n} {...pressable(() => actions.setRating('w', work.id, n), { label: `${n}/5`, pressed: n <= rating })} style={{ fontSize: 20, cursor: 'pointer', color: n <= rating ? 'var(--color-gold)' : 'var(--color-check-border)' }}>{n <= rating ? '★' : '☆'}</span>
                 ))}
               </div>
             </div>

@@ -41,7 +41,7 @@ export default function AchievementsGrid({ works, watched, ratings, compact = fa
               <div key={a.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 14, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)' }}>
                 <span style={{ fontSize: 32 }} role="img" aria-label={a.label}>{a.emoji}</span>
                 <span style={{ fontWeight: 700, fontSize: 13, textAlign: 'center' }}>{a.label}</span>
-                <span style={{ fontSize: 11.5, color: 'var(--color-muted-3)', textAlign: 'center' }}>{a.desc}</span>
+                <span style={{ fontSize: 12.5, color: 'var(--color-muted-3)', textAlign: 'center' }}>{a.desc}</span>
               </div>
             ))}
           </div>
@@ -57,8 +57,8 @@ export default function AchievementsGrid({ works, watched, ratings, compact = fa
               <div key={a.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px', borderRadius: 14, background: 'var(--color-chip-bg)', border: '1px dashed var(--color-border)', opacity: 0.5 }}>
                 <span style={{ fontSize: 32, filter: 'grayscale(1)' }} role="img" aria-label={a.label}>{a.emoji}</span>
                 <span style={{ fontWeight: 600, fontSize: 13, textAlign: 'center' }}>{a.label}</span>
-                <span style={{ fontSize: 11.5, color: 'var(--color-muted-3)', textAlign: 'center' }}>{a.desc}</span>
-                <span style={{ fontSize: 11, color: 'var(--color-muted-3)' }}>{a.value}/{a.threshold}</span>
+                <span style={{ fontSize: 12.5, color: 'var(--color-muted-3)', textAlign: 'center' }}>{a.desc}</span>
+                <span style={{ fontSize: 12, color: 'var(--color-muted-3)' }}>{a.value}/{a.threshold}</span>
               </div>
             ))}
           </div>

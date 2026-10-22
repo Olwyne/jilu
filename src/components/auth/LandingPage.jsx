@@ -24,6 +24,7 @@ const css = `
 .lp .badge { display: inline-flex; align-items: center; gap: 0.4rem; background: #ede9fe; color: #7c3aed; padding: 0.35rem 0.9rem; border-radius: 99px; font-size: 0.8rem; font-weight: 500; margin-bottom: 1.5rem; }
 .lp .badge-dot { width: 6px; height: 6px; background: #7c3aed; border-radius: 50%; animation: lp-pulse 2s infinite; }
 @keyframes lp-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@media (prefers-reduced-motion: reduce) { .lp .badge-dot { animation: none; } }
 .lp h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 700; line-height: 1.12; color: #1a1a2e; margin-bottom: 1rem; }
 .lp h1 span { color: #7c3aed; }
 .lp .hero-sub { font-size: 1.1rem; color: #6b6b8a; max-width: 580px; margin: 0 auto 2rem; line-height: 1.65; }
@@ -32,7 +33,7 @@ const css = `
 .lp .btn-primary:hover { background: #6d28d9; }
 .lp .btn-secondary { background: white; color: #1a1a2e; padding: 0.8rem 1.75rem; border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 1rem; border: 1.5px solid #e0ddf0; display: inline-flex; align-items: center; gap: 0.5rem; }
 .lp .btn-secondary:hover { background: #f9f8fc; }
-.lp .hero-note { font-size: 0.8rem; color: #9999b3; }
+.lp .hero-note { font-size: 0.8rem; color: #6b6b88; }
 
 .lp .mockup-container { max-width: 860px; margin: 3rem auto 0; padding: 0 1.5rem; }
 .lp .browser-chrome { background: white; border-radius: 14px; box-shadow: 0 24px 64px rgba(124,58,237,0.13), 0 4px 16px rgba(0,0,0,0.07); overflow: hidden; border: 1px solid #e8e6f0; }
@@ -42,13 +43,13 @@ const css = `
 .lp .dot-red { background: #ff5f57; }
 .lp .dot-yellow { background: #febc2e; }
 .lp .dot-green { background: #28c840; }
-.lp .browser-url { background: white; border-radius: 6px; padding: 0.25rem 0.75rem; font-size: 0.75rem; color: #9999b3; flex: 1; border: 1px solid #e8e6f0; }
-.lp .hero-screenshot { width: 100%; display: block; }
+.lp .browser-url { background: white; border-radius: 6px; padding: 0.25rem 0.75rem; font-size: 0.75rem; color: #6b6b88; flex: 1; border: 1px solid #e8e6f0; }
+.lp .hero-screenshot { width: 100%; height: auto; display: block; }
 
 .lp .stats-row { max-width: 860px; margin: 3rem auto 0; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .lp .stat-card { background: white; border-radius: 12px; padding: 1.25rem; border: 1px solid #e8e6f0; text-align: center; }
 .lp .stat-number { font-size: 1.8rem; font-weight: 700; color: #7c3aed; margin-bottom: 0.2rem; }
-.lp .stat-label { font-size: 0.78rem; color: #9999b3; }
+.lp .stat-label { font-size: 0.78rem; color: #6b6b88; }
 
 .lp .features { max-width: 860px; margin: 5rem auto 0; padding: 0 1.5rem; }
 .lp .section-label { text-align: center; font-size: 0.75rem; font-weight: 600; color: #7c3aed; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.5rem; }
@@ -82,7 +83,7 @@ const css = `
 .lp .import-steps { display: flex; gap: 0.5rem; margin-top: 1rem; align-items: center; flex-wrap: wrap; }
 .lp .step { background: white; border: 1px solid #e8e6f0; border-radius: 8px; padding: 0.4rem 0.75rem; font-size: 0.78rem; color: #4b4b6b; }
 .lp .step-arrow { color: #c4b5fd; }
-.lp .import-detail { margin-top: 0.75rem; font-size: 0.78rem; color: #9999b3; }
+.lp .import-detail { margin-top: 0.75rem; font-size: 0.78rem; color: #6b6b88; }
 
 .lp .platforms { max-width: 860px; margin: 4rem auto 0; padding: 0 1.5rem; text-align: center; }
 .lp .platform-badges { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
@@ -102,7 +103,7 @@ const css = `
 .lp .btn-white { background: white; color: #7c3aed; padding: 0.8rem 2.25rem; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 1rem; display: inline-block; }
 .lp .btn-white:hover { background: #f5f3ff; }
 
-.lp footer { text-align: center; padding: 2rem; color: #9999b3; font-size: 0.8rem; border-top: 1px solid #e8e6f0; background: white; }
+.lp footer { text-align: center; padding: 2rem; color: #6b6b88; font-size: 0.8rem; border-top: 1px solid #e8e6f0; background: white; }
 .lp footer a { color: #7c3aed; text-decoration: none; }
 
 @media (max-width: 700px) {
@@ -193,7 +194,7 @@ export default function LandingPage() {
             </div>
             <div className="browser-url">jilu-app.vercel.app/library</div>
           </div>
-          <img src={heroScreenshot} alt="Jilu app screenshot" className="hero-screenshot" />
+          <img src={heroScreenshot} alt="Jilu app screenshot" className="hero-screenshot" width="3006" height="1722" decoding="async" fetchPriority="high" />
         </div>
       </div>
 

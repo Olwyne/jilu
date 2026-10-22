@@ -28,7 +28,7 @@ function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
       <div style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', opacity: 0.68 }} />
       <div style={{ position: 'relative', zIndex: 1, flexShrink: 0, width: 76, alignSelf: 'stretch', borderRadius: '14px 0 0 14px', overflow: 'hidden', boxShadow: '2px 0 8px rgba(0,0,0,0.2)' }}>
         {w.poster
-          ? <img src={w.poster} alt={w.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          ? <img src={w.poster} alt={w.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           : <PosterBox id={w.id} title={w.title} poster={null} width="100%" height="100%" radius={0} fontSize={22} style={{ flexShrink: 1 }} />
         }
       </div>
@@ -63,7 +63,7 @@ function EpisodeCard({ item, showMarkWatched, onOpenWork, onMarkWatched, t }) {
       <div style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', opacity: 0.68 }} />
       <div style={{ position: 'relative', zIndex: 1, flexShrink: 0, width: 76, alignSelf: 'stretch', borderRadius: '14px 0 0 14px', overflow: 'hidden', boxShadow: '2px 0 8px rgba(0,0,0,0.2)' }}>
         {w.poster
-          ? <img src={w.poster} alt={w.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          ? <img src={w.poster} alt={w.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           : <PosterBox id={w.id} title={w.title} poster={null} width="100%" height="100%" radius={0} fontSize={22} style={{ flexShrink: 1 }} />
         }
       </div>
@@ -75,7 +75,7 @@ function EpisodeCard({ item, showMarkWatched, onOpenWork, onMarkWatched, t }) {
               S{s.n} · {t('term.series.ep')} {e.n}
             </span>
             {remaining > 1 && (
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.75)', background: 'rgba(0,0,0,0.35)', padding: '2px 7px', borderRadius: 5, display: 'inline-block' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.75)', background: 'rgba(0,0,0,0.35)', padding: '2px 7px', borderRadius: 5, display: 'inline-block' }}>
                 {showMarkWatched ? t('calendar.remaining', { count: remaining - 1 }) : t('calendar.remainingUnseen', { count: remaining - 1 })}
               </span>
             )}
@@ -96,7 +96,7 @@ function UpcomingEpisodeRow({ item, onOpenWork, language, t, now }) {
     <div {...pressable(() => onOpenWork(w.id))} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
       <div style={{ width: 52, flexShrink: 0, textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19, color: 'var(--color-accent)', lineHeight: 1 }}>{d.getDate()}</div>
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', marginTop: 2 }}>{d.toLocaleString(language, { month: 'short' })}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', marginTop: 2 }}>{d.toLocaleString(language, { month: 'short' })}</div>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>

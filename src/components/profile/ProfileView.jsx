@@ -144,7 +144,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
               <div key={w.id} {...pressable(() => onOpenWork(w.id))} style={{ flexShrink: 0, width: 90, cursor: 'pointer' }}>
                 <PosterBox id={w.id} title={w.title} poster={w.poster} width={90} height={130} radius={12} />
                 <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title}</div>
-                <div style={{ fontSize: 11, color: 'var(--color-muted-3)' }}>{w.category} · {w.year}</div>
+                <div style={{ fontSize: 12, color: 'var(--color-muted-3)' }}>{w.category} · {w.year}</div>
               </div>
             ))}
           </div>

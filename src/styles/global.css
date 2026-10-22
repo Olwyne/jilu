@@ -24,4 +24,33 @@ body { font-family: var(--font-body); color: var(--color-text); }
 
 @keyframes jiluPulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 @keyframes jiluIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes jiluFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes jiluPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes jiluToast { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+/* Authored arrivals: dialogs rise in, toasts slide up. Exit is instant, which keeps close feeling immediate. */
+.jilu-backdrop-in { animation: jiluFade .16s ease-out; }
+.jilu-panel-in { animation: jiluPop .26s cubic-bezier(0.16, 1, 0.3, 1); }
+.jilu-toast-in { animation: jiluToast .28s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Reduced motion: keep the state change (fade, colour), drop the travel and the loops. */
+@media (prefers-reduced-motion: reduce) {
+  .jilu-panel-in, .jilu-toast-in { animation: jiluFade .12s linear; }
+}
+
+/* Touch: every pressable and button gets a hit area of at least 44x44 without changing layout.
+   The pseudo-element only grows past the control's own box when the control is smaller than 44px. */
+@media (pointer: coarse) {
+  :where(button, [data-pressable], select) { position: relative; }
+  :where(button, [data-pressable], select)::after {
+    content: ''; position: absolute;
+    inset-block: min(0px, calc((100% - 44px) / 2));
+    inset-inline: min(0px, calc((100% - 44px) / 2));
+  }
+}
+
+/* Toast clears the mobile tab bar. */
+.jilu-toast { bottom: 28px; right: 28px; }
+@media (max-width: 859px) {
+  .jilu-toast { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); right: 16px; left: 16px; max-width: none !important; }
+}

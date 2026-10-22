@@ -103,7 +103,7 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
             >
               {label} <span className={styles.chipCount}>{key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length}</span>
               {disabled && (
-                <span style={{ position: 'absolute', top: -6, right: -6, background: 'var(--color-danger-fill)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                <span style={{ position: 'absolute', top: -6, right: -6, background: 'var(--color-danger-fill)', color: '#fff', fontSize: 12, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
                   {t('settings.comingSoon')}
                 </span>
               )}

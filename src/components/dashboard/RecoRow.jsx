@@ -107,7 +107,7 @@ function RecoCard({ r, works, onAddWork }) {
         )}
       </div>
       <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{r.title}</div>
-      <div style={{ fontSize: 11.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>
+      <div style={{ fontSize: 12.5, color: 'var(--color-muted-3)', marginTop: 2 }}>{r.year}</div>
     </div>
   )
 }

@@ -7,8 +7,8 @@ export default function Toast({ toast, onClose, onOpenRating }) {
   const handleAction = toast.action ? toast.action.fn : onOpenRating
   const actionLabel = toast.action ? toast.action.label : t('toast.rate')
   return (
-    <div role="status" aria-live="polite" style={{
-      position: 'fixed', bottom: 28, right: 28, zIndex: 9000,
+    <div role="status" aria-live="polite" className="jilu-toast jilu-toast-in" style={{
+      position: 'fixed', zIndex: 9000,
       background: 'var(--color-surface-toast)', border: '1px solid var(--color-border-glass)',
       borderRadius: 16, padding: '14px 18px', display: 'flex', alignItems: 'center',
       gap: 14, boxShadow: `0 8px 32px var(--color-shadow-lg)`,

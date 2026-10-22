@@ -46,12 +46,14 @@ export default function Modal({ onClose, label, labelledBy, backdropStyle, panel
   return (
     <div
       role="presentation"
+      className="jilu-backdrop-in"
       onMouseDown={(e) => { if (e.target === e.currentTarget && dismissable) onClose?.() }}
       style={backdropStyle}
     >
       <div
         ref={panelRef}
         role="dialog"
+        className="jilu-panel-in"
         aria-modal="true"
         aria-label={label}
         aria-labelledby={label ? undefined : labelledBy}

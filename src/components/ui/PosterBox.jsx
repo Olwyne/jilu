@@ -9,7 +9,7 @@ export default function PosterBox({ id, title, poster, width, height, radius = 1
       <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(150deg, ${from}, ${to})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: autoSize, color: 'rgba(255,255,255,.9)' }}>{initials(title)}</span>
       </div>
-      {poster && <img src={poster} alt={title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />}
+      {poster && <img src={poster} alt={title} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />}
       {children}
     </div>
   )

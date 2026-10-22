@@ -166,7 +166,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           <div style={{ display: 'flex', gap: 3, width: '100%' }}>
             {heatCols.map((col, ci) => (
               <div key={ci} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <div style={{ height: 14, fontSize: 10, color: 'var(--color-muted-3)', overflow: 'hidden' }}>
+                <div style={{ height: 16, fontSize: 12, color: 'var(--color-muted-3)', overflow: 'hidden' }}>
                   {monthLabels[ci] || ''}
                 </div>
                 {col.days.map((day, di) => (
@@ -264,9 +264,9 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 110 }}>
             {ratingDist.map((n, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, height: '100%', justifyContent: 'flex-end' }}>
-                <span style={{ fontSize: 11, color: 'var(--color-muted)' }}>{n || ''}</span>
+                <span style={{ fontSize: 12, color: 'var(--color-muted)' }}>{n || ''}</span>
                 <div style={{ width: '100%', borderRadius: '4px 4px 0 0', height: `${Math.round(n / rdMax * 70)}%`, background: 'var(--color-gold)', minHeight: n ? 4 : 0 }} />
-                <span style={{ fontSize: 11, color: 'var(--color-gold)', letterSpacing: -1 }}>{'★'.repeat(i + 1)}</span>
+                <span style={{ fontSize: 12, color: 'var(--color-gold)', letterSpacing: -1 }}>{'★'.repeat(i + 1)}</span>
               </div>
             ))}
           </div>
@@ -280,9 +280,9 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 110, minWidth: sortedDecades.length * 44 }}>
                 {sortedDecades.map((decade) => (
                   <div key={decade} style={{ flex: 1, minWidth: 38, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, height: '100%', justifyContent: 'flex-end' }}>
-                    <span style={{ fontSize: 11, color: 'var(--color-muted)' }}>{decadeCount[decade]}</span>
+                    <span style={{ fontSize: 12, color: 'var(--color-muted)' }}>{decadeCount[decade]}</span>
                     <div style={{ width: '100%', borderRadius: '4px 4px 0 0', height: `${Math.round(decadeCount[decade] / decMax * 70)}%`, background: 'linear-gradient(180deg, var(--color-blue), #1a5a8a)', minHeight: 4 }} />
-                    <span style={{ fontSize: 10, color: 'var(--color-muted-2)', whiteSpace: 'nowrap' }}>{decade}s</span>
+                    <span style={{ fontSize: 12, color: 'var(--color-muted-2)', whiteSpace: 'nowrap' }}>{decade}s</span>
                   </div>
                 ))}
               </div>

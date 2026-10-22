@@ -117,7 +117,7 @@ function FeedbackSection({ profile }) {
 function Toggle({ on, onToggle, label, disabled }) {
   return (
     <div {...pressable(onToggle, { role: 'switch', checked: on, label, disabled })} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
-      <div style={{ position: 'absolute', top: 3, left: on ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left .18s' }} />
+      <div style={{ position: 'absolute', top: 3, left: 3, transform: on ? 'translateX(18px)' : 'none', width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'transform .18s' }} />
     </div>
   )
 }
@@ -132,7 +132,7 @@ function Section({ rows, settings, onToggleSetting }) {
             <div style={{ fontWeight: 600, fontSize: 14.5, display: 'flex', alignItems: 'center', gap: 8 }}>
               {label}
               {disabled && (
-                <span style={{ background: 'var(--color-danger-fill)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 6px', lineHeight: 1.5 }}>
+                <span style={{ background: 'var(--color-danger-fill)', color: '#fff', fontSize: 12, fontWeight: 700, borderRadius: 10, padding: '1px 6px', lineHeight: 1.5 }}>
                   {t('settings.comingSoon')}
                 </span>
               )}

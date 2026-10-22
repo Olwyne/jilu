@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext'
-import styles from './ResetPasswordPage.module.css'
+import styles from './Auth.module.css'
 import { pressable } from '../../lib/a11y'
 
 export default function ResetPasswordPage() {

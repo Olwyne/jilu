@@ -2,6 +2,7 @@
 // Spread onto the element: <div {...pressable(onOpen, { label })} />
 export function pressable(handler, { role = 'button', label, pressed, checked, disabled } = {}) {
   const props = {
+    'data-pressable': '',
     role,
     tabIndex: disabled ? -1 : 0,
     onClick: disabled ? undefined : handler,

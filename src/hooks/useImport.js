@@ -1,4 +1,3 @@
-import JSZip from 'jszip'
 
 function tmdbFetch(path, params = {}) {
   const qs = new URLSearchParams({ path, ...params }).toString()
@@ -14,6 +13,7 @@ const MAX_IMPORT_BYTES = 200 * 1024 * 1024 // garde-fou contre les archives pié
 
 async function loadZip(file) {
   if (file.size > 50 * 1024 * 1024) throw new Error('Fichier trop volumineux')
+  const { default: JSZip } = await import('jszip')
   const zip = await JSZip.loadAsync(file)
   let total = 0
   zip.forEach((_, entry) => { total += entry._data?.uncompressedSize || 0 })
