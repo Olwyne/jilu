@@ -11,7 +11,7 @@ export default function WorkCard({ work, watchedCount, totalCount, rating, isFav
     <div {...pressable(onClick)} style={{ cursor: 'pointer' }}>
       <PosterBox id={work.id} title={localizedTitle(work, i18n.language)} poster={localizedPoster(work, i18n.language)} width="100%" radius={14} aspectRatio="2/3" fontSize={38}>
         {isFavorite && (
-          <div style={{ position: 'absolute', top: 7, right: 7, fontSize: 14, color: '#ffc24b', textShadow: '0 1px 4px rgba(0,0,0,.6)', zIndex: 1 }}>★</div>
+          <div style={{ position: 'absolute', top: 7, right: 7, fontSize: 14, color: 'var(--color-gold)', textShadow: '0 1px 4px rgba(0,0,0,.6)', zIndex: 1 }}>★</div>
         )}
         {showProgress && (
           <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9, zIndex: 1 }}>
