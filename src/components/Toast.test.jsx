@@ -7,9 +7,10 @@ import Toast from './Toast'
 describe('Toast', () => {
   const toast = { title: 'Severance', label: 'S1 · E3' }
 
-  it('renders nothing when toast is null', () => {
-    const { container } = render(<Toast toast={null} onClose={() => {}} onOpenRating={() => {}} />)
-    expect(container.firstChild).toBeNull()
+  it('keeps an empty live region mounted when toast is null', () => {
+    render(<Toast toast={null} onClose={() => {}} onOpenRating={() => {}} />)
+    expect(screen.queryByText('Marked as seen')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
   })
 
   it('shows "Marked as seen" and work info when toast is set', () => {

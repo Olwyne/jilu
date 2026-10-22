@@ -2,13 +2,14 @@ import { useTranslation } from 'react-i18next'
 
 export default function Toast({ toast, onClose, onOpenRating }) {
   const { t } = useTranslation()
-  if (!toast) return null
-  const header = toast.header ?? t('toast.seen')
-  const handleAction = toast.action ? toast.action.fn : onOpenRating
-  const actionLabel = toast.action ? toast.action.label : t('toast.rate')
+  const header = toast?.header ?? t('toast.seen')
+  const handleAction = toast?.action ? toast.action.fn : onOpenRating
+  const actionLabel = toast?.action ? toast.action.label : t('toast.rate')
+  // The live region stays mounted so screen readers announce the toast when it is filled in.
   return (
-    <div role="status" aria-live="polite" className="jilu-toast jilu-toast-in" style={{
-      position: 'fixed', zIndex: 9000,
+    <div role="status" aria-live="polite" className="jilu-toast" style={{ position: 'fixed', zIndex: 9000 }}>
+      {toast && (
+    <div className="jilu-toast-in" style={{
       background: 'var(--color-surface-toast)', border: '1px solid var(--color-border-glass)',
       borderRadius: 16, padding: '14px 18px', display: 'flex', alignItems: 'center',
       gap: 14, boxShadow: `0 8px 32px var(--color-shadow-lg)`,
@@ -27,6 +28,8 @@ export default function Toast({ toast, onClose, onOpenRating }) {
         {actionLabel}
       </button>
       <button type="button" onClick={onClose} aria-label={t('toast.dismiss')} style={{ minWidth: 32, minHeight: 32, fontSize: 16, color: 'var(--color-muted-2)', cursor: 'pointer', flexShrink: 0, lineHeight: 1, background: 'none', border: 'none' }}><span aria-hidden="true">✕</span></button>
+    </div>
+      )}
     </div>
   )
 }

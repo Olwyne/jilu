@@ -35,12 +35,14 @@ export default function ForgotPasswordPage() {
             <input
               className={styles.input}
               type="email"
+              autoComplete="email"
               placeholder={t('auth.emailPlaceholder')}
+              aria-label={t('auth.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            {error && <div className={styles.error}>{error}</div>}
+            {error && <div role="alert" className={styles.error}>{error}</div>}
             <button className={styles.button} type="submit">{t('auth.sendLink')}</button>
           </>
         ) : (

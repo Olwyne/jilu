@@ -89,12 +89,14 @@ function FeedbackSection({ profile }) {
         value={subject}
         onChange={e => setSubject(e.target.value)}
         placeholder={t('feedback.subjectPlaceholder')}
+        aria-label={t('feedback.subjectPlaceholder')}
         style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
       />
       <textarea
         value={message}
         onChange={e => setMessage(e.target.value)}
         placeholder={t('feedback.messagePlaceholder')}
+        aria-label={t('feedback.messagePlaceholder')}
         rows={4}
         style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
       />
@@ -244,18 +246,21 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
       )}
       {deleteOpen && (
         <Modal onClose={() => { setDeleteOpen(false); setDeletePassword('') }} dismissable={deleteStatus !== 'loading'} label={t('settings.deleteAccountTitle')} backdropStyle={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} panelStyle={{ width: '100%', maxWidth: 400, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 12 }}>{t('settings.deleteAccountTitle')}</div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, margin: '0 0 12px' }}>{t('settings.deleteAccountTitle')}</h2>
             <div style={{ fontSize: 14, color: 'var(--color-muted)', lineHeight: 1.6, marginBottom: 20 }}>{t('settings.deleteAccountDesc')}</div>
             <input
               type="password"
               placeholder={t('settings.deleteAccountPassword')}
+              autoComplete="current-password"
+              aria-invalid={deleteStatus === 'wrongPassword' || undefined}
+              aria-label={t('settings.deleteAccountPassword')}
               value={deletePassword}
               onChange={(e) => setDeletePassword(e.target.value)}
               disabled={deleteStatus === 'loading'}
               style={{ width: '100%', padding: '11px 14px', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'var(--color-input-bg, var(--color-surface))', color: 'var(--color-text)', fontSize: 14, marginBottom: 16, boxSizing: 'border-box', outline: 'none' }}
             />
             {(deleteStatus === 'error' || deleteStatus === 'wrongPassword') && (
-              <div style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 16, fontWeight: 600 }}>
+              <div role="alert" style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 16, fontWeight: 600 }}>
                 {deleteStatus === 'wrongPassword' ? t('settings.deleteAccountWrongPassword') : t('settings.deleteAccountError')}
               </div>
             )}
@@ -310,6 +315,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
             <div style={{ fontWeight: 600, fontSize: 14.5 }}>{t('settings.language')}</div>
           </div>
           <select
+            aria-label={t('settings.language')}
             value={i18nInstance.language?.split('-')[0] === 'fr' ? 'fr' : 'en'}
             onChange={e => onChangeLanguage?.(e.target.value)}
             style={{ padding: '8px 32px 8px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, fontWeight: 500, cursor: 'pointer', outline: 'none', appearance: 'auto' }}
@@ -345,6 +351,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
                 </div>
                 <textarea
                   readOnly
+                  aria-label={t('settings.importFailed', { count: g.items.length, label: g.label })}
                   value={g.items.join('\n')}
                   onClick={e => e.target.select()}
                   style={{ width: '100%', minHeight: Math.min(g.items.length * 22, 180), resize: 'vertical', background: 'var(--color-surface-row)', border: '1px solid var(--color-border-btn)', borderRadius: 10, color: 'var(--color-muted)', fontSize: 13, padding: '10px 12px', fontFamily: 'monospace', boxSizing: 'border-box', cursor: 'text' }}

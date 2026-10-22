@@ -8,10 +8,10 @@ import { pressable } from '../../lib/a11y'
 
 function Field({ label, children }) {
   return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-muted-2)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{label}</div>
+    <fieldset style={{ marginBottom: 18, border: 'none', padding: 0, minWidth: 0 }}>
+      <legend style={{ padding: 0, fontSize: 12, fontWeight: 600, color: 'var(--color-muted-2)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{label}</legend>
       {children}
-    </div>
+    </fieldset>
   )
 }
 
@@ -96,7 +96,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
 
   return (
     <Modal onClose={onClose} label={t('editProfile.title')} backdropStyle={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} panelStyle={{ width: '100%', maxWidth: 440, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 24 }}>{t('editProfile.title')}</div>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, margin: '0 0 24px' }}>{t('editProfile.title')}</h2>
         <form onSubmit={handleSubmit}>
           <Field label={t('editProfile.pseudo')}>
             <div style={{ position: 'relative' }}>
@@ -104,11 +104,15 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
                 value={handle}
                 onChange={(e) => setHandle(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
                 placeholder="ton_pseudo"
+                aria-label={t('editProfile.pseudo')}
+                autoComplete="username"
                 maxLength={20}
+                aria-invalid={handleStatus === 'taken' || handleStatus === 'invalid' || undefined}
+                aria-describedby={msg ? 'handle-status' : undefined}
                 style={{ ...inputStyle }}
               />
             </div>
-            {msg && <div style={{ fontSize: 12.5, marginTop: 6, color: msg.color }}>{msg.text}</div>}
+            {msg && <div role="status" id="handle-status" style={{ fontSize: 12.5, marginTop: 6, color: msg.color }}>{msg.text}</div>}
           </Field>
           <Field label={t('editProfile.changePassword')}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -117,6 +121,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder={t('editProfile.currentPassword')}
+                aria-label={t('editProfile.currentPassword')}
                 style={inputStyle}
                 autoComplete="current-password"
               />
@@ -125,6 +130,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder={t('editProfile.newPassword')}
+                aria-label={t('editProfile.newPassword')}
                 style={inputStyle}
                 minLength={6}
                 autoComplete="new-password"
@@ -134,12 +140,13 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder={t('editProfile.confirmPassword')}
+                aria-label={t('editProfile.confirmPassword')}
                 style={inputStyle}
                 autoComplete="new-password"
               />
             </div>
           </Field>
-          {error && <div style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 14 }}>{error}</div>}
+          {error && <div role="alert" style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 14 }}>{error}</div>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
             <div {...pressable(onClose)} style={{ padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-muted-2)', background: 'var(--color-chip-bg)' }}>{t('editProfile.cancel')}</div>
             <button type="submit" disabled={!canSave} style={{ padding: '11px 22px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed', border: 'none', background: canSave ? 'var(--color-accent)' : 'var(--color-border-btn)', color: canSave ? '#fff' : 'var(--color-muted-3)' }}>

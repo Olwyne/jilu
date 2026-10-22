@@ -128,13 +128,13 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
       {/* Manual entry */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22, flexWrap: 'wrap' }}>
         <input
-          type="number" min="0" placeholder="0h"
+          type="number" min="0" placeholder="0h" aria-label={t('game.hours')}
           value={manualH} onChange={(e) => setManualH(e.target.value)}
           style={inputStyle}
         />
         <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>h</span>
         <input
-          type="number" min="0" max="59" placeholder="0min"
+          type="number" min="0" max="59" placeholder="0min" aria-label={t('game.minutes')}
           value={manualM} onChange={(e) => setManualM(e.target.value)}
           style={inputStyle}
         />

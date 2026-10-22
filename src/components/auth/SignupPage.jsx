@@ -33,7 +33,9 @@ export default function SignupPage() {
         <input
           className={styles.input}
           type="email"
+          autoComplete="email"
           placeholder={t('auth.emailPlaceholder')}
+          aria-label={t('auth.emailPlaceholder')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -41,12 +43,14 @@ export default function SignupPage() {
         <input
           className={styles.input}
           type="password"
+          autoComplete="new-password"
           placeholder={t('auth.passwordPlaceholder')}
+          aria-label={t('auth.passwordPlaceholder')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <div className={styles.error}>{error}</div>}
+        {error && <div role="alert" className={styles.error}>{error}</div>}
         <button className={styles.button} type="submit">{t('auth.createAccount')}</button>
         <div className={styles.switch} {...pressable(() => navigate('/login', { state: location.state }), { role: 'link' })}>
           {t('auth.alreadyAccount')}

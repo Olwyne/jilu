@@ -33,7 +33,9 @@ export default function LoginPage() {
         <input
           className={styles.input}
           type="email"
+          autoComplete="username"
           placeholder={t('auth.emailPlaceholder')}
+          aria-label={t('auth.emailPlaceholder')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -41,7 +43,9 @@ export default function LoginPage() {
         <input
           className={styles.input}
           type="password"
+          autoComplete="current-password"
           placeholder={t('auth.passwordPlaceholder')}
+          aria-label={t('auth.passwordPlaceholder')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -49,7 +53,7 @@ export default function LoginPage() {
         <div className={styles.switchRight} {...pressable(() => navigate('/forgot-password'), { role: 'link' })}>
           {t('auth.forgotPassword')}
         </div>
-        {error && <div className={styles.error}>{error}</div>}
+        {error && <div role="alert" className={styles.error}>{error}</div>}
         <button className={styles.button} type="submit">{t('auth.login')}</button>
         <div className={styles.switch} {...pressable(() => navigate('/signup', { state: location.state }), { role: 'link' })}>
           {t('auth.noAccount')}

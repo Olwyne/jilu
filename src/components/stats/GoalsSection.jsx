@@ -67,6 +67,7 @@ export default function GoalsSection({ works, settings, onSaveSettings }) {
                   <input
                     type="number"
                     min="0"
+                    aria-label={t('goals.targetFor', { cat: t('cat.' + cat) })}
                     value={draft}
                     autoFocus
                     onChange={(e) => setDraft(e.target.value)}

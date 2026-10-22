@@ -1,6 +1,6 @@
 // Props that make a non-<button> element operable from the keyboard.
 // Spread onto the element: <div {...pressable(onOpen, { label })} />
-export function pressable(handler, { role = 'button', label, pressed, checked, disabled } = {}) {
+export function pressable(handler, { role = 'button', label, pressed, checked, expanded, disabled } = {}) {
   const props = {
     'data-pressable': '',
     role,
@@ -18,6 +18,7 @@ export function pressable(handler, { role = 'button', label, pressed, checked, d
   if (label) props['aria-label'] = label
   if (pressed !== undefined) props['aria-pressed'] = pressed
   if (checked !== undefined) props['aria-checked'] = checked
+  if (expanded !== undefined) props['aria-expanded'] = expanded
   if (disabled) props['aria-disabled'] = true
   return props
 }

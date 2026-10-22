@@ -40,13 +40,15 @@ export default function ResetPasswordPage() {
             <input
               className={styles.input}
               type="password"
+              autoComplete="new-password"
               placeholder={t('auth.newPasswordPlaceholder')}
+              aria-label={t('auth.newPasswordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               minLength={6}
               required
             />
-            {error && <div className={styles.error}>{error}</div>}
+            {error && <div role="alert" className={styles.error}>{error}</div>}
             <button className={styles.button} type="submit">{t('auth.resetButton')}</button>
           </>
         ) : (

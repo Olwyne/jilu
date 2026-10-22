@@ -37,13 +37,15 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
         const isOpen = expanded.has(s.n)
         return (
           <div key={s.n} style={{ border: '1px solid var(--color-border-btn)', borderRadius: 16, overflow: 'hidden', background: 'var(--color-surface)' }}>
-            <div {...pressable(() => toggleExpanded(s.n))} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', cursor: 'pointer' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17 }}>{s.name || t('season.default', { n: s.n })}</span>
-              {s.release && <span style={{ fontSize: 12, color: 'var(--color-muted-2)' }}>{fmtFull(s.release)}</span>}
-              <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('season.seen', { done, total: s.episodes.length })}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px' }}>
+              <div {...pressable(() => toggleExpanded(s.n), { expanded: isOpen })} style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17 }}>{s.name || t('season.default', { n: s.n })}</span>
+                {s.release && <span style={{ fontSize: 12, color: 'var(--color-muted-2)' }}>{fmtFull(s.release)}</span>}
+                <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('season.seen', { done, total: s.episodes.length })}</span>
+              </div>
               <div
-                {...pressable((e) => { e.stopPropagation(); onMarkSeason(work.id, s.n) })}
-                style={{ marginLeft: 'auto', fontSize: 12.5, color: 'var(--color-accent)', fontWeight: 600, padding: '5px 10px', borderRadius: 8 }}
+                {...pressable(() => onMarkSeason(work.id, s.n))}
+                style={{ flexShrink: 0, fontSize: 12.5, color: 'var(--color-accent)', fontWeight: 600, padding: '5px 10px', borderRadius: 8, cursor: 'pointer' }}
               >
                 {aired.length > 0 && done === aired.length ? t('season.unmarkAll') : t('season.markAll')}
               </div>
@@ -57,7 +59,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
                   return (
                     <div key={e.n} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderTop: '1px solid var(--color-border)', opacity: isWatched ? .62 : (aired2 ? 1 : .5) }}>
                       <div
-                        {...pressable((ev) => { ev.stopPropagation(); if (aired2) onToggleEpisode(work.id, s.n, e.n) })}
+                        {...pressable(() => { if (aired2) onToggleEpisode(work.id, s.n, e.n) }, { role: 'checkbox', checked: isWatched, label: epLabel(work, s, e, t), disabled: !aired2 })}
                         style={{ width: 26, height: 26, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, cursor: aired2 ? 'pointer' : 'not-allowed', color: '#fff', background: isWatched ? 'var(--color-accent)' : 'transparent', border: `2px solid ${isWatched ? 'var(--color-accent)' : (aired2 ? 'var(--color-check-border)' : 'var(--color-check-border-dim)')}` }}
                       >
                         {isWatched ? '✓' : ''}

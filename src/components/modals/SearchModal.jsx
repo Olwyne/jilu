@@ -54,6 +54,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('search.placeholder')}
+            aria-label={t('search.placeholder')}
             style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--color-text)', fontSize: 16, fontFamily: 'inherit' }}
           />
           <div {...pressable(onClose)} style={{ color: 'var(--color-muted-2)', cursor: 'pointer', fontSize: 14, padding: '4px 8px' }}>{t('search.escape')}</div>

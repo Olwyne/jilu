@@ -20,7 +20,7 @@ function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
     ? t('calendar.markPlayed')
     : t('calendar.markWatched')
   return (
-    <div {...pressable(() => onOpenWork(w.id))} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
+    <div onClick={() => onOpenWork(w.id)} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
       {w.poster
         ? <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${w.poster})`, backgroundSize: 'cover', backgroundPosition: 'center top', filter: 'blur(6px) brightness(0.35)', transform: 'scale(1.15)', opacity: 0.9 }} />
         : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${from}, ${to})`, opacity: 0.25 }} />
@@ -34,7 +34,7 @@ function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
       </div>
       <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px 12px 12px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
+          <div {...pressable((ev) => { ev.stopPropagation(); onOpenWork(w.id) }, { role: 'link' })} style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
           {subtitle && (
             <span style={{ marginTop: 5, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6, display: 'inline-block' }}>
               {subtitle}
@@ -55,7 +55,7 @@ function EpisodeCard({ item, showMarkWatched, onOpenWork, onMarkWatched, t }) {
   const { w, s, e, remaining } = item
   const { from, to } = posterGradient(w.id)
   return (
-    <div {...pressable(() => onOpenWork(w.id))} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
+    <div onClick={() => onOpenWork(w.id)} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
       {w.poster
         ? <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${w.poster})`, backgroundSize: 'cover', backgroundPosition: 'center top', filter: 'blur(6px) brightness(0.35)', transform: 'scale(1.15)', opacity: 0.9 }} />
         : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${from}, ${to})`, opacity: 0.25 }} />
@@ -69,7 +69,7 @@ function EpisodeCard({ item, showMarkWatched, onOpenWork, onMarkWatched, t }) {
       </div>
       <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px 12px 12px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
+          <div {...pressable((ev) => { ev.stopPropagation(); onOpenWork(w.id) }, { role: 'link' })} style={{ fontWeight: 700, fontSize: 15 }}>{w.title}</div>
           <div style={{ marginTop: 5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.92)', background: 'rgba(0,0,0,0.5)', padding: '3px 8px', borderRadius: 6, display: 'inline-block' }}>
               S{s.n} · {t('term.series.ep')} {e.n}
