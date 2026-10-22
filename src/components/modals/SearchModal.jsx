@@ -67,7 +67,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
             return (
               <Chip key={c.k} active={!disabled && cat === c.k} disabled={disabled} onClick={() => { if (!disabled) { setCat(c.k); setResults([]) } }}>
                 {c.label}
-                {disabled && <Badge floating>{t('search.comingSoon')}</Badge>}
+                {disabled && <Badge floating tone="neutral">{t('search.comingSoon')}</Badge>}
               </Chip>
             )
           })}

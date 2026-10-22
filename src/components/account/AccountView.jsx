@@ -102,7 +102,7 @@ function FeedbackSection({ profile }) {
         <Button variant="primary" onClick={handleSend} disabled={status === 'loading' || !subject.trim() || !message.trim()}>
           {status === 'loading' ? t('feedback.sending') : t('feedback.send')}
         </Button>
-        {status === 'success' && <span style={{ fontSize: 13, color: 'var(--color-green, #22c55e)', fontWeight: 600 }}>{t('feedback.success')}</span>}
+        {status === 'success' && <span style={{ fontSize: 13, color: 'var(--color-green)', fontWeight: 600 }}>{t('feedback.success')}</span>}
         {status === 'error' && <span style={{ fontSize: 13, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('feedback.error')}</span>}
         {status === 'ratelimit' && <span style={{ fontSize: 13, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('feedback.rateLimit')}</span>}
       </div>
@@ -128,7 +128,7 @@ function Section({ rows, settings, onToggleSetting }) {
             <div style={{ fontWeight: 600, fontSize: 14.5, display: 'flex', alignItems: 'center', gap: 8 }}>
               {label}
               {disabled && (
-                <Badge>{t('settings.comingSoon')}</Badge>
+                <Badge tone="neutral">{t('settings.comingSoon')}</Badge>
               )}
             </div>
             <div style={{ fontSize: 12.5, color: 'var(--color-muted)', marginTop: 2 }}>{desc}</div>
@@ -289,8 +289,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
             <div style={{ fontSize: 12.5, color: 'var(--color-muted)', marginTop: 2 }}>{t('settings.darkModeDesc')}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{isDark ? '🌙' : '☀️'}</span>
-            <Toggle on={isDark} onToggle={() => onToggleSetting('darkMode')} label={t('settings.darkMode')} />
+                        <Toggle on={isDark} onToggle={() => onToggleSetting('darkMode')} label={t('settings.darkMode')} />
           </div>
         </div>
         {/* Language row */}

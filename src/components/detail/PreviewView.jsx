@@ -33,7 +33,7 @@ export default function PreviewView({ works, onAddWork }) {
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, margin: '0 0 14px' }}>{work.title}</h2>
           {work.overview && (
-            <p style={{ color: '#b9b9c8', fontSize: 15, lineHeight: 1.55, maxWidth: 560, margin: '0 0 20px' }}>{work.overview}</p>
+            <p style={{ color: 'var(--color-muted)', fontSize: 15, lineHeight: 1.55, maxWidth: 560, margin: '0 0 20px' }}>{work.overview}</p>
           )}
           <Button variant="primary" size="lg" onClick={handleAdd}>
             {alreadyAdded ? t('preview.openInLibrary') : t('preview.add')}

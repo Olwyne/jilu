@@ -6,7 +6,7 @@ const CAT_COLORS = {
   series: 'var(--color-blue)',
   films: 'var(--color-pink)',
   animes: 'var(--color-accent)',
-  mangas: '#f97316',
+  mangas: 'var(--color-orange)',
   livres: 'var(--color-green)',
   jeux: 'var(--color-gold)',
 }
@@ -44,9 +44,9 @@ export default function GoalsSection({ works, settings, onSaveSettings }) {
 
   return (
     <div style={{ ...CARD, marginBottom: 30 }}>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>
         {t('stats.goalsTitle', { year: currentYear })}
-      </h3>
+      </h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14 }}>
         {CATS.map((cat) => {
           const done = countByCategory[cat] || 0
@@ -61,7 +61,7 @@ export default function GoalsSection({ works, settings, onSaveSettings }) {
                 {t('cat.' + cat)}
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 10 }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, color, lineHeight: 1 }}>{done}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, color: 'var(--color-text)', lineHeight: 1 }}>{done}</span>
                 <span style={{ color: 'var(--color-muted-2)', fontSize: 16 }}>/</span>
                 {editing === cat ? (
                   <input

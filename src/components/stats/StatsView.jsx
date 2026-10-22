@@ -8,7 +8,7 @@ import { pressable } from '../../lib/a11y'
 import Card from '../ui/Card'
 
 const RUNTIME = { animes: 24, series: 45 }
-const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', mangas: '#f97316', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: '#c46dff' }
+const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', mangas: 'var(--color-orange)', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: 'var(--color-muted)' }
 const HEAT = ['var(--color-border)', 'var(--heat-1)', 'var(--heat-2)', 'var(--heat-3)', 'var(--heat-4)']
 const MONTHS_FR = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jul', 'aoû', 'sep', 'oct', 'nov', 'déc']
 const HEATMAP_WEEKS = 52
@@ -117,9 +117,9 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           [String(totalWorks), t('stats.totalLibrary'), 'var(--color-muted)'],
           [completionRate + ' %', t('stats.completionRate'), 'var(--color-green)'],
           [ratedN ? (ratedSum / ratedN).toFixed(1) : '—', t('stats.avgRating'), 'var(--color-gold)'],
-        ].map(([value, label, color]) => (
+        ].map(([value, label, color], i) => (
           <Card key={label} dense pad="sm">
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color, lineHeight: 1.1 }}>{value}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: i === 0 ? 'var(--color-accent)' : 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
             <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3 }}>{label}</div>
           </Card>
         ))}
@@ -136,8 +136,10 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           [String(jeuxFinis), t('stats.gamesFinished'), CAT_COLORS.jeux],
         ].map(([value, label, color]) => (
           <Card key={label} dense pad="sm">
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color, lineHeight: 1.1 }}>{value}</div>
-            <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3 }}>{label}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
+            <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />{label}
+            </div>
           </Card>
         ))}
       </div>
@@ -145,7 +147,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
       {/* Heatmap + Streak */}
       <div style={{ ...CARD, marginBottom: 30 }}>
         <div style={{ marginBottom: 18 }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 3px' }}>{t('stats.recentActivity')}</h3>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 3px' }}>{t('stats.recentActivity')}</h2>
           <div style={{ fontSize: 12, color: 'var(--color-muted-2)' }}>{t('stats.activityNote')}</div>
         </div>
         {isMobile ? (
@@ -222,14 +224,14 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
 
       {/* Achievements */}
       <div style={{ ...CARD, marginBottom: 30 }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 20px' }}>{t('achievements.title')}</h3>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 20px' }}>{t('achievements.title')}</h2>
         <AchievementsGrid works={works} watched={watched} ratings={ratings} />
       </div>
 
       {/* Category + Status */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 26, marginBottom: 30 }}>
         <div style={CARD}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.byCategory')}</h3>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.byCategory')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {Object.keys(catCount).filter((k) => catCount[k]).map((k) => (
               <div key={k}>
@@ -242,7 +244,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           </div>
         </div>
         <div style={CARD}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.byStatus')}</h3>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.byStatus')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {['termine', 'en_cours', 'a_voir', 'abandonne'].map((k) => (
               <div key={k}>
@@ -261,19 +263,19 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
       {/* Ratings Dist + Decade */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 26, marginBottom: 30 }}>
         <div style={CARD}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.ratingsDist')}</h3>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.ratingsDist')}</h2>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 110 }}>
             {ratingDist.map((n, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, height: '100%', justifyContent: 'flex-end' }}>
                 <span style={{ fontSize: 12, color: 'var(--color-muted)' }}>{n || ''}</span>
-                <div style={{ width: '100%', borderRadius: '4px 4px 0 0', height: `${Math.round(n / rdMax * 70)}%`, background: 'var(--color-gold)', minHeight: n ? 4 : 0 }} />
+                <div style={{ width: '100%', borderRadius: '8px 8px 0 0', height: `${Math.round(n / rdMax * 70)}%`, background: 'var(--color-gold)', minHeight: n ? 4 : 0 }} />
                 <span style={{ fontSize: 12, color: 'var(--color-gold)', letterSpacing: -1 }}>{'★'.repeat(i + 1)}</span>
               </div>
             ))}
           </div>
         </div>
         <div style={CARD}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.byDecade')}</h3>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.byDecade')}</h2>
           {sortedDecades.length === 0
             ? <div style={{ fontSize: 13, color: 'var(--color-muted-2)' }}>—</div>
             : (
@@ -282,7 +284,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
                 {sortedDecades.map((decade) => (
                   <div key={decade} style={{ flex: 1, minWidth: 38, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, height: '100%', justifyContent: 'flex-end' }}>
                     <span style={{ fontSize: 12, color: 'var(--color-muted)' }}>{decadeCount[decade]}</span>
-                    <div style={{ width: '100%', borderRadius: '4px 4px 0 0', height: `${Math.round(decadeCount[decade] / decMax * 70)}%`, background: 'linear-gradient(180deg, var(--color-blue), #1a5a8a)', minHeight: 4 }} />
+                    <div style={{ width: '100%', borderRadius: '8px 8px 0 0', height: `${Math.round(decadeCount[decade] / decMax * 70)}%`, background: 'linear-gradient(180deg, var(--color-blue), color-mix(in srgb, var(--color-blue) 50%, var(--color-bg)))', minHeight: 4 }} />
                     <span style={{ fontSize: 12, color: 'var(--color-muted-2)', whiteSpace: 'nowrap' }}>{decade}s</span>
                   </div>
                 ))}
@@ -295,7 +297,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
       {/* Top Genres + Top Rated */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 26 }}>
         <div style={CARD}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.topGenres')}</h3>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.topGenres')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {topGenres.map(([g, n]) => (
               <div key={g}>
@@ -306,7 +308,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           </div>
         </div>
         <div style={CARD}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.topRated')}</h3>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.topRated')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {topRated.map((w) => (
               <div key={w.id} {...pressable(() => onOpenWork(w.id))} style={{ display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer' }}>

@@ -2,8 +2,8 @@
 .chip:hover:not(:disabled):not(.active) { color: var(--color-text); }
 .chip:disabled, .chip[aria-disabled="true"] { cursor: not-allowed; opacity: .45; }
 
-.md { padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; }
-.sm { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.md { padding: 7px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; }
+.sm { padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
 .xs { padding: 5px 11px; border-radius: 8px; font-size: 12.5px; font-weight: 500; color: var(--color-muted-2); background: transparent; border-color: transparent; }
 
 .active { font-weight: 600; color: var(--color-on-accent); background: var(--color-accent-fill); border-color: transparent; }
@@ -13,4 +13,10 @@
 .flat { background: transparent; border-color: transparent; }
 .flat.active { background: var(--color-accent-fill); }
 
-.count { opacity: .7; font-size: 12px; font-weight: 500; }
+.count { font-size: 12px; font-weight: 500; }
+
+/* Touch: taller pills so neighbours don't crowd their 44px hit areas. */
+@media (pointer: coarse) {
+  .md { padding-block: 10px; }
+  .sm, .xs { padding-block: 8px; }
+}

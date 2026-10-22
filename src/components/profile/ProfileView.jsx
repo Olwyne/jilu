@@ -121,7 +121,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                 <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
             </IconButton>
-            <div {...pressable(handleShare)} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
+            <div {...pressable(handleShare)} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'var(--color-accent-soft)' : 'var(--color-chip-bg)', color: isPublic ? 'var(--color-text)' : 'var(--color-muted)', border: `1px solid ${isPublic ? 'var(--color-accent-soft-border)' : 'var(--color-border)'}` }}>
               {isPublic ? t('profile.copyLink') : t('profile.private')}
             </div>
             <div style={{ fontSize: 12, color: isPublic ? 'var(--color-green)' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
@@ -129,7 +129,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
         )}
         {!readOnly && isMobile && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div {...pressable(handleShare)} style={{ flex: 1, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', textAlign: 'center', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
+            <div {...pressable(handleShare)} style={{ flex: 1, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', textAlign: 'center', background: isPublic ? 'var(--color-accent-soft)' : 'var(--color-chip-bg)', color: isPublic ? 'var(--color-text)' : 'var(--color-muted)', border: `1px solid ${isPublic ? 'var(--color-accent-soft-border)' : 'var(--color-border)'}` }}>
               {isPublic ? t('profile.copyLink') : t('profile.private')}
             </div>
             <div style={{ fontSize: 12, color: isPublic ? 'var(--color-green)' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>

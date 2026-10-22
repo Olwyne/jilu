@@ -1,2 +1,4 @@
 .badge { display: inline-flex; align-items: center; box-sizing: border-box; font-size: 12px; font-weight: 700; line-height: 1.4; white-space: nowrap; border-radius: 10px; padding: 1px 6px; color: #fff; background: var(--color-danger-fill); }
 .floating { position: absolute; top: -6px; right: -6px; }
+
+.neutral { background: var(--color-chip-bg); color: var(--color-muted); border: 1px solid var(--color-border-btn); }

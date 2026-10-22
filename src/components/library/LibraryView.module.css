@@ -6,3 +6,14 @@
 .empty { padding: 60px 20px; text-align: center; color: var(--color-muted-3); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 20px 18px; }
 @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 12px 10px; } }
+
+/* On phones the three filter rows share one scrolling line each, so posters start sooner. */
+@media (max-width: 859px) {
+  .chipsRow { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scrollbar-width: none; margin-bottom: 12px; }
+  .chipsRow::-webkit-scrollbar { display: none; }
+  .chipsRow > * { flex-shrink: 0; }
+  .filtersRow { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scrollbar-width: none; gap: 10px; margin-bottom: 16px; }
+  .filtersRow::-webkit-scrollbar { display: none; }
+  .smallChips, .sortChips { flex-wrap: nowrap; flex-shrink: 0; margin-left: 0; }
+  .sortLabel { display: none; }
+}

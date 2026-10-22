@@ -4,7 +4,6 @@ import WorkCard from './WorkCard'
 import { epTotals } from '../../lib/domain'
 import styles from './LibraryView.module.css'
 import Chip from '../ui/Chip'
-import Badge from '../ui/Badge'
 
 export default function LibraryView({ works, watched, ratings, favorites, onOpenWork }) {
   const { t } = useTranslation()
@@ -96,9 +95,8 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
         {CATS.map(([key, label]) => {
           const disabled = key === 'musique'
           return (
-            <Chip key={key} active={!disabled && category === key} disabled={disabled} count={key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length} onClick={() => { if (!disabled) setCategory(key) }}>
+            <Chip key={key} active={!disabled && category === key} disabled={disabled} title={disabled ? t('settings.comingSoon') : undefined} count={key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length} onClick={() => { if (!disabled) setCategory(key) }}>
               {label}
-              {disabled && <Badge floating>{t('settings.comingSoon')}</Badge>}
             </Chip>
           )
         })}

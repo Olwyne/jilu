@@ -5,7 +5,8 @@
   --color-dropdown-bg: #1c1c2e;
   --color-modal-bg: #15151d;
   --color-mobile-nav-bg: rgba(14,14,20,.92);
-  --color-check-border: #4a4a58;
+  --color-check-border: #7a7a8c;
+  --color-control-edge: #7a7a8c;
   --color-check-border-dim: #2a2a38;
   --color-text: #ECECF2;
   --color-accent: #8b6dff;
@@ -22,6 +23,7 @@
   --color-gold: #ffc24b;
   --color-green: #4ade80;
   --color-blue: #38bdf8;
+  --color-orange: #fb923c;
   --color-muted: #9797a8;
   --color-muted-2: #8c8ca0;
   --color-muted-3: #8585a0;
@@ -63,9 +65,10 @@
   --color-on-green: #ffffff;
   --color-danger-fill: #dc2626;
   --color-pink: #c91d52;
-  --color-gold: #946000;
+  --color-gold: #865600;
   --color-green: #157a38;
   --color-blue: #0369a1;
+  --color-orange: #b45309;
   --color-muted: #5f5f76;
   --color-muted-2: #606078;
   --color-muted-3: #666680;
@@ -79,7 +82,8 @@
   --color-dropdown-bg: #ffffff;
   --color-modal-bg: #ffffff;
   --color-mobile-nav-bg: rgba(242,242,247,.92);
-  --color-check-border: rgba(0,0,0,.28);
+  --color-check-border: #77778c;
+  --color-control-edge: #77778c;
   --color-check-border-dim: rgba(0,0,0,.13);
   --color-border: rgba(0,0,0,.08);
   --color-border-sm: rgba(0,0,0,.05);
