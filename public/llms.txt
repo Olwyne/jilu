@@ -11,7 +11,7 @@ Jilu is a free personal media tracker built as a replacement for TV Time. It let
 - Episode-by-episode tracking with per-episode ratings and comments
 - Release calendar showing upcoming episodes and new releases
 - Detailed stats: hours watched, top genres, weekly activity, average rating
-- Multi-source search: TMDB, AniList, RAWG, Google Books, Spotify
+- Multi-source search: TMDB, AniList, RAWG, Google Books
 - Public profiles shareable at /u/yourhandle
 - TV Time data import (ZIP export → instant migration)
 - Bilingual: English and French
