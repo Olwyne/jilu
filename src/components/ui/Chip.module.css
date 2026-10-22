@@ -1,0 +1,16 @@
+.chip { position: relative; display: inline-flex; align-items: center; gap: 7px; box-sizing: border-box; font-family: inherit; line-height: 1.2; white-space: nowrap; cursor: pointer; color: var(--color-muted); background: var(--color-chip-bg); border: 1px solid var(--color-border-btn); transition: background-color .15s, color .15s, border-color .15s; }
+.chip:hover:not(:disabled):not(.active) { color: var(--color-text); }
+.chip:disabled, .chip[aria-disabled="true"] { cursor: not-allowed; opacity: .45; }
+
+.md { padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+.sm { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.xs { padding: 5px 11px; border-radius: 8px; font-size: 12.5px; font-weight: 500; color: var(--color-muted-2); background: transparent; border-color: transparent; }
+
+.active { font-weight: 600; color: var(--color-on-accent); background: var(--color-accent-fill); border-color: transparent; }
+.xs.active { color: var(--color-text); background: var(--color-border-btn); }
+
+/* flat: segmented control inside a tinted track */
+.flat { background: transparent; border-color: transparent; }
+.flat.active { background: var(--color-accent-fill); }
+
+.count { opacity: .7; font-size: 12px; font-weight: 500; }

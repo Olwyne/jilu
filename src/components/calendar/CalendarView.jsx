@@ -5,6 +5,7 @@ import { relText, DAY } from '../../lib/domain'
 import { posterGradient } from '../../lib/posterBox'
 import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
+import Chip from '../ui/Chip'
 
 const TABS = ['rattraper', 'commencer', 'venir', 'abandonne']
 const CAT_KEYS = ['all', 'series', 'films', 'animes', 'mangas', 'livres', 'jeux']
@@ -237,22 +238,16 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
       {/* Category chips */}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
         {CAT_KEYS.map((key) => (
-          <div
-            key={key}
-            {...pressable(() => setCategory(key))}
-            style={{ padding: '5px 12px', borderRadius: 20, cursor: 'pointer', fontWeight: 600, fontSize: 12, background: category === key ? 'var(--color-accent)' : 'var(--color-chip-bg)', color: category === key ? '#fff' : 'var(--color-muted)' }}
-          >
-            {t(`cat.${key}`)}
-          </div>
+          <Chip key={key} size="sm" active={category === key} onClick={() => setCategory(key)}>{t(`cat.${key}`)}</Chip>
         ))}
       </div>
 
       {/* Status tabs */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
         {TABS.map((tk) => (
-          <button key={tk} onClick={() => setTab(tk)} style={{ padding: '7px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13, background: tab === tk ? 'var(--color-accent)' : 'var(--color-chip-bg)', color: tab === tk ? '#fff' : 'var(--color-muted)' }}>
+          <Chip key={tk} active={tab === tk} onClick={() => setTab(tk)}>
             {TAB_LABELS[tk]}{counts[tk] > 0 ? ` · ${counts[tk]}` : ''}
-          </button>
+          </Chip>
         ))}
       </div>
 

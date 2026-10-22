@@ -177,7 +177,7 @@ describe('useAppData : rafraîchissement côté serveur', () => {
     const progress = vi.fn()
     await act(async () => { await result.current.refreshAll(progress) })
     expect(mods.requestCatalogRefresh).toHaveBeenCalledTimes(2) // a et z : toutes deux « ended: false » ici
-    expect(progress).toHaveBeenCalledWith(expect.stringContaining('mise'))
+    expect(progress).toHaveBeenCalledWith(expect.stringContaining('updated'))
   })
 
   it('une panne du serveur n’interrompt pas les autres', async () => {

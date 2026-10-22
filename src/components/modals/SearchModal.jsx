@@ -4,6 +4,8 @@ import { searchCatalog, fetchTrending } from '../../catalog/search'
 import PosterBox from '../ui/PosterBox'
 import Modal from '../ui/Modal'
 import { pressable } from '../../lib/a11y'
+import Chip from '../ui/Chip'
+import Badge from '../ui/Badge'
 
 export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
   const { t } = useTranslation()
@@ -63,18 +65,10 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
           {CATS.map((c) => {
             const disabled = c.k === 'musique'
             return (
-              <div
-                key={c.k}
-                {...pressable(() => { if (!disabled) { setCat(c.k); setResults([]) } }, { pressed: !disabled && cat === c.k, disabled })}
-                style={{ position: 'relative', padding: '6px 13px', borderRadius: 20, fontSize: 13, fontWeight: cat === c.k ? 600 : 500, cursor: disabled ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', color: disabled ? 'var(--color-muted-3)' : cat === c.k ? '#fff' : 'var(--color-muted)', background: disabled ? 'var(--color-surface-row)' : cat === c.k ? 'var(--color-accent)' : 'var(--color-surface-row)', border: `1px solid ${!disabled && cat === c.k ? 'transparent' : 'var(--color-border)'}`, opacity: disabled ? 0.5 : 1, flexShrink: 0 }}
-              >
+              <Chip key={c.k} active={!disabled && cat === c.k} disabled={disabled} onClick={() => { if (!disabled) { setCat(c.k); setResults([]) } }}>
                 {c.label}
-                {disabled && (
-                  <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--color-danger-fill)', color: '#fff', fontSize: 12, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
-                    {t('search.comingSoon')}
-                  </span>
-                )}
-              </div>
+                {disabled && <Badge floating>{t('search.comingSoon')}</Badge>}
+              </Chip>
             )
           })}
         </div>

@@ -1,3 +1,4 @@
+import i18n from '../i18n/index.js'
 import { tmdbGetBothMeta } from '../catalog/tmdb'
 import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
 import { DETAIL_FETCHERS } from '../catalog/refresh'
@@ -35,8 +36,7 @@ export function useWorkActions(data, mutate, services = {}) {
     const statusPatch = buildStatusPatch(work, watched, data.works)
     if (statusPatch.works && work.status === 'abandonne') {
       const auto = statusPatch.works[workId].status
-      const label = auto === 'en_cours' ? 'En cours' : 'Terminé'
-      const resume = window.confirm(`Tu reprends "${work.title}" ? Passer en "${label}" ?`)
+      const resume = window.confirm(i18n.t('actions.resumeConfirm', { title: work.title, status: i18n.t(auto === 'en_cours' ? 'status.en_cours' : 'status.termine') }))
       if (!resume) { await mutate({ watched }); return }
     }
     await mutate({ watched, ...statusPatch })
@@ -56,8 +56,7 @@ export function useWorkActions(data, mutate, services = {}) {
     const statusPatch = buildStatusPatch(work, watched, data.works)
     if (statusPatch.works && work.status === 'abandonne') {
       const auto = statusPatch.works[workId].status
-      const label = auto === 'en_cours' ? 'En cours' : 'Terminé'
-      const resume = window.confirm(`Tu reprends "${work.title}" ? Passer en "${label}" ?`)
+      const resume = window.confirm(i18n.t('actions.resumeConfirm', { title: work.title, status: i18n.t(auto === 'en_cours' ? 'status.en_cours' : 'status.termine') }))
       if (!resume) { await mutate({ watched }); return }
     }
     await mutate({ watched, ...statusPatch })
@@ -160,13 +159,13 @@ export function useWorkActions(data, mutate, services = {}) {
   }
 
   async function resetProgress() {
-    if (window.confirm('Réinitialiser toute ta progression ? Les épisodes cochés seront remis à zéro.')) {
+    if (window.confirm(i18n.t('actions.resetConfirm'))) {
       await mutate({ watched: {} })
     }
   }
 
   async function clearAll() {
-    if (window.confirm('Tout effacer ? Progression, notes, avis et œuvres importées seront supprimés. Irréversible.')) {
+    if (window.confirm(i18n.t('actions.clearConfirm'))) {
       await mutate({ works: {}, watched: {}, ratings: {}, reviews: [], feed: [], games: {}, favorites: {} })
     }
   }

@@ -11,6 +11,8 @@ import { initials } from '../../lib/domain'
 import EditProfileModal from '../modals/EditProfileModal'
 import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
+import Chip from '../ui/Chip'
+import Badge from '../ui/Badge'
 
 const TYPE_EMOJI = { bug: '🐛', suggestion: '💡', other: '💬' }
 
@@ -77,13 +79,7 @@ function FeedbackSection({ profile }) {
     <div style={{ borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden', marginBottom: 24, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {FEEDBACK_TYPES.map(ft => (
-          <button
-            key={ft.value}
-            onClick={() => setType(ft.value)}
-            style={{ padding: '6px 14px', borderRadius: 20, border: '1px solid', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: type === ft.value ? 'var(--color-accent)' : 'transparent', color: type === ft.value ? '#fff' : 'var(--color-muted)', borderColor: type === ft.value ? 'var(--color-accent)' : 'var(--color-border-btn)', transition: 'all .15s' }}
-          >
-            {ft.label}
-          </button>
+          <Chip key={ft.value} active={type === ft.value} onClick={() => setType(ft.value)}>{ft.label}</Chip>
         ))}
       </div>
       <input
@@ -131,9 +127,7 @@ function Section({ rows, settings, onToggleSetting }) {
             <div style={{ fontWeight: 600, fontSize: 14.5, display: 'flex', alignItems: 'center', gap: 8 }}>
               {label}
               {disabled && (
-                <span style={{ background: 'var(--color-danger-fill)', color: '#fff', fontSize: 12, fontWeight: 700, borderRadius: 10, padding: '1px 6px', lineHeight: 1.5 }}>
-                  {t('settings.comingSoon')}
-                </span>
+                <Badge>{t('settings.comingSoon')}</Badge>
               )}
             </div>
             <div style={{ fontSize: 12.5, color: 'var(--color-muted)', marginTop: 2 }}>{desc}</div>
@@ -273,7 +267,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         </Modal>
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', padding: 24, borderRadius: 20, background: 'var(--color-surface)', border: '1px solid var(--color-border)', marginBottom: 26 }}>
-        <div style={{ width: 76, height: 76, flexShrink: 0, borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), var(--color-pink))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30, color: '#fff' }}>
+        <div style={{ width: 76, height: 76, flexShrink: 0, borderRadius: '50%', background: 'var(--gradient-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30, color: '#fff' }}>
           {initials(profile.handle || profile.name)}
         </div>
         <div style={{ flex: 1, minWidth: 220 }}>

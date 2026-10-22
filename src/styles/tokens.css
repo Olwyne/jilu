@@ -25,6 +25,7 @@
   --color-muted: #9797a8;
   --color-muted-2: #8c8ca0;
   --color-muted-3: #8585a0;
+  --gradient-brand: linear-gradient(135deg, var(--color-accent), var(--color-pink));
   --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
   --font-body: 'Instrument Sans', system-ui, sans-serif;
   --color-surface-toast: rgba(18,18,28,.96);

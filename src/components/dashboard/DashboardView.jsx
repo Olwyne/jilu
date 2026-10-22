@@ -7,6 +7,7 @@ import RecoRow from './RecoRow'
 import { useFriendsFeed } from '../../hooks/useFriendsFeed'
 import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
+import Chip from '../ui/Chip'
 
 const PAGE_SIZE = 5
 
@@ -89,12 +90,6 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
   ].sort((a, b) => b.ts - a.ts)
 
   const hasFriends = Object.keys(following || {}).length > 0
-  const tabStyle = (active) => ({
-    padding: '7px 16px', borderRadius: 20, border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer',
-    background: active ? 'var(--color-accent)' : 'transparent',
-    color: active ? '#fff' : 'var(--color-muted)',
-  })
-
   return (
     <div>
       <QuizWidget user={user} handle={handle} following={following} />
@@ -103,8 +98,8 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
         <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, margin: 0 }}>{t('dashboard.activity')}</h3>
         {hasFriends && (
           <div style={{ display: 'flex', gap: 4, background: 'var(--color-chip-bg)', borderRadius: 22, padding: 4 }}>
-            <button type="button" style={tabStyle(tab === 'me')} onClick={() => setTab('me')}>{t('social.me')}</button>
-            <button type="button" style={tabStyle(tab === 'friends')} onClick={() => setTab('friends')}>{t('social.friends')}</button>
+            <Chip flat active={tab === 'me'} onClick={() => setTab('me')}>{t('social.me')}</Chip>
+            <Chip flat active={tab === 'friends'} onClick={() => setTab('friends')}>{t('social.friends')}</Chip>
           </div>
         )}
       </div>

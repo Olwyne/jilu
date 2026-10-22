@@ -5,6 +5,7 @@ import PosterBox from '../ui/PosterBox'
 import { initials, relText } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
 import { pressable } from '../../lib/a11y'
+import IconButton from '../ui/IconButton'
 
 const RUNTIME = { animes: 24, series: 45, films: 120 }
 
@@ -86,7 +87,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
       {/* Hero */}
       <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 16 : 20, padding: 24, borderRadius: 22, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 72, height: 72, flexShrink: 0, borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), var(--color-pink))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: '#fff' }}>
+          <div style={{ width: 72, height: 72, flexShrink: 0, borderRadius: '50%', background: 'var(--gradient-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: '#fff' }}>
             {initials(pseudo)}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -94,11 +95,11 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
             <div style={{ color: 'var(--color-muted-3)', fontSize: 13, marginTop: 2 }}>{t('profile.memberSince', { date: profile.memberSince })}</div>
           </div>
           {!readOnly && isMobile && (
-            <div {...pressable(() => navigate('/account'), { label: t('header.account') })} style={{ width: 34, height: 34, flexShrink: 0, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-chip-bg)', border: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-muted)' }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+            <IconButton size="sm" label={t('header.account')} onClick={() => navigate('/account')}>
+              <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
                 <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
-            </div>
+            </IconButton>
           )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -114,11 +115,11 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
         </div>
         {!readOnly && !isMobile && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-            <div {...pressable(() => navigate('/account'), { label: t('header.account') })} style={{ width: 34, height: 34, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-chip-bg)', border: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-muted)' }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+            <IconButton size="sm" label={t('header.account')} onClick={() => navigate('/account')}>
+              <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
                 <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
-            </div>
+            </IconButton>
             <div {...pressable(handleShare)} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
               {isPublic ? t('profile.copyLink') : t('profile.private')}
             </div>

@@ -1,3 +1,4 @@
+import i18n from '../i18n/index.js'
 
 function tmdbFetch(path, params = {}) {
   const qs = new URLSearchParams({ path, ...params }).toString()
@@ -12,12 +13,12 @@ const slug = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '
 const MAX_IMPORT_BYTES = 200 * 1024 * 1024 // garde-fou contre les archives piégées (zip bomb)
 
 async function loadZip(file) {
-  if (file.size > 50 * 1024 * 1024) throw new Error('Fichier trop volumineux')
+  if (file.size > 50 * 1024 * 1024) throw new Error(i18n.t('import.tooBig'))
   const { default: JSZip } = await import('jszip')
   const zip = await JSZip.loadAsync(file)
   let total = 0
   zip.forEach((_, entry) => { total += entry._data?.uncompressedSize || 0 })
-  if (total > MAX_IMPORT_BYTES) throw new Error('Archive trop volumineuse une fois décompressée')
+  if (total > MAX_IMPORT_BYTES) throw new Error(i18n.t('import.zipTooBig'))
   return zip
 }
 
@@ -53,7 +54,7 @@ export function useImport(data, mutate) {
   async function importTVTime(onStatus, onFailed) {
     const file = await pickFile('.zip')
     if (!file) return
-    onStatus('Lecture du fichier…')
+    onStatus(i18n.t('import.reading'))
     try {
       const zip = await loadZip(file)
 
@@ -70,9 +71,9 @@ export function useImport(data, mutate) {
       })
 
       // Tracking history
-      onStatus("Analyse de l'historique…")
+      onStatus(i18n.t('import.analyzing'))
       const trackFile = zip.file('tracking-prod-records-v2.csv')
-      if (!trackFile) { onStatus('Erreur : tracking-prod-records-v2.csv introuvable.'); return }
+      if (!trackFile) { onStatus(i18n.t('import.missingTracking')); return }
       const showData = new Map()
       parseCSV(await trackFile.async('string')).forEach(r => {
         const name = r.series_name; if (!name) return
@@ -117,7 +118,7 @@ export function useImport(data, mutate) {
       const existingByTmdb = new Map(Object.values(works).filter(w => w.tmdbId).map(w => [w.tmdbId, w]))
 
       for (let i = 0; i < showNames.length; i += BATCH) {
-        onStatus(`Recherche TMDB… ${Math.min(i + BATCH, showNames.length)}/${showNames.length}`)
+        onStatus(i18n.t('import.searchTmdb', { done: Math.min(i + BATCH, showNames.length), total: showNames.length }))
         await Promise.all(showNames.slice(i, i + BATCH).map(async showName => {
           const tvData = showData.get(showName)
           const nName = norm(showName)
@@ -164,7 +165,7 @@ export function useImport(data, mutate) {
         })
         const movieNames = Array.from(movieData.keys())
         for (let i = 0; i < movieNames.length; i += BATCH) {
-          onStatus(`Films TMDB… ${Math.min(i + BATCH, movieNames.length)}/${movieNames.length}`)
+          onStatus(i18n.t('import.moviesTmdb', { done: Math.min(i + BATCH, movieNames.length), total: movieNames.length }))
           await Promise.all(movieNames.slice(i, i + BATCH).map(async movieName => {
             const watchedAt = movieData.get(movieName)
             try {
@@ -191,19 +192,19 @@ export function useImport(data, mutate) {
       autoStatus(Object.values(works), watched)
       await mutate({ works, watched, ratings, favorites })
       if (onFailed && failed.length > 0) onFailed(failed)
-      onStatus(`✓ ${newImports} série${newImports !== 1 ? 's' : ''}, ${totalEps} épisode${totalEps !== 1 ? 's' : ''}, ${newMovies} film${newMovies !== 1 ? 's' : ''} importé${newMovies !== 1 ? 's' : ''}.`)
-    } catch (e) { onStatus('Erreur : ' + e.message) }
+      onStatus(i18n.t('import.done', { series: i18n.t('import.nSeries', { count: newImports }), episodes: i18n.t('import.nEpisodes', { count: totalEps }), movies: i18n.t('import.nMovies', { count: newMovies }) }))
+    } catch (e) { onStatus(i18n.t('import.error', { message: e.message })) }
   }
 
   async function importTVTimeOut(onStatus, onFailed) {
     const file = await pickFile('.zip')
     if (!file) return
-    onStatus('Lecture du fichier…')
+    onStatus(i18n.t('import.reading'))
     const STATUS_MAP = { up_to_date: 'en_cours', continuing: 'en_cours', watch_later: 'a_voir', not_started_yet: 'a_voir', stopped: 'abandonne' }
     try {
       const zip = await loadZip(file)
       const seriesJsonFile = zip.file(/^tvtime-series-.*\.json$/)[0]
-      if (!seriesJsonFile) { onStatus('Erreur : tvtime-series-*.json introuvable.'); return }
+      if (!seriesJsonFile) { onStatus(i18n.t('import.missingSeries')); return }
 
       const watched = { ...data.watched }
       const works = { ...data.works }
@@ -215,7 +216,7 @@ export function useImport(data, mutate) {
 
       const series = JSON.parse(await seriesJsonFile.async('string'))
       for (let i = 0; i < series.length; i += BATCH) {
-        onStatus(`Séries… ${Math.min(i + BATCH, series.length)}/${series.length}`)
+        onStatus(i18n.t('import.seriesProgress', { done: Math.min(i + BATCH, series.length), total: series.length }))
         await Promise.all(series.slice(i, i + BATCH).map(async show => {
           const tvdbId = show.id?.tvdb
           try {
@@ -265,7 +266,7 @@ export function useImport(data, mutate) {
       if (moviesFile) {
         const movies = JSON.parse(await moviesFile.async('string'))
         for (let i = 0; i < movies.length; i += BATCH) {
-          onStatus(`Films… ${Math.min(i + BATCH, movies.length)}/${movies.length}`)
+          onStatus(i18n.t('import.moviesProgress', { done: Math.min(i + BATCH, movies.length), total: movies.length }))
           await Promise.all(movies.slice(i, i + BATCH).map(async movie => {
             const imdbId = movie.id?.imdb
             try {
@@ -301,8 +302,8 @@ export function useImport(data, mutate) {
       autoStatus(Object.values(works), watched)
       await mutate({ works, watched, ratings, favorites })
       if (onFailed && failed.length > 0) onFailed(failed)
-      onStatus(`✓ ${newImports} série${newImports !== 1 ? 's' : ''}, ${totalEps} épisode${totalEps !== 1 ? 's' : ''}, ${newMovies} film${newMovies !== 1 ? 's' : ''} importé${newMovies !== 1 ? 's' : ''}.`)
-    } catch (e) { onStatus('Erreur : ' + e.message) }
+      onStatus(i18n.t('import.done', { series: i18n.t('import.nSeries', { count: newImports }), episodes: i18n.t('import.nEpisodes', { count: totalEps }), movies: i18n.t('import.nMovies', { count: newMovies }) }))
+    } catch (e) { onStatus(i18n.t('import.error', { message: e.message })) }
   }
 
   return { importTVTime, importTVTimeOut }

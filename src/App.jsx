@@ -39,7 +39,7 @@ const LegalNoticePage = lazy(() => import('./components/legal/LegalNoticePage'))
 
 function RouteFallback() {
   const { t } = useTranslation()
-  return <div role="status" aria-busy="true" style={{ padding: 40, color: 'var(--color-muted)', fontSize: 14 }}>{t('profile.loading')}</div>
+  return <div role="status" aria-busy="true" className="jilu-fallback">{t('profile.loading')}</div>
 }
 
 function getRouteCopy(t) {

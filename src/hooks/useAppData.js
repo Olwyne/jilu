@@ -13,6 +13,7 @@ import { assembleData, catalogIdsNeededAtStartup } from '../data/assemble.js'
 import { planV2Writes, applyPlanToLibrary, commitPlan, isEmptyPlan } from '../data/writeV2.js'
 import { requestCatalogRefresh, REFRESHABLE_SOURCES, AUTO_REFRESH_MIN_AGE_MS } from '../data/refreshClient.js'
 import { clean } from '../lib/catalogUtils.js'
+import i18n from '../i18n/index.js'
 
 export const EMPTY_DATA = {
   works: {}, watched: {}, ratings: {}, reviews: [],
@@ -217,9 +218,9 @@ export function useAppData(user) {
       .sort((a, b) => (a.refreshedAt || 0) - (b.refreshedAt || 0))
       .slice(0, MANUAL_REFRESH_LIMIT)
       .map((c) => c.id)
-    if (!ids.length) { onProgress?.('Aucune œuvre en cours de diffusion à rafraîchir'); return { refreshed: [], total: 0 } }
-    const res = await refreshCatalogDocs(ids, { onProgress: (done, total) => onProgress?.(`Rafraîchissement… ${done}/${total}`) })
-    onProgress?.(`✓ ${res.refreshed.length} fiche${res.refreshed.length > 1 ? 's' : ''} mise${res.refreshed.length > 1 ? 's' : ''} à jour (${res.total - res.refreshed.length} déjà à jour)`)
+    if (!ids.length) { onProgress?.(i18n.t('refresh.none')); return { refreshed: [], total: 0 } }
+    const res = await refreshCatalogDocs(ids, { onProgress: (done, total) => onProgress?.(i18n.t('refresh.progress', { done, total })) })
+    onProgress?.(i18n.t('refresh.done', { count: res.refreshed.length, already: res.total - res.refreshed.length }))
     return res
   }
 

@@ -8,6 +8,7 @@ import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
 import ReviewFeed from './ReviewFeed'
 import { pressable } from '../../lib/a11y'
+import StarRating from '../ui/StarRating'
 
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites, currentUser }) {
   const { t, i18n } = useTranslation()
@@ -80,11 +81,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 13, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)' }}>
               <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('detail.myRating')}</span>
-              <div style={{ display: 'flex', gap: 3 }}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <span key={n} {...pressable(() => actions.setRating('w', work.id, n), { label: `${n}/5`, pressed: n <= rating })} style={{ fontSize: 20, cursor: 'pointer', color: n <= rating ? 'var(--color-gold)' : 'var(--color-check-border)' }}>{n <= rating ? '★' : '☆'}</span>
-                ))}
-              </div>
+              <StarRating value={rating} onChange={(n) => actions.setRating('w', work.id, n)} label={t('detail.myRating')} />
             </div>
             <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} disabled={isUnreleased} />
             {actions.toggleFavorite && (

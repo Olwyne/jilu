@@ -4,8 +4,9 @@ import { localizedTitle } from '../../lib/domain'
 import { tmdbFetchEpisode } from '../../catalog/tmdb'
 import ReviewFeed from '../detail/ReviewFeed'
 import Modal from '../ui/Modal'
-import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
+import IconButton from '../ui/IconButton'
+import StarRating from '../ui/StarRating'
 
 function fmtDate(ts) {
   if (!ts || ts === Infinity) return null
@@ -51,10 +52,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
               <div style={{ fontSize: 12.5, color: 'var(--color-muted)', marginTop: 5 }}>{fmtDate(ep.air)}</div>
             )}
           </div>
-          <div
-            {...pressable(onClose, { label: t('common.close') })}
-            style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid var(--color-border-btn)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 18, flexShrink: 0 }}
-          >✕</div>
+          <IconButton size="sm" label={t('common.close')} onClick={onClose} style={{ fontSize: 18 }}>✕</IconButton>
         </div>
 
         {/* Overview */}
@@ -67,17 +65,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
         {/* Ma note */}
         <div style={{ padding: '16px 26px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--color-border)' }}>
           <span style={{ fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600 }}>{t('detail.myRating')}</span>
-          <div style={{ display: 'flex', gap: 3 }}>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <span
-                key={n}
-                {...pressable(() => handleStarClick(n), { label: `${n}/5`, pressed: n <= myRating })}
-                style={{ fontSize: 26, cursor: 'pointer', color: n <= myRating ? 'var(--color-gold)' : 'var(--color-check-border)' }}
-              >
-                {n <= myRating ? '★' : '☆'}
-              </span>
-            ))}
-          </div>
+          <StarRating value={myRating} onChange={handleStarClick} label={t('detail.myRating')} size="lg" />
         </div>
 
         {/* Avis + feed — avec spoiler gate */}

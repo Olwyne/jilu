@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import WorkCard from './WorkCard'
 import { epTotals } from '../../lib/domain'
 import styles from './LibraryView.module.css'
-import { pressable } from '../../lib/a11y'
+import Chip from '../ui/Chip'
+import Badge from '../ui/Badge'
 
 export default function LibraryView({ works, watched, ratings, favorites, onOpenWork }) {
   const { t } = useTranslation()
@@ -95,34 +96,25 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
         {CATS.map(([key, label]) => {
           const disabled = key === 'musique'
           return (
-            <div
-              key={key}
-              className={`${styles.chip} ${!disabled && category === key ? styles.chipActive : ''} ${disabled ? styles.chipDisabled : ''}`}
-              {...pressable(() => { if (!disabled) setCategory(key) }, { pressed: !disabled && category === key, disabled })}
-              style={disabled ? { cursor: 'not-allowed', opacity: 0.45, position: 'relative' } : { position: 'relative' }}
-            >
-              {label} <span className={styles.chipCount}>{key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length}</span>
-              {disabled && (
-                <span style={{ position: 'absolute', top: -6, right: -6, background: 'var(--color-danger-fill)', color: '#fff', fontSize: 12, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
-                  {t('settings.comingSoon')}
-                </span>
-              )}
-            </div>
+            <Chip key={key} active={!disabled && category === key} disabled={disabled} count={key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length} onClick={() => { if (!disabled) setCategory(key) }}>
+              {label}
+              {disabled && <Badge floating>{t('settings.comingSoon')}</Badge>}
+            </Chip>
           )
         })}
       </div>
       <div className={styles.filtersRow}>
         <div className={styles.smallChips}>
           {STATUSES.map(([key, label]) => (
-            <div key={key} className={`${styles.smallChip} ${status === key ? styles.smallChipActive : ''}`} {...pressable(() => setStatus(key), { pressed: status === key })}>{label}</div>
+            <Chip key={key} size="xs" active={status === key} onClick={() => setStatus(key)}>{label}</Chip>
           ))}
         </div>
         <div className={styles.sortChips}>
           <span className={styles.sortLabel}>{t('library.sort')}</span>
           {SORTS.map(([key, label]) => (
-            <div key={key} className={`${styles.smallChip} ${sort === key ? styles.smallChipActive : ''}`} {...pressable(() => handleSort(key), { pressed: sort === key })}>
+            <Chip key={key} size="xs" active={sort === key} onClick={() => handleSort(key)}>
               {label}{sort === key ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
-            </div>
+            </Chip>
           ))}
         </div>
       </div>
