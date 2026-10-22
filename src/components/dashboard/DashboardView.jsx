@@ -6,6 +6,7 @@ import QuizWidget from './QuizWidget'
 import RecoRow from './RecoRow'
 import { useFriendsFeed } from '../../hooks/useFriendsFeed'
 import { pressable } from '../../lib/a11y'
+import Button from '../ui/Button'
 
 const PAGE_SIZE = 5
 
@@ -58,13 +59,9 @@ function ActivityList({ items, works, onOpenWork, emptyKey }) {
         })}
       </div>
       {hasMore && (
-        <button
-          type="button"
-          onClick={() => setShown((n) => n + PAGE_SIZE)}
-          style={{ width: '100%', padding: '11px 0', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-muted)', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 32 }}
-        >
+        <Button variant="secondary" block style={{ marginBottom: 32 }} onClick={() => setShown((n) => n + PAGE_SIZE)}>
           {t('dashboard.showMore')}
-        </button>
+        </Button>
       )}
     </>
   )

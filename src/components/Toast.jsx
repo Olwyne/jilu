@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import Button from './ui/Button'
 
 export default function Toast({ toast, onClose, onOpenRating }) {
   const { t } = useTranslation()
@@ -21,12 +22,9 @@ export default function Toast({ toast, onClose, onOpenRating }) {
         <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{toast.title}</div>
         {toast.label && <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 2 }}>{toast.label}</div>}
       </div>
-      <button
-        onClick={handleAction}
-        style={{ padding: '7px 13px', borderRadius: 10, background: 'var(--color-accent-fill)', fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0, border: 'none', color: '#fff' }}
-      >
+      <Button variant="primary" size="sm" style={{ flexShrink: 0 }} onClick={handleAction}>
         {actionLabel}
-      </button>
+      </Button>
       <button type="button" onClick={onClose} aria-label={t('toast.dismiss')} style={{ minWidth: 32, minHeight: 32, fontSize: 16, color: 'var(--color-muted-2)', cursor: 'pointer', flexShrink: 0, lineHeight: 1, background: 'none', border: 'none' }}><span aria-hidden="true">✕</span></button>
     </div>
       )}

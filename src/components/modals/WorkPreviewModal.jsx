@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import Modal from '../ui/Modal'
+import Button from '../ui/Button'
 
 export default function WorkPreviewModal({ work, onAdd, onClose }) {
   const { t } = useTranslation()
@@ -22,20 +23,12 @@ export default function WorkPreviewModal({ work, onAdd, onClose }) {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-text)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
-          >
+          <Button variant="secondary" style={{ flex: 1 }} onClick={onClose}>
             {t('preview.close')}
-          </button>
-          <button
-            type="button"
-            onClick={() => { onAdd(work); onClose() }}
-            style={{ flex: 2, padding: '11px 0', borderRadius: 12, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
-          >
+          </Button>
+          <Button variant="primary" style={{ flex: 2 }} onClick={() => { onAdd(work); onClose() }}>
             {t('preview.add')}
-          </button>
+          </Button>
         </div>
       
     </Modal>

@@ -5,6 +5,7 @@ import { tmdbFetchEpisode } from '../../catalog/tmdb'
 import ReviewFeed from '../detail/ReviewFeed'
 import Modal from '../ui/Modal'
 import { pressable } from '../../lib/a11y'
+import Button from '../ui/Button'
 
 function fmtDate(ts) {
   if (!ts || ts === Infinity) return null
@@ -96,12 +97,9 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
           {!spoilerVisible && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 20 }}>
               <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-text)', textAlign: 'center' }}>Épisode pas encore vu</div>
-              <div
-                {...pressable(() => setRevealed(true))}
-                style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}
-              >
+              <Button variant="primary" size="sm" onClick={() => setRevealed(true)}>
                 {t('episode.reveal')}
-              </div>
+              </Button>
             </div>
           )}
         </div>

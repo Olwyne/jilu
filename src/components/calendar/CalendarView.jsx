@@ -4,6 +4,7 @@ import PosterBox from '../ui/PosterBox'
 import { relText, DAY } from '../../lib/domain'
 import { posterGradient } from '../../lib/posterBox'
 import { pressable } from '../../lib/a11y'
+import Button from '../ui/Button'
 
 const TABS = ['rattraper', 'commencer', 'venir', 'abandonne']
 const CAT_KEYS = ['all', 'series', 'films', 'animes', 'mangas', 'livres', 'jeux']
@@ -42,9 +43,9 @@ function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
           )}
         </div>
         {onMarkDone && (
-          <div {...pressable((ev) => { ev.stopPropagation(); onMarkDone(w.id) })} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontSize: 13, fontWeight: 600 }}>
+          <Button variant="primary" size="sm" style={{ flexShrink: 0 }} onClick={(ev) => { ev.stopPropagation(); onMarkDone(w.id) }}>
             {markLabel}
-          </div>
+          </Button>
         )}
       </div>
     </div>
@@ -82,7 +83,7 @@ function EpisodeCard({ item, showMarkWatched, onOpenWork, onMarkWatched, t }) {
           </div>
         </div>
         {showMarkWatched && (
-          <div {...pressable((ev) => { ev.stopPropagation(); onMarkWatched(w.id, s.n, e.n) })} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontSize: 13, fontWeight: 600 }}>{t('calendar.markWatched')}</div>
+          <Button variant="primary" size="sm" style={{ flexShrink: 0 }} onClick={(ev) => { ev.stopPropagation(); onMarkWatched(w.id, s.n, e.n) }}>{t('calendar.markWatched')}</Button>
         )}
       </div>
     </div>

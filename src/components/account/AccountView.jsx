@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { initials } from '../../lib/domain'
 import EditProfileModal from '../modals/EditProfileModal'
 import { pressable } from '../../lib/a11y'
+import Button from '../ui/Button'
 
 const TYPE_EMOJI = { bug: '🐛', suggestion: '💡', other: '💬' }
 
@@ -101,13 +102,9 @@ function FeedbackSection({ profile }) {
         style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button
-          onClick={handleSend}
-          disabled={status === 'loading' || !subject.trim() || !message.trim()}
-          style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: status === 'loading' ? 'wait' : 'pointer', opacity: (!subject.trim() || !message.trim()) ? 0.5 : 1, transition: 'opacity .15s' }}
-        >
+        <Button variant="primary" onClick={handleSend} disabled={status === 'loading' || !subject.trim() || !message.trim()}>
           {status === 'loading' ? t('feedback.sending') : t('feedback.send')}
-        </button>
+        </Button>
         {status === 'success' && <span style={{ fontSize: 13, color: 'var(--color-green, #22c55e)', fontWeight: 600 }}>{t('feedback.success')}</span>}
         {status === 'error' && <span style={{ fontSize: 13, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('feedback.error')}</span>}
         {status === 'ratelimit' && <span style={{ fontSize: 13, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('feedback.rateLimit')}</span>}
@@ -265,20 +262,12 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
               </div>
             )}
             <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                onClick={() => { setDeleteOpen(false); setDeletePassword('') }}
-                disabled={deleteStatus === 'loading'}
-                style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-text)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
-              >
+              <Button variant="secondary" style={{ flex: 1 }} onClick={() => { setDeleteOpen(false); setDeletePassword('') }} disabled={deleteStatus === 'loading'}>
                 {t('settings.deleteAccountCancel')}
-              </button>
-              <button
-                onClick={handleDeleteAccount}
-                disabled={deleteStatus === 'loading' || !deletePassword}
-                style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: 'none', background: 'var(--color-danger-fill)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: (deleteStatus === 'loading' || !deletePassword) ? 'not-allowed' : 'pointer', opacity: (deleteStatus === 'loading' || !deletePassword) ? 0.5 : 1 }}
-              >
+              </Button>
+              <Button variant="danger" style={{ flex: 1 }} onClick={handleDeleteAccount} disabled={deleteStatus === 'loading' || !deletePassword}>
                 {deleteStatus === 'loading' ? t('settings.deleteAccountDeleting') : t('settings.deleteAccountConfirm')}
-              </button>
+              </Button>
             </div>
           
         </Modal>
@@ -337,8 +326,8 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.import')}</div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: failedItems.length || failedOutItems.length ? 12 : 24 }}>
-        <div {...pressable(handleImport)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{importLabel ?? t('settings.importTVTime')}</div>
-        <div {...pressable(handleImportOut)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{importOutLabel ?? t('settings.importTVTimeOut')}</div>
+        <Button variant="secondary" size="lg" onClick={handleImport}>{importLabel ?? t('settings.importTVTime')}</Button>
+        <Button variant="secondary" size="lg" onClick={handleImportOut}>{importOutLabel ?? t('settings.importTVTimeOut')}</Button>
       </div>
       {(failedItems.length > 0 || failedOutItems.length > 0) && (
         <div style={{ marginBottom: 24 }}>
@@ -363,16 +352,16 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.data')}</div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-        <div {...pressable(handleSync)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{syncLabel ?? t('settings.sync')}</div>
-        <div {...pressable(handleRefreshAll)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{refreshLabel ?? t('settings.refresh')}</div>
-        <div {...pressable(onMarkAll)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.markAll')}</div>
-        <div {...pressable(onReset)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.reset')}</div>
-        <div {...pressable(onClearAll)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border-2)', background: 'var(--color-danger-bg-2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.clearAll')}</div>
+        <Button variant="secondary" size="lg" onClick={handleSync}>{syncLabel ?? t('settings.sync')}</Button>
+        <Button variant="secondary" size="lg" onClick={handleRefreshAll}>{refreshLabel ?? t('settings.refresh')}</Button>
+        <Button variant="secondary" size="lg" onClick={onMarkAll}>{t('settings.markAll')}</Button>
+        <Button variant="dangerOutline" size="lg" onClick={onReset}>{t('settings.reset')}</Button>
+        <Button variant="dangerOutline" size="lg" onClick={onClearAll}>{t('settings.clearAll')}</Button>
       </div>
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.export')}</div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
-        <div {...pressable(onExportJSON)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.exportJSON')}</div>
-        <div {...pressable(onExportCSV)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.exportCSV')}</div>
+        <Button variant="secondary" size="lg" onClick={onExportJSON}>{t('settings.exportJSON')}</Button>
+        <Button variant="secondary" size="lg" onClick={onExportCSV}>{t('settings.exportCSV')}</Button>
       </div>
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.about')}</div>
@@ -395,8 +384,8 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 24 }}>
         <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12 }}>{t('settings.dangerZone')}</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <div {...pressable(onLogout)} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.logout')}</div>
-          <div {...pressable(() => setDeleteOpen(true))} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid #ef4444', background: 'rgba(239,68,68,.08)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.deleteAccount')}</div>
+          <Button variant="dangerOutline" onClick={onLogout}>{t('settings.logout')}</Button>
+          <Button variant="dangerOutline" onClick={() => setDeleteOpen(true)}>{t('settings.deleteAccount')}</Button>
         </div>
       </div>
     </div>

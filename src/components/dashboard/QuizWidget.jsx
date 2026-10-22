@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { collection, doc, getDoc, setDoc, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { getTodayQuestion, getTodayKey } from '../../lib/quizQuestions'
+import Button from '../ui/Button'
 
 const MAX_LEADERS = 10
 
@@ -120,13 +121,9 @@ export default function QuizWidget({ user, handle, following }) {
       {phase === 'idle' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ flex: 1, fontSize: 14.5, color: 'var(--color-muted)', lineHeight: 1.5 }}>{t('quiz.hint')}</div>
-          <button
-            type="button"
-            onClick={startQuiz}
-            style={{ padding: '11px 22px', borderRadius: 12, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
-          >
+          <Button variant="primary" onClick={startQuiz}>
             {t('quiz.play')}
-          </button>
+          </Button>
         </div>
       )}
 

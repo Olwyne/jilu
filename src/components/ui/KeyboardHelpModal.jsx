@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import Button from './Button'
 
 const SHORTCUTS = [
   { keys: ['g', 'h'], action: 'route.home.title' },
@@ -75,15 +76,9 @@ export default function KeyboardHelpModal({ onClose }) {
             </div>
           ))}
         </dl>
-        <button
-          ref={closeRef}
-          type="button"
-          onClick={onClose}
-          aria-label={t('shortcuts.close')}
-          style={{ marginTop: 22, width: '100%', padding: '10px 0', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-muted)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
-        >
+        <Button variant="secondary" block style={{ marginTop: 22 }} ref={closeRef}  onClick={onClose} aria-label={t('shortcuts.close')}>
           {t('shortcuts.close')}
-        </button>
+        </Button>
       </div>
     </div>
   )

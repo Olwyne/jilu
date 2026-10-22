@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit'
 import DOMPurify from 'dompurify'
 import { useReviews } from '../../hooks/useReviews'
 import { pressable } from '../../lib/a11y'
+import Button from '../ui/Button'
 
 // Les liens des avis ouvrent toujours un nouvel onglet, sans transmettre window.opener ni le referrer
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
@@ -101,12 +102,9 @@ export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUs
           <EditorContent editor={editor} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-          <div
-            {...pressable(submit)}
-            style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
-          >
+          <Button variant="primary" size="sm" onClick={submit}>
             Partager
-          </div>
+          </Button>
         </div>
       </div>
 

@@ -22,6 +22,7 @@ import SearchModal from './components/modals/SearchModal'
 import KeyboardHelpModal from './components/ui/KeyboardHelpModal'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { ensureHandle } from './lib/handle'
+import Button from './components/ui/Button'
 
 const EpisodeModal = lazy(() => import('./components/modals/EpisodeModal'))
 const LandingPage = lazy(() => import('./components/auth/LandingPage'))
@@ -83,8 +84,8 @@ function Shell() {
       <div role="alert" style={box}>
         <div>
           <p style={{ marginBottom: 14 }}>Impossible de mettre à jour ta bibliothèque pour le moment. Tes données sont intactes.</p>
-          <button onClick={retry} style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 600, cursor: 'pointer', marginRight: 10 }}>Réessayer</button>
-          <button onClick={logout} style={{ padding: '10px 20px', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-text)', fontWeight: 600, cursor: 'pointer' }}>Se déconnecter</button>
+          <Button variant="primary" style={{ marginRight: 10 }} onClick={retry}>Réessayer</Button>
+          <Button variant="secondary" onClick={logout}>Se déconnecter</Button>
         </div>
       </div>
     )

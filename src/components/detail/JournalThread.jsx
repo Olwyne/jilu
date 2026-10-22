@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { relText } from '../../lib/domain'
 import { pressable } from '../../lib/a11y'
+import Button from '../ui/Button'
 
 export default function JournalThread({ commentsKey, feed, onPost, onToggleLike, onDelete }) {
   const { t, i18n } = useTranslation()
@@ -28,7 +29,7 @@ export default function JournalThread({ commentsKey, feed, onPost, onToggleLike,
           aria-label={t('journal.placeholder')}
           style={{ flex: 1, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 10, padding: '11px 14px', color: 'var(--color-text)', fontSize: 14 }}
         />
-        <div {...pressable(submit)} style={{ padding: '11px 18px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{t('journal.post')}</div>
+        <Button variant="primary" onClick={submit}>{t('journal.post')}</Button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {comments.map((c) => (
