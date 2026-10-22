@@ -5,11 +5,12 @@ export const CAT = {
   livres: 'Livres', jeux: 'Jeux vidéo', musique: 'Musique'
 }
 
+// Theme variables, not hex: each theme supplies values that pass AA for text on its own background.
 export const STATUS = {
-  a_voir: { label: 'À voir', color: '#8b6dff' },
-  en_cours: { label: 'En cours', color: '#38bdf8' },
-  termine: { label: 'Terminé', color: '#4ade80' },
-  abandonne: { label: 'Abandonné', color: '#9797a8' }
+  a_voir: { label: 'À voir', color: 'var(--color-accent)' },
+  en_cours: { label: 'En cours', color: 'var(--color-blue)' },
+  termine: { label: 'Terminé', color: 'var(--color-green)' },
+  abandonne: { label: 'Abandonné', color: 'var(--color-muted)' }
 }
 
 const TERM = {
@@ -70,3 +71,6 @@ export function epTotals(work, watched) {
   }))
   return { total, watchedCount }
 }
+
+// Translucent wash of a CSS colour (works with theme variables, unlike appending an alpha byte to hex).
+export const tint = (color, pct) => `color-mix(in srgb, ${color} ${pct}%, transparent)`

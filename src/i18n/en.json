@@ -118,6 +118,7 @@
   "status.a_voir_jeux": "Plan to play",
   "status.en_cours": "Watching",
   "status.termine": "Completed",
+  "status.label": "Status",
   "status.abandonne": "Dropped",
   "cat.all": "All",
   "cat.series": "Series",

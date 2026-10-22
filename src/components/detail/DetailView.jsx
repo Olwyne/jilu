@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import PosterBox from '../ui/PosterBox'
 import StatusSelect from '../ui/StatusSelect'
-import { STATUS, epTotals, localizedTitle, localizedPoster } from '../../lib/domain'
+import { STATUS, tint, epTotals, localizedTitle, localizedPoster } from '../../lib/domain'
 import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
 import ReviewFeed from './ReviewFeed'
@@ -58,7 +58,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
         <PosterBox id={work.id} title={localizedTitle(work, i18n.language)} poster={localizedPoster(work, i18n.language)} width={150} height={220} radius={18} fontSize={52} />
         <div style={{ flex: 1, minWidth: 260 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <span style={{ padding: '5px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: STATUS[work.status].color, background: `${STATUS[work.status].color}22` }}>{t('status.' + work.status)}</span>
+            <span style={{ padding: '5px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: STATUS[work.status].color, background: tint(STATUS[work.status].color, 13) }}>{t('status.' + work.status)}</span>
             <span style={{ fontSize: 13, color: 'var(--color-muted-2)' }}>
               {t('cat.' + work.category)} · {work.genre} · {work.year}
               {work.ended === true && <span style={{ marginLeft: 6, color: '#4ade80', fontWeight: 600 }}>{t('detail.ended')}</span>}

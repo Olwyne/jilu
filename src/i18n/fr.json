@@ -118,6 +118,7 @@
   "status.a_voir_jeux": "À jouer",
   "status.en_cours": "En cours",
   "status.termine": "Terminé",
+  "status.label": "Statut",
   "status.abandonne": "Abandonné",
   "cat.all": "Tout",
   "cat.series": "Séries",
