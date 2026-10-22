@@ -6,6 +6,7 @@ import { initials, relText } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
 import { pressable } from '../../lib/a11y'
 import IconButton from '../ui/IconButton'
+import Card from '../ui/Card'
 
 const RUNTIME = { animes: 24, series: 45, films: 120 }
 
@@ -85,7 +86,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
     <div style={{ maxWidth: 700, display: 'flex', flexDirection: 'column', gap: 28 }}>
 
       {/* Hero */}
-      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 16 : 20, padding: 24, borderRadius: 22, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+      <Card style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 16 : 20, padding: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ width: 72, height: 72, flexShrink: 0, borderRadius: '50%', background: 'var(--gradient-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: '#fff' }}>
             {initials(pseudo)}
@@ -123,7 +124,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
             <div {...pressable(handleShare)} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
               {isPublic ? t('profile.copyLink') : t('profile.private')}
             </div>
-            <div style={{ fontSize: 12, color: isPublic ? '#4ade80' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
+            <div style={{ fontSize: 12, color: isPublic ? 'var(--color-green)' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
           </div>
         )}
         {!readOnly && isMobile && (
@@ -131,10 +132,10 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
             <div {...pressable(handleShare)} style={{ flex: 1, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', textAlign: 'center', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
               {isPublic ? t('profile.copyLink') : t('profile.private')}
             </div>
-            <div style={{ fontSize: 12, color: isPublic ? '#4ade80' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
+            <div style={{ fontSize: 12, color: isPublic ? 'var(--color-green)' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Favoris */}
       {favWorks.length > 0 && (
@@ -154,9 +155,9 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
 
       {/* Succès */}
       {!readOnly && (
-        <div style={{ padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+        <Card pad="md">
           <AchievementsGrid works={works} watched={watched} ratings={ratings} compact />
-        </div>
+        </Card>
       )}
 
       {/* Activité récente */}
@@ -197,7 +198,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                 const w = works[f.workId]
                 const context = getContext(f, works)
                 return (
-                  <div key={f.id} style={{ border: '1px solid var(--color-border)', borderRadius: 18, background: 'var(--color-surface)', padding: 18 }}>
+                  <Card key={f.id} style={{ padding: 18 }}>
                     <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
                       <div {...pressable(() => w && onOpenWork(w.id))} style={{ flexShrink: 0, cursor: 'pointer' }}>
                         <PosterBox id={f.workId} title={w ? w.title : f.workId} poster={w?.poster} width={46} height={66} radius={10} />
@@ -220,7 +221,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                       </span>
                       <span {...pressable(() => onDelete(f.id))} style={{ fontSize: 13, color: 'var(--color-muted-3)', cursor: 'pointer' }}>{t('profile.delete')}</span>
                     </div>
-                  </div>
+                  </Card>
                 )
               })}
             </div>

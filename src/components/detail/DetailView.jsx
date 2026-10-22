@@ -61,7 +61,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
             <span style={{ padding: '5px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: STATUS[work.status].color, background: tint(STATUS[work.status].color, 13) }}>{t('status.' + work.status)}</span>
             <span style={{ fontSize: 13, color: 'var(--color-muted-2)' }}>
               {t('cat.' + work.category)} · {work.genre} · {work.year}
-              {work.ended === true && <span style={{ marginLeft: 6, color: '#4ade80', fontWeight: 600 }}>{t('detail.ended')}</span>}
+              {work.ended === true && <span style={{ marginLeft: 6, color: 'var(--color-green)', fontWeight: 600 }}>{t('detail.ended')}</span>}
               {work.ended === false && <span style={{ marginLeft: 6, color: '#f59e0b', fontWeight: 600 }}>{t('detail.ongoing')}</span>}
             </span>
           </div>

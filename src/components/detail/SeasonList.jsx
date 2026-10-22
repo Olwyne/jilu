@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { pressable } from '../../lib/a11y'
+import Card from '../ui/Card'
 
 function fmtFull(ts) {
   const d = new Date(ts)
@@ -36,7 +37,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
         const done = aired.filter((e) => watched[`${work.id}-${s.n}-${e.n}`]).length
         const isOpen = expanded.has(s.n)
         return (
-          <div key={s.n} style={{ border: '1px solid var(--color-border-btn)', borderRadius: 16, overflow: 'hidden', background: 'var(--color-surface)' }}>
+          <Card key={s.n} dense strong clip>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px' }}>
               <div {...pressable(() => toggleExpanded(s.n), { expanded: isOpen })} style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17 }}>{s.name || t('season.default', { n: s.n })}</span>
@@ -74,7 +75,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
                 })}
               </div>
             )}
-          </div>
+          </Card>
         )
       })}
     </div>

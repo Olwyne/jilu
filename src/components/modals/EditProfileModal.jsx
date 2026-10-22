@@ -29,7 +29,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
     idle: null,
     self: null,
     checking: { text: t('editProfile.checking'), color: 'var(--color-muted-3)' },
-    available: { text: t('editProfile.available'), color: '#4ade80' },
+    available: { text: t('editProfile.available'), color: 'var(--color-green)' },
     taken: { text: t('editProfile.taken'), color: 'var(--color-danger-text)' },
     invalid: { text: t('editProfile.invalidHandle'), color: 'var(--color-danger-text)' },
   }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { pressable } from '../../lib/a11y'
+import Card from '../ui/Card'
 
 function getMinutes(game) {
   if (!game) return 0
@@ -97,7 +98,7 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
   })
 
   return (
-    <div style={{ border: '1px solid var(--color-border-btn)', borderRadius: 18, background: 'var(--color-surface)', padding: 22, marginBottom: 22 }}>
+    <Card strong pad="md" style={{ marginBottom: 22 }}>
       <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('game.title')}</h3>
 
       {/* Total */}
@@ -155,6 +156,6 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
           )
         })}
       </div>
-    </div>
+    </Card>
   )
 }

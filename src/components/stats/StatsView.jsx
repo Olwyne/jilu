@@ -5,6 +5,7 @@ import { STATUS, DAY } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
 import GoalsSection from './GoalsSection'
 import { pressable } from '../../lib/a11y'
+import Card from '../ui/Card'
 
 const RUNTIME = { animes: 24, series: 45 }
 const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', mangas: '#f97316', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: '#c46dff' }
@@ -117,10 +118,10 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           [completionRate + ' %', t('stats.completionRate'), 'var(--color-green)'],
           [ratedN ? (ratedSum / ratedN).toFixed(1) : '—', t('stats.avgRating'), 'var(--color-gold)'],
         ].map(([value, label, color]) => (
-          <div key={label} style={{ padding: '18px 20px', borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+          <Card key={label} dense pad="sm">
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color, lineHeight: 1.1 }}>{value}</div>
             <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3 }}>{label}</div>
-          </div>
+          </Card>
         ))}
       </div>
 
@@ -134,10 +135,10 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           [String(livresLus), t('stats.livresRead'), CAT_COLORS.livres],
           [String(jeuxFinis), t('stats.gamesFinished'), CAT_COLORS.jeux],
         ].map(([value, label, color]) => (
-          <div key={label} style={{ padding: '18px 20px', borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+          <Card key={label} dense pad="sm">
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color, lineHeight: 1.1 }}>{value}</div>
             <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3 }}>{label}</div>
-          </div>
+          </Card>
         ))}
       </div>
 

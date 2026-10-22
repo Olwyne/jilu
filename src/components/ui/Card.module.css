@@ -1,0 +1,6 @@
+.card { box-sizing: border-box; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; }
+.strong { border-color: var(--color-border-btn); }
+.dense { border-radius: 16px; }
+.clip { overflow: hidden; }
+.padMd { padding: 22px; }
+.padSm { padding: 18px 20px; }

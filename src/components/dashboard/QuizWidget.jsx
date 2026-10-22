@@ -4,6 +4,7 @@ import { collection, doc, getDoc, setDoc, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { getTodayQuestion, getTodayKey } from '../../lib/quizQuestions'
 import Button from '../ui/Button'
+import Card from '../ui/Card'
 
 const MAX_LEADERS = 10
 
@@ -91,13 +92,13 @@ export default function QuizWidget({ user, handle, following }) {
 
   function optionStyle(idx) {
     if (phase !== 'done') return { ...btnBase, background: 'var(--color-chip-bg)', color: 'inherit' }
-    if (idx === question.a) return { ...btnBase, background: 'rgba(74,222,128,.15)', border: '1px solid #4ade80', color: '#4ade80', fontWeight: 600 }
-    if (idx === selected) return { ...btnBase, background: 'rgba(239,68,68,.1)', border: '1px solid #ef4444', color: 'var(--color-danger-text)', fontWeight: 600 }
+    if (idx === question.a) return { ...btnBase, background: 'color-mix(in srgb, var(--color-green) 15%, transparent)', border: '1px solid var(--color-green)', color: 'var(--color-green)', fontWeight: 600 }
+    if (idx === selected) return { ...btnBase, background: 'var(--color-danger-bg)', border: '1px solid var(--color-danger-border-2)', color: 'var(--color-danger-text)', fontWeight: 600 }
     return { ...btnBase, background: 'var(--color-chip-bg)', color: 'var(--color-muted)', opacity: 0.5 }
   }
 
   return (
-    <div style={{ border: '1px solid var(--color-border)', borderRadius: 18, background: 'var(--color-surface)', padding: 22, marginBottom: 28 }}>
+    <Card pad="md" style={{ marginBottom: 28 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18 }}>{t('quiz.title')}</div>
@@ -180,6 +181,6 @@ export default function QuizWidget({ user, handle, following }) {
           })()}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

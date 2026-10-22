@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { relText } from '../../lib/domain'
 import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
+import Card from '../ui/Card'
 
 export default function JournalThread({ commentsKey, feed, onPost, onToggleLike, onDelete }) {
   const { t, i18n } = useTranslation()
@@ -16,7 +17,7 @@ export default function JournalThread({ commentsKey, feed, onPost, onToggleLike,
   }
 
   return (
-    <div style={{ border: '1px solid var(--color-border-btn)', borderRadius: 16, background: 'var(--color-surface)', padding: '18px 20px' }}>
+    <Card dense strong pad="sm">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16 }}>{t('journal.title')}</span>
         <span style={{ fontSize: 12.5, color: 'var(--color-muted-2)' }}>{comments.length}</span>
@@ -48,6 +49,6 @@ export default function JournalThread({ commentsKey, feed, onPost, onToggleLike,
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   )
 }

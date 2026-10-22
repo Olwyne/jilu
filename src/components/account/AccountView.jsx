@@ -13,6 +13,7 @@ import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
 import Chip from '../ui/Chip'
 import Badge from '../ui/Badge'
+import Card from '../ui/Card'
 
 const TYPE_EMOJI = { bug: '🐛', suggestion: '💡', other: '💬' }
 
@@ -76,7 +77,7 @@ function FeedbackSection({ profile }) {
   }
 
   return (
-    <div style={{ borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden', marginBottom: 24, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <Card clip style={{ marginBottom: 24, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {FEEDBACK_TYPES.map(ft => (
           <Chip key={ft.value} active={type === ft.value} onClick={() => setType(ft.value)}>{ft.label}</Chip>
@@ -105,7 +106,7 @@ function FeedbackSection({ profile }) {
         {status === 'error' && <span style={{ fontSize: 13, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('feedback.error')}</span>}
         {status === 'ratelimit' && <span style={{ fontSize: 13, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('feedback.rateLimit')}</span>}
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -120,7 +121,7 @@ function Toggle({ on, onToggle, label, disabled }) {
 function Section({ rows, settings, onToggleSetting }) {
   const { t } = useTranslation()
   return (
-    <div style={{ borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden', marginBottom: 24 }}>
+    <Card clip style={{ marginBottom: 24 }}>
       {rows.map(([key, label, desc, disabled]) => (
         <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderTop: '1px solid var(--color-border-sm)', opacity: disabled ? 0.45 : 1 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -137,7 +138,7 @@ function Section({ rows, settings, onToggleSetting }) {
           </div>
         </div>
       ))}
-    </div>
+    </Card>
   )
 }
 
@@ -266,7 +267,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           
         </Modal>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', padding: 24, borderRadius: 20, background: 'var(--color-surface)', border: '1px solid var(--color-border)', marginBottom: 26 }}>
+      <Card style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', padding: 24, marginBottom: 26 }}>
         <div style={{ width: 76, height: 76, flexShrink: 0, borderRadius: '50%', background: 'var(--gradient-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30, color: '#fff' }}>
           {initials(profile.handle || profile.name)}
         </div>
@@ -278,10 +279,10 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{user?.email || profile.email}</div>
           <div style={{ color: 'var(--color-muted-3)', fontSize: 12.5, marginTop: 8 }}>{t('settings.memberSince') + ' '}{profile.memberSince}</div>
         </div>
-      </div>
+      </Card>
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.appearance')}</div>
-      <div style={{ borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden', marginBottom: 24 }}>
+      <Card clip style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderTop: '1px solid var(--color-border-sm)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 600, fontSize: 14.5 }}>{t('settings.darkMode')}</div>
@@ -307,7 +308,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
             <option value="fr">Français</option>
           </select>
         </div>
-      </div>
+      </Card>
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.notifications')}</div>
       <Section rows={PREF_ROWS} settings={settings} onToggleSetting={onToggleSetting} />
