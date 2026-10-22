@@ -30,8 +30,8 @@
 /* ---------- hero ---------- */
 .hero { padding: clamp(3rem, 8vw, 6rem) 0 0; }
 .badge { display: inline-flex; align-items: center; gap: .55rem; padding: .35rem .9rem .35rem .75rem; border: 1px solid var(--color-border-btn); border-radius: 999px; font-size: .9rem; font-weight: 600; color: var(--color-muted); }
-.badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--color-pink); }
-.h1 { margin-top: 1.5rem; font-size: clamp(2.75rem, 7.4vw, 5.5rem); line-height: 1.02; letter-spacing: -.035em; max-width: 14ch; }
+.badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent); }
+.h1 { margin-top: 1.5rem; font-size: clamp(2.75rem, 7.4vw, 5.5rem); line-height: 1.02; letter-spacing: -.035em; max-width: 16ch; }
 .h1 em { display: block; font-style: normal; color: var(--color-accent); }
 .sub { margin-top: 1.5rem; max-width: 58ch; font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--color-muted); }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
@@ -58,16 +58,19 @@
 .steps li { counter-increment: step; display: flex; align-items: center; gap: 1rem; padding: 1rem 1.15rem; border-radius: 16px; background: var(--color-bg); border: 1px solid var(--color-border); font-weight: 600; }
 .steps li::before { content: counter(step); display: inline-grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--color-accent-fill); color: var(--color-on-accent); font-family: var(--font-display); font-weight: 800; }
 .detail { margin-top: 1.25rem; font-size: .95rem; }
+.after { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--color-accent-soft-border); font-size: .98rem; color: var(--color-text); }
 
 /* ---------- reasons ---------- */
 .reasons { padding: 0 0 clamp(3rem, 7vw, 5rem); }
 .reasonsTitle { font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.08; letter-spacing: -.03em; max-width: 20ch; white-space: pre-line; }
 .reasonsSub { margin-top: 1rem; color: var(--color-muted); max-width: 56ch; }
 .reasonList { list-style: none; margin: clamp(2rem, 5vw, 3.5rem) 0 0; padding: 0; }
-.reason { display: grid; gap: .75rem 3rem; padding: 2rem 0; border-top: 1px solid var(--color-border-btn); }
+.reason { display: grid; gap: 1.25rem 3rem; padding: 2rem 0; border-top: 1px solid var(--color-border-btn); align-items: center; }
 @media (min-width: 820px) { .reason { grid-template-columns: 1fr 1.1fr; } }
-.reason h3 { font-size: clamp(1.4rem, 2.6vw, 2rem); line-height: 1.15; letter-spacing: -.02em; }
-.reason p { color: var(--color-muted); max-width: 54ch; }
+.reasonImg { display: block; width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--color-border-btn); }
+@media (min-width: 820px) { .reasonImg { justify-self: end; } }
+.reasonText h3 { font-size: clamp(1.4rem, 2.6vw, 2rem); line-height: 1.15; letter-spacing: -.02em; }
+.reasonText p { margin-top: .75rem; color: var(--color-muted); max-width: 54ch; }
 
 .also { margin-top: clamp(1.5rem, 4vw, 2.5rem); padding-top: 2rem; border-top: 1px solid var(--color-border-btn); }
 .also h3 { font-size: 1.25rem; letter-spacing: -.01em; }
@@ -77,12 +80,6 @@
 .alsoList span { color: var(--color-muted); font-size: .98rem; }
 
 /* ---------- platforms + faq ---------- */
-.platforms { padding: clamp(2.5rem, 6vw, 4rem) 0; border-top: 1px solid var(--color-border); }
-.platforms h2, .faq h2 { font-size: clamp(1.6rem, 3.2vw, 2.25rem); letter-spacing: -.025em; line-height: 1.1; }
-.platforms p { margin-top: .75rem; color: var(--color-muted); max-width: 56ch; }
-.platformList { list-style: none; margin: 1.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .6rem; }
-.platformList li { padding: .6rem 1.1rem; border-radius: 999px; border: 1px solid var(--color-border-btn); font-weight: 600; font-size: .95rem; }
-
 .faq { padding: clamp(2.5rem, 6vw, 4rem) 0; border-top: 1px solid var(--color-border); }
 .faqList { margin-top: 1.75rem; max-width: 760px; }
 .faqItem { border-bottom: 1px solid var(--color-border-btn); }

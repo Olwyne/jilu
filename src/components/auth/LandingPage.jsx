@@ -5,10 +5,18 @@ import i18n from '../../i18n/index.js'
 import BrandMark from '../ui/BrandMark'
 import library1200 from '../../assets/library-1200.webp'
 import library2350 from '../../assets/library-2350.webp'
+import cropFilters from '../../assets/crop-filters.webp'
+import cropProgress from '../../assets/crop-progress.webp'
 import styles from './Landing.module.css'
 
 const OTHER = { en: 'fr', fr: 'en' }
-const ALSO = ['f5', 'f6', 'f7', 'f8', 'f9']
+const ALSO = ['f5', 'f7', 'f8']
+// Real crops of the app. A differentiator with no honest screenshot stays type-only.
+const REASONS = [
+  { n: 1, img: cropFilters, w: 1000, h: 111 },
+  { n: 2, img: cropProgress, w: 900, h: 225 },
+  { n: 3 },
+]
 const FAQ = [1, 2, 3, 4, 5]
 
 // Follows the visitor's OS scheme, using the app's own token sets (dark is the default world).
@@ -107,10 +115,10 @@ export default function LandingPage() {
       </header>
 
       <main id="main">
-        <section className={styles.hero}>
+        <section className={styles.hero} aria-labelledby="hero-title">
           <div className={styles.wrap}>
             <p className={styles.badge}>{t('landing.badge')}</p>
-            <h1 className={styles.h1}>{t('landing.h1a')}<em>{t('landing.h1b')}</em></h1>
+            <h1 id="hero-title" className={styles.h1}>{t('landing.h1a')}<em>{t('landing.h1b')}</em></h1>
             <p className={styles.sub}>{t('landing.sub')}</p>
             <div className={styles.actions}>
               <Link to="/signup" className={styles.btnPrimary}>{t('landing.cta.primary')}</Link>
@@ -140,6 +148,7 @@ export default function LandingPage() {
                 <h2 id="import-title">{t('landing.import.h3')}</h2>
                 <p>{t('landing.import.p')}</p>
                 <p className={styles.detail}>{t('landing.import.detail')}</p>
+                <p className={styles.after}>{t('landing.import.after')}</p>
               </div>
               <ol className={styles.steps}>
                 <li>{t('landing.import.step1')}</li>
@@ -155,10 +164,15 @@ export default function LandingPage() {
             <h2 id="why-title" className={styles.reasonsTitle}>{t('landing.features.title')}</h2>
             <p className={styles.reasonsSub}>{t('landing.features.sub')}</p>
             <ul className={styles.reasonList}>
-              {[1, 2, 3].map((n) => (
+              {REASONS.map(({ n, img, w, h }) => (
                 <li key={n} className={styles.reason}>
-                  <h3>{t(`landing.d${n}.title`)}</h3>
-                  <p>{t(`landing.d${n}.desc`)}</p>
+                  <div className={styles.reasonText}>
+                    <h3>{t(`landing.d${n}.title`)}</h3>
+                    <p>{t(`landing.d${n}.desc`)}</p>
+                  </div>
+                  {img && (
+                    <img className={styles.reasonImg} src={img} alt={t(`landing.d${n}.alt`)} width={w} height={h} loading="lazy" decoding="async" />
+                  )}
                 </li>
               ))}
             </ul>
@@ -176,18 +190,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className={styles.platforms} aria-labelledby="platforms-title">
-          <div className={styles.wrap}>
-            <h2 id="platforms-title">{t('landing.platforms.title')}</h2>
-            <p>{t('landing.platforms.sub')}</p>
-            <ul className={styles.platformList}>
-              <li>{t('landing.platforms.web')}</li>
-              <li>{t('landing.platforms.ios')}</li>
-              <li>{t('landing.platforms.android')}</li>
-            </ul>
-          </div>
-        </section>
-
         <section className={styles.faq} aria-labelledby="faq-title">
           <div className={styles.wrap}>
             <h2 id="faq-title">{t('landing.faq.title')}</h2>
@@ -202,11 +204,11 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className={styles.close}>
+        <section className={styles.close} aria-labelledby="close-title">
           <div className={styles.wrap}>
             <div className={styles.closeCard}>
               <div>
-                <h2>{t('landing.cta2.h2')}</h2>
+                <h2 id="close-title">{t('landing.cta2.h2')}</h2>
                 <p>{t('landing.cta2.p')}</p>
               </div>
               <Link to="/signup" className={styles.btnOnAccent}>{t('landing.cta2.btn')}</Link>
@@ -218,7 +220,7 @@ export default function LandingPage() {
       <footer className={styles.footer}>
         <div className={`${styles.wrap} ${styles.footerInner}`}>
           <p>{t('landing.footer')}</p>
-          <nav className={styles.footerLinks} aria-label={t('landing.footer.legal')}>
+          <nav className={styles.footerLinks} aria-label={t('landing.footer.nav')}>
             <Link to="/login">{t('landing.footer.signin')}</Link>
             <Link to="/privacy">{t('landing.footer.privacy')}</Link>
             <Link to="/terms">{t('landing.footer.terms')}</Link>
