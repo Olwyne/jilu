@@ -30,8 +30,8 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
     self: null,
     checking: { text: t('editProfile.checking'), color: 'var(--color-muted-3)' },
     available: { text: t('editProfile.available'), color: '#4ade80' },
-    taken: { text: t('editProfile.taken'), color: '#f87171' },
-    invalid: { text: t('editProfile.invalidHandle'), color: '#f87171' },
+    taken: { text: t('editProfile.taken'), color: 'var(--color-danger-text)' },
+    invalid: { text: t('editProfile.invalidHandle'), color: 'var(--color-danger-text)' },
   }
   const [handle, setHandle] = useState(profile.handle || '')
   const [handleStatus, setHandleStatus] = useState('self')
@@ -139,7 +139,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
               />
             </div>
           </Field>
-          {error && <div style={{ fontSize: 13, color: '#f87171', marginBottom: 14 }}>{error}</div>}
+          {error && <div style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 14 }}>{error}</div>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
             <div {...pressable(onClose)} style={{ padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-muted-2)', background: 'var(--color-chip-bg)' }}>{t('editProfile.cancel')}</div>
             <button type="submit" disabled={!canSave} style={{ padding: '11px 22px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed', border: 'none', background: canSave ? 'var(--color-accent)' : 'var(--color-border-btn)', color: canSave ? '#fff' : 'var(--color-muted-3)' }}>

@@ -106,7 +106,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
                       </div>
                     )}
                     {actions.removeWork && (
-                      <div {...pressable(handleRemove)} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ef4444' }}>{t('detail.removeWork')}</div>
+                      <div {...pressable(handleRemove)} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('detail.removeWork')}</div>
                     )}
                   </div>
                 )}

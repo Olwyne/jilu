@@ -42,7 +42,7 @@ function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
           )}
         </div>
         {onMarkDone && (
-          <div {...pressable((ev) => { ev.stopPropagation(); onMarkDone(w.id) })} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>
+          <div {...pressable((ev) => { ev.stopPropagation(); onMarkDone(w.id) })} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontSize: 13, fontWeight: 600 }}>
             {markLabel}
           </div>
         )}
@@ -82,7 +82,7 @@ function EpisodeCard({ item, showMarkWatched, onOpenWork, onMarkWatched, t }) {
           </div>
         </div>
         {showMarkWatched && (
-          <div {...pressable((ev) => { ev.stopPropagation(); onMarkWatched(w.id, s.n, e.n) })} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>{t('calendar.markWatched')}</div>
+          <div {...pressable((ev) => { ev.stopPropagation(); onMarkWatched(w.id, s.n, e.n) })} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontSize: 13, fontWeight: 600 }}>{t('calendar.markWatched')}</div>
         )}
       </div>
     </div>

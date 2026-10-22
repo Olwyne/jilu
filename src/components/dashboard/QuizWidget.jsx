@@ -91,7 +91,7 @@ export default function QuizWidget({ user, handle, following }) {
   function optionStyle(idx) {
     if (phase !== 'done') return { ...btnBase, background: 'var(--color-chip-bg)', color: 'inherit' }
     if (idx === question.a) return { ...btnBase, background: 'rgba(74,222,128,.15)', border: '1px solid #4ade80', color: '#4ade80', fontWeight: 600 }
-    if (idx === selected) return { ...btnBase, background: 'rgba(239,68,68,.1)', border: '1px solid #ef4444', color: '#ef4444', fontWeight: 600 }
+    if (idx === selected) return { ...btnBase, background: 'rgba(239,68,68,.1)', border: '1px solid #ef4444', color: 'var(--color-danger-text)', fontWeight: 600 }
     return { ...btnBase, background: 'var(--color-chip-bg)', color: 'var(--color-muted)', opacity: 0.5 }
   }
 
@@ -109,7 +109,7 @@ export default function QuizWidget({ user, handle, following }) {
         )}
         {phase === 'done' && timeMs != null && (
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: correct ? '#4ade80' : '#ef4444' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: correct ? 'var(--color-green)' : 'var(--color-danger-text)' }}>
               {correct ? t('quiz.correct') : t('quiz.wrong')}
             </div>
             <div style={{ fontSize: 12.5, color: 'var(--color-muted-3)' }}>{(timeMs / 1000).toFixed(2)}s</div>
@@ -123,7 +123,7 @@ export default function QuizWidget({ user, handle, following }) {
           <button
             type="button"
             onClick={startQuiz}
-            style={{ padding: '11px 22px', borderRadius: 12, border: 'none', background: 'var(--color-accent)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
+            style={{ padding: '11px 22px', borderRadius: 12, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
           >
             {t('quiz.play')}
           </button>
@@ -172,7 +172,7 @@ export default function QuizWidget({ user, handle, following }) {
                     <div key={l.uid} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, background: isMe ? 'rgba(var(--color-accent-rgb, 111,80,255),.12)' : 'var(--color-chip-bg)', border: isMe ? '1px solid var(--color-accent)' : '1px solid transparent' }}>
                       <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: i < 3 ? ['#ffd700', '#c0c0c0', '#cd7f32'][i] : 'var(--color-muted)', minWidth: 22 }}>{i + 1}</span>
                       <span style={{ flex: 1, fontSize: 14, fontWeight: isMe ? 700 : 500 }}>{l.handle}</span>
-                      <span style={{ fontSize: 13, color: l.correct ? '#4ade80' : '#ef4444', fontWeight: 600 }}>
+                      <span style={{ fontSize: 13, color: l.correct ? 'var(--color-green)' : 'var(--color-danger-text)', fontWeight: 600 }}>
                         {l.correct ? (l.timeMs / 1000).toFixed(2) + 's' : t('quiz.incorrect')}
                       </span>
                     </div>

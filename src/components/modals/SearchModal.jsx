@@ -69,7 +69,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
               >
                 {c.label}
                 {disabled && (
-                  <span style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                  <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--color-danger-fill)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 5px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
                     {t('search.comingSoon')}
                   </span>
                 )}

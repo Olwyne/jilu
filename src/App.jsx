@@ -77,7 +77,7 @@ function Shell() {
       <div role="alert" style={box}>
         <div>
           <p style={{ marginBottom: 14 }}>Impossible de mettre à jour ta bibliothèque pour le moment. Tes données sont intactes.</p>
-          <button onClick={retry} style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: 'var(--color-accent)', color: '#fff', fontWeight: 600, cursor: 'pointer', marginRight: 10 }}>Réessayer</button>
+          <button onClick={retry} style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 600, cursor: 'pointer', marginRight: 10 }}>Réessayer</button>
           <button onClick={logout} style={{ padding: '10px 20px', borderRadius: 12, border: '1px solid var(--color-border-btn)', background: 'transparent', color: 'var(--color-text)', fontWeight: 600, cursor: 'pointer' }}>Se déconnecter</button>
         </div>
       </div>

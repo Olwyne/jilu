@@ -98,7 +98,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
               <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-text)', textAlign: 'center' }}>Épisode pas encore vu</div>
               <div
                 {...pressable(() => setRevealed(true))}
-                style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}
+                style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}
               >
                 {t('episode.reveal')}
               </div>

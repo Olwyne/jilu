@@ -1,6 +1,6 @@
 .chipsRow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 .chip { padding: 7px 14px; border-radius: 20px; cursor: pointer; font-size: 13.5px; font-weight: 500; color: var(--color-muted); background: var(--color-chip-bg); border: 1px solid var(--color-border-btn); }
-.chipActive { font-weight: 600; color: #fff; background: var(--color-accent); border-color: transparent; }
+.chipActive { font-weight: 600; color: #fff; background: var(--color-accent-fill); border-color: transparent; }
 .chipCount { margin-left: 7px; font-size: 12px; opacity: .7; }
 .filtersRow { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 22px; }
 .smallChips { display: flex; gap: 6px; flex-wrap: wrap; }

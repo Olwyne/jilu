@@ -32,7 +32,7 @@ export default function WorkPreviewModal({ work, onAdd, onClose }) {
           <button
             type="button"
             onClick={() => { onAdd(work); onClose() }}
-            style={{ flex: 2, padding: '11px 0', borderRadius: 12, border: 'none', background: 'var(--color-accent)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+            style={{ flex: 2, padding: '11px 0', borderRadius: 12, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
           >
             {t('preview.add')}
           </button>

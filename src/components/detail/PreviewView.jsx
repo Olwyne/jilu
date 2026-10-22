@@ -41,7 +41,7 @@ export default function PreviewView({ works, onAddWork }) {
           <button
             type="button"
             onClick={handleAdd}
-            style={{ padding: '12px 24px', borderRadius: 13, border: 'none', background: 'var(--color-accent)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+            style={{ padding: '12px 24px', borderRadius: 13, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
           >
             {alreadyAdded ? t('preview.openInLibrary') : t('preview.add')}
           </button>

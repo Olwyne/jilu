@@ -102,7 +102,7 @@ function FeedbackSection({ profile }) {
         <button
           onClick={handleSend}
           disabled={status === 'loading' || !subject.trim() || !message.trim()}
-          style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: 'var(--color-accent)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: status === 'loading' ? 'wait' : 'pointer', opacity: (!subject.trim() || !message.trim()) ? 0.5 : 1, transition: 'opacity .15s' }}
+          style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: 'var(--color-accent-fill)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: status === 'loading' ? 'wait' : 'pointer', opacity: (!subject.trim() || !message.trim()) ? 0.5 : 1, transition: 'opacity .15s' }}
         >
           {status === 'loading' ? t('feedback.sending') : t('feedback.send')}
         </button>
@@ -132,7 +132,7 @@ function Section({ rows, settings, onToggleSetting }) {
             <div style={{ fontWeight: 600, fontSize: 14.5, display: 'flex', alignItems: 'center', gap: 8 }}>
               {label}
               {disabled && (
-                <span style={{ background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 6px', lineHeight: 1.5 }}>
+                <span style={{ background: 'var(--color-danger-fill)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 10, padding: '1px 6px', lineHeight: 1.5 }}>
                   {t('settings.comingSoon')}
                 </span>
               )}
@@ -270,7 +270,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteStatus === 'loading' || !deletePassword}
-                style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: 'none', background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 600, cursor: (deleteStatus === 'loading' || !deletePassword) ? 'not-allowed' : 'pointer', opacity: (deleteStatus === 'loading' || !deletePassword) ? 0.5 : 1 }}
+                style={{ flex: 1, padding: '11px 0', borderRadius: 12, border: 'none', background: 'var(--color-danger-fill)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: (deleteStatus === 'loading' || !deletePassword) ? 'not-allowed' : 'pointer', opacity: (deleteStatus === 'loading' || !deletePassword) ? 0.5 : 1 }}
               >
                 {deleteStatus === 'loading' ? t('settings.deleteAccountDeleting') : t('settings.deleteAccountConfirm')}
               </button>
@@ -389,7 +389,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12 }}>{t('settings.dangerZone')}</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <div {...pressable(onLogout)} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.logout')}</div>
-          <div {...pressable(() => setDeleteOpen(true))} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid #ef4444', background: 'rgba(239,68,68,.08)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ef4444' }}>{t('settings.deleteAccount')}</div>
+          <div {...pressable(() => setDeleteOpen(true))} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid #ef4444', background: 'rgba(239,68,68,.08)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.deleteAccount')}</div>
         </div>
       </div>
     </div>

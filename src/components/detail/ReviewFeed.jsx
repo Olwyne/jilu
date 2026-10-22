@@ -103,7 +103,7 @@ export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUs
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
           <div
             {...pressable(submit)}
-            style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
+            style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent-fill)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
           >
             Partager
           </div>

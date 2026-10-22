@@ -95,7 +95,7 @@ function RecoCard({ r, works, onAddWork }) {
         <PosterBox id={r.id} title={r.title} poster={r.poster} width={110} height={160} radius={12} fontSize={32} />
         {hovered && !adding && (
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 10 }}>
-            <span style={{ background: 'var(--color-accent)', color: '#fff', fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 20 }}>
+            <span style={{ background: 'var(--color-accent-fill)', color: '#fff', fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 20 }}>
               {t('search.add')}
             </span>
           </div>
