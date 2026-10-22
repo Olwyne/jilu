@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './ForgotPasswordPage.module.css'
+import { pressable } from '../../lib/a11y'
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation()
@@ -47,7 +48,7 @@ export default function ForgotPasswordPage() {
             {t('auth.emailSent')}
           </p>
         )}
-        <div className={styles.switch} onClick={() => navigate('/login')}>
+        <div className={styles.switch} {...pressable(() => navigate('/login'), { role: 'link' })}>
           {t('auth.backToLogin')}
         </div>
       </form>

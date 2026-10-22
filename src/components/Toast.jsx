@@ -1,10 +1,13 @@
+import { useTranslation } from 'react-i18next'
+
 export default function Toast({ toast, onClose, onOpenRating }) {
+  const { t } = useTranslation()
   if (!toast) return null
-  const header = toast.header ?? 'Marqué comme vu'
+  const header = toast.header ?? t('toast.seen')
   const handleAction = toast.action ? toast.action.fn : onOpenRating
-  const actionLabel = toast.action ? toast.action.label : 'Noter'
+  const actionLabel = toast.action ? toast.action.label : t('toast.rate')
   return (
-    <div style={{
+    <div role="status" aria-live="polite" style={{
       position: 'fixed', bottom: 28, right: 28, zIndex: 9000,
       background: 'var(--color-surface-toast)', border: '1px solid var(--color-border-glass)',
       borderRadius: 16, padding: '14px 18px', display: 'flex', alignItems: 'center',
@@ -23,7 +26,7 @@ export default function Toast({ toast, onClose, onOpenRating }) {
       >
         {actionLabel}
       </button>
-      <button onClick={onClose} style={{ fontSize: 16, color: 'var(--color-muted-2)', cursor: 'pointer', flexShrink: 0, lineHeight: 1, background: 'none', border: 'none' }}>✕</button>
+      <button type="button" onClick={onClose} aria-label={t('toast.dismiss')} style={{ minWidth: 32, minHeight: 32, fontSize: 16, color: 'var(--color-muted-2)', cursor: 'pointer', flexShrink: 0, lineHeight: 1, background: 'none', border: 'none' }}><span aria-hidden="true">✕</span></button>
     </div>
   )
 }

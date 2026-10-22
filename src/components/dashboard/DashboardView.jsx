@@ -5,6 +5,7 @@ import { relText } from '../../lib/domain'
 import QuizWidget from './QuizWidget'
 import RecoRow from './RecoRow'
 import { useFriendsFeed } from '../../hooks/useFriendsFeed'
+import { pressable } from '../../lib/a11y'
 
 const PAGE_SIZE = 5
 
@@ -30,7 +31,7 @@ function ActivityList({ items, works, onOpenWork, emptyKey }) {
           return (
             <div
               key={item.id || item._type + item.ts + idx}
-              onClick={() => w && onOpenWork(workId)}
+              {...pressable(() => w && onOpenWork(workId))}
               style={{ display: 'flex', gap: 14, padding: 14, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: w ? 'pointer' : 'default' }}
             >
               <PosterBox id={workId} title={w?.title || ''} poster={w?.poster} width={46} height={66} radius={10} />

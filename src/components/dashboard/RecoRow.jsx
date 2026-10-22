@@ -6,6 +6,7 @@ import { anilistDiscoverAnime, anilistDiscoverManga } from '../../catalog/anilis
 import { rawgDiscover } from '../../catalog/rawg'
 import { googleBooksDiscover } from '../../catalog/googleBooks'
 import PosterBox from '../ui/PosterBox'
+import { pressable } from '../../lib/a11y'
 
 const TMDB_GENRE_TO_ID = {
   Action: 28, Drame: 18, Drama: 18, Comédie: 35, Comedy: 35,
@@ -85,7 +86,7 @@ function RecoCard({ r, works, onAddWork }) {
 
   return (
     <div
-      onClick={handleClick}
+      {...pressable(handleClick)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{ flexShrink: 0, width: 110, cursor: adding ? 'wait' : 'pointer', opacity: adding ? 0.6 : 1, transition: 'opacity .15s' }}

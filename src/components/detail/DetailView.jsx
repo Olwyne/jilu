@@ -7,6 +7,7 @@ import { STATUS, epTotals, localizedTitle, localizedPoster } from '../../lib/dom
 import SeasonList from './SeasonList'
 import GamePanel from './GamePanel'
 import ReviewFeed from './ReviewFeed'
+import { pressable } from '../../lib/a11y'
 
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites, currentUser }) {
   const { t, i18n } = useTranslation()
@@ -81,31 +82,31 @@ export default function DetailView({ work, watched, ratings, games, feed, action
               <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('detail.myRating')}</span>
               <div style={{ display: 'flex', gap: 3 }}>
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <span key={n} onClick={() => actions.setRating('w', work.id, n)} style={{ fontSize: 20, cursor: 'pointer', color: n <= rating ? 'var(--color-gold)' : '#4a4a58' }}>{n <= rating ? '★' : '☆'}</span>
+                  <span key={n} {...pressable(() => actions.setRating('w', work.id, n), { label: `${n}/5`, pressed: n <= rating })} style={{ fontSize: 20, cursor: 'pointer', color: n <= rating ? 'var(--color-gold)' : '#4a4a58' }}>{n <= rating ? '★' : '☆'}</span>
                 ))}
               </div>
             </div>
             <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} disabled={isUnreleased} />
             {actions.toggleFavorite && (
-              <div onClick={() => actions.toggleFavorite(work.id)} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
+              <div {...pressable(() => actions.toggleFavorite(work.id))} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
             )}
             {(actions.removeWork || actions.refreshWork || (actions.markWorkWatched && hasEpisodes)) && (
               <div ref={menuRef} style={{ position: 'relative' }}>
-                <div onClick={() => setMenuOpen((o) => !o)} style={{ padding: '11px 14px', borderRadius: 13, background: menuOpen ? 'var(--color-border-btn)' : 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', color: 'var(--color-muted)', fontWeight: 700, fontSize: 17, cursor: 'pointer', lineHeight: 1, letterSpacing: 1 }}>⋯</div>
+                <div {...pressable(() => setMenuOpen((o) => !o))} style={{ padding: '11px 14px', borderRadius: 13, background: menuOpen ? 'var(--color-border-btn)' : 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', color: 'var(--color-muted)', fontWeight: 700, fontSize: 17, cursor: 'pointer', lineHeight: 1, letterSpacing: 1 }}>⋯</div>
                 {menuOpen && (
                   <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: 210, background: 'var(--color-surface)', border: '1px solid var(--color-border-btn)', borderRadius: 13, boxShadow: '0 8px 32px rgba(0,0,0,.28)', zIndex: 100, overflow: 'hidden' }}>
                     {actions.markWorkWatched && hasEpisodes && (
-                      <div onClick={() => { setMenuOpen(false); actions.markWorkWatched(work.id) }} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-text)', borderBottom: '1px solid var(--color-border)' }}>
+                      <div {...pressable(() => { setMenuOpen(false); actions.markWorkWatched(work.id) })} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-text)', borderBottom: '1px solid var(--color-border)' }}>
                         {allWatched ? t('detail.uncheckAll') : t('detail.checkAll')}
                       </div>
                     )}
                     {actions.refreshWork && (
-                      <div onClick={handleRefresh} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: refreshing ? 'wait' : 'pointer', opacity: refreshing ? 0.6 : 1, color: 'var(--color-text)', borderBottom: actions.removeWork ? '1px solid var(--color-border)' : 'none' }}>
+                      <div {...pressable(handleRefresh)} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: refreshing ? 'wait' : 'pointer', opacity: refreshing ? 0.6 : 1, color: 'var(--color-text)', borderBottom: actions.removeWork ? '1px solid var(--color-border)' : 'none' }}>
                         {refreshing ? t('detail.refreshing') : t('detail.refreshMeta')}
                       </div>
                     )}
                     {actions.removeWork && (
-                      <div onClick={handleRemove} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ef4444' }}>{t('detail.removeWork')}</div>
+                      <div {...pressable(handleRemove)} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ef4444' }}>{t('detail.removeWork')}</div>
                     )}
                   </div>
                 )}

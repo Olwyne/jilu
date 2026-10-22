@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import styles from './Header.module.css'
+import { pressable } from '../../lib/a11y'
 
 export default function Header({
   title, subtitle, showBack, onBack, onOpenSearch, onOpenAccount, isMobile, avatarInitials
@@ -15,19 +16,19 @@ export default function Header({
       )}
       <div className={styles.titleBlock}>
         {showBack && (
-          <div className={styles.back} onClick={onBack}>{t('header.back')}</div>
+          <div className={styles.back} {...pressable(onBack)}>{t('header.back')}</div>
         )}
         <h1 className={styles.title}>{title}</h1>
         <div className={styles.subtitle}>{subtitle}</div>
       </div>
-      <div className={styles.searchButton} onClick={onOpenSearch}>
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <div className={styles.searchButton} {...pressable(onOpenSearch, { label: t('header.search') })}>
+        <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="11" cy="11" r="7" />
           <path d="M21 21l-4.3-4.3" />
         </svg>
       </div>
       {avatarInitials && (
-        <div className={styles.avatar} onClick={onOpenAccount}>{avatarInitials}</div>
+        <div className={styles.avatar} {...pressable(onOpenAccount, { label: t('header.account') })}>{avatarInitials}</div>
       )}
     </header>
   )

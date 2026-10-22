@@ -12,24 +12,24 @@ describe('Toast', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('shows "Marqué comme vu" and work info when toast is set', () => {
+  it('shows "Marked as seen" and work info when toast is set', () => {
     render(<Toast toast={toast} onClose={() => {}} onOpenRating={() => {}} />)
-    expect(screen.getByText('Marqué comme vu')).toBeInTheDocument()
+    expect(screen.getByText('Marked as seen')).toBeInTheDocument()
     expect(screen.getByText('Severance')).toBeInTheDocument()
     expect(screen.getByText('S1 · E3')).toBeInTheDocument()
   })
 
-  it('calls onOpenRating when "Noter" is clicked', async () => {
+  it('calls onOpenRating when "Rate" is clicked', async () => {
     const onOpenRating = vi.fn()
     render(<Toast toast={toast} onClose={() => {}} onOpenRating={onOpenRating} />)
-    await userEvent.click(screen.getByText('Noter'))
+    await userEvent.click(screen.getByText('Rate'))
     expect(onOpenRating).toHaveBeenCalled()
   })
 
   it('calls onClose when ✕ is clicked', async () => {
     const onClose = vi.fn()
     render(<Toast toast={toast} onClose={onClose} onOpenRating={() => {}} />)
-    await userEvent.click(screen.getByText('✕'))
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
     expect(onClose).toHaveBeenCalled()
   })
 })

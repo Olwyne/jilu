@@ -2,6 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import DOMPurify from 'dompurify'
 import { useReviews } from '../../hooks/useReviews'
+import { pressable } from '../../lib/a11y'
 
 // Les liens des avis ouvrent toujours un nouvel onglet, sans transmettre window.opener ni le referrer
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
@@ -101,7 +102,7 @@ export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUs
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
           <div
-            onClick={submit}
+            {...pressable(submit)}
             style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
           >
             Partager
@@ -127,7 +128,7 @@ export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUs
                   {r.rating > 0 && <span style={{ fontSize: 13, color: 'var(--color-gold)' }}>{'★'.repeat(r.rating)}</span>}
                   {isOwn && (
                     <span
-                      onClick={() => deleteReview(r.id)}
+                      {...pressable(() => deleteReview(r.id))}
                       title="Supprimer"
                       style={{ fontSize: 15, cursor: 'pointer', color: 'var(--color-muted-3)', lineHeight: 1, flexShrink: 0 }}
                     >🗑</span>

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './ResetPasswordPage.module.css'
+import { pressable } from '../../lib/a11y'
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation()
@@ -51,7 +52,7 @@ export default function ResetPasswordPage() {
         ) : (
           <p className={styles.success}>{t('auth.resetSuccess')}</p>
         )}
-        <div className={styles.switch} onClick={() => navigate('/login')}>
+        <div className={styles.switch} {...pressable(() => navigate('/login'), { role: 'link' })}>
           {t('auth.backToLogin')}
         </div>
       </form>

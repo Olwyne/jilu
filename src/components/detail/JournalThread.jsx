@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { relText } from '../../lib/domain'
+import { pressable } from '../../lib/a11y'
 
 export default function JournalThread({ commentsKey, feed, onPost, onToggleLike, onDelete }) {
   const { t, i18n } = useTranslation()
@@ -26,7 +27,7 @@ export default function JournalThread({ commentsKey, feed, onPost, onToggleLike,
           placeholder={t('journal.placeholder')}
           style={{ flex: 1, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 10, padding: '11px 14px', color: 'var(--color-text)', fontSize: 14 }}
         />
-        <div onClick={submit} style={{ padding: '11px 18px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{t('journal.post')}</div>
+        <div {...pressable(submit)} style={{ padding: '11px 18px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{t('journal.post')}</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {comments.map((c) => (
@@ -38,8 +39,8 @@ export default function JournalThread({ commentsKey, feed, onPost, onToggleLike,
               </div>
               <div style={{ fontSize: 14, lineHeight: 1.45, marginTop: 3 }}>{c.text}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginTop: 6 }}>
-                <span onClick={() => onToggleLike(c.id)} style={{ fontSize: 12.5, cursor: 'pointer', color: c.liked ? 'var(--color-pink)' : 'var(--color-muted-2)' }}>♥ {c.likes || ''}</span>
-                <span onClick={() => onDelete(c.id)} style={{ fontSize: 12, color: 'var(--color-muted-3)', cursor: 'pointer' }}>{t('journal.delete')}</span>
+                <span {...pressable(() => onToggleLike(c.id))} style={{ fontSize: 12.5, cursor: 'pointer', color: c.liked ? 'var(--color-pink)' : 'var(--color-muted-2)' }}>♥ {c.likes || ''}</span>
+                <span {...pressable(() => onDelete(c.id))} style={{ fontSize: 12, color: 'var(--color-muted-3)', cursor: 'pointer' }}>{t('journal.delete')}</span>
               </div>
             </div>
           </div>

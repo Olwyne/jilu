@@ -1,18 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
+import Modal from '../ui/Modal'
 
 export default function WorkPreviewModal({ work, onAdd, onClose }) {
   const { t } = useTranslation()
 
   return (
-    <div
-      onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{ width: '100%', maxWidth: 460, background: 'var(--color-modal-bg, var(--color-bg))', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}
-      >
+    <Modal onClose={onClose} label={work.title} backdropStyle={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} panelStyle={{ width: '100%', maxWidth: 460, background: 'var(--color-modal-bg, var(--color-bg))', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
         <div style={{ display: 'flex', gap: 20, marginBottom: 20 }}>
           <PosterBox id={work.id} title={work.title} poster={work.poster} width={100} height={148} radius={13} fontSize={34} />
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -43,7 +37,7 @@ export default function WorkPreviewModal({ work, onAdd, onClose }) {
             {t('preview.add')}
           </button>
         </div>
-      </div>
-    </div>
+      
+    </Modal>
   )
 }

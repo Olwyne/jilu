@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import Modal from '../ui/Modal'
 import { doc, getDoc, writeBatch } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
+import { pressable } from '../../lib/a11y'
 
 function Field({ label, children }) {
   return (
@@ -93,8 +95,7 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
   const msg = STATUS_MSG[handleStatus]
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
+    <Modal onClose={onClose} label={t('editProfile.title')} backdropStyle={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} panelStyle={{ width: '100%', maxWidth: 440, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 24 }}>{t('editProfile.title')}</div>
         <form onSubmit={handleSubmit}>
           <Field label={t('editProfile.pseudo')}>
@@ -140,13 +141,13 @@ export default function EditProfileModal({ profile, onSave, onClose }) {
           </Field>
           {error && <div style={{ fontSize: 13, color: '#f87171', marginBottom: 14 }}>{error}</div>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-            <div onClick={onClose} style={{ padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-muted-2)', background: 'var(--color-chip-bg)' }}>{t('editProfile.cancel')}</div>
+            <div {...pressable(onClose)} style={{ padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-muted-2)', background: 'var(--color-chip-bg)' }}>{t('editProfile.cancel')}</div>
             <button type="submit" disabled={!canSave} style={{ padding: '11px 22px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed', border: 'none', background: canSave ? 'var(--color-accent)' : 'var(--color-border-btn)', color: canSave ? '#fff' : 'var(--color-muted-3)' }}>
               {saving ? t('editProfile.saving') : t('editProfile.save')}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      
+    </Modal>
   )
 }

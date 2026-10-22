@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import WorkCard from './WorkCard'
 import { epTotals } from '../../lib/domain'
 import styles from './LibraryView.module.css'
+import { pressable } from '../../lib/a11y'
 
 export default function LibraryView({ works, watched, ratings, favorites, onOpenWork }) {
   const { t } = useTranslation()
@@ -97,7 +98,7 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
             <div
               key={key}
               className={`${styles.chip} ${!disabled && category === key ? styles.chipActive : ''} ${disabled ? styles.chipDisabled : ''}`}
-              onClick={() => { if (!disabled) setCategory(key) }}
+              {...pressable(() => { if (!disabled) setCategory(key) }, { pressed: !disabled && category === key, disabled })}
               style={disabled ? { cursor: 'not-allowed', opacity: 0.45, position: 'relative' } : { position: 'relative' }}
             >
               {label} <span className={styles.chipCount}>{key === 'all' ? Object.keys(works).length : Object.values(works).filter((w) => w.category === key).length}</span>
@@ -113,13 +114,13 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
       <div className={styles.filtersRow}>
         <div className={styles.smallChips}>
           {STATUSES.map(([key, label]) => (
-            <div key={key} className={`${styles.smallChip} ${status === key ? styles.smallChipActive : ''}`} onClick={() => setStatus(key)}>{label}</div>
+            <div key={key} className={`${styles.smallChip} ${status === key ? styles.smallChipActive : ''}`} {...pressable(() => setStatus(key), { pressed: status === key })}>{label}</div>
           ))}
         </div>
         <div className={styles.sortChips}>
           <span className={styles.sortLabel}>{t('library.sort')}</span>
           {SORTS.map(([key, label]) => (
-            <div key={key} className={`${styles.smallChip} ${sort === key ? styles.smallChipActive : ''}`} onClick={() => handleSort(key)}>
+            <div key={key} className={`${styles.smallChip} ${sort === key ? styles.smallChipActive : ''}`} {...pressable(() => handleSort(key), { pressed: sort === key })}>
               {label}{sort === key ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
             </div>
           ))}

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './LoginPage.module.css'
+import { pressable } from '../../lib/a11y'
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -45,12 +46,12 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <div className={styles.switchRight} onClick={() => navigate('/forgot-password')}>
+        <div className={styles.switchRight} {...pressable(() => navigate('/forgot-password'), { role: 'link' })}>
           {t('auth.forgotPassword')}
         </div>
         {error && <div className={styles.error}>{error}</div>}
         <button className={styles.button} type="submit">{t('auth.login')}</button>
-        <div className={styles.switch} onClick={() => navigate('/signup', { state: location.state })}>
+        <div className={styles.switch} {...pressable(() => navigate('/signup', { state: location.state }), { role: 'link' })}>
           {t('auth.noAccount')}
         </div>
       </form>

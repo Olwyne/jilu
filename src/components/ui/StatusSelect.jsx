@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { STATUS } from '../../lib/domain'
+import { pressable } from '../../lib/a11y'
 
 export default function StatusSelect({ value, onChange, disabled }) {
   const { t } = useTranslation()
@@ -53,7 +54,7 @@ export default function StatusSelect({ value, onChange, disabled }) {
           {Object.entries(STATUS).map(([key, { color }]) => (
             <div
               key={key}
-              onClick={() => { onChange(key); setOpen(false) }}
+              {...pressable(() => { onChange(key); setOpen(false) })}
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '11px 16px',

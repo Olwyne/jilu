@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { relText, DAY } from '../../lib/domain'
 import { posterGradient } from '../../lib/posterBox'
+import { pressable } from '../../lib/a11y'
 
 const TABS = ['rattraper', 'commencer', 'venir', 'abandonne']
 const CAT_KEYS = ['all', 'series', 'films', 'animes', 'mangas', 'livres', 'jeux']
@@ -19,7 +20,7 @@ function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
     ? t('calendar.markPlayed')
     : t('calendar.markWatched')
   return (
-    <div onClick={() => onOpenWork(w.id)} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
+    <div {...pressable(() => onOpenWork(w.id))} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
       {w.poster
         ? <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${w.poster})`, backgroundSize: 'cover', backgroundPosition: 'center top', filter: 'blur(6px) brightness(0.35)', transform: 'scale(1.15)', opacity: 0.9 }} />
         : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${from}, ${to})`, opacity: 0.25 }} />
@@ -41,7 +42,7 @@ function SimpleCard({ item, onOpenWork, onMarkDone, t, language }) {
           )}
         </div>
         {onMarkDone && (
-          <div onClick={(ev) => { ev.stopPropagation(); onMarkDone(w.id) }} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>
+          <div {...pressable((ev) => { ev.stopPropagation(); onMarkDone(w.id) })} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>
             {markLabel}
           </div>
         )}
@@ -54,7 +55,7 @@ function EpisodeCard({ item, showMarkWatched, onOpenWork, onMarkWatched, t }) {
   const { w, s, e, remaining } = item
   const { from, to } = posterGradient(w.id)
   return (
-    <div onClick={() => onOpenWork(w.id)} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
+    <div {...pressable(() => onOpenWork(w.id))} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'stretch', minHeight: 88 }}>
       {w.poster
         ? <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${w.poster})`, backgroundSize: 'cover', backgroundPosition: 'center top', filter: 'blur(6px) brightness(0.35)', transform: 'scale(1.15)', opacity: 0.9 }} />
         : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${from}, ${to})`, opacity: 0.25 }} />
@@ -81,7 +82,7 @@ function EpisodeCard({ item, showMarkWatched, onOpenWork, onMarkWatched, t }) {
           </div>
         </div>
         {showMarkWatched && (
-          <div onClick={(ev) => { ev.stopPropagation(); onMarkWatched(w.id, s.n, e.n) }} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>{t('calendar.markWatched')}</div>
+          <div {...pressable((ev) => { ev.stopPropagation(); onMarkWatched(w.id, s.n, e.n) })} style={{ flexShrink: 0, padding: '9px 14px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>{t('calendar.markWatched')}</div>
         )}
       </div>
     </div>
@@ -92,7 +93,7 @@ function UpcomingEpisodeRow({ item, onOpenWork, language, t, now }) {
   const { w, s, e } = item
   const d = new Date(e.air)
   return (
-    <div onClick={() => onOpenWork(w.id)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
+    <div {...pressable(() => onOpenWork(w.id))} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
       <div style={{ width: 52, flexShrink: 0, textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19, color: 'var(--color-accent)', lineHeight: 1 }}>{d.getDate()}</div>
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', marginTop: 2 }}>{d.toLocaleString(language, { month: 'short' })}</div>
@@ -112,7 +113,7 @@ function UpcomingReleaseRow({ item, onOpenWork, language, now }) {
     ? relText(w.release, now, language)
     : w.year ? String(w.year) : null
   return (
-    <div onClick={() => onOpenWork(w.id)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
+    <div {...pressable(() => onOpenWork(w.id))} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
       </div>
@@ -237,7 +238,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
         {CAT_KEYS.map((key) => (
           <div
             key={key}
-            onClick={() => setCategory(key)}
+            {...pressable(() => setCategory(key))}
             style={{ padding: '5px 12px', borderRadius: 20, cursor: 'pointer', fontWeight: 600, fontSize: 12, background: category === key ? 'var(--color-accent)' : 'var(--color-chip-bg)', color: category === key ? '#fff' : 'var(--color-muted)' }}
           >
             {t(`cat.${key}`)}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import Modal from '../ui/Modal'
 import i18n from '../../i18n/index.js'
 import emailjs from '@emailjs/browser'
 import { doc, getDoc, setDoc, getDocs, writeBatch, collection, query, where } from 'firebase/firestore'
@@ -8,6 +9,7 @@ import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import { initials } from '../../lib/domain'
 import EditProfileModal from '../modals/EditProfileModal'
+import { pressable } from '../../lib/a11y'
 
 const TYPE_EMOJI = { bug: '🐛', suggestion: '💡', other: '💬' }
 
@@ -112,9 +114,9 @@ function FeedbackSection({ profile }) {
   )
 }
 
-function Toggle({ on, onToggle }) {
+function Toggle({ on, onToggle, label, disabled }) {
   return (
-    <div onClick={onToggle} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
+    <div {...pressable(onToggle, { role: 'switch', checked: on, label, disabled })} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
       <div style={{ position: 'absolute', top: 3, left: on ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left .18s' }} />
     </div>
   )
@@ -138,7 +140,7 @@ function Section({ rows, settings, onToggleSetting }) {
             <div style={{ fontSize: 12.5, color: 'var(--color-muted)', marginTop: 2 }}>{desc}</div>
           </div>
           <div style={{ pointerEvents: disabled ? 'none' : 'auto' }}>
-            <Toggle on={disabled ? false : !!settings[key]} onToggle={() => onToggleSetting(key)} />
+            <Toggle on={disabled ? false : !!settings[key]} onToggle={() => onToggleSetting(key)} label={label} disabled={disabled} />
           </div>
         </div>
       ))}
@@ -241,8 +243,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         />
       )}
       {deleteOpen && (
-        <div onClick={() => { if (deleteStatus !== 'loading') { setDeleteOpen(false); setDeletePassword('') } }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
+        <Modal onClose={() => { setDeleteOpen(false); setDeletePassword('') }} dismissable={deleteStatus !== 'loading'} label={t('settings.deleteAccountTitle')} backdropStyle={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} panelStyle={{ width: '100%', maxWidth: 400, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, padding: 28, boxShadow: '0 30px 80px rgba(0,0,0,.6)' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, marginBottom: 12 }}>{t('settings.deleteAccountTitle')}</div>
             <div style={{ fontSize: 14, color: 'var(--color-muted)', lineHeight: 1.6, marginBottom: 20 }}>{t('settings.deleteAccountDesc')}</div>
             <input
@@ -274,8 +275,8 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
                 {deleteStatus === 'loading' ? t('settings.deleteAccountDeleting') : t('settings.deleteAccountConfirm')}
               </button>
             </div>
-          </div>
-        </div>
+          
+        </Modal>
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', padding: 24, borderRadius: 20, background: 'var(--color-surface)', border: '1px solid var(--color-border)', marginBottom: 26 }}>
         <div style={{ width: 76, height: 76, flexShrink: 0, borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), var(--color-pink))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30, color: '#fff' }}>
@@ -284,7 +285,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>{profile.handle || '—'}</h2>
-            <span onClick={() => setEditOpen(true)} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>{t('settings.modify')}</span>
+            <span {...pressable(() => setEditOpen(true))} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>{t('settings.modify')}</span>
           </div>
           <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{user?.email || profile.email}</div>
           <div style={{ color: 'var(--color-muted-3)', fontSize: 12.5, marginTop: 8 }}>{t('settings.memberSince') + ' '}{profile.memberSince}</div>
@@ -300,7 +301,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{isDark ? '🌙' : '☀️'}</span>
-            <Toggle on={isDark} onToggle={() => onToggleSetting('darkMode')} />
+            <Toggle on={isDark} onToggle={() => onToggleSetting('darkMode')} label={t('settings.darkMode')} />
           </div>
         </div>
         {/* Language row */}
@@ -330,8 +331,8 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.import')}</div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: failedItems.length || failedOutItems.length ? 12 : 24 }}>
-        <div onClick={handleImport} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{importLabel ?? t('settings.importTVTime')}</div>
-        <div onClick={handleImportOut} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{importOutLabel ?? t('settings.importTVTimeOut')}</div>
+        <div {...pressable(handleImport)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{importLabel ?? t('settings.importTVTime')}</div>
+        <div {...pressable(handleImportOut)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{importOutLabel ?? t('settings.importTVTimeOut')}</div>
       </div>
       {(failedItems.length > 0 || failedOutItems.length > 0) && (
         <div style={{ marginBottom: 24 }}>
@@ -355,16 +356,16 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.data')}</div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-        <div onClick={handleSync} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{syncLabel ?? t('settings.sync')}</div>
-        <div onClick={handleRefreshAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{refreshLabel ?? t('settings.refresh')}</div>
-        <div onClick={onMarkAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.markAll')}</div>
-        <div onClick={onReset} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.reset')}</div>
-        <div onClick={onClearAll} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border-2)', background: 'var(--color-danger-bg-2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.clearAll')}</div>
+        <div {...pressable(handleSync)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{syncLabel ?? t('settings.sync')}</div>
+        <div {...pressable(handleRefreshAll)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{refreshLabel ?? t('settings.refresh')}</div>
+        <div {...pressable(onMarkAll)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.markAll')}</div>
+        <div {...pressable(onReset)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.reset')}</div>
+        <div {...pressable(onClearAll)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-danger-border-2)', background: 'var(--color-danger-bg-2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.clearAll')}</div>
       </div>
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.export')}</div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
-        <div onClick={onExportJSON} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.exportJSON')}</div>
-        <div onClick={onExportCSV} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.exportCSV')}</div>
+        <div {...pressable(onExportJSON)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.exportJSON')}</div>
+        <div {...pressable(onExportCSV)} style={{ padding: '12px 18px', borderRadius: 12, border: '1px solid var(--color-border-btn)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{t('settings.exportCSV')}</div>
       </div>
 
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.about')}</div>
@@ -387,8 +388,8 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 24 }}>
         <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12 }}>{t('settings.dangerZone')}</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <div onClick={onLogout} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.logout')}</div>
-          <div onClick={() => setDeleteOpen(true)} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid #ef4444', background: 'rgba(239,68,68,.08)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ef4444' }}>{t('settings.deleteAccount')}</div>
+          <div {...pressable(onLogout)} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid var(--color-danger-border)', background: 'var(--color-danger-bg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-danger-text)' }}>{t('settings.logout')}</div>
+          <div {...pressable(() => setDeleteOpen(true))} style={{ padding: '11px 20px', borderRadius: 12, border: '1px solid #ef4444', background: 'rgba(239,68,68,.08)', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#ef4444' }}>{t('settings.deleteAccount')}</div>
         </div>
       </div>
     </div>

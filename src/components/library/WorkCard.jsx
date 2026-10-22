@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { localizedTitle, localizedPoster } from '../../lib/domain'
+import { pressable } from '../../lib/a11y'
 
 export default function WorkCard({ work, watchedCount, totalCount, rating, isFavorite, onClick }) {
   const { t, i18n } = useTranslation()
   const pct = totalCount ? Math.round((watchedCount / totalCount) * 100) : 0
   const showProgress = work.seasons && watchedCount > 0 && watchedCount < totalCount
   return (
-    <div onClick={onClick} style={{ cursor: 'pointer' }}>
+    <div {...pressable(onClick)} style={{ cursor: 'pointer' }}>
       <PosterBox id={work.id} title={localizedTitle(work, i18n.language)} poster={localizedPoster(work, i18n.language)} width="100%" radius={14} aspectRatio="2/3" fontSize={38}>
         {isFavorite && (
           <div style={{ position: 'absolute', top: 7, right: 7, fontSize: 14, color: '#ffc24b', textShadow: '0 1px 4px rgba(0,0,0,.6)', zIndex: 1 }}>★</div>

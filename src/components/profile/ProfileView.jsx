@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { initials, relText } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
+import { pressable } from '../../lib/a11y'
 
 const RUNTIME = { animes: 24, series: 45, films: 120 }
 
@@ -93,7 +94,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
             <div style={{ color: 'var(--color-muted-3)', fontSize: 13, marginTop: 2 }}>{t('profile.memberSince', { date: profile.memberSince })}</div>
           </div>
           {!readOnly && isMobile && (
-            <div onClick={() => navigate('/account')} style={{ width: 34, height: 34, flexShrink: 0, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-chip-bg)', border: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-muted)' }}>
+            <div {...pressable(() => navigate('/account'), { label: t('header.account') })} style={{ width: 34, height: 34, flexShrink: 0, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-chip-bg)', border: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-muted)' }}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
                 <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
@@ -113,12 +114,12 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
         </div>
         {!readOnly && !isMobile && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-            <div onClick={() => navigate('/account')} style={{ width: 34, height: 34, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-chip-bg)', border: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-muted)' }}>
+            <div {...pressable(() => navigate('/account'), { label: t('header.account') })} style={{ width: 34, height: 34, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-chip-bg)', border: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-muted)' }}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
                 <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
             </div>
-            <div onClick={handleShare} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
+            <div {...pressable(handleShare)} style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
               {isPublic ? t('profile.copyLink') : t('profile.private')}
             </div>
             <div style={{ fontSize: 12, color: isPublic ? '#4ade80' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
@@ -126,7 +127,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
         )}
         {!readOnly && isMobile && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div onClick={handleShare} style={{ flex: 1, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', textAlign: 'center', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
+            <div {...pressable(handleShare)} style={{ flex: 1, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: isPublic ? 'pointer' : 'default', textAlign: 'center', background: isPublic ? 'rgba(139,109,255,.2)' : 'var(--color-chip-bg)', color: isPublic ? '#b9a6ff' : 'var(--color-muted-3)', border: `1px solid ${isPublic ? 'rgba(139,109,255,.35)' : 'var(--color-border)'}` }}>
               {isPublic ? t('profile.copyLink') : t('profile.private')}
             </div>
             <div style={{ fontSize: 12, color: isPublic ? '#4ade80' : 'var(--color-muted)' }}>{isPublic ? t('profile.public') : t('profile.privLocked')}</div>
@@ -140,7 +141,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 14 }}>{t('profile.favorites')}</div>
           <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
             {favWorks.map(w => (
-              <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ flexShrink: 0, width: 90, cursor: 'pointer' }}>
+              <div key={w.id} {...pressable(() => onOpenWork(w.id))} style={{ flexShrink: 0, width: 90, cursor: 'pointer' }}>
                 <PosterBox id={w.id} title={w.title} poster={w.poster} width={90} height={130} radius={12} />
                 <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title}</div>
                 <div style={{ fontSize: 11, color: 'var(--color-muted-3)' }}>{w.category} · {w.year}</div>
@@ -169,7 +170,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                 const cat = w?.category || 'default'
                 const label = `${t('term.' + cat + '.season')} ${sNum} · ${t('term.' + cat + '.ep')} ${eNum}`
                 return (
-                  <div key={`${workId}-${sNum}-${eNum}`} onClick={() => w && onOpenWork(workId)} style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px 16px', borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: w ? 'pointer' : 'default' }}>
+                  <div key={`${workId}-${sNum}-${eNum}`} {...pressable(() => w && onOpenWork(workId))} style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px 16px', borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: w ? 'pointer' : 'default' }}>
                     <PosterBox id={workId} title={w?.title || workId} poster={w?.poster} width={40} height={58} radius={8} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w?.title || workId}</div>
@@ -197,7 +198,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                 return (
                   <div key={f.id} style={{ border: '1px solid var(--color-border)', borderRadius: 18, background: 'var(--color-surface)', padding: 18 }}>
                     <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
-                      <div onClick={() => w && onOpenWork(w.id)} style={{ flexShrink: 0, cursor: 'pointer' }}>
+                      <div {...pressable(() => w && onOpenWork(w.id))} style={{ flexShrink: 0, cursor: 'pointer' }}>
                         <PosterBox id={f.workId} title={w ? w.title : f.workId} poster={w?.poster} width={46} height={66} radius={10} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -205,18 +206,18 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                           <span style={{ fontWeight: 600, fontSize: 14 }}>{pseudo}</span>
                           <span style={{ fontSize: 12.5, color: 'var(--color-muted-3)' }}>· {relText(f.ts, Date.now(), i18n.language)}</span>
                         </div>
-                        <div onClick={() => w && onOpenWork(w.id)} style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 5, cursor: 'pointer' }}>
+                        <div {...pressable(() => w && onOpenWork(w.id))} style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 5, cursor: 'pointer' }}>
                           <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>{w ? w.title : f.workId}</span> · {context}
                         </div>
                       </div>
                     </div>
                     <div style={{ fontSize: 15, lineHeight: 1.5 }}>{f.text}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 14 }}>
-                      <span onClick={() => onToggleLike(f.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer', color: f.liked ? 'var(--color-pink)' : 'var(--color-muted-2)' }}>
+                      <span {...pressable(() => onToggleLike(f.id))} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer', color: f.liked ? 'var(--color-pink)' : 'var(--color-muted-2)' }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill={f.liked ? 'var(--color-pink)' : 'none'} stroke={f.liked ? 'var(--color-pink)' : 'currentColor'} strokeWidth="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z" /></svg>
                         {f.likes || ''}
                       </span>
-                      <span onClick={() => onDelete(f.id)} style={{ fontSize: 13, color: 'var(--color-muted-3)', cursor: 'pointer' }}>{t('profile.delete')}</span>
+                      <span {...pressable(() => onDelete(f.id))} style={{ fontSize: 13, color: 'var(--color-muted-3)', cursor: 'pointer' }}>{t('profile.delete')}</span>
                     </div>
                   </div>
                 )

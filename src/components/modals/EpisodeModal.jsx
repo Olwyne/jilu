@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { localizedTitle } from '../../lib/domain'
 import { tmdbFetchEpisode } from '../../catalog/tmdb'
 import ReviewFeed from '../detail/ReviewFeed'
+import Modal from '../ui/Modal'
+import { pressable } from '../../lib/a11y'
 
 function fmtDate(ts) {
   if (!ts || ts === Infinity) return null
@@ -38,14 +40,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
   }
 
   return (
-    <div
-      onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.68)', zIndex: 70, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '5vh 20px 20px', overflowY: 'auto' }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{ width: '100%', maxWidth: 680, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, overflow: 'hidden' }}
-      >
+    <Modal onClose={onClose} label={label} backdropStyle={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.68)', zIndex: 70, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '5vh 20px 20px', overflowY: 'auto' }} panelStyle={{ width: '100%', maxWidth: 680, background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 22, overflow: 'hidden' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 15, padding: '20px 26px', borderBottom: '1px solid var(--color-border)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -56,7 +51,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
             )}
           </div>
           <div
-            onClick={onClose}
+            {...pressable(onClose, { label: t('common.close') })}
             style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid var(--color-border-btn)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 18, flexShrink: 0 }}
           >✕</div>
         </div>
@@ -75,7 +70,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
             {[1, 2, 3, 4, 5].map((n) => (
               <span
                 key={n}
-                onClick={() => handleStarClick(n)}
+                {...pressable(() => handleStarClick(n), { label: `${n}/5`, pressed: n <= myRating })}
                 style={{ fontSize: 26, cursor: 'pointer', color: n <= myRating ? 'var(--color-gold)' : 'var(--color-check-border)' }}
               >
                 {n <= myRating ? '★' : '☆'}
@@ -102,7 +97,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 20 }}>
               <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-text)', textAlign: 'center' }}>Épisode pas encore vu</div>
               <div
-                onClick={() => setRevealed(true)}
+                {...pressable(() => setRevealed(true))}
                 style={{ padding: '9px 20px', borderRadius: 10, background: 'var(--color-accent)', color: '#fff', fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}
               >
                 {t('episode.reveal')}
@@ -110,7 +105,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
             </div>
           )}
         </div>
-      </div>
-    </div>
+      
+    </Modal>
   )
 }

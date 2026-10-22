@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './SignupPage.module.css'
+import { pressable } from '../../lib/a11y'
 
 export default function SignupPage() {
   const { t } = useTranslation()
@@ -47,7 +48,7 @@ export default function SignupPage() {
         />
         {error && <div className={styles.error}>{error}</div>}
         <button className={styles.button} type="submit">{t('auth.createAccount')}</button>
-        <div className={styles.switch} onClick={() => navigate('/login', { state: location.state })}>
+        <div className={styles.switch} {...pressable(() => navigate('/login', { state: location.state }), { role: 'link' })}>
           {t('auth.alreadyAccount')}
         </div>
       </form>

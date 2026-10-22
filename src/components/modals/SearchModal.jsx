@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { searchCatalog, fetchTrending } from '../../catalog/search'
 import PosterBox from '../ui/PosterBox'
+import Modal from '../ui/Modal'
+import { pressable } from '../../lib/a11y'
 
 export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
   const { t } = useTranslation()
@@ -43,15 +45,8 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
     return () => { cancelled = true }
   }, [cat])
 
-  useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
-
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '12vh 20px 20px' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'color-mix(in srgb, var(--color-bg) 96%, var(--color-text))', border: '1px solid var(--color-border-btn)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 30px 80px var(--color-shadow-lg)' }}>
+    <Modal onClose={onClose} label={t('search.placeholder')} backdropStyle={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', zIndex: 60, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '12vh 20px 20px' }} panelStyle={{ width: '100%', maxWidth: 560, background: 'color-mix(in srgb, var(--color-bg) 96%, var(--color-text))', border: '1px solid var(--color-border-btn)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 30px 80px var(--color-shadow-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '18px 20px', borderBottom: '1px solid var(--color-border)' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-muted)" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
           <input
@@ -61,7 +56,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
             placeholder={t('search.placeholder')}
             style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--color-text)', fontSize: 16, fontFamily: 'inherit' }}
           />
-          <div onClick={onClose} style={{ color: 'var(--color-muted-2)', cursor: 'pointer', fontSize: 14, padding: '4px 8px' }}>{t('search.escape')}</div>
+          <div {...pressable(onClose)} style={{ color: 'var(--color-muted-2)', cursor: 'pointer', fontSize: 14, padding: '4px 8px' }}>{t('search.escape')}</div>
         </div>
         <div style={{ display: 'flex', gap: 6, padding: '12px 14px 0', overflowX: 'auto', scrollbarWidth: 'none' }}>
           {CATS.map((c) => {
@@ -69,7 +64,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
             return (
               <div
                 key={c.k}
-                onClick={() => { if (!disabled) { setCat(c.k); setResults([]) } }}
+                {...pressable(() => { if (!disabled) { setCat(c.k); setResults([]) } }, { pressed: !disabled && cat === c.k, disabled })}
                 style={{ position: 'relative', padding: '6px 13px', borderRadius: 20, fontSize: 13, fontWeight: cat === c.k ? 600 : 500, cursor: disabled ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', color: disabled ? 'var(--color-muted-3)' : cat === c.k ? '#fff' : 'var(--color-muted)', background: disabled ? 'var(--color-surface-row)' : cat === c.k ? 'var(--color-accent)' : 'var(--color-surface-row)', border: `1px solid ${!disabled && cat === c.k ? 'transparent' : 'var(--color-border)'}`, opacity: disabled ? 0.5 : 1, flexShrink: 0 }}
               >
                 {c.label}
@@ -97,7 +92,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
             return (
               <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', borderRadius: 12 }}>
                 <div
-                  onClick={() => added && onNavigate?.(r)}
+                  {...pressable(() => added && onNavigate?.(r))}
                   style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0, cursor: added ? 'pointer' : 'default' }}
                 >
                   <PosterBox id={r.id} title={r.title} poster={r.poster} width={44} height={62} radius={9} fontSize={16} />
@@ -107,7 +102,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
                   </div>
                 </div>
                 <div
-                  onClick={() => !added && onAdd(r)}
+                  {...pressable(() => !added && onAdd(r))}
                   style={{ flexShrink: 0, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: added ? 'default' : 'pointer', color: added ? 'var(--color-green)' : '#fff', background: added ? 'rgba(74,222,128,.14)' : 'var(--color-accent)' }}
                 >
                   {added ? t('search.added') : t('search.add')}
@@ -116,7 +111,7 @@ export default function SearchModal({ works, onAdd, onClose, onNavigate }) {
             )
           })}
         </div>
-      </div>
-    </div>
+      
+    </Modal>
   )
 }

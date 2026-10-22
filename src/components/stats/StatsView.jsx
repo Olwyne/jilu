@@ -4,6 +4,7 @@ import PosterBox from '../ui/PosterBox'
 import { STATUS, DAY } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
 import GoalsSection from './GoalsSection'
+import { pressable } from '../../lib/a11y'
 
 const RUNTIME = { animes: 24, series: 45 }
 const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', mangas: '#f97316', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: '#c46dff' }
@@ -307,7 +308,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.topRated')}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {topRated.map((w) => (
-              <div key={w.id} onClick={() => onOpenWork(w.id)} style={{ display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer' }}>
+              <div key={w.id} {...pressable(() => onOpenWork(w.id))} style={{ display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer' }}>
                 <PosterBox id={w.id} title={w.title} poster={w.poster} width={44} height={62} radius={10} fontSize={15} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{w.title}</div>
