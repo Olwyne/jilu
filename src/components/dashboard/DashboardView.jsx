@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
 import { relText } from '../../lib/domain'
+import { nextUpList } from '../../lib/nextUp'
 import QuizWidget from './QuizWidget'
 import RecoRow from './RecoRow'
 import { useFriendsFeed } from '../../hooks/useFriendsFeed'
 import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
 import Chip from '../ui/Chip'
+import Card from '../ui/Card'
 
 const PAGE_SIZE = 5
 
@@ -68,7 +70,35 @@ function ActivityList({ items, works, onOpenWork, emptyKey }) {
   )
 }
 
-export default function DashboardView({ works, watched, reviews, feed, onOpenWork, user, handle, onAddWork, following }) {
+function NextUp({ works, watched, onOpenWork, onWatchNext }) {
+  const { t } = useTranslation()
+  const items = nextUpList(works, watched, Date.now(), 3)
+  if (!items.length) return null
+  return (
+    <section aria-labelledby="next-up-title" style={{ marginBottom: 32 }}>
+      <h2 id="next-up-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, margin: '0 0 14px' }}>{t('dashboard.nextUp')}</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {items.map(({ w, s, e, remaining }) => (
+          <Card key={w.id} dense style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 12 }}>
+            <div {...pressable(() => onOpenWork(w.id), { label: w.title })} style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0, cursor: 'pointer' }}>
+              <PosterBox id={w.id} title={w.title} poster={w.poster} width={46} height={66} radius={10} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title}</div>
+                <div style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 2 }}>
+                  S{s.n} · {t('term.' + w.category + '.ep')} {e.n}
+                  {remaining > 1 && <span style={{ color: 'var(--color-muted-2)' }}> · {t('dashboard.nextUpMore', { count: remaining - 1 })}</span>}
+                </div>
+              </div>
+            </div>
+            <Button size="sm" onClick={() => onWatchNext?.(w.id, s.n, e.n)} variant="primary" style={{ flexShrink: 0 }}>{t('calendar.markWatched')}</Button>
+          </Card>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export default function DashboardView({ works, watched, reviews, feed, onOpenWork, onWatchNext, user, handle, onAddWork, following }) {
   const { t } = useTranslation()
   const [tab, setTab] = useState('me')
   const { friendsFeed, loading: friendsLoading } = useFriendsFeed(following)
@@ -92,10 +122,11 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
   const hasFriends = Object.keys(following || {}).length > 0
   return (
     <div>
+      <NextUp works={works} watched={watched} onOpenWork={onOpenWork} onWatchNext={onWatchNext} />
       <QuizWidget user={user} handle={handle} following={following} />
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, margin: 0 }}>{t('dashboard.activity')}</h3>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, margin: 0 }}>{t('dashboard.activity')}</h2>
         {hasFriends && (
           <div style={{ display: 'flex', gap: 4, background: 'var(--color-chip-bg)', borderRadius: 22, padding: 4 }}>
             <Chip flat active={tab === 'me'} onClick={() => setTab('me')}>{t('social.me')}</Chip>

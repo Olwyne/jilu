@@ -63,7 +63,7 @@ export default function MobileNav() {
   ]
 
   return (
-    <nav className={styles.nav}>
+    <nav className={styles.nav} aria-label={t('a11y.mainNav')}>
       {ITEMS.map((item) => (
         <button
           key={item.path}

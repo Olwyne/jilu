@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { pressable } from '../../lib/a11y'
 import Card from '../ui/Card'
+import Button from '../ui/Button'
 
 function getMinutes(game) {
   if (!game) return 0
@@ -91,12 +92,6 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
     background: 'var(--color-bg)', color: 'inherit', fontSize: 14, textAlign: 'center',
     outline: 'none',
   }
-  const btnStyle = (accent) => ({
-    padding: '7px 14px', borderRadius: 9, border: '1px solid var(--color-border-btn)',
-    background: accent ? 'var(--color-accent)' : 'var(--color-chip-bg)',
-    color: accent ? '#fff' : 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-  })
-
   return (
     <Card strong pad="md" style={{ marginBottom: 22 }}>
       <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('game.title')}</h3>
@@ -109,13 +104,9 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
 
       {/* Chrono */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, padding: '14px 16px', borderRadius: 13, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border)' }}>
-        <button
-          type="button"
-          onClick={timerRunning ? stopTimer : startTimer}
-          style={{ ...btnStyle(timerRunning), minWidth: 80 }}
-        >
+        <Button size="sm" variant={timerRunning ? 'primary' : 'secondary'} style={{ minWidth: 80 }} onClick={timerRunning ? stopTimer : startTimer}>
           {timerRunning ? t('game.timerStop') : t('game.timerStart')}
-        </button>
+        </Button>
         {timerRunning && (
           <span style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 700, color: 'var(--color-accent)' }}>
             {formatElapsed(elapsed)}
@@ -140,8 +131,8 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
           style={inputStyle}
         />
         <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>min</span>
-        <button type="button" onClick={applyManual} style={btnStyle(true)}>+ {t('game.add')}</button>
-        <button type="button" onClick={subtractManual} style={btnStyle(false)}>− {t('game.subtract')}</button>
+        <Button size="sm" variant="primary" onClick={applyManual}>+ {t('game.add')}</Button>
+        <Button size="sm" variant="secondary" onClick={subtractManual}>− {t('game.subtract')}</Button>
       </div>
 
       {/* Tiers */}
@@ -150,7 +141,7 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
           const on = !!(g.done && g.done[key])
           return (
             <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderTop: '1px solid var(--color-border)' }}>
-              <div {...pressable(() => onToggleTier(workId, key))} style={{ width: 24, height: 24, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', color: 'var(--color-on-green)', background: on ? 'var(--color-green)' : 'transparent', border: `2px solid ${on ? 'var(--color-green)' : 'var(--color-check-border)'}` }}>{on ? '✓' : ''}</div>
+              <div {...pressable(() => onToggleTier(workId, key), { role: 'checkbox', checked: on, label })} style={{ width: 24, height: 24, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', color: 'var(--color-on-green)', background: on ? 'var(--color-green)' : 'transparent', border: `2px solid ${on ? 'var(--color-green)' : 'var(--color-check-border)'}` }}>{on ? '✓' : ''}</div>
               <span style={{ fontWeight: 600, fontSize: 14.5, flex: 1, textDecoration: on ? 'line-through' : 'none', color: on ? 'var(--color-muted)' : 'inherit' }}>{label}</span>
             </div>
           )

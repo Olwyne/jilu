@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import styles from './Sidebar.module.css'
 import { initials } from '../../lib/domain'
+import BrandMark from '../ui/BrandMark'
 
 export default function Sidebar({ profile = {}, toCatch = 0 }) {
   const navigate = useNavigate()
@@ -19,9 +20,10 @@ export default function Sidebar({ profile = {}, toCatch = 0 }) {
   return (
     <aside className={styles.aside}>
       <button className={styles.brand} onClick={() => navigate('/dashboard')} aria-label={t('nav.home')}>
-        <div className={styles.mark}>J</div>
+        <BrandMark size={34} />
         <div className={styles.name}>Jilu</div>
       </button>
+      <nav aria-label={t('a11y.mainNav')} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {ITEMS.map((item) => (
         <button
           key={item.path}
@@ -35,6 +37,7 @@ export default function Sidebar({ profile = {}, toCatch = 0 }) {
           )}
         </button>
       ))}
+      </nav>
       <div style={{ flex: 1 }} />
       <button
         onClick={() => navigate('/account')}

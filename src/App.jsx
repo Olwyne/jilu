@@ -345,7 +345,7 @@ function ShellInner() {
         </main>
       </div>
       {isMobile && <MobileNav />}
-      <Toast toast={toast} onClose={() => setToast(null)} onOpenRating={() => { if (toast?.workId) setEpisodeModal({ workId: toast.workId, sNum: toast.sNum, eNum: toast.eNum }); setToast(null) }} />
+      <Toast toast={toast} onClose={() => setToast(null)} onUndo={() => { if (toast?.workId) workActions.toggleEpisode(toast.workId, toast.sNum, toast.eNum); setToast(null) }} onOpenRating={() => { if (toast?.workId) setEpisodeModal({ workId: toast.workId, sNum: toast.sNum, eNum: toast.eNum }); setToast(null) }} />
       {searchOpen && (
         <SearchModal
           works={data.works}

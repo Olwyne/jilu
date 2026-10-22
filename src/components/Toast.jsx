@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import Button from './ui/Button'
 
-export default function Toast({ toast, onClose, onOpenRating }) {
+export default function Toast({ toast, onClose, onOpenRating, onUndo }) {
   const { t } = useTranslation()
   const header = toast?.header ?? t('toast.seen')
   const handleAction = toast?.action ? toast.action.fn : onOpenRating
@@ -22,6 +22,9 @@ export default function Toast({ toast, onClose, onOpenRating }) {
         <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{toast.title}</div>
         {toast.label && <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 2 }}>{toast.label}</div>}
       </div>
+      {onUndo && toast.sNum != null && (
+        <Button variant="secondary" size="sm" style={{ flexShrink: 0 }} onClick={onUndo}>{t('toast.undo')}</Button>
+      )}
       <Button variant="primary" size="sm" style={{ flexShrink: 0 }} onClick={handleAction}>
         {actionLabel}
       </Button>

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import styles from './Header.module.css'
 import { pressable } from '../../lib/a11y'
+import BrandMark from '../ui/BrandMark'
 import IconButton from '../ui/IconButton'
 
 export default function Header({
@@ -11,15 +12,15 @@ export default function Header({
     <header className={styles.header}>
       {isMobile && (
         <div className={styles.brand}>
-          <div className={styles.mark}>J</div>
-          <div className={styles.name}>Jilu</div>
+          <BrandMark size={30} />
+          <span className="sr-only">Jilu</span>
         </div>
       )}
       <div className={styles.titleBlock}>
         {showBack && (
           <div className={styles.back} {...pressable(onBack)}>{t('header.back')}</div>
         )}
-        <h1 className={styles.title}>{title}</h1>
+        {title && <h1 className={styles.title}>{title}</h1>}
         <div className={styles.subtitle}>{subtitle}</div>
       </div>
       <IconButton label={t('header.search')} onClick={onOpenSearch} className={styles.searchButton}>

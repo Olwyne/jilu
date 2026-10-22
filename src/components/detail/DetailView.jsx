@@ -9,6 +9,8 @@ import GamePanel from './GamePanel'
 import ReviewFeed from './ReviewFeed'
 import { pressable } from '../../lib/a11y'
 import StarRating from '../ui/StarRating'
+import Button from '../ui/Button'
+import { nextAiredUnwatched } from '../../lib/nextUp'
 
 export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites, currentUser }) {
   const { t, i18n } = useTranslation()
@@ -48,6 +50,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
   const allWatched = hasEpisodes && work.seasons.every((s) =>
     s.episodes.filter((e) => e.air <= now).every((e) => watched[`${work.id}-${s.n}-${e.n}`])
   )
+  const next = work.seasons ? nextAiredUnwatched(work, watched, now) : null
   const currentYear = new Date().getFullYear()
   const isUnreleased = (work.release && work.release > now) ||
     (work.category === 'livres' && work.year && work.year > currentYear)
@@ -62,11 +65,11 @@ export default function DetailView({ work, watched, ratings, games, feed, action
             <span style={{ fontSize: 13, color: 'var(--color-muted-2)' }}>
               {t('cat.' + work.category)} · {work.genre} · {work.year}
               {work.ended === true && <span style={{ marginLeft: 6, color: 'var(--color-green)', fontWeight: 600 }}>{t('detail.ended')}</span>}
-              {work.ended === false && <span style={{ marginLeft: 6, color: '#f59e0b', fontWeight: 600 }}>{t('detail.ongoing')}</span>}
+              {work.ended === false && <span style={{ marginLeft: 6, color: 'var(--color-gold)', fontWeight: 600 }}>{t('detail.ongoing')}</span>}
             </span>
           </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, margin: '0 0 12px' }}>{localizedTitle(work, i18n.language)}</h2>
-          <p style={{ color: '#b9b9c8', fontSize: 15, lineHeight: 1.55, maxWidth: 560 }}>{work.overview}</p>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, margin: '0 0 12px' }}>{localizedTitle(work, i18n.language)}</h1>
+          <p style={{ color: 'var(--color-muted)', fontSize: 15, lineHeight: 1.55, maxWidth: 560 }}>{work.overview}</p>
           {work.seasons && (
             <div style={{ maxWidth: 420, marginBottom: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 7 }}>
@@ -78,6 +81,15 @@ export default function DetailView({ work, watched, ratings, games, feed, action
               </div>
             </div>
           )}
+          {next && actions.toggleEpisode && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 20 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-muted)' }}>{t('detail.nextEpisode')}</div>
+                <div style={{ fontWeight: 700, fontSize: 16 }}>S{next.s.n} · {t('term.' + work.category + '.ep')} {next.e.n}</div>
+              </div>
+              <Button variant="primary" onClick={() => actions.toggleEpisode(work.id, next.s.n, next.e.n)}>{t('calendar.markWatched')}</Button>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 13, background: 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)' }}>
               <span style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('detail.myRating')}</span>
@@ -85,7 +97,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
             </div>
             <StatusSelect value={work.status} onChange={(s) => actions.setStatus(work.id, s)} disabled={isUnreleased} />
             {actions.toggleFavorite && (
-              <div {...pressable(() => actions.toggleFavorite(work.id))} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? 'rgba(255,196,75,.14)' : 'var(--color-chip-bg)', border: `1px solid ${isFav ? 'rgba(255,196,75,.4)' : 'var(--color-border-btn)'}`, color: isFav ? '#ffc24b' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
+              <div {...pressable(() => actions.toggleFavorite(work.id))} style={{ padding: '11px 16px', borderRadius: 13, background: isFav ? tint('var(--color-gold)', 14) : 'var(--color-chip-bg)', border: `1px solid ${isFav ? tint('var(--color-gold)', 40) : 'var(--color-border-btn)'}`, color: isFav ? 'var(--color-gold)' : 'var(--color-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{isFav ? t('detail.favorite') : t('detail.notFavorite')}</div>
             )}
             {(actions.removeWork || actions.refreshWork || (actions.markWorkWatched && hasEpisodes)) && (
               <div ref={menuRef} style={{ position: 'relative' }}>
@@ -93,7 +105,7 @@ export default function DetailView({ work, watched, ratings, games, feed, action
                 {menuOpen && (
                   <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: 210, background: 'var(--color-surface)', border: '1px solid var(--color-border-btn)', borderRadius: 13, boxShadow: '0 8px 32px rgba(0,0,0,.28)', zIndex: 100, overflow: 'hidden' }}>
                     {actions.markWorkWatched && hasEpisodes && (
-                      <div {...pressable(() => { setMenuOpen(false); actions.markWorkWatched(work.id) })} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-text)', borderBottom: '1px solid var(--color-border)' }}>
+                      <div {...pressable(() => { setMenuOpen(false); if (allWatched && !window.confirm(t('detail.confirmUncheckAll'))) return; actions.markWorkWatched(work.id) })} style={{ padding: '13px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: 'var(--color-text)', borderBottom: '1px solid var(--color-border)' }}>
                         {allWatched ? t('detail.uncheckAll') : t('detail.checkAll')}
                       </div>
                     )}
@@ -117,15 +129,6 @@ export default function DetailView({ work, watched, ratings, games, feed, action
         <GamePanel workId={work.id} game={games[work.id]} onAddMinutes={actions.addGameMinutes} onToggleTier={actions.toggleGameTier} />
       )}
 
-      <div style={{ marginBottom: 22 }}>
-        <ReviewFeed
-          workId={work.id}
-          currentUser={currentUser}
-          myRating={rating}
-          onFeedPost={(text) => actions.postComment(work.id, null, null, text)}
-        />
-      </div>
-
       {work.seasons && work.seasons.length > 0 && (
         <SeasonList
           work={work}
@@ -135,6 +138,16 @@ export default function DetailView({ work, watched, ratings, games, feed, action
           onOpenEpisode={onOpenEpisode}
         />
       )}
+
+      <div style={{ marginTop: 28 }}>
+        <ReviewFeed
+          workId={work.id}
+          currentUser={currentUser}
+          myRating={rating}
+          onFeedPost={(text) => actions.postComment(work.id, null, null, text)}
+        />
+      </div>
+
     </div>
   )
 }

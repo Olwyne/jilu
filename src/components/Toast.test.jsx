@@ -33,4 +33,16 @@ describe('Toast', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('offers Undo for episode toasts and calls onUndo', async () => {
+    const onUndo = vi.fn()
+    render(<Toast toast={{ title: 'Severance', label: 'S1 · E3', workId: 'w1', sNum: 1, eNum: 3 }} onClose={() => {}} onOpenRating={() => {}} onUndo={onUndo} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Undo' }))
+    expect(onUndo).toHaveBeenCalled()
+  })
+
+  it('has no Undo when the toast is not about an episode', () => {
+    render(<Toast toast={{ title: 'Added' }} onClose={() => {}} onOpenRating={() => {}} onUndo={() => {}} />)
+    expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeInTheDocument()
+  })
 })

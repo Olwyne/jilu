@@ -10,7 +10,7 @@ describe('CalendarView', () => {
   it('shows the up-to-date message when nothing to catch up on', () => {
     const works = { w1: { id: 'w1', title: 'X', status: 'termine', seasons: null } }
     render(<CalendarView works={works} watched={{}} onOpenWork={() => {}} onMarkWatched={() => {}} />)
-    expect(screen.getByText("You're all caught up! 🎉")).toBeInTheDocument()
+    expect(screen.getByText("You're all caught up!")).toBeInTheDocument()
   })
 
   it('lists an aired-unwatched episode under À rattraper', () => {

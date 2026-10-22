@@ -73,6 +73,9 @@ export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUs
     content: '',
     editorProps: {
       attributes: {
+        role: 'textbox',
+        'aria-multiline': 'true',
+        'aria-label': t('review.mine'),
         style: 'min-height:90px;padding:10px 12px;outline:none;font-size:14px;line-height:1.6;color:var(--color-text)',
       },
     },
