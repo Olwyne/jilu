@@ -23,7 +23,7 @@
 .menu { display: none; position: relative; }
 .menu summary { list-style: none; display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid var(--color-border-btn); cursor: pointer; color: var(--color-text); }
 .menu summary::-webkit-details-marker { display: none; }
-.menuList { position: absolute; right: 0; top: calc(100% + 6px); min-width: 220px; padding: .35rem; background: var(--color-dropdown-bg); border: 1px solid var(--color-border-btn); border-radius: 14px; box-shadow: 0 12px 32px var(--color-shadow-lg); display: flex; flex-direction: column; }
+.menuList { position: absolute; right: 0; top: calc(100% + 6px); min-width: 220px; padding: .35rem; background: var(--color-dropdown-bg); border: 1px solid var(--color-border-btn); border-radius: 12px; box-shadow: 0 12px 32px var(--color-shadow-lg); display: flex; flex-direction: column; }
 .menuList a { display: flex; align-items: center; min-height: 44px; padding: 0 .85rem; border-radius: 10px; color: var(--color-text); text-decoration: none; font-size: .95rem; }
 .menuList a:hover { background: var(--color-chip-bg); }
 
@@ -35,7 +35,7 @@
 .h1 em { display: block; font-style: normal; color: var(--color-accent); }
 .sub { margin-top: 1.5rem; max-width: 58ch; font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--color-muted); }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
-.btnPrimary, .btnSecondary { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 1.6rem; border-radius: 14px; font-size: 1.05rem; font-weight: 700; text-decoration: none; transition: background-color .15s; }
+.btnPrimary, .btnSecondary { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 1.6rem; border-radius: 12px; font-size: 16px; font-weight: 700; text-decoration: none; transition: background-color .15s; }
 .btnPrimary { background: var(--color-accent-fill); color: var(--color-on-accent); }
 .btnPrimary:hover { background: var(--color-accent-fill-hover); }
 .btnSecondary { border: 1px solid var(--color-border-btn); color: var(--color-text); }
@@ -50,7 +50,7 @@
 
 /* ---------- import ---------- */
 .import { padding: clamp(3rem, 7vw, 5rem) 0; }
-.importCard { display: grid; gap: 2rem; padding: clamp(1.5rem, 4vw, 2.75rem); border-radius: 24px; background: var(--color-accent-soft); border: 1px solid var(--color-accent-soft-border); }
+.importCard { display: grid; gap: 2rem; padding: clamp(1.5rem, 4vw, 2.75rem); border-radius: 22px; background: var(--color-accent-soft); border: 1px solid var(--color-accent-soft-border); }
 @media (min-width: 900px) { .importCard { grid-template-columns: 1.05fr 1fr; align-items: center; gap: 3rem; } }
 .importCard h2 { font-size: clamp(1.75rem, 3.6vw, 2.5rem); line-height: 1.1; letter-spacing: -.025em; }
 .importCard p { margin-top: 1rem; color: var(--color-muted); max-width: 52ch; }
@@ -58,7 +58,7 @@
 .steps li { counter-increment: step; display: flex; align-items: center; gap: 1rem; padding: 1rem 1.15rem; border-radius: 16px; background: var(--color-bg); border: 1px solid var(--color-border); font-weight: 600; }
 .steps li::before { content: counter(step); display: inline-grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--color-accent-fill); color: var(--color-on-accent); font-family: var(--font-display); font-weight: 800; }
 .detail { margin-top: 1.25rem; font-size: .95rem; }
-.after { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--color-accent-soft-border); font-size: .98rem; color: var(--color-text); }
+.after { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--color-accent-soft-border); font-size: 15px; color: var(--color-text); }
 
 /* ---------- reasons ---------- */
 .reasons { padding: 0 0 clamp(3rem, 7vw, 5rem); }
@@ -77,14 +77,14 @@
 .alsoList { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; gap: 1.25rem 2.5rem; }
 @media (min-width: 720px) { .alsoList { grid-template-columns: 1fr 1fr; } }
 .alsoList strong { display: block; font-weight: 700; }
-.alsoList span { color: var(--color-muted); font-size: .98rem; }
+.alsoList span { color: var(--color-muted); font-size: 15px; }
 
 /* ---------- platforms + faq ---------- */
 .faq { padding: clamp(2.5rem, 6vw, 4rem) 0; border-top: 1px solid var(--color-border); }
 .faqList { margin-top: 1.75rem; max-width: 760px; }
 .faqItem { border-bottom: 1px solid var(--color-border-btn); }
 .faqItem:first-child { border-top: 1px solid var(--color-border-btn); }
-.faqItem summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 56px; padding: .5rem 0; font-weight: 600; font-size: 1.05rem; cursor: pointer; list-style: none; }
+.faqItem summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 56px; padding: .5rem 0; font-weight: 600; font-size: 16px; cursor: pointer; list-style: none; }
 .faqItem summary::-webkit-details-marker { display: none; }
 .faqItem summary::after { content: ''; flex-shrink: 0; width: 10px; height: 10px; border-right: 2px solid var(--color-muted); border-bottom: 2px solid var(--color-muted); transform: rotate(45deg); transition: transform .2s; }
 .faqItem[open] summary::after { transform: rotate(-135deg); }
@@ -92,11 +92,11 @@
 
 /* ---------- closing ---------- */
 .close { padding: 0 0 clamp(3rem, 7vw, 5rem); }
-.closeCard { display: grid; gap: 1.5rem; align-items: center; padding: clamp(1.75rem, 5vw, 3.5rem); border-radius: 28px; background: var(--color-accent-fill); color: var(--color-on-accent); }
+.closeCard { display: grid; gap: 1.5rem; align-items: center; padding: clamp(1.75rem, 5vw, 3.5rem); border-radius: 22px; background: var(--color-accent-fill); color: var(--color-on-accent); }
 @media (min-width: 820px) { .closeCard { grid-template-columns: 1fr auto; } }
 .closeCard h2 { font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.08; letter-spacing: -.03em; }
-.closeCard p { margin-top: .75rem; font-size: 1.1rem; white-space: pre-line; }
-.btnOnAccent { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 1.75rem; border-radius: 14px; background: var(--color-on-accent); color: var(--color-accent-fill); font-weight: 800; font-size: 1.05rem; text-decoration: none; white-space: nowrap; }
+.closeCard p { margin-top: .75rem; font-size: 16px; white-space: pre-line; }
+.btnOnAccent { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 1.75rem; border-radius: 12px; background: var(--color-on-accent); color: var(--color-accent-fill); font-weight: 800; font-size: 16px; text-decoration: none; white-space: nowrap; }
 .btnOnAccent:hover { filter: brightness(.95); }
 
 /* ---------- footer ---------- */

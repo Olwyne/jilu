@@ -4,7 +4,7 @@
 
 .sm { padding: 8px 14px; border-radius: 10px; font-size: 13px; }
 .md { padding: 10px 20px; border-radius: 12px; font-size: 14px; }
-.lg { padding: 12px 24px; border-radius: 13px; font-size: 14px; }
+.lg { padding: 12px 24px; border-radius: 12px; font-size: 14px; }
 .block { width: 100%; }
 
 .primary { background: var(--color-accent-fill); color: var(--color-on-accent); }

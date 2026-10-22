@@ -25,6 +25,8 @@ colors:
   hairline: "rgba(255,255,255,0.07)"
   hairline-strong: "rgba(255,255,255,0.10)"
   violet-wash: "rgba(139,109,255,0.14)"
+  scrim: "rgba(0,0,0,0.65)"
+  scrim-label: "rgba(0,0,0,0.72)"
 typography:
   display:
     fontFamily: "'Bricolage Grotesque', system-ui, sans-serif"
@@ -44,11 +46,61 @@ typography:
     fontWeight: 700
     lineHeight: 1.1
     letterSpacing: "-0.02em"
+  title-md:
+    fontFamily: "'Bricolage Grotesque', system-ui, sans-serif"
+    fontSize: "22px"
+    fontWeight: 700
+    lineHeight: 1.15
+    letterSpacing: "-0.02em"
+  title-sm:
+    fontFamily: "'Bricolage Grotesque', system-ui, sans-serif"
+    fontSize: "20px"
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: "-0.01em"
+  body-lg:
+    fontFamily: "'Instrument Sans', system-ui, sans-serif"
+    fontSize: "15px"
+    fontWeight: 400
+    lineHeight: 1.6
   body:
     fontFamily: "'Instrument Sans', system-ui, sans-serif"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.6
+  body-xl:
+    fontFamily: "'Instrument Sans', system-ui, sans-serif"
+    fontSize: "16px"
+    fontWeight: 400
+    lineHeight: 1.7
+  lead:
+    fontFamily: "'Instrument Sans', system-ui, sans-serif"
+    fontSize: "clamp(1.05rem, 1.6vw, 1.25rem)"
+    fontWeight: 400
+    lineHeight: 1.6
+  headline-md:
+    fontFamily: "'Bricolage Grotesque', system-ui, sans-serif"
+    fontSize: "clamp(1.75rem, 3.6vw, 2.5rem)"
+    fontWeight: 800
+    lineHeight: 1.1
+    letterSpacing: "-0.025em"
+  headline-sm:
+    fontFamily: "'Bricolage Grotesque', system-ui, sans-serif"
+    fontSize: "clamp(1.4rem, 2.6vw, 2rem)"
+    fontWeight: 800
+    lineHeight: 1.15
+    letterSpacing: "-0.02em"
+  page-title:
+    fontFamily: "'Bricolage Grotesque', system-ui, sans-serif"
+    fontSize: "clamp(2rem, 5vw, 2.75rem)"
+    fontWeight: 800
+    lineHeight: 1.08
+    letterSpacing: "-0.03em"
+  caption:
+    fontFamily: "'Instrument Sans', system-ui, sans-serif"
+    fontSize: "13px"
+    fontWeight: 500
+    lineHeight: 1.4
   label:
     fontFamily: "'Instrument Sans', system-ui, sans-serif"
     fontSize: "12px"
@@ -56,7 +108,9 @@ typography:
     lineHeight: 1.2
 rounded:
   sm: "8px"
+  control: "10px"
   md: "12px"
+  row: "16px"
   lg: "18px"
   xl: "22px"
   pill: "999px"
@@ -164,8 +218,10 @@ A near-black canvas, translucent white layers, one electric violet, and a small 
 ### Hierarchy
 - **Display** (800, clamp(2.75rem, 7.4vw, 5.5rem), 1.02, -0.035em): landing hero only.
 - **Headline** (800, clamp(1.9rem, 4vw, 3rem), 1.08, -0.03em): landing section titles, legal page titles.
-- **Title** (700, 26px, 1.1, -0.02em): page title in the app header; 20-22px for modal and card titles.
-- **Body** (400, 14px app / 16px marketing, 1.6): lists, descriptions, forms. Reading blocks stay within 65 to 70ch.
+- **Title** (700, 26px, 1.1, -0.02em): page title in the app header. **Title MD** (22px) and **Title SM** (20px) are the modal, card and section titles.
+- **Body** (400, 14px app, 1.6): lists, descriptions, forms. **Body LG** (15px) is the larger app body and the marketing body (16px on marketing pages). Reading blocks stay within 65 to 70ch.
+- **Caption** (500, 13px, 1.4): secondary lines under titles, form hints.
+- **Marketing scale** (landing and legal pages only): Body XL (16px, 1.7), Lead (fluid 1.05 to 1.25rem), Headline MD (fluid 1.75 to 2.5rem), Headline SM (fluid 1.4 to 2rem) and Page Title (fluid 2 to 2.75rem, legal pages).
 - **Label** (600, 12px, 1.2): chips, badges, captions, metadata. 12px is the floor for any text.
 
 ### Named Rules
@@ -193,7 +249,7 @@ Depth is tonal first. Surface Tint, Row Tint and Chip Tint stack over Blackout, 
 
 ## Shapes
 
-Soft and generous. Controls are 10 to 12px, cards 16 to 18px, dialogs and hero imagery 22 to 24px, filters and tabs are full pills, and avatars are circles. Posters keep a 12 to 14px radius at a 2:3 ratio and are the only rectangles with a visible image edge. The logo is a rounded square (18px on a 64px grid) holding a drawn "J".
+Soft and generous. Controls are 10px (small) or 12px (standard), dense rows 16px, cards 18px, dialogs and hero imagery 22px, filters and tabs are full pills, and avatars are circles. Posters keep a 12 to 14px radius at a 2:3 ratio and are the only rectangles with a visible image edge. The logo is a rounded square (18px on a 64px grid) holding a drawn "J".
 
 ## Components
 
