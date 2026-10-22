@@ -103,7 +103,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-            <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{worksCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>œuvres</div></div>
+            <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{worksCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{t('profile.works')}</div></div>
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{episodesCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>vus</div></div>
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{ratingsCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>avis</div></div>
           </div>

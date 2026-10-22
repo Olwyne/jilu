@@ -31,7 +31,7 @@ export default function Sidebar({ profile = {}, toCatch = 0 }) {
         >
           {item.label}
           {item.path === '/calendar' && toCatch > 0 && (
-            <span style={{ marginLeft: 'auto', minWidth: 20, height: 20, padding: '0 6px', borderRadius: 20, background: 'var(--color-pink)', color: '#fff', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toCatch}</span>
+            <span style={{ marginLeft: 'auto', minWidth: 20, height: 20, padding: '0 6px', borderRadius: 20, background: 'var(--color-pink)', color: 'var(--color-on-pink)', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toCatch}</span>
           )}
         </button>
       ))}

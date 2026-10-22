@@ -2,6 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import DOMPurify from 'dompurify'
 import { useReviews } from '../../hooks/useReviews'
+import { useTranslation } from 'react-i18next'
 import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
 
@@ -23,8 +24,9 @@ const toolbarBtnStyle = (active) => ({
   padding: '3px 8px',
   borderRadius: 6,
   border: '1px solid var(--color-border-btn)',
-  background: active ? 'var(--color-accent)' : 'transparent',
-  color: active ? '#fff' : 'var(--color-text)',
+  background: active ? 'var(--color-accent-fill)' : 'transparent',
+  color: active ? 'var(--color-on-accent)' : 'var(--color-text)',
+  fontFamily: 'inherit',
   cursor: 'pointer',
   fontSize: 13,
   fontWeight: 600,
@@ -32,18 +34,30 @@ const toolbarBtnStyle = (active) => ({
 })
 
 function RichToolbar({ editor }) {
+  const { t } = useTranslation()
   if (!editor) return null
+  const tool = (name, label, run, content) => (
+    <button
+      type="button"
+      aria-label={label}
+      aria-pressed={editor.isActive(name)}
+      style={toolbarBtnStyle(editor.isActive(name))}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={() => run(editor.chain().focus()).run()}
+    >{content}</button>
+  )
   return (
     <div style={{ display: 'flex', gap: 4, padding: '6px 10px', borderBottom: '1px solid var(--color-border-btn)', flexWrap: 'wrap' }}>
-      <div style={toolbarBtnStyle(editor.isActive('bold'))} onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run() }}><b>G</b></div>
-      <div style={toolbarBtnStyle(editor.isActive('italic'))} onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run() }}><i>I</i></div>
-      <div style={toolbarBtnStyle(editor.isActive('bulletList'))} onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run() }}>• Liste</div>
-      <div style={toolbarBtnStyle(editor.isActive('blockquote'))} onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBlockquote().run() }}>" Citation</div>
+      {tool('bold', t('review.boldLabel'), (c) => c.toggleBold(), <b>{t('review.bold')}</b>)}
+      {tool('italic', t('review.italicLabel'), (c) => c.toggleItalic(), <i>{t('review.italic')}</i>)}
+      {tool('bulletList', t('review.bullets'), (c) => c.toggleBulletList(), t('review.bullets'))}
+      {tool('blockquote', t('review.quote'), (c) => c.toggleBlockquote(), t('review.quote'))}
     </div>
   )
 }
 
 export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUser, myRating = 0, onFeedPost }) {
+  const { t } = useTranslation()
   const { episodeReviews, workReviews, addReview, deleteReview } = useReviews(workId, currentUser)
 
   const reviews = sNum != null
@@ -82,39 +96,39 @@ export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUs
     <div>
       {/* Note moyenne */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <span style={{ fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600 }}>Note moyenne</span>
+        <span style={{ fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600 }}>{t('review.avg')}</span>
         {avg ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ color: 'var(--color-gold)', fontSize: 18 }}>★</span>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17 }}>{avg}</span>
-            <span style={{ fontSize: 12, color: 'var(--color-muted-3)' }}>/ 5 · {ratingCount} note{ratingCount > 1 ? 's' : ''}</span>
+            <span style={{ fontSize: 12, color: 'var(--color-muted-3)' }}>/ 5 · {t('review.ratingCount', { count: ratingCount })}</span>
           </div>
         ) : (
-          <span style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>Aucune note encore</span>
+          <span style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>{t('review.noRatings')}</span>
         )}
       </div>
 
       {/* Éditeur */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, marginBottom: 8 }}>Mon avis</div>
+        <div style={{ fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, marginBottom: 8 }}>{t('review.mine')}</div>
         <div style={{ border: '1px solid var(--color-border-btn)', borderRadius: 12, background: 'var(--color-chip-bg)', overflow: 'hidden' }}>
           <RichToolbar editor={editor} />
           <EditorContent editor={editor} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
           <Button variant="primary" size="sm" onClick={submit}>
-            Partager
+            {t('review.share')}
           </Button>
         </div>
       </div>
 
       {/* Feed */}
       <div style={{ fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, marginBottom: 10 }}>
-        Avis de la communauté
+        {t('review.community')}
         {reviews.length > 0 && <span style={{ fontWeight: 400, color: 'var(--color-muted-3)', marginLeft: 6 }}>{reviews.length}</span>}
       </div>
       {reviews.length === 0 ? (
-        <div style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>Personne n'a encore partagé d'avis</div>
+        <div style={{ fontSize: 13, color: 'var(--color-muted-3)' }}>{t('review.empty')}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {reviews.map((r) => {
@@ -122,12 +136,11 @@ export default function ReviewFeed({ workId, sNum = null, eNum = null, currentUs
             return (
               <div key={r.id} style={{ borderTop: '1px solid var(--color-border)', paddingTop: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <span style={{ fontWeight: 600, fontSize: 13.5, flex: 1 }}>{isOwn ? 'Moi' : (r.handle || 'Anonyme')}</span>
+                  <span style={{ fontWeight: 600, fontSize: 13.5, flex: 1 }}>{isOwn ? t('social.me') : (r.handle || t('review.anonymous'))}</span>
                   {r.rating > 0 && <span style={{ fontSize: 13, color: 'var(--color-gold)' }}>{'★'.repeat(r.rating)}</span>}
                   {isOwn && (
                     <span
-                      {...pressable(() => deleteReview(r.id))}
-                      title="Supprimer"
+                      {...pressable(() => deleteReview(r.id), { label: t('journal.delete') })}
                       style={{ fontSize: 15, cursor: 'pointer', color: 'var(--color-muted-3)', lineHeight: 1, flexShrink: 0 }}
                     >🗑</span>
                   )}

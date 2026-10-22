@@ -60,7 +60,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
                     <div key={e.n} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderTop: '1px solid var(--color-border)', opacity: isWatched ? .62 : (aired2 ? 1 : .5) }}>
                       <div
                         {...pressable(() => { if (aired2) onToggleEpisode(work.id, s.n, e.n) }, { role: 'checkbox', checked: isWatched, label: epLabel(work, s, e, t), disabled: !aired2 })}
-                        style={{ width: 26, height: 26, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, cursor: aired2 ? 'pointer' : 'not-allowed', color: '#fff', background: isWatched ? 'var(--color-accent)' : 'transparent', border: `2px solid ${isWatched ? 'var(--color-accent)' : (aired2 ? 'var(--color-check-border)' : 'var(--color-check-border-dim)')}` }}
+                        style={{ width: 26, height: 26, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, cursor: aired2 ? 'pointer' : 'not-allowed', color: 'var(--color-on-accent)', background: isWatched ? 'var(--color-accent-fill)' : 'transparent', border: `2px solid ${isWatched ? 'var(--color-accent-fill)' : (aired2 ? 'var(--color-check-border)' : 'var(--color-check-border-dim)')}` }}
                       >
                         {isWatched ? '✓' : ''}
                       </div>

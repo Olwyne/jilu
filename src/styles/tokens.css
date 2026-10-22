@@ -15,6 +15,8 @@
   --color-accent-fill: #7050ee;
   --color-accent-fill-hover: #6340e0;
   --color-on-accent: #ffffff;
+  --color-on-pink: #0a0a0f;
+  --color-on-green: #0a0a0f;
   --color-danger-fill: #dc2626;
   --color-pink: #ff5c8a;
   --color-gold: #ffc24b;
@@ -56,6 +58,8 @@
   --color-accent-fill: #6a4ce0;
   --color-accent-fill-hover: #5a3cd0;
   --color-on-accent: #ffffff;
+  --color-on-pink: #ffffff;
+  --color-on-green: #ffffff;
   --color-danger-fill: #dc2626;
   --color-pink: #c91d52;
   --color-gold: #946000;

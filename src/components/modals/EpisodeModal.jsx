@@ -66,7 +66,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
 
         {/* Ma note */}
         <div style={{ padding: '16px 26px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--color-border)' }}>
-          <span style={{ fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600 }}>Ma note</span>
+          <span style={{ fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600 }}>{t('detail.myRating')}</span>
           <div style={{ display: 'flex', gap: 3 }}>
             {[1, 2, 3, 4, 5].map((n) => (
               <span
@@ -96,7 +96,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions,
 
           {!spoilerVisible && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 20 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-text)', textAlign: 'center' }}>Épisode pas encore vu</div>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-text)', textAlign: 'center' }}>{t('episode.notSeen')}</div>
               <Button variant="primary" size="sm" onClick={() => setRevealed(true)}>
                 {t('episode.reveal')}
               </Button>

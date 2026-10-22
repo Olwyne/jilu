@@ -75,6 +75,7 @@ function DetailRoute({ data, workActions, currentUser, onOpenEpisode }) {
 
 // Prépare le compte (rattrapage à la première ouverture) avant d'afficher l'application.
 function Shell() {
+  const { t } = useTranslation()
   const { user, logout } = useAuth()
   const { status, progress, retry } = useCutover(user)
   if (status === 'ready') return <ShellInner />
@@ -83,14 +84,14 @@ function Shell() {
     return (
       <div role="alert" style={box}>
         <div>
-          <p style={{ marginBottom: 14 }}>Impossible de mettre à jour ta bibliothèque pour le moment. Tes données sont intactes.</p>
-          <Button variant="primary" style={{ marginRight: 10 }} onClick={retry}>Réessayer</Button>
-          <Button variant="secondary" onClick={logout}>Se déconnecter</Button>
+          <p style={{ marginBottom: 14 }}>{t('cutover.error')}</p>
+          <Button variant="primary" style={{ marginRight: 10 }} onClick={retry}>{t('cutover.retry')}</Button>
+          <Button variant="secondary" onClick={logout}>{t('cutover.logout')}</Button>
         </div>
       </div>
     )
   }
-  return <div role="status" style={box}>{progress || 'Mise à jour de ta bibliothèque…'}</div>
+  return <div role="status" style={box}>{progress || t('cutover.updating')}</div>
 }
 
 function ShellInner() {

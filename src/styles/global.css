@@ -24,8 +24,6 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, .tiptap:focus
 .tiptap { caret-color: var(--color-accent); }
 .tiptap p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--color-muted-3); pointer-events: none; float: left; height: 0; }
 
-@keyframes jiluPulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
-@keyframes jiluIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes jiluFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes jiluPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes jiluToast { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }

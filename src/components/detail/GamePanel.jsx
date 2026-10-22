@@ -149,7 +149,7 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
           const on = !!(g.done && g.done[key])
           return (
             <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderTop: '1px solid var(--color-border)' }}>
-              <div {...pressable(() => onToggleTier(workId, key))} style={{ width: 24, height: 24, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', color: '#fff', background: on ? 'var(--color-green)' : 'transparent', border: `2px solid ${on ? 'var(--color-green)' : 'var(--color-check-border)'}` }}>{on ? '✓' : ''}</div>
+              <div {...pressable(() => onToggleTier(workId, key))} style={{ width: 24, height: 24, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', color: 'var(--color-on-green)', background: on ? 'var(--color-green)' : 'transparent', border: `2px solid ${on ? 'var(--color-green)' : 'var(--color-check-border)'}` }}>{on ? '✓' : ''}</div>
               <span style={{ fontWeight: 600, fontSize: 14.5, flex: 1, textDecoration: on ? 'line-through' : 'none', color: on ? 'var(--color-muted)' : 'inherit' }}>{label}</span>
             </div>
           )
