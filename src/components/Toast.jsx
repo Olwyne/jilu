@@ -19,7 +19,7 @@ export default function Toast({ toast, onClose, onOpenRating, onUndo, onHold }) 
       minWidth: 260, maxWidth: 380,
     }}>
       <div className="jilu-toast-text">
-        <div style={{ fontSize: 12, color: 'var(--color-green)', fontWeight: 700, marginBottom: 2 }}>{header}</div>
+        <div style={{ fontSize: 12, color: toast.tone === 'error' ? 'var(--color-danger-text)' : 'var(--color-green)', fontWeight: 700, marginBottom: 2 }}>{header}</div>
         <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {toast.title}{toast.label && <span style={{ fontWeight: 400, color: 'var(--color-muted)' }}> · {toast.label}</span>}
         </div>

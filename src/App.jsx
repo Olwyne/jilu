@@ -79,25 +79,29 @@ function Shell() {
   const { user, logout } = useAuth()
   const { status, progress, retry } = useCutover(user)
   if (status === 'ready') return <ShellInner />
-  const box = { minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--color-muted)', fontSize: 15, padding: 24, textAlign: 'center' }
-  if (status === 'error') {
-    return (
-      <div role="alert" style={box}>
-        <div>
-          <p style={{ marginBottom: 14 }}>{t('cutover.error')}</p>
-          <Button variant="primary" style={{ marginRight: 10 }} onClick={retry}>{t('cutover.retry')}</Button>
-          <Button variant="secondary" onClick={logout}>{t('cutover.logout')}</Button>
-        </div>
+  if (status === 'error') return <ErrorScreen message={t('cutover.error')} onRetry={retry} onLogout={logout} />
+  return <div role="status" style={fullScreenBox}>{progress || t('cutover.updating')}</div>
+}
+
+const fullScreenBox = { minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--color-muted)', fontSize: 15, padding: 24, textAlign: 'center' }
+
+function ErrorScreen({ message, onRetry, onLogout }) {
+  const { t } = useTranslation()
+  return (
+    <div role="alert" style={fullScreenBox}>
+      <div>
+        <p style={{ marginBottom: 14 }}>{message}</p>
+        <Button variant="primary" style={{ marginRight: 10 }} onClick={onRetry}>{t('cutover.retry')}</Button>
+        <Button variant="secondary" onClick={onLogout}>{t('cutover.logout')}</Button>
       </div>
-    )
-  }
-  return <div role="status" style={box}>{progress || t('cutover.updating')}</div>
+    </div>
+  )
 }
 
 function ShellInner() {
   const { user, logout } = useAuth()
   const {
-    data, loading, mutate, syncAll, getFullData, getCatalogDoc,
+    data, loading, error, saveError, mutate, syncAll, getFullData, getCatalogDoc,
     ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog, refreshWork, refreshStale, refreshAll,
   } = useAppData(user)
   const navigate = useNavigate()
@@ -151,6 +155,12 @@ function ShellInner() {
   }, [toast, toastHold])
 
   useEffect(() => { setEpisodeModal(null) }, [pathname])
+
+  // Écriture refusée par le serveur : l'écran est déjà revenu à l'état enregistré, on le dit
+  useEffect(() => {
+    if (!saveError) return
+    setToast({ tone: 'error', header: t('data.saveError'), title: t('data.saveErrorHint'), action: { label: t('data.reload'), fn: () => window.location.reload() } })
+  }, [saveError])
 
   // Comptes sans pseudo (inscription sans étape pseudo, anciens comptes) : on réserve un pseudo
   // neutre (membre_xxxxxx) une seule fois par appareil ; l'utilisateur peut le changer ensuite.
@@ -234,6 +244,8 @@ function ShellInner() {
   }
 
   if (loading) return null
+  // Sans ce garde-fou, un chargement raté affiche une bibliothèque vide (« tout est perdu »)
+  if (error) return <ErrorScreen message={t('data.loadError')} onRetry={() => window.location.reload()} onLogout={logout} />
 
   const routeCopy = getRouteCopy(t)
   const isDetail = pathname.startsWith('/work/')

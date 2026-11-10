@@ -109,11 +109,22 @@ describe('useAppData : écriture (une seule fois, dans le nouveau modèle)', () 
     expect(firestore.setDoc).toHaveBeenCalledWith(expect.anything(), { reviews }, { merge: true })
   })
 
-  it('remonte l’erreur si l’écriture échoue', async () => {
+  it('écriture refusée : remonte l’erreur et l’écran revient à l’état enregistré', async () => {
     const { result } = await mount()
+    const before = result.current.data.favorites
     mods.commitPlan.mockRejectedValueOnce(new Error('quota'))
     await act(async () => { await expect(result.current.mutate({ favorites: { a: true } })).rejects.toThrow('quota') })
-    await waitFor(() => expect(result.current.error?.message).toBe('quota'))
+    await waitFor(() => expect(result.current.saveError?.message).toBe('quota'))
+    expect(result.current.data.favorites).toEqual(before)
+    expect(result.current.error).toBeNull() // pas un échec de chargement : l'app reste utilisable
+  })
+
+  it('document utilisateur refusé après une bibliothèque enregistrée : la bibliothèque reste à jour', async () => {
+    const { result } = await mount()
+    firestore.setDoc.mockRejectedValueOnce(new Error('denied'))
+    const reviews = [{ id: 'a', note: 'top', rating: 5, ts: 9 }]
+    await act(async () => { await expect(result.current.mutate({ reviews })).rejects.toThrow('denied') })
+    expect(result.current.data.reviews).toEqual(reviews) // déjà écrit dans library/a
   })
 
   it('ajouter une œuvre rend ses épisodes disponibles tout de suite', async () => {

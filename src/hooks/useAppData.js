@@ -43,7 +43,8 @@ export async function clearLocalCaches(uid) {
 export function useAppData(user) {
   const [data, setData] = useState(EMPTY_DATA)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null)         // chargement impossible
+  const [saveError, setSaveError] = useState(null) // dernière écriture refusée
   const dataRef = useRef(data)
   dataRef.current = data
   const st = useRef({ cache: null, library: {}, catalog: {}, main: {}, loaded: { main: false, library: false }, lastSync: 0 })
@@ -234,16 +235,20 @@ export function useAppData(user) {
     if (Object.keys(plan.catalogCreates).length) s.catalog = { ...s.catalog, ...plan.catalogCreates } // épisodes dispo immédiatement
     const mainPatch = Object.fromEntries(Object.entries(patch).filter(([k]) => !LIBRARY_KEYS.includes(k) || MIRRORED_KEYS.includes(k)))
     try {
-      if (!isEmptyPlan(plan)) await commitPlan(db, uid, plan)
+      if (!isEmptyPlan(plan)) {
+        await commitPlan(db, uid, plan)
+        s.library = applyPlanToLibrary(s.library, plan) // enregistré : la copie locale suit, même si la suite échoue
+      }
       if (Object.keys(mainPatch).length) await setDoc(doc(db, 'users', uid), clean(mainPatch), { merge: true })
-      s.library = applyPlanToLibrary(s.library, plan)
       if (s.cache && !isEmptyPlan(plan)) {
         const touched = [...Object.keys(plan.libraryCreates), ...Object.keys(plan.patches)]
         await s.cache.setMany(touched.map((id) => [`lib:${uid}:${id}`, s.library[id]]))
         await s.cache.deleteMany(plan.removes.map((id) => `lib:${uid}:${id}`))
       }
     } catch (e) {
-      setError(e)
+      // Écran = ce qui est réellement enregistré : sinon les modifications suivantes partiraient d'un état faux
+      setData(compute())
+      setSaveError(e)
       throw e
     }
   }
@@ -261,7 +266,7 @@ export function useAppData(user) {
   }
 
   return {
-    data, loading, error, mutate, syncAll,
+    data, loading, error, saveError, mutate, syncAll,
     // Données complètes (tous les épisodes chargés) pour l'export : indépendant du prochain rendu
     getFullData: async () => { await ensureAllCatalog(); return compute() },
     getCatalogDoc, ensureCatalog, ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog,
