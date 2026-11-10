@@ -150,6 +150,7 @@ function Shell() {
   useEffect(() => {
     if (!saveError) return
     setToast({ tone: 'error', header: t('data.saveError'), title: t('data.saveErrorHint'), action: { label: t('data.reload'), fn: () => window.location.reload() } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seulement à chaque nouvelle erreur, pas au changement de langue
   }, [saveError])
 
   // Comptes sans pseudo (inscription sans étape pseudo, anciens comptes) : on réserve un pseudo
@@ -164,6 +165,7 @@ function Shell() {
     }).then(() => {
       try { localStorage.setItem(flag, '1') } catch { /* ignoré */ }
     }).catch((e) => console.warn('[handle]', e))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une fois par compte, après le chargement (le résultat écrit lui-même data.profile)
   }, [loading, user?.uid])
 
   // Les épisodes viennent du catalogue partagé, chargés selon l'écran affiché
@@ -172,6 +174,7 @@ function Shell() {
     if (pathname.startsWith('/work/')) ensureWorkCatalog(pathname.split('/')[2])
     else if (pathname.startsWith('/stats') || pathname.startsWith('/profile') || pathname.startsWith('/account')) ensureAllCatalog()
     else if (pathname.startsWith('/library')) ensureProgressCatalog()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- les fonctions ensure* sont recréées à chaque rendu : les ajouter relancerait le chargement en boucle
   }, [pathname, loading])
 
   // Rafraîchissement automatique : quelques œuvres en cours de diffusion par session, via le serveur
@@ -181,6 +184,7 @@ function Shell() {
     if (loading || autoRefreshDone.current) return
     autoRefreshDone.current = true
     refreshStale().catch((e) => console.warn('[auto-refresh]', e))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une seule fois par session (garde autoRefreshDone)
   }, [loading])
 
   function handleChangeLanguage(lang) {
