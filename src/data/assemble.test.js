@@ -33,7 +33,7 @@ describe('assembleData : aller-retour ancien modèle → v2 → reconstitué', (
   const data = assembleData({ library, catalog })
 
   it('redonne exactement les mêmes œuvres (champs utilisateur compris), sans les champs internes', () => {
-    const expectedWorks = Object.fromEntries(Object.entries(v1.works).map(([id, { refreshedAt, ...w }]) => [id, w]))
+    const expectedWorks = Object.fromEntries(Object.entries(v1.works).map(([id, { refreshedAt: _refreshedAt, ...w }]) => [id, w]))
     expect(data.works).toEqual(expectedWorks)
     expect(data.works['tmdb-tv-1']).not.toHaveProperty('updatedAt')
     expect(data.works['tmdb-tv-1'].seasons[0].episodes[0].air).toBe(Infinity)

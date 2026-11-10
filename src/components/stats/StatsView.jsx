@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
-import { STATUS, DAY } from '../../lib/domain'
+import { STATUS } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
 import GoalsSection from './GoalsSection'
 import { pressable } from '../../lib/a11y'
@@ -24,7 +24,6 @@ const CARD = { padding: 22, borderRadius: 18, background: 'var(--color-surface)'
 
 export default function StatsView({ works, watched, ratings, onOpenWork, isMobile, settings = {}, onSaveSettings }) {
   const { t, i18n } = useTranslation()
-  const now = Date.now()
 
   let totalEps = 0, minutes = 0, seriesVues = 0, filmsSeen = 0, animesVus = 0, mangasLus = 0, livresLus = 0, jeuxFinis = 0
   let ratedSum = 0, ratedN = 0

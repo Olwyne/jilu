@@ -1,6 +1,7 @@
 # Scripts d'administration
 
-Dossier isolé du site (son propre `package.json`) : `cd scripts && pnpm install`.
+Scripts Admin SDK : ils utilisent le `firebase-admin` du projet (rien à installer en plus). À lancer depuis Docker
+(voir plus bas) ou, hors Docker, depuis la racine du dépôt : `node scripts/<script>.mjs`.
 
 ## `audit-accounts.mjs` — croiser Authentication et Firestore
 
@@ -15,13 +16,13 @@ Ne jamais la committer.
 export GOOGLE_APPLICATION_CREDENTIALS=/chemin/vers/cle.json
 
 # 1. Lecture seule (aucune modification)
-node audit-accounts.mjs --project <id-du-projet> --out rapport.json
+node scripts/audit-accounts.mjs --project <id-du-projet> --out rapport.json
 
 # 2. Sauvegarder les données des orphelins (toujours sans rien supprimer)
-node audit-accounts.mjs --project <id-du-projet> --backup ./sauvegarde
+node scripts/audit-accounts.mjs --project <id-du-projet> --backup ./sauvegarde
 
 # 3. Supprimer les orphelins (exige --backup et --confirm avec l'id du projet)
-node audit-accounts.mjs --project <id-du-projet> --backup ./sauvegarde --delete-orphans --confirm <id-du-projet>
+node scripts/audit-accounts.mjs --project <id-du-projet> --backup ./sauvegarde --delete-orphans --confirm <id-du-projet>
 ```
 
 Garde-fous : lecture seule par défaut ; la suppression est refusée sans sauvegarde, sans `--confirm` correspondant au
@@ -43,4 +44,4 @@ Les deux `-e …_EMULATOR_HOST=` vides sont indispensables : le service `web` vi
 
 `seed-emulator.mjs` crée des comptes de test (actif, sans pseudo, orphelins) et refuse de tourner hors émulateur.
 Lancer les émulateurs Auth + Firestore, exporter `FIRESTORE_EMULATOR_HOST` et `FIREBASE_AUTH_EMULATOR_HOST`
-(fait automatiquement par `firebase emulators:exec`), puis `node seed-emulator.mjs` et `node audit-accounts.mjs --project demo-jilu`.
+(fait automatiquement par `firebase emulators:exec`), puis `node scripts/seed-emulator.mjs` et `node scripts/audit-accounts.mjs --project demo-jilu`.

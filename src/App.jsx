@@ -105,7 +105,7 @@ function Shell() {
   const workActions = useWorkActions(data, { mutate, writeLibrary }, { getCatalogDoc, refreshWork, refreshAll })
   const { importTVTime, importTVTimeOut } = useImport(data, writeLibrary)
   const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
-  const { following, follow, unfollow, isFollowing } = useFollows(user)
+  const { following } = useFollows(user)
 
   useKeyboardShortcuts({
     navigate,

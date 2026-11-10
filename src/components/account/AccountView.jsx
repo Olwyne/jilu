@@ -364,7 +364,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           [t('settings.legalNotice'), '/legal'],
           [t('settings.privacy_policy'), '/privacy'],
           [t('settings.terms'), '/terms'],
-        ].map(([label, href], i, arr) => (
+        ].map(([label, href], i) => (
           <a key={href} href={href} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', fontSize: 14, color: 'var(--color-text)', textDecoration: 'none', background: 'var(--color-surface)', borderTop: i > 0 ? '1px solid var(--color-border)' : 'none' }}>
             <span>{label}</span>
             <span style={{ color: 'var(--color-muted-3)', fontSize: 16 }}>›</span>

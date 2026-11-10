@@ -15,11 +15,11 @@ import { requestCatalogRefresh, REFRESHABLE_SOURCES, AUTO_REFRESH_MIN_AGE_MS } f
 import { clean } from '../lib/catalogUtils.js'
 import i18n from '../i18n/index.js'
 
-export const EMPTY_DATA = {
+const EMPTY_DATA = {
   works: {}, watched: {}, ratings: {}, reviews: [],
-  settings: { startPage: 'library', autoNext: true, spoilerFree: true, notifNewEp: true, notifCalendar: true, notifWeekly: false, publicProfile: false, adult: false, darkMode: true, language: null, goals: {} },
+  settings: { publicProfile: false, darkMode: true, language: null, goals: {} },
   profile: { name: '', handle: '', email: '', memberSince: '' },
-  feed: [], games: {}, ccLikes: {}, favorites: {},
+  feed: [], games: {}, favorites: {},
 }
 
 const CACHE_NAME = 'jilu-v2'

@@ -20,7 +20,7 @@ export default function SignupPage() {
     try {
       await signup(email, password)
       navigate(location.state?.from || '/library', { replace: true })
-    } catch (err) {
+    } catch {
       setError(t('auth.signupError'))
     }
   }

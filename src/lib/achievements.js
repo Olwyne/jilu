@@ -1,4 +1,4 @@
-export const ACHIEVEMENTS = [
+const ACHIEVEMENTS = [
   // Bibliothèque
   { id: 'lib_10',    emoji: '📖', label: 'Curieux',       desc: '10 œuvres',    getValue: (s) => s.totalWorks,      threshold: 10 },
   { id: 'lib_50',    emoji: '📚', label: 'Lecteur',        desc: '50 œuvres',    getValue: (s) => s.totalWorks,      threshold: 50 },
@@ -42,7 +42,7 @@ export const ACHIEVEMENTS = [
   { id: 'diverse',  emoji: '🌈',  label: 'Omnivore',        desc: '5 catégories',        getValue: (s) => s.catCount,      threshold: 5 },
 ]
 
-export function computeStats(works, watched, ratings) {
+function computeStats(works, watched, ratings) {
   let totalEps = 0, filmsSeen = 0, seriesVues = 0, animesVus = 0, mangasLus = 0, livresLus = 0, jeuxFinis = 0, ratedN = 0
   const cats = new Set()
   Object.values(works).forEach((w) => {

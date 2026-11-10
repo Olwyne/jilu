@@ -21,7 +21,7 @@ function formatWatchTime(totalMins, t) {
   return parts.join(' ')
 }
 
-export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, onShare, readOnly, isMobile }) {
+export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, readOnly, isMobile }) {
   const { t, i18n } = useTranslation()
   const { works, watched, ratings, favorites, feed, profile, settings } = data
   const navigate = useNavigate()
@@ -74,7 +74,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
   function handleShare() {
     if (!isPublic) return
     const url = `${window.location.origin}/u/${pseudo}`
-    try { navigator.clipboard.writeText(url) } catch (e) {}
+    try { navigator.clipboard.writeText(url) } catch { /* presse-papiers indisponible */ }
   }
 
   return (

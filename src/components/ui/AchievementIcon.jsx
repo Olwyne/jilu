@@ -12,7 +12,7 @@ const PATHS = {
   diverse: <><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></>,
 }
 
-export const achievementFamily = (id) => {
+const achievementFamily = (id) => {
   const k = id.split('_')[0]
   return PATHS[k] ? k : 'diverse'
 }

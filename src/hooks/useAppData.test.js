@@ -150,7 +150,7 @@ describe('useAppData : rafraîchissement côté serveur', () => {
 
   it('ne demande rien pour une œuvre sans source rafraîchissable', async () => {
     mods.syncLibrary.mockResolvedValue({ library: { g: lib('g') }, fetched: 1 })
-    mods.loadCatalog.mockImplementation(async (db, ids) => ({ catalog: { g: cat('g', { source: 'rawg' }) } }))
+    mods.loadCatalog.mockImplementation(async () => ({ catalog: { g: cat('g', { source: 'rawg' }) } }))
     const { result } = await mount()
     await act(async () => { await result.current.refreshWork('g') })
     expect(mods.requestCatalogRefresh).not.toHaveBeenCalled()
@@ -169,7 +169,7 @@ describe('useAppData : rafraîchissement côté serveur', () => {
 
   it('automatique : ignore les œuvres terminées, récemment rafraîchies ou finies de diffuser', async () => {
     mods.syncLibrary.mockResolvedValue({ library: { fresh: lib('fresh'), done: lib('done'), old: lib('old') }, fetched: 3 })
-    mods.loadCatalog.mockImplementation(async (db, want) => ({ catalog: {
+    mods.loadCatalog.mockImplementation(async () => ({ catalog: {
       fresh: cat('fresh', { refreshedAt: Date.now() }),
       done: cat('done', { ended: true, refreshedAt: 0 }),
       old: cat('old', { refreshedAt: 0 }),

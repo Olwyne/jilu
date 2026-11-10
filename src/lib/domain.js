@@ -34,7 +34,7 @@ export function initials(t) {
   return (clean[0][0] + clean[1][0]).toUpperCase()
 }
 
-export function monthsFR() {
+function monthsFR() {
   return ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
 }
 

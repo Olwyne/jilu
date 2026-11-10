@@ -15,7 +15,7 @@ function fmtDate(ts) {
 }
 
 
-export default function EpisodeModal({ work, sNum, eNum, ratings, feed, actions, watched, currentUser, onClose }) {
+export default function EpisodeModal({ work, sNum, eNum, ratings, actions, watched, currentUser, onClose }) {
   const { t, i18n } = useTranslation()
   const season = work.seasons.find((s) => s.n === sNum)
   const ep = season.episodes.find((e) => e.n === eNum)

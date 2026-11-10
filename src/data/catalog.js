@@ -2,7 +2,7 @@
 // tant qu'elle n'est pas périmée. Les lectures serveur ne portent que sur les fiches manquantes.
 import { collection, documentId, getDocs, query, where } from 'firebase/firestore'
 
-export const CATALOG_MAX_AGE_MS = 24 * 60 * 60 * 1000
+const CATALOG_MAX_AGE_MS = 24 * 60 * 60 * 1000
 const IN_LIMIT = 30
 const key = (id) => `cat:${id}`
 

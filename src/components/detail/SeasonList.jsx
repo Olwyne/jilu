@@ -26,7 +26,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
 
   function toggleExpanded(n) {
     const next = new Set(expanded)
-    next.has(n) ? next.delete(n) : next.add(n)
+    if (next.has(n)) next.delete(n); else next.add(n)
     setExpanded(next)
   }
 

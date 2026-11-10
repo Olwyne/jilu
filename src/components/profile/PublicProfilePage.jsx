@@ -17,7 +17,7 @@ export default function PublicProfilePage() {
   const { t } = useTranslation()
   const { handle } = useParams()
   const { user } = useAuth()
-  const { following, isFollowing, follow, unfollow } = useFollows(user)
+  const { isFollowing, follow, unfollow } = useFollows(user)
   const [profileData, setProfileData] = useState(null)
   const [targetUid, setTargetUid] = useState(null)
   const [status, setStatus] = useState('loading')

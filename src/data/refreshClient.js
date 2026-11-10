@@ -4,7 +4,7 @@
 import { auth } from '../firebase'
 
 export const REFRESHABLE_SOURCES = ['tmdb', 'anilist', 'anilist-manga', 'spotify']
-export const MANUAL_REFRESH_MIN_AGE_MS = 6 * 60 * 60 * 1000
+const MANUAL_REFRESH_MIN_AGE_MS = 6 * 60 * 60 * 1000
 export const AUTO_REFRESH_MIN_AGE_MS = 24 * 60 * 60 * 1000
 
 export async function requestCatalogRefresh(catalogId, { minAgeMs = MANUAL_REFRESH_MIN_AGE_MS, fetchImpl = (...a) => fetch(...a), getToken = () => auth.currentUser?.getIdToken() } = {}) {

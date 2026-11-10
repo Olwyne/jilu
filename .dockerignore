@@ -7,5 +7,4 @@ npm-debug.log
 dist
 .DS_Store
 *.zip
-extracted
 firestore-debug.log

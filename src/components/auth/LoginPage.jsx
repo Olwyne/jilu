@@ -20,7 +20,7 @@ export default function LoginPage() {
     try {
       await login(email, password)
       navigate(location.state?.from || '/library', { replace: true })
-    } catch (err) {
+    } catch {
       setError(t('auth.loginError'))
     }
   }

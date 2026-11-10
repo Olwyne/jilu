@@ -12,7 +12,7 @@ import StarRating from '../ui/StarRating'
 import Button from '../ui/Button'
 import { nextAiredUnwatched } from '../../lib/nextUp'
 
-export default function DetailView({ work, watched, ratings, games, feed, actions, onOpenEpisode, favorites, currentUser }) {
+export default function DetailView({ work, watched, ratings, games, actions, onOpenEpisode, favorites, currentUser }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)

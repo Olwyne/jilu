@@ -126,7 +126,7 @@ function UpcomingReleaseRow({ item, onOpenWork, language, now }) {
   )
 }
 
-export default function CalendarView({ works, watched, onOpenWork, isMobile, onMarkWatched, onMarkDone }) {
+export default function CalendarView({ works, watched, onOpenWork, onMarkWatched, onMarkDone }) {
   const { t, i18n } = useTranslation()
   const [tab, setTab] = useState('rattraper')
   const [category, setCategory] = useState('all')
@@ -254,7 +254,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
       {tab === 'rattraper' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {catchGroups.length === 0 && <div style={{ color: 'var(--color-muted-3)', fontSize: 14 }}>{t('calendar.upToDate')}</div>}
-          {catchGroups.map((item, i) =>
+          {catchGroups.map((item) =>
             item.type === 'episode'
               ? <EpisodeCard key={item.w.id} item={item} showMarkWatched={true} onOpenWork={onOpenWork} onMarkWatched={onMarkWatched} t={t} />
               : <SimpleCard key={item.w.id} item={item} onOpenWork={onOpenWork} onMarkDone={onMarkDone} t={t} language={i18n.language} />
@@ -274,7 +274,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
       {tab === 'venir' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {upcoming.length === 0 && <div style={{ color: 'var(--color-muted-3)', fontSize: 14 }}>{t('calendar.nothingUpcoming')}</div>}
-          {upcoming.slice(0, 14).map((item, i) =>
+          {upcoming.slice(0, 14).map((item) =>
             item.type === 'episode'
               ? <UpcomingEpisodeRow key={`${item.w.id}-${item.s.n}-${item.e.n}`} item={item} onOpenWork={onOpenWork} language={i18n.language} t={t} now={now} />
               : <UpcomingReleaseRow key={item.w.id} item={item} onOpenWork={onOpenWork} language={i18n.language} now={now} />
@@ -285,7 +285,7 @@ export default function CalendarView({ works, watched, onOpenWork, isMobile, onM
       {tab === 'abandonne' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {abandoned.length === 0 && <div style={{ color: 'var(--color-muted-3)', fontSize: 14 }}>{t('calendar.nothingDropped')}</div>}
-          {abandoned.map((item, i) =>
+          {abandoned.map((item) =>
             item.type === 'episode'
               ? <EpisodeCard key={item.w.id} item={item} showMarkWatched={false} onOpenWork={onOpenWork} onMarkWatched={onMarkWatched} t={t} />
               : <SimpleCard key={item.w.id} item={item} onOpenWork={onOpenWork} language={i18n.language} />
