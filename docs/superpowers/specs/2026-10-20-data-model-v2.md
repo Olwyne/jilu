@@ -1,6 +1,41 @@
 # Modèle de données v2 — catalogue partagé, peu d'appels, peu d'écritures
 
-Statut : **proposition à valider** (aucun code écrit). Basé sur l'audit du 2026-10-20 et sur le rapport des comptes réels.
+Statut : **en production**. La section 0 décrit le système actuel ; les sections 1 à 9 sont la proposition et le
+journal de migration d'origine (2026-10-20), gardés pour l'historique.
+
+## 0. État actuel (2026-11-10)
+
+**Données (Firestore)**
+- `catalog/{id}` : fiche partagée d'une œuvre (métadonnées, saisons/épisodes, `ended`, `refreshedAt`, `timeToBeat` pour
+  les jeux IGDB). Création seule côté client (première personne qui ajoute l'œuvre) ; mises à jour par le serveur
+  uniquement. Les fiches `local-{uid}-…` (imports sans correspondance) n'appartiennent qu'à leur auteur.
+- `users/{uid}/library/{id}` : une fiche par œuvre suivie (statut, `eps`, `watchedCount`, notes, favori, jeu, avis
+  personnel, résumé pour la liste). Suppression douce (`deleted`), `updatedAt` pour la synchronisation par delta.
+- `users/{uid}` : réglages, profil, fil d'activité, copie des avis (lue par le fil d'amis).
+- Ancien modèle `works`, `watched`, `migrations` : encore en base, plus lu ni écrit ; règles = lecture/suppression par
+  le propriétaire seulement. Code de migration retiré le 2026-11-10 (tous les comptes avaient une copie v2 contrôlée).
+
+**Lecture** (`src/hooks/useAppData.js`) : cache IndexedDB + delta sur `updatedAt` (`src/data/library.js`) ; catalogue
+chargé à la demande (`src/data/catalog.js`), en cache 1 jour (série en diffusion) à 30 jours. Une fiche absente du
+serveur n'est **jamais** tenue pour acquise : elle est relue (elle est souvent créée juste après). `assembleData`
+reconstitue pour les écrans l'ancien format `{ works, watched, ratings, … }`.
+
+**Écriture** : chaque action dit ce qu'elle change — `writeLibrary({ add, set: { id: { 'eps.1-3': ts, status } },
+remove }, mainPatch)` → `buildPlan` → `commitPlan` (une écriture par document, lots de 400). Écran mis à jour depuis
+la copie locale, retour exact à l'état enregistré si l'écriture est refusée (toast). `mutate` : document utilisateur.
+
+**Rafraîchissement des fiches** (serveur, Firebase Admin) :
+- `api/refresh-work` (bouton ⋯ d'une fiche, et 5 œuvres en diffusion à l'ouverture) : plancher 6 h, verrou, jamais
+  d'écrasement par un résultat vide (`api/_lib/refreshCatalog.js`).
+- `api/cron-refresh` (cron Vercel, 4 h UTC) : toutes les fiches `ended == false`, les plus anciennes d'abord, pendant
+  45 s, protégé par `CRON_SECRET`. Le compte de service doit garder le rôle IAM « Agent de service administrateur du
+  SDK Admin Firebase ».
+
+**Sources** : TMDB (séries, films), AniList (animés, mangas), MangaDex (chapitres), Google Books, Spotify, IGDB (jeux,
+depuis la panne de RAWG en novembre 2026 ; anciennes fiches `rawg-…` conservées). Clés côté serveur uniquement (`api/`).
+
+**Limites connues** : la première fiche créée d'une œuvre n'est pas vérifiée côté serveur (acceptable entre
+utilisateurs de confiance) ; ~100 fiches rafraîchies par passage du cron (3 en parallèle).
 
 ## 1. Objectifs
 1. Ne **jamais perdre** une donnée utilisateur pendant la migration (copie, jamais de suppression avant validation).
@@ -74,7 +109,7 @@ Le cache de Firestore seul ne suffit pas : un écouteur rouvert après plus de 3
 - Phase suivante : écriture réservée au serveur (fonction Vercel + clés TMDB/AniList/MangaDex), règles resserrées à lecture seule.
 - Le serveur rafraîchit chaque jour uniquement les œuvres dont `ended === false`.
 
-## 7. Plan de migration (aucune perte)
+## 7. Plan de migration (aucune perte) — historique, terminé
 Prérequis : sauvegarde complète de la base (export JSON par script, ou export natif si forfait Blaze) ; répétition sur les émulateurs avec des données ressemblant à la production.
 
 | Étape | Action | Réversible ? |
