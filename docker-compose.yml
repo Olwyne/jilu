@@ -42,6 +42,7 @@ services:
       FIRESTORE_EMULATOR_HOST: emulators:8080
       FIREBASE_AUTH_EMULATOR_HOST: emulators:9099
       GCLOUD_PROJECT: demo-jilu
+      CRON_SECRET: dev-cron # local seulement : curl -H 'Authorization: Bearer dev-cron' localhost:5173/api/cron-refresh
     env_file:
       - path: .env.local # clés des API de catalogue (TMDB, RAWG…) : facultatif
         required: false

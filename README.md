@@ -52,6 +52,7 @@ Copier `.env.example` en `.env.local` et renseigner chaque valeur.
 | `GOOGLE_BOOKS_API_KEY` | serveur | Clé Google Books |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | serveur | Spotify (**ne pas préfixer `VITE_`**) |
 | `FIREBASE_SERVICE_ACCOUNT` | serveur | Clé de compte de service (JSON ou base64) : permet à `api/refresh-work.js` de mettre à jour le catalogue partagé. Jamais dans le dépôt ni côté client |
+| `CRON_SECRET` | serveur | Chaîne aléatoire (ex. `openssl rand -hex 32`) : Vercel l'envoie au cron quotidien `api/cron-refresh.js` (4 h UTC) qui rafraîchit les séries, animés et mangas en cours ; sans elle, le cron refuse de tourner |
 
 > Les variables « serveur » sont lues par les fonctions Vercel de `api/` (servies telles quelles en dev par `vite.config.js`). Un préfixe `VITE_` les ferait entrer dans le bundle client.
 

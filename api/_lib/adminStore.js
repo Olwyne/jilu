@@ -24,6 +24,11 @@ export function createAdminStore(db = getFirestore()) {
     async save(id, data) {
       await col.doc(id).set(data) // remplace la fiche entière (sans leaseUntil : le verrou est levé)
     },
+    // Œuvres encore en cours (séries, animés, mangas) : { id, refreshedAt } ; les champs lourds ne sont pas lus
+    async listAiring() {
+      const snap = await col.where('ended', '==', false).select('refreshedAt').get()
+      return snap.docs.map((d) => ({ id: d.id, refreshedAt: d.get('refreshedAt') || 0 }))
+    },
     async releaseLease(id) {
       await col.doc(id).update({ leaseUntil: 0 }).catch(() => {})
     },

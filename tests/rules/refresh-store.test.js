@@ -61,4 +61,16 @@ describe('rafraîchissement contre Firestore', () => {
   it('fiche inconnue : not_found', async () => {
     expect((await refreshCatalogWork({ store, fetchFresh: vi.fn(), id: 'absente', now: NOW })).status).toBe('not_found')
   })
+
+  it('liste des œuvres en cours : seulement ended == false, avec leur date de rafraîchissement', async () => {
+    await seed({ ended: false, refreshedAt: 5 })
+    await db.doc('catalog/tmdb-tv-2').set({ id: 'tmdb-tv-2', title: 'Finie', category: 'series', ended: true })
+    await db.doc('catalog/igdb-3').set({ id: 'igdb-3', title: 'Jeu', category: 'jeux' })
+    await db.doc('catalog/anilist-manga-4').set({ id: 'anilist-manga-4', title: 'Manga', category: 'mangas', ended: false })
+    const airing = await store.listAiring()
+    expect(airing.sort((a, b) => a.id.localeCompare(b.id))).toEqual([
+      { id: 'anilist-manga-4', refreshedAt: 0 },
+      { id: 'tmdb-tv-1', refreshedAt: 5 },
+    ])
+  })
 })
