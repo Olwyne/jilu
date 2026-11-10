@@ -1,5 +1,5 @@
-// Écritures v2 contre l'émulateur et les vraies règles : après une longue série d'actions de l'application,
-// relire le nouveau modèle depuis zéro doit redonner exactement ce que l'ancien modèle contiendrait.
+// Écritures v2 contre l'émulateur et les vraies règles : après chaque action réelle de l'application,
+// relire la bibliothèque depuis zéro doit redonner exactement la copie locale tenue à jour sans relire.
 import 'fake-indexeddb/auto'
 import { readFileSync } from 'node:fs'
 import { beforeAll, afterAll, beforeEach, describe, it, expect } from 'vitest'
@@ -9,7 +9,8 @@ import { createCache } from '../../src/data/cache.js'
 import { syncLibrary } from '../../src/data/library.js'
 import { loadCatalog } from '../../src/data/catalog.js'
 import { assembleData } from '../../src/data/assemble.js'
-import { planV2Writes, applyPlanToLibrary, commitPlan, isEmptyPlan } from '../../src/data/writeV2.js'
+import { buildPlan, applyPlanToLibrary, commitPlan, isEmptyPlan } from '../../src/data/writeV2.js'
+import { useWorkActions } from '../../src/hooks/useWorkActions.js'
 import { buildLibraryDocs } from '../../src/data/libraryDocs.js'
 
 let env
@@ -30,95 +31,68 @@ beforeAll(async () => {
 afterAll(() => env.cleanup())
 beforeEach(() => env.clearFirestore())
 
-// Même sémantique que useWorkActions : on reçoit toujours des cartes complètes
-const v1Seed = () => ({
+const start = {
   works: { 'tmdb-tv-1': W('tmdb-tv-1', { status: 'en_cours' }), 'tmdb-tv-2': W('tmdb-tv-2'), 'tmdb-movie-3': W('tmdb-movie-3', { category: 'films', seasons: null, status: 'termine' }) },
-  watched: { 'tmdb-tv-1-1-1': 11, 'tmdb-tv-1-1-2': 12 },
-  ratings: { 'w:tmdb-tv-1': 4 },
-  favorites: {},
-  games: {},
-  reviews: [{ id: 'tmdb-tv-1', note: '', rating: 4, ts: 5 }],
-})
-
-const forExistingWorks = (model) => {
-  const ids = Object.keys(model.works)
-  const owns = (key, scopeLen) => ids.some((id) => key.slice(scopeLen).startsWith(id))
-  return {
-    ...model,
-    // Écart voulu : l'ancien modèle laisse l'avis personnel d'une œuvre retirée dans la liste, le nouveau l'efface avec elle
-    reviews: model.reviews.filter((r) => ids.includes(r.id)),
-    watched: Object.fromEntries(Object.entries(model.watched).filter(([k]) => owns(k, 0))),
-    ratings: Object.fromEntries(Object.entries(model.ratings).filter(([k]) => owns(k, 2))),
-  }
+  watchedDocs: { 'tmdb-tv-1': { '1-1': 11, '1-2': 12 } },
+  main: { ratings: { 'w:tmdb-tv-1': 4 }, reviews: [{ id: 'tmdb-tv-1', note: '', rating: 4, ts: 5 }] },
 }
 
-describe('écritures v2 : même résultat que l’ancien modèle', () => {
-  it('suite complète d’actions, relue depuis zéro', async () => {
-    const start = v1Seed()
-    await seed((d) => setDoc(doc(d, 'users/alice'), { reviews: start.reviews }))
-    await seedV2('alice', {
-      works: start.works, watchedDocs: { 'tmdb-tv-1': { '1-1': 11, '1-2': 12 } },
-      main: { ratings: start.ratings, reviews: start.reviews, favorites: {}, games: {} },
-    })
+describe('écritures v2 : les vraies actions, relues depuis zéro', () => {
+  it('suite complète d’actions : la copie locale et le serveur restent identiques', async () => {
+    globalThis.window = { confirm: () => true } // resetProgress / clearAll demandent confirmation
+    await seedV2('alice', start)
     const db = as('alice')
     const cache = await createCache(`w-${Math.random()}`)
     let { library } = await syncLibrary(db, 'alice', cache)
-    let model = start
+    let { catalog } = await loadCatalog(db, Object.values(library).map((l) => l.catalogId), cache)
     let totalWrites = 0
 
-    // Relecture depuis zéro (nouvel appareil) : bibliothèque + catalogue, comparée à l'ancien modèle
-    const check = async (label) => {
+    // Même chemin que useAppData.writeLibrary (sans React) : plan -> écriture -> copie locale
+    const store = {
+      mutate: async () => {},
+      writeLibrary: async (ops) => {
+        const plan = buildPlan({ uid: 'alice', library, ...ops })
+        if (!isEmptyPlan(plan)) totalWrites += (await commitPlan(db, 'alice', plan)).writes
+        library = applyPlanToLibrary(library, plan)
+        catalog = { ...catalog, ...plan.catalogCreates }
+      },
+    }
+    const view = () => assembleData({ library, catalog })
+    const step = async (label, fn) => {
+      await fn(useWorkActions(view(), store))
+      // Nouvel appareil : relecture complète du serveur, identique à la copie tenue à jour sans relire
       const fresh = await createCache(`fresh-${Math.random()}`)
       const server = await syncLibrary(db, 'alice', fresh)
-      const { catalog } = await loadCatalog(db, Object.values(server.library).map((l) => l.catalogId).filter(Boolean), fresh)
-      const fromServer = assembleData({ library: server.library, catalog })
-      const expected = forExistingWorks(model)
-      const fields = ['works', 'watched', 'ratings', 'favorites', 'games', 'reviews']
-      for (const f of fields) expect(fromServer[f], `${label} : ${f}`).toEqual(expected[f])
-      // la copie locale tenue à jour sans relire est identique à celle du serveur
-      expect(assembleData({ library, catalog }), `${label} : copie locale`).toEqual(fromServer)
+      const { catalog: serverCatalog } = await loadCatalog(db, Object.values(server.library).map((l) => l.catalogId).filter(Boolean), fresh)
+      expect(assembleData({ library: server.library, catalog: serverCatalog }), label).toEqual(view())
     }
 
-    const act = async (patch, label) => {
-      const plan = planV2Writes({ uid: 'alice', prev: model, patch, now: Date.now() })
-      if (!isEmptyPlan(plan)) totalWrites += (await commitPlan(db, 'alice', plan)).writes
-      library = applyPlanToLibrary(library, plan)
-      model = { ...model, ...patch }
-      await check(label)
-      return plan
-    }
-
-    // 1. cocher un épisode (+ statut automatique)
-    await act({ watched: { ...model.watched, 'tmdb-tv-1-1-3': 13 } }, 'cocher un épisode')
-    // 2. marquer toute la saison 1 de tmdb-tv-2
-    await act({ watched: { ...model.watched, ...Object.fromEntries([1, 2, 3, 4].map((e) => [`tmdb-tv-2-1-${e}`, 20 + e])) }, works: { ...model.works, 'tmdb-tv-2': W('tmdb-tv-2', { status: 'en_cours' }) } }, 'marquer une saison')
-    // 3. notes œuvre / saison / épisode, puis retrait d'une note
-    await act({ ratings: { ...model.ratings, 'w:tmdb-tv-2': 5, 's:tmdb-tv-2-1': 3, 'e:tmdb-tv-2-1-2': 4 }, reviews: [{ id: 'tmdb-tv-2', note: '', rating: 5, ts: 30 }, ...model.reviews] }, 'noter œuvre/saison/épisode')
-    await act({ ratings: { ...model.ratings, 'w:tmdb-tv-2': 0 } }, 'retirer une note')
-    // 4. favori, jeu, statut
-    await act({ favorites: { 'tmdb-movie-3': true } }, 'favori')
-    await act({ games: { 'tmdb-tv-2': { minutes: 90, done: { platine: true } } } }, 'jeu')
-    await act({ works: { ...model.works, 'tmdb-movie-3': { ...model.works['tmdb-movie-3'], status: 'abandonne' } } }, 'statut')
-    // 5. ajouter une série (avec progression) et une œuvre locale
-    await act({ works: { ...model.works, 'tmdb-tv-50': W('tmdb-tv-50', { status: 'en_cours' }) }, watched: { ...model.watched, 'tmdb-tv-50-1-1': 50 } }, 'ajouter une série')
+    await step('cocher un épisode', (a) => a.toggleEpisode('tmdb-tv-1', 1, 3))
+    expect(view().watched['tmdb-tv-1-1-3']).toEqual(expect.any(Number))
+    await step('marquer une saison', (a) => a.markSeason('tmdb-tv-2', 1))
+    expect(view().works['tmdb-tv-2'].status).toBe('en_cours')
+    await step('noter l’œuvre', (a) => a.setRating('w', 'tmdb-tv-2', 5))
+    await step('noter une saison', (a) => a.setRating('s', 'tmdb-tv-2-1', 3))
+    await step('noter un épisode', (a) => a.setRating('e', 'tmdb-tv-2-1-2', 4))
+    await step('retirer la note de l’œuvre', (a) => a.setRating('w', 'tmdb-tv-2', 5))
+    expect(view().ratings).toEqual({ 'w:tmdb-tv-1': 4, 's:tmdb-tv-2-1': 3, 'e:tmdb-tv-2-1-2': 4 })
+    await step('favori', (a) => a.toggleFavorite('tmdb-movie-3'))
+    await step('jeu', (a) => a.addGameMinutes('tmdb-tv-2', 90))
+    await step('statut', (a) => a.setStatus('tmdb-movie-3', 'abandonne'))
+    await step('ajouter une série', () => store.writeLibrary({ add: { 'tmdb-tv-50': W('tmdb-tv-50', { status: 'en_cours' }) } }))
     const { sourceId, ...local } = W('ma-serie'); void sourceId
-    await act({ works: { ...model.works, 'ma-serie': local } }, 'ajouter une œuvre locale')
-    // 6. retirer une œuvre comme removeWork (carte, progression, note, favori)
-    await act({
-      works: Object.fromEntries(Object.entries(model.works).filter(([id]) => id !== 'tmdb-tv-1')),
-      watched: Object.fromEntries(Object.entries(model.watched).filter(([k]) => !k.startsWith('tmdb-tv-1-'))),
-      ratings: Object.fromEntries(Object.entries(model.ratings).filter(([k]) => k !== 'w:tmdb-tv-1')),
-      favorites: Object.fromEntries(Object.entries(model.favorites).filter(([id]) => id !== 'tmdb-tv-1')),
-    }, 'retirer une œuvre')
-    // 7. la ré-ajouter : progression remise à zéro
-    await act({ works: { ...model.works, 'tmdb-tv-1': W('tmdb-tv-1') } }, 'ré-ajouter l’œuvre retirée')
-    // 8. décocher un épisode
-    await act({ watched: Object.fromEntries(Object.entries(model.watched).filter(([k]) => k !== 'tmdb-tv-2-1-2')) }, 'décocher un épisode')
-    // 9. réinitialiser la progression
-    await act({ watched: {} }, 'réinitialiser la progression')
-    // 10. tout effacer, puis ajouter une œuvre
-    await act({ works: {}, watched: {}, ratings: {}, reviews: [], games: {}, favorites: {} }, 'tout effacer')
-    await act({ works: { 'tmdb-tv-9': W('tmdb-tv-9', { status: 'a_voir' }) } }, 'ajouter après tout effacer')
+    await step('ajouter une œuvre locale', () => store.writeLibrary({ add: { 'ma-serie': local } }))
+    expect(library['ma-serie'].catalogId).toBe('local-alice-ma-serie')
+    await step('retirer une œuvre', (a) => a.removeWork('tmdb-tv-1'))
+    expect(view().works['tmdb-tv-1']).toBeUndefined()
+    await step('ré-ajouter l’œuvre retirée', () => store.writeLibrary({ add: { 'tmdb-tv-1': W('tmdb-tv-1') } }))
+    expect(Object.keys(view().watched).filter((k) => k.startsWith('tmdb-tv-1-'))).toEqual([]) // progression repartie de zéro
+    await step('décocher un épisode', (a) => a.toggleEpisode('tmdb-tv-2', 1, 2))
+    await step('réinitialiser la progression', (a) => a.resetProgress())
+    expect(view().watched).toEqual({})
+    await step('tout effacer', (a) => a.clearAll())
+    expect(view().works).toEqual({})
+    await step('ajouter après tout effacer', () => store.writeLibrary({ add: { 'tmdb-tv-9': W('tmdb-tv-9') } }))
 
     expect(totalWrites).toBeGreaterThan(0)
   })
@@ -127,8 +101,8 @@ describe('écritures v2 : même résultat que l’ancien modèle', () => {
     const big = W('tmdb-tv-7', { seasons: [season(1, 500)], status: 'en_cours' })
     await seedV2('alice', { works: { 'tmdb-tv-7': big } })
     const db = as('alice')
-    const prev = { works: { 'tmdb-tv-7': big }, watched: {}, ratings: {}, favorites: {}, games: {}, reviews: [] }
-    const plan = planV2Writes({ uid: 'alice', prev, patch: { watched: { 'tmdb-tv-7-1-250': 99 } }, now: Date.now() })
+    const library = { 'tmdb-tv-7': (await getDoc(doc(db, 'users/alice/library/tmdb-tv-7'))).data() }
+    const plan = buildPlan({ uid: 'alice', library, set: { 'tmdb-tv-7': { 'eps.1-250': 99 } } })
     expect((await commitPlan(db, 'alice', plan)).writes).toBe(1)
     const lib = (await getDoc(doc(db, 'users/alice/library/tmdb-tv-7'))).data()
     expect(lib.eps).toEqual({ '1-250': 99 })
@@ -137,11 +111,10 @@ describe('écritures v2 : même résultat que l’ancien modèle', () => {
 
   it('réutilise une fiche de catalogue existante sans erreur et refuse de la modifier', async () => {
     const db = as('bob')
-    const prev = { works: {}, watched: {}, ratings: {}, favorites: {}, games: {}, reviews: [] }
-    await commitPlan(db, 'bob', planV2Writes({ uid: 'bob', prev, patch: { works: { 'tmdb-tv-8': W('tmdb-tv-8') } }, now: 1 }))
+    await commitPlan(db, 'bob', buildPlan({ uid: 'bob', add: { 'tmdb-tv-8': W('tmdb-tv-8') }, now: 1 }))
     const catalogBefore = (await getDoc(doc(db, 'catalog/tmdb-tv-8'))).data()
     const other = as('carl')
-    const plan = planV2Writes({ uid: 'carl', prev, patch: { works: { 'tmdb-tv-8': W('tmdb-tv-8', { title: 'Piraté', seasons: [] }) } }, now: 2 })
+    const plan = buildPlan({ uid: 'carl', add: { 'tmdb-tv-8': W('tmdb-tv-8', { title: 'Piraté', seasons: [] }) }, now: 2 })
     expect((await commitPlan(other, 'carl', plan)).writes).toBe(1) // seulement la bibliothèque de carl
     expect((await getDoc(doc(db, 'catalog/tmdb-tv-8'))).data()).toEqual(catalogBefore)
     await assertFails(setDoc(doc(other, 'catalog/tmdb-tv-8'), { title: 'x', category: 'series' }))

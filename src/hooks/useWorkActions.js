@@ -2,13 +2,16 @@ import i18n from '../i18n/index.js'
 import { tmdbGetBothMeta } from '../catalog/tmdb'
 import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
 import { DETAIL_FETCHERS } from '../catalog/refresh'
+import { DELETE } from '../data/writeV2.js'
+import { assignRatings } from '../data/libraryDocs.js'
 
-function computeAutoStatus(work, watched) {
+// isWatched(clé) : progression après la modification en cours (sans recopier toute la progression)
+function computeAutoStatus(work, isWatched) {
   if (!work.seasons || !work.seasons.length) return null
   let total = 0, watchedCount = 0
   work.seasons.forEach((s) => s.episodes.forEach((e) => {
     total++
-    if (watched[`${work.id}-${s.n}-${e.n}`]) watchedCount++
+    if (isWatched(`${work.id}-${s.n}-${e.n}`)) watchedCount++
   }))
   if (total === 0) return null
   if (watchedCount === 0) return 'a_voir'
@@ -16,80 +19,104 @@ function computeAutoStatus(work, watched) {
   return 'en_cours'
 }
 
-function buildStatusPatch(work, watched, works) {
-  const auto = computeAutoStatus(work, watched)
+// Changement de statut induit par la progression : { status, finishedAt? } ou {}
+function autoStatusChanges(work, isWatched) {
+  const auto = computeAutoStatus(work, isWatched)
   if (!auto || auto === work.status) return {}
-  const updatedWork = { ...work, status: auto }
-  if (auto === 'termine' && !work.finishedAt) {
-    updatedWork.finishedAt = Date.now()
-  }
-  return { works: { ...works, [work.id]: updatedWork } }
+  return auto === 'termine' && !work.finishedAt ? { status: auto, finishedAt: Date.now() } : { status: auto }
 }
 
-// services (facultatif) : fournis par useAppData — fiche du catalogue partagé et rafraîchissement côté serveur
-export function useWorkActions(data, mutate, services = {}) {
+// "w1-1-3" -> "1-3" (la saison et l'épisode sont toujours les deux derniers segments)
+const epSub = (key) => key.split('-').slice(-2).join('-')
+const workOfKey = (key) => key.split('-').slice(0, -2).join('-')
+
+// store : { mutate (document utilisateur), writeLibrary (bibliothèque) } fournis par useAppData
+// services (facultatif) : fiche du catalogue partagé et rafraîchissement côté serveur
+export function useWorkActions(data, { mutate, writeLibrary }, services = {}) {
+  // Coche/décoche des épisodes d'une œuvre : { clé: horodatage | null }, statut ajusté au passage
+  async function setEpisodes(workId, changes, { confirmResume = false } = {}) {
+    const work = data.works[workId]
+    const isWatched = (k) => (k in changes ? changes[k] : data.watched[k])
+    const eps = Object.fromEntries(Object.entries(changes).map(([k, ts]) => [`eps.${epSub(k)}`, ts || DELETE]))
+    let status = autoStatusChanges(work, isWatched)
+    if (confirmResume && status.status && work.status === 'abandonne') {
+      const resume = window.confirm(i18n.t('actions.resumeConfirm', { title: work.title, status: i18n.t(status.status === 'en_cours' ? 'status.en_cours' : 'status.termine') }))
+      if (!resume) status = {}
+    }
+    await writeLibrary({ set: { [workId]: { ...eps, ...status } } })
+  }
+
   async function toggleEpisode(workId, sNum, eNum) {
     const key = `${workId}-${sNum}-${eNum}`
-    const watched = { ...data.watched }
-    if (watched[key]) delete watched[key]; else watched[key] = Date.now()
-    const work = data.works[workId]
-    const statusPatch = buildStatusPatch(work, watched, data.works)
-    if (statusPatch.works && work.status === 'abandonne') {
-      const auto = statusPatch.works[workId].status
-      const resume = window.confirm(i18n.t('actions.resumeConfirm', { title: work.title, status: i18n.t(auto === 'en_cours' ? 'status.en_cours' : 'status.termine') }))
-      if (!resume) { await mutate({ watched }); return }
-    }
-    await mutate({ watched, ...statusPatch })
+    await setEpisodes(workId, { [key]: data.watched[key] ? null : Date.now() }, { confirmResume: true })
   }
 
   async function markSeason(workId, sNum) {
     const work = data.works[workId]
     const season = work.seasons.find((s) => s.n === sNum)
     const now = Date.now()
-    const aired = season.episodes.filter((e) => e.air <= now)
-    const allDone = aired.every((e) => data.watched[`${workId}-${sNum}-${e.n}`])
-    const watched = { ...data.watched }
-    aired.forEach((e) => {
-      const key = `${workId}-${sNum}-${e.n}`
-      if (allDone) delete watched[key]; else watched[key] = Date.now()
+    const keys = season.episodes.filter((e) => e.air <= now).map((e) => `${workId}-${sNum}-${e.n}`)
+    const allDone = keys.every((k) => data.watched[k])
+    await setEpisodes(workId, Object.fromEntries(keys.map((k) => [k, allDone ? null : now])), { confirmResume: true })
+  }
+
+  async function markWorkWatched(workId) {
+    const work = data.works[workId]
+    if (!work?.seasons) return
+    const now = Date.now()
+    const keys = []
+    work.seasons.forEach((s) => s.episodes.forEach((e) => { if (e.air <= now) keys.push(`${workId}-${s.n}-${e.n}`) }))
+    const allDone = keys.every((k) => data.watched[k])
+    await setEpisodes(workId, Object.fromEntries(keys.map((k) => [k, allDone ? null : (data.watched[k] || now)])))
+  }
+
+  async function markAllWatched() {
+    const now = Date.now()
+    const set = {}
+    Object.values(data.works).forEach((w) => {
+      w.seasons?.forEach((s) => s.episodes.forEach((e) => {
+        const key = `${w.id}-${s.n}-${e.n}`
+        if (e.air <= now && !data.watched[key]) (set[w.id] ||= {})[`eps.${s.n}-${e.n}`] = now
+      }))
     })
-    const statusPatch = buildStatusPatch(work, watched, data.works)
-    if (statusPatch.works && work.status === 'abandonne') {
-      const auto = statusPatch.works[workId].status
-      const resume = window.confirm(i18n.t('actions.resumeConfirm', { title: work.title, status: i18n.t(auto === 'en_cours' ? 'status.en_cours' : 'status.termine') }))
-      if (!resume) { await mutate({ watched }); return }
-    }
-    await mutate({ watched, ...statusPatch })
+    await writeLibrary({ set })
+  }
+
+  async function resetProgress() {
+    if (!window.confirm(i18n.t('actions.resetConfirm'))) return
+    const ids = new Set(Object.keys(data.watched).map(workOfKey))
+    await writeLibrary({ set: Object.fromEntries([...ids].map((id) => [id, { eps: DELETE }])) })
+  }
+
+  async function clearAll() {
+    if (!window.confirm(i18n.t('actions.clearConfirm'))) return
+    await writeLibrary({ remove: Object.keys(data.works) }, { feed: [], reviews: [] })
   }
 
   async function setRating(scope, id, val) {
     const key = `${scope}:${id}`
     const current = data.ratings?.[key] || 0
     const next = current === val ? 0 : val
-    const ratings = { ...data.ratings, [key]: next }
-    let reviews = data.reviews || []
-    if (scope === 'w') {
-      const idx = reviews.findIndex((r) => r.id === id)
-      if (next > 0) {
-        const prevNote = idx >= 0 ? reviews[idx].note : ''
-        const note = prevNote === 'Note mise à jour.' ? '' : prevNote
-        const entry = { id, note, rating: next, ts: Date.now() }
-        reviews = [entry, ...reviews.filter((r) => r.id !== id)]
-      }
+    const [workId, subs] = Object.entries(assignRatings({ [key]: next }, Object.keys(data.works)).byWork)[0] || []
+    if (!workId) return
+    const changes = Object.fromEntries(Object.keys(subs).map((sub) => [`ratings.${sub}`, next || DELETE]))
+    let mainPatch
+    if (scope === 'w' && next > 0) {
+      // Avis personnel (note + texte) : dans la fiche, et recopié dans le document utilisateur pour le fil d'amis
+      const reviews = data.reviews || []
+      const prevNote = reviews.find((r) => r.id === id)?.note || ''
+      const entry = { id, note: prevNote === 'Note mise à jour.' ? '' : prevNote, rating: next, ts: Date.now() }
+      changes.personalReview = entry
+      mainPatch = { reviews: [entry, ...reviews.filter((r) => r.id !== id)] }
     }
-    const patch = { ratings }
-    if (scope === 'w') patch.reviews = reviews
-    await mutate(patch)
+    await writeLibrary({ set: { [workId]: changes } }, mainPatch)
   }
 
   async function setStatus(workId, status) {
     const work = data.works[workId]
-    const updatedWork = { ...work, status }
-    if (status === 'termine' && !work.finishedAt) {
-      updatedWork.finishedAt = Date.now()
-    }
-    const works = { ...data.works, [workId]: updatedWork }
-    await mutate({ works })
+    const changes = { status }
+    if (status === 'termine' && !work.finishedAt) changes.finishedAt = Date.now()
+    await writeLibrary({ set: { [workId]: changes } })
   }
 
   async function postComment(workId, sNum, eNum, text) {
@@ -106,85 +133,29 @@ export function useWorkActions(data, mutate, services = {}) {
   }
 
   async function deleteComment(commentId) {
-    const feed = (data.feed || []).filter((f) => f.id !== commentId)
-    await mutate({ feed })
+    await mutate({ feed: (data.feed || []).filter((f) => f.id !== commentId) })
   }
 
   async function addGameMinutes(workId, deltaMinutes) {
-    const games = { ...data.games }
-    const raw = games[workId] || {}
+    const raw = data.games?.[workId] || {}
     const currentMinutes = raw.minutes != null ? raw.minutes : (raw.hours || 0) * 60
-    const g = { done: {}, ...raw, minutes: Math.max(0, currentMinutes + deltaMinutes) }
-    delete g.hours
-    games[workId] = g
-    await mutate({ games })
+    const game = { done: {}, ...raw, minutes: Math.max(0, currentMinutes + deltaMinutes) }
+    delete game.hours
+    await writeLibrary({ set: { [workId]: { game } } })
   }
 
   async function toggleGameTier(workId, tier) {
-    const games = { ...data.games }
-    const g = { hours: 0, done: {}, ...(games[workId] || {}) }
-    g.done = { ...(g.done || {}), [tier]: !g.done[tier] }
-    games[workId] = g
-    await mutate({ games })
-  }
-
-  async function markWorkWatched(workId) {
-    const work = data.works[workId]
-    if (!work?.seasons) return
-    const now = Date.now()
-    const aired = []
-    work.seasons.forEach((s) => s.episodes.forEach((e) => {
-      if (e.air <= now) aired.push(`${workId}-${s.n}-${e.n}`)
-    }))
-    const allDone = aired.every((k) => data.watched[k])
-    const watched = { ...data.watched }
-    if (allDone) aired.forEach((k) => delete watched[k])
-    else aired.forEach((k) => { watched[k] = watched[k] || Date.now() })
-    const statusPatch = buildStatusPatch(work, watched, data.works)
-    await mutate({ watched, ...statusPatch })
-  }
-
-  async function markAllWatched() {
-    const now = Date.now()
-    const watched = { ...data.watched }
-    Object.values(data.works).forEach((w) => {
-      if (w.seasons) {
-        w.seasons.forEach((s) => s.episodes.forEach((e) => {
-          const key = `${w.id}-${s.n}-${e.n}`
-          if (e.air <= now && !watched[key]) watched[key] = now
-        }))
-      }
-    })
-    await mutate({ watched })
-  }
-
-  async function resetProgress() {
-    if (window.confirm(i18n.t('actions.resetConfirm'))) {
-      await mutate({ watched: {} })
-    }
-  }
-
-  async function clearAll() {
-    if (window.confirm(i18n.t('actions.clearConfirm'))) {
-      await mutate({ works: {}, watched: {}, ratings: {}, reviews: [], feed: [], games: {}, favorites: {} })
-    }
+    const g = { hours: 0, done: {}, ...(data.games?.[workId] || {}) }
+    const game = { ...g, done: { ...(g.done || {}), [tier]: !g.done?.[tier] } }
+    await writeLibrary({ set: { [workId]: { game } } })
   }
 
   async function removeWork(workId) {
-    const works = { ...data.works }
-    delete works[workId]
-    const watched = Object.fromEntries(Object.entries(data.watched).filter(([k]) => !k.startsWith(workId + '-')))
-    const ratings = { ...data.ratings }
-    delete ratings[`w:${workId}`]
-    const favorites = { ...(data.favorites || {}) }
-    delete favorites[workId]
-    await mutate({ works, watched, ratings, favorites })
+    await writeLibrary({ remove: [workId] }) // notes, favori et progression partent avec la fiche
   }
 
   async function toggleFavorite(workId) {
-    const favorites = { ...(data.favorites || {}) }
-    if (favorites[workId]) delete favorites[workId]; else favorites[workId] = true
-    await mutate({ favorites })
+    await writeLibrary({ set: { [workId]: { favorite: data.favorites?.[workId] ? DELETE : true } } })
   }
 
   async function markWatchedToast(work, sNum, eNum, setToast) {
@@ -230,8 +201,7 @@ export function useWorkActions(data, mutate, services = {}) {
       }
     }
 
-    const works = { ...data.works, [searchResult.id]: { ...work, status: 'a_voir', added: Date.now() } }
-    await mutate({ works })
+    await writeLibrary({ add: { [searchResult.id]: { ...work, status: 'a_voir', added: Date.now() } } })
   }
 
   // Rafraîchissement : toujours côté serveur, qui ne rappelle les API que si la fiche partagée est périmée

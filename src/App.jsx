@@ -91,7 +91,7 @@ function ErrorScreen({ message, onRetry, onLogout }) {
 function Shell() {
   const { user, logout } = useAuth()
   const {
-    data, loading, error, saveError, mutate, syncAll, getFullData, getCatalogDoc,
+    data, loading, error, saveError, mutate, writeLibrary, syncAll, getFullData, getCatalogDoc,
     ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog, refreshWork, refreshStale, refreshAll,
   } = useAppData(user)
   const navigate = useNavigate()
@@ -102,8 +102,8 @@ function Shell() {
   const [episodeModal, setEpisodeModal] = useState(null)
   const [toast, setToast] = useState(null)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
-  const workActions = useWorkActions(data, mutate, { getCatalogDoc, refreshWork, refreshAll })
-  const { importTVTime, importTVTimeOut } = useImport(data, mutate)
+  const workActions = useWorkActions(data, { mutate, writeLibrary }, { getCatalogDoc, refreshWork, refreshAll })
+  const { importTVTime, importTVTimeOut } = useImport(data, writeLibrary)
   const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
   const { following, follow, unfollow, isFollowing } = useFollows(user)
 

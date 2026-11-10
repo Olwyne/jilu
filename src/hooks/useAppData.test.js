@@ -83,14 +83,14 @@ describe('useAppData : lecture', () => {
   })
 })
 
-describe('useAppData : écriture (une seule fois, dans le nouveau modèle)', () => {
-  it('cocher un épisode : 1 fiche écrite, rien dans le document utilisateur', async () => {
+describe('useAppData : écriture', () => {
+  it('cocher un épisode : 1 fiche écrite (épisode + compteur), rien dans le document utilisateur', async () => {
     const { result } = await mount()
-    await act(async () => { await result.current.mutate({ watched: { 'a-1-1': 123 } }) })
+    await act(async () => { await result.current.writeLibrary({ set: { a: { 'eps.1-1': 123 } } }) })
     expect(result.current.data.watched).toEqual({ 'a-1-1': 123 })
     expect(mods.commitPlan).toHaveBeenCalledTimes(1)
     expect(mods.commitPlan.mock.calls[0][2].patches.a).toMatchObject({ 'eps.1-1': 123, watchedCount: 1 })
-    expect(firestore.setDoc).not.toHaveBeenCalled()           // plus aucune écriture dans l'ancien modèle
+    expect(firestore.setDoc).not.toHaveBeenCalled()
     expect(mods.cache.setMany).toHaveBeenCalled()
   })
 
@@ -101,45 +101,41 @@ describe('useAppData : écriture (une seule fois, dans le nouveau modèle)', () 
     expect(firestore.setDoc).toHaveBeenCalledWith(expect.anything(), { settings: { darkMode: true } }, { merge: true })
   })
 
-  it('avis personnels : écrits dans la bibliothèque et recopiés pour le fil d’amis', async () => {
+  it('avis personnel : écrit dans la bibliothèque et recopié pour le fil d’amis', async () => {
     const { result } = await mount()
-    const reviews = [{ id: 'a', note: 'top', rating: 5, ts: 9 }]
-    await act(async () => { await result.current.mutate({ reviews }) })
-    expect(mods.commitPlan.mock.calls[0][2].patches.a.personalReview).toEqual(reviews[0])
-    expect(firestore.setDoc).toHaveBeenCalledWith(expect.anything(), { reviews }, { merge: true })
+    const review = { id: 'a', note: 'top', rating: 5, ts: 9 }
+    await act(async () => { await result.current.writeLibrary({ set: { a: { personalReview: review } } }, { reviews: [review] }) })
+    expect(mods.commitPlan.mock.calls[0][2].patches.a.personalReview).toEqual(review)
+    expect(firestore.setDoc).toHaveBeenCalledWith(expect.anything(), { reviews: [review] }, { merge: true })
+    expect(result.current.data.reviews).toEqual([review])
   })
 
-  it('écriture refusée : remonte l’erreur et l’écran revient à l’état enregistré', async () => {
+  it('écriture refusée : remonte l’erreur et l’écran revient exactement à l’état enregistré', async () => {
     const { result } = await mount()
-    const before = result.current.data.favorites
     mods.commitPlan.mockRejectedValueOnce(new Error('quota'))
-    await act(async () => { await expect(result.current.mutate({ favorites: { a: true } })).rejects.toThrow('quota') })
+    await act(async () => { await expect(result.current.writeLibrary({ set: { a: { favorite: true } } })).rejects.toThrow('quota') })
     await waitFor(() => expect(result.current.saveError?.message).toBe('quota'))
-    expect(result.current.data.favorites).toEqual(before)
+    expect(result.current.data.favorites).toEqual({})
     expect(result.current.error).toBeNull() // pas un échec de chargement : l'app reste utilisable
+    await act(async () => { await result.current.writeLibrary({ set: { a: { 'eps.1-1': 5 } } }) })
+    expect(mods.commitPlan.mock.calls[1][2].patches.a).toMatchObject({ watchedCount: 1 }) // repart de l'état enregistré
   })
 
   it('document utilisateur refusé après une bibliothèque enregistrée : la bibliothèque reste à jour', async () => {
     const { result } = await mount()
     firestore.setDoc.mockRejectedValueOnce(new Error('denied'))
-    const reviews = [{ id: 'a', note: 'top', rating: 5, ts: 9 }]
-    await act(async () => { await expect(result.current.mutate({ reviews })).rejects.toThrow('denied') })
-    expect(result.current.data.reviews).toEqual(reviews) // déjà écrit dans library/a
+    const review = { id: 'a', note: 'top', rating: 5, ts: 9 }
+    await act(async () => { await expect(result.current.writeLibrary({ set: { a: { personalReview: review } } }, { reviews: [review] })).rejects.toThrow('denied') })
+    expect(result.current.data.reviews).toEqual([review]) // déjà écrit dans library/a
   })
 
   it('ajouter une œuvre rend ses épisodes disponibles tout de suite', async () => {
     const { result } = await mount()
     const w = { id: 'n', source: 'tmdb', sourceId: 5, title: 'Nouvelle', category: 'series', seasons: [season(1, 3)], status: 'a_voir', added: 1 }
-    await act(async () => { await result.current.mutate({ works: { ...result.current.data.works, n: w } }) })
+    await act(async () => { await result.current.writeLibrary({ add: { n: w } }) })
     expect(mods.commitPlan.mock.calls[0][2].catalogCreates.n).toMatchObject({ title: 'Nouvelle' })
+    expect(result.current.data.works.n.seasons).toHaveLength(1)
     expect((await result.current.getCatalogDoc('n')).title).toBe('Nouvelle')
-  })
-
-  it('« synchroniser » repart du serveur', async () => {
-    const { result } = await mount()
-    await act(async () => { await result.current.syncAll() })
-    expect(mods.clearLibraryCache).toHaveBeenCalled()
-    expect(mods.syncLibrary).toHaveBeenCalledTimes(2)
   })
 })
 

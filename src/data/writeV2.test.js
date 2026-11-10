@@ -1,108 +1,63 @@
 import { describe, it, expect } from 'vitest'
-import { planV2Writes, applyPlanToLibrary, nestForFirestore, isEmptyPlan, DELETE } from './writeV2.js'
+import { buildPlan, applyPlanToLibrary, nestForFirestore, isEmptyPlan, DELETE } from './writeV2.js'
 import { assembleData } from './assemble.js'
 import { buildLibraryDocs } from './libraryDocs.js'
 
 const season = (n, count) => ({ n, name: null, episodes: Array.from({ length: count }, (_, i) => ({ n: i + 1, title: `E${i + 1}`, air: i === 0 ? Infinity : 1000 })) })
 const W = (id, over = {}) => ({ id, source: 'tmdb', sourceId: 1, title: `T ${id}`, category: 'series', seasons: [season(1, 3)], status: 'en_cours', added: 1, ...over })
 
-const base = () => ({
-  works: { a: W('a'), b: W('b', { status: 'a_voir' }) },
-  watched: { 'a-1-1': 10 },
-  ratings: { 'w:a': 4 },
-  favorites: {},
-  games: {},
-  reviews: [],
-})
 const NOW = 5000
-const plan = (patch, prev = base()) => planV2Writes({ uid: 'u', prev, patch, now: NOW })
+const library = { a: { id: 'a', catalogId: 'a', eps: { '1-1': 10 }, watchedCount: 1 } }
+const plan = (ops) => buildPlan({ uid: 'u', library, now: NOW, ...ops })
 const count = (p) => Object.keys(p.libraryCreates).length + Object.keys(p.patches).length + p.removes.length
 
-describe('planV2Writes : une action = une écriture par document touché', () => {
-  it('cocher un épisode : 1 écriture ciblée (épisode, compteur, statut dans le même document)', () => {
-    const p = plan({ watched: { 'a-1-1': 10, 'a-1-2': 20 }, works: { ...base().works, a: W('a', { status: 'termine', finishedAt: 99 }) } })
+describe('buildPlan : une action = une écriture par document touché', () => {
+  it('cocher un épisode : 1 écriture ciblée, compteur recalculé depuis la copie locale', () => {
+    const p = plan({ set: { a: { 'eps.1-2': 20, status: 'termine' } } })
     expect(count(p)).toBe(1)
-    expect(p.patches.a).toEqual({ 'eps.1-2': 20, watchedCount: 2, status: 'termine', finishedAt: 99, updatedAt: NOW })
+    expect(p.patches.a).toEqual({ 'eps.1-2': 20, status: 'termine', watchedCount: 2, updatedAt: NOW })
     expect(p.catalogCreates).toEqual({})
   })
-  it('décocher : supprime la clé de l’épisode et recompte', () => {
-    const p = plan({ watched: {} })
-    expect(p.patches.a).toEqual({ 'eps.1-1': DELETE, watchedCount: 0, updatedAt: NOW })
+  it('décocher, ou tout réinitialiser : recompte', () => {
+    expect(plan({ set: { a: { 'eps.1-1': DELETE } } }).patches.a).toEqual({ 'eps.1-1': DELETE, watchedCount: 0, updatedAt: NOW })
+    expect(plan({ set: { a: { eps: DELETE } } }).patches.a).toEqual({ eps: DELETE, watchedCount: 0, updatedAt: NOW })
   })
-  it('marquer une saison de 20 épisodes : toujours 1 écriture', () => {
-    const watched = Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`a-1-${i + 1}`, 100 + i]))
-    const p = plan({ watched })
-    expect(count(p)).toBe(1)
-    expect(p.patches.a.watchedCount).toBe(20)
+  it('un champ hors progression ne touche pas au compteur', () => {
+    expect(plan({ set: { a: { favorite: true } } }).patches.a).toEqual({ favorite: true, updatedAt: NOW })
   })
-  it('noter une œuvre / une saison / un épisode', () => {
-    const p = plan({ ratings: { 'w:a': 5, 's:a-1': 3, 'e:a-1-2': 4 } })
-    expect(p.patches.a).toMatchObject({ 'ratings.w': 5, 'ratings.s:1': 3, 'ratings.e:1-2': 4 })
-    expect(count(p)).toBe(1)
+  it('rien à faire : plan vide', () => {
+    expect(isEmptyPlan(plan({}))).toBe(true)
+    expect(isEmptyPlan(plan({ set: { a: {} } }))).toBe(true)
   })
-  it('favori, jeu, avis personnel', () => {
-    const p = plan({ favorites: { b: true }, games: { b: { minutes: 30 } }, reviews: [{ id: 'b', note: 'ok', rating: 3, ts: 1 }] })
-    expect(p.patches.b).toMatchObject({ favorite: true, game: { minutes: 30 }, personalReview: { id: 'b', note: 'ok', rating: 3, ts: 1 } })
-    expect(count(p)).toBe(1)
-    expect(plan({ favorites: {} }, { ...base(), favorites: { b: true } }).patches.b.favorite).toBe(DELETE)
-  })
-  it('changer le statut ne touche que ce document', () => {
-    const p = plan({ works: { ...base().works, b: W('b', { status: 'abandonne' }) } })
-    expect(p.patches).toEqual({ b: { status: 'abandonne', updatedAt: NOW } })
-  })
-  it('ne fait rien quand rien ne change (et ignore les champs du catalogue)', () => {
-    expect(isEmptyPlan(plan({ watched: { 'a-1-1': 10 }, ratings: { 'w:a': 4 } }))).toBe(true)
-    const refreshed = { ...base().works, a: W('a', { seasons: [season(1, 9)], overview: 'nouveau' }) }
-    expect(isEmptyPlan(plan({ works: refreshed }))).toBe(true) // rafraîchir le catalogue n'est pas le rôle du client
-  })
-  it('ajouter une œuvre : document de bibliothèque + fiche de catalogue, progression incluse', () => {
-    const prev = base()
-    const p = plan({ works: { ...prev.works, c: W('c', { sourceId: 7 }) }, watched: { ...prev.watched, 'c-1-1': 55 }, favorites: { c: true } }, prev)
-    expect(Object.keys(p.libraryCreates)).toEqual(['c'])
-    expect(p.libraryCreates.c).toMatchObject({ catalogId: 'c', title: 'T c', status: 'en_cours', favorite: true, eps: { '1-1': 55 }, watchedCount: 1, updatedAt: NOW })
-    expect(p.catalogCreates.c).toMatchObject({ title: 'T c', seasons: expect.any(Array) })
-    expect(p.catalogCreates.c).not.toHaveProperty('status')
-    expect(p.patches).toEqual({})
+  it('ajouter une œuvre : fiche de bibliothèque + fiche de catalogue, progression et notes d’un import comprises', () => {
+    const p = plan({ add: { n: W('n') }, extras: { watchedDocs: { n: { '1-1': 7 } }, main: { ratings: { 'w:n': 5 }, favorites: { n: true } } } })
+    expect(p.catalogCreates.n).toMatchObject({ title: 'T n', updatedAt: NOW })
+    expect(p.libraryCreates.n).toMatchObject({ catalogId: 'n', status: 'en_cours', eps: { '1-1': 7 }, watchedCount: 1, ratings: { w: 5 }, favorite: true })
   })
   it('ajouter une œuvre locale (sans sourceId) : catalogue local à l’utilisateur', () => {
-    const prev = base()
-    const { sourceId, ...local } = W('loc')
-    const p = plan({ works: { ...prev.works, loc: local } }, prev)
-    expect(p.libraryCreates.loc.catalogId).toBe('local-u-loc')
-    expect(Object.keys(p.catalogCreates)).toEqual(['local-u-loc'])
+    const p = plan({ add: { m: W('m', { sourceId: undefined }) } })
+    expect(Object.keys(p.catalogCreates)).toEqual(['local-u-m'])
   })
-  it('retirer une œuvre (et ses données) : suppression douce, sans écriture parasite', () => {
-    const prev = { ...base(), favorites: { a: true } }
-    const p = plan({ works: { b: prev.works.b }, watched: {}, ratings: {}, favorites: {} }, prev)
+  it('retirer : suppression douce, et aucune écriture en double sur la même fiche', () => {
+    const p = plan({ remove: ['a'], set: { a: { favorite: true } } })
     expect(p.removes).toEqual(['a'])
     expect(p.patches).toEqual({})
-    expect(count(p)).toBe(1)
-  })
-  it('tout effacer : une suppression douce par œuvre', () => {
-    const p = plan({ works: {}, watched: {}, ratings: {}, reviews: [], games: {}, favorites: {} })
-    expect(p.removes.sort()).toEqual(['a', 'b'])
-  })
-  it('un identifiant d’œuvre contenant des tirets reste correctement rattaché', () => {
-    const prev = { works: { 'tmdb-tv-12': W('tmdb-tv-12'), 'tmdb-tv-1': W('tmdb-tv-1') }, watched: {}, ratings: {}, favorites: {}, games: {}, reviews: [] }
-    const p = plan({ watched: { 'tmdb-tv-12-2-5': 9 }, ratings: { 'e:tmdb-tv-1-1-3': 2 } }, prev)
-    expect(p.patches['tmdb-tv-12']).toMatchObject({ 'eps.2-5': 9, watchedCount: 1 })
-    expect(p.patches['tmdb-tv-1']).toMatchObject({ 'ratings.e:1-3': 2 })
   })
 })
 
 describe('applyPlanToLibrary / nestForFirestore', () => {
   it('reflète le plan dans la copie locale, avec suppressions de clés', () => {
-    const { library } = buildLibraryDocs({ uid: 'u', works: base().works, watchedDocs: { a: { '1-1': 10 } }, main: { ratings: base().ratings }, now: 1 })
-    const p = plan({ watched: { 'a-1-2': 20 }, ratings: {}, favorites: { a: true } })
-    const out = applyPlanToLibrary(library, p)
+    const { library: lib } = buildLibraryDocs({ uid: 'u', works: { a: W('a') }, watchedDocs: { a: { '1-1': 10 } }, main: { ratings: { 'w:a': 4 } }, now: 1 })
+    const p = buildPlan({ uid: 'u', library: lib, now: NOW, set: { a: { 'eps.1-1': DELETE, 'eps.1-2': 20, 'ratings.w': DELETE, favorite: true } } })
+    const out = applyPlanToLibrary(lib, p)
     expect(out.a.eps).toEqual({ '1-2': 20 })
     expect(out.a.ratings).toEqual({})
     expect(out.a).toMatchObject({ favorite: true, watchedCount: 1, updatedAt: NOW })
-    expect(library.a.eps).toEqual({ '1-1': 10 }) // l'original n'est pas modifié
+    expect(lib.a.eps).toEqual({ '1-1': 10 }) // l'original n'est pas modifié
   })
   it('retire une œuvre supprimée de la copie locale', () => {
-    const { library } = buildLibraryDocs({ uid: 'u', works: base().works, now: 1 })
-    expect(Object.keys(applyPlanToLibrary(library, plan({ works: { b: base().works.b } })))).toEqual(['b'])
+    const { library: lib } = buildLibraryDocs({ uid: 'u', works: { a: W('a'), b: W('b') }, now: 1 })
+    expect(Object.keys(applyPlanToLibrary(lib, buildPlan({ uid: 'u', remove: ['a'] })))).toEqual(['b'])
   })
   it('construit un objet imbriqué pour Firestore (merge)', () => {
     const nested = nestForFirestore({ 'eps.1-3': 5, 'ratings.e:1-2': 4, status: 'x', favorite: DELETE })

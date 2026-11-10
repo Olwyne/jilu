@@ -1,133 +1,33 @@
-// Écritures dans le modèle v2 : transforme une modification de l'application (le « patch » de mutate)
-// en opérations sur les documents de bibliothèque — UNE écriture par document touché, champs ciblés
+// Écritures dans la bibliothèque v2 : UNE écriture par document touché, champs ciblés
 // (cocher un épisode = 1 écriture de `eps.1-3`, au lieu de réécrire toute la progression).
 import { collection, deleteField, doc, writeBatch } from 'firebase/firestore'
-import { assignRatings, buildLibraryDocs, deepEqual, idsThatExist } from './libraryDocs.js'
+import { buildLibraryDocs, countTruthy, idsThatExist } from './libraryDocs.js'
 
 export const DELETE = Symbol('delete')
-const WORK_USER_FIELDS = ['status', 'added', 'finishedAt']
-const SUMMARY_FIELDS = ['title', 'titles', 'poster', 'posters', 'category', 'genre', 'year', 'originalTitle']
 const BATCH_SIZE = 400
 
-// "tmdb-tv-1-2-3" -> { workId: 'tmdb-tv-1', sub: '2-3' }
-function splitWatchedKey(key) {
-  const parts = key.split('-')
-  if (parts.length < 3) return null
-  const e = parts.pop()
-  const s = parts.pop()
-  return { workId: parts.join('-'), sub: `${s}-${e}` }
-}
-
-const present = (v) => v !== undefined && v !== null
-
-// prev : données actuelles (forme v1) · patch : ce que mutate() reçoit · retourne les opérations à appliquer
-export function planV2Writes({ uid, prev, patch, now = Date.now() }) {
-  const next = { ...prev, ...patch }
-  const patches = {}          // id -> { 'champ' | 'eps.1-3' | 'ratings.w' : valeur | DELETE }
-  const removes = new Set()
-  const created = {}          // id -> œuvre complète (nouvelle dans la bibliothèque)
-  const touch = (id) => (patches[id] ||= {})
-
-  if (patch.works !== undefined) {
-    const prevW = prev.works || {}
-    const nextW = patch.works || {}
-    for (const id of Object.keys(prevW)) if (!nextW[id]) removes.add(id)
-    for (const [id, w] of Object.entries(nextW)) {
-      if (!prevW[id]) { created[id] = { ...w, id: w.id ?? id }; continue }
-      for (const f of WORK_USER_FIELDS) {
-        if (!deepEqual(prevW[id][f], w[f])) touch(id)[f] = present(w[f]) ? w[f] : DELETE
+// Opérations explicites -> plan d'écriture (fonction pure)
+//   add : { id: œuvre } · extras : { watchedDocs, main } pour les œuvres ajoutées (import)
+//   set : { id: { champ | 'eps.1-3' | 'ratings.w' : valeur | DELETE } } · remove : [id] (suppression douce)
+//   library : copie locale actuelle, pour recalculer watchedCount quand des épisodes changent
+export function buildPlan({ uid, library = {}, add = {}, extras = {}, set = {}, remove = [], now = Date.now() }) {
+  const { library: libraryCreates, catalog: catalogCreates } = buildLibraryDocs({ uid, works: add, ...extras, now })
+  const patches = {}
+  for (const [id, changes] of Object.entries(set)) {
+    if (!Object.keys(changes).length || libraryCreates[id] || remove.includes(id)) continue
+    const patch = { ...changes, updatedAt: now }
+    const epsKeys = Object.keys(changes).filter((k) => k === 'eps' || k.startsWith('eps.'))
+    if (epsKeys.length) {
+      const eps = changes.eps === DELETE ? {} : { ...(library[id]?.eps || {}) }
+      for (const k of epsKeys) {
+        if (k === 'eps') continue
+        if (changes[k] === DELETE) delete eps[k.slice(4)]; else eps[k.slice(4)] = changes[k]
       }
-      for (const f of SUMMARY_FIELDS) {
-        if (!deepEqual(prevW[id][f], w[f])) touch(id)[f] = present(w[f]) ? w[f] : DELETE
-      }
+      patch.watchedCount = countTruthy(eps)
     }
+    patches[id] = patch
   }
-
-  const knownIds = [...new Set([...Object.keys(prev.works || {}), ...Object.keys(next.works || {})])]
-
-  if (patch.watched !== undefined) {
-    const prevMap = prev.watched || {}
-    const nextMap = patch.watched || {}
-    const affected = new Set()
-    for (const key of new Set([...Object.keys(prevMap), ...Object.keys(nextMap)])) {
-      if (deepEqual(prevMap[key], nextMap[key])) continue
-      const k = splitWatchedKey(key)
-      if (!k) continue
-      affected.add(k.workId)
-      touch(k.workId)[`eps.${k.sub}`] = present(nextMap[key]) ? nextMap[key] : DELETE
-    }
-    const counts = {}
-    for (const [key, ts] of Object.entries(nextMap)) {
-      const k = splitWatchedKey(key)
-      if (k && affected.has(k.workId) && ts) counts[k.workId] = (counts[k.workId] || 0) + 1
-    }
-    for (const id of affected) touch(id).watchedCount = counts[id] || 0
-  }
-
-  if (patch.ratings !== undefined) {
-    const prevMap = prev.ratings || {}
-    const nextMap = patch.ratings || {}
-    for (const key of new Set([...Object.keys(prevMap), ...Object.keys(nextMap)])) {
-      if (deepEqual(prevMap[key], nextMap[key])) continue
-      const { byWork } = assignRatings({ [key]: nextMap[key] ?? 0 }, knownIds)
-      for (const [id, sub] of Object.entries(byWork)) {
-        for (const subKey of Object.keys(sub)) touch(id)[`ratings.${subKey}`] = present(nextMap[key]) ? nextMap[key] : DELETE
-      }
-    }
-  }
-
-  if (patch.favorites !== undefined) {
-    const prevMap = prev.favorites || {}
-    const nextMap = patch.favorites || {}
-    for (const id of new Set([...Object.keys(prevMap), ...Object.keys(nextMap)])) {
-      if (!!prevMap[id] === !!nextMap[id]) continue
-      touch(id).favorite = nextMap[id] ? true : DELETE
-    }
-  }
-
-  if (patch.games !== undefined) {
-    const prevMap = prev.games || {}
-    const nextMap = patch.games || {}
-    for (const id of new Set([...Object.keys(prevMap), ...Object.keys(nextMap)])) {
-      if (deepEqual(prevMap[id], nextMap[id])) continue
-      touch(id).game = present(nextMap[id]) ? nextMap[id] : DELETE
-    }
-  }
-
-  if (patch.reviews !== undefined) {
-    const prevMap = Object.fromEntries((prev.reviews || []).map((r) => [r.id, r]))
-    const nextMap = Object.fromEntries((patch.reviews || []).map((r) => [r.id, r]))
-    for (const id of new Set([...Object.keys(prevMap), ...Object.keys(nextMap)])) {
-      if (deepEqual(prevMap[id], nextMap[id])) continue
-      touch(id).personalReview = nextMap[id] ?? DELETE
-    }
-  }
-
-  // Œuvres nouvelles : documents complets (progression, notes, favoris compris)
-  const createdIds = Object.keys(created)
-  let libraryCreates = {}
-  let catalogCreates = {}
-  if (createdIds.length) {
-    const watchedDocs = {}
-    for (const [key, ts] of Object.entries(next.watched || {})) {
-      const k = splitWatchedKey(key)
-      if (k && created[k.workId]) (watchedDocs[k.workId] ||= {})[k.sub] = ts
-    }
-    const built = buildLibraryDocs({
-      uid, works: created, watchedDocs,
-      main: { ratings: next.ratings, favorites: next.favorites, games: next.games, reviews: next.reviews },
-      now,
-    })
-    libraryCreates = built.library
-    catalogCreates = built.catalog
-    for (const id of createdIds) delete patches[id]
-  }
-
-  for (const id of removes) delete patches[id]
-  for (const id of Object.keys(patches)) patches[id].updatedAt = now
-  for (const doc of Object.values(libraryCreates)) doc.updatedAt = now
-
-  return { libraryCreates, catalogCreates, patches, removes: [...removes], now }
+  return { libraryCreates, catalogCreates, patches, removes: remove, now }
 }
 
 export const isEmptyPlan = (p) => !Object.keys(p.libraryCreates).length && !Object.keys(p.patches).length && !p.removes.length

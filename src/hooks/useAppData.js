@@ -10,7 +10,7 @@ import { createCache } from '../data/cache.js'
 import { syncLibrary, clearLibraryCache } from '../data/library.js'
 import { loadCatalog } from '../data/catalog.js'
 import { assembleData, catalogIdsNeededAtStartup } from '../data/assemble.js'
-import { planV2Writes, applyPlanToLibrary, commitPlan, isEmptyPlan } from '../data/writeV2.js'
+import { buildPlan, applyPlanToLibrary, commitPlan, isEmptyPlan } from '../data/writeV2.js'
 import { requestCatalogRefresh, REFRESHABLE_SOURCES, AUTO_REFRESH_MIN_AGE_MS } from '../data/refreshClient.js'
 import { clean } from '../lib/catalogUtils.js'
 import i18n from '../i18n/index.js'
@@ -30,8 +30,6 @@ const RESYNC_AFTER_MS = 2 * 60 * 1000
 const catalogTtl = (doc) => (doc?.ended === false ? DAY : MONTH)
 // Ces données vivent dans la bibliothèque (une fiche par œuvre), pas dans le document utilisateur
 const LIBRARY_KEYS = ['works', 'watched', 'ratings', 'favorites', 'games', 'reviews']
-// Avis personnels : aussi recopiés dans le document utilisateur, car le fil d'amis le lit
-const MIRRORED_KEYS = ['reviews']
 const AUTO_REFRESH_PER_SESSION = 5
 const MANUAL_REFRESH_LIMIT = 100
 
@@ -226,31 +224,47 @@ export function useAppData(user) {
   }
 
   // --- Écriture ---
+  // Document utilisateur : réglages, profil, fil d'activité, copie des avis (lue par le fil d'amis)
   async function mutate(patch) {
-    const prev = dataRef.current
-    setData({ ...prev, ...patch })
+    setData({ ...dataRef.current, ...patch })
+    if (!user) return
+    try {
+      await setDoc(doc(db, 'users', uid), clean(patch), { merge: true })
+    } catch (e) {
+      setData(compute()) // écran = ce qui est réellement enregistré
+      setSaveError(e)
+      throw e
+    }
+  }
+
+  // Bibliothèque : chaque action dit exactement ce qu'elle change (voir buildPlan)
+  //   add : { id: œuvre } (+ extras { watchedDocs, main } pour un import) · set : { id: { champ | 'eps.1-3' : valeur | DELETE } }
+  //   remove : [id] · mainPatch : à écrire en même temps dans le document utilisateur
+  async function writeLibrary(ops, mainPatch) {
     if (!user) return
     const s = st.current
-    const plan = planV2Writes({ uid, prev, patch })
-    if (Object.keys(plan.catalogCreates).length) s.catalog = { ...s.catalog, ...plan.catalogCreates } // épisodes dispo immédiatement
-    const mainPatch = Object.fromEntries(Object.entries(patch).filter(([k]) => !LIBRARY_KEYS.includes(k) || MIRRORED_KEYS.includes(k)))
+    const plan = buildPlan({ uid, library: s.library, ...ops })
+    if (isEmptyPlan(plan)) return mainPatch && mutate(mainPatch)
+    const before = s.library
+    s.library = applyPlanToLibrary(s.library, plan)
+    s.catalog = { ...s.catalog, ...plan.catalogCreates } // épisodes d'une œuvre ajoutée disponibles tout de suite
+    setData({ ...compute(), ...mainPatch })
     try {
-      if (!isEmptyPlan(plan)) {
-        await commitPlan(db, uid, plan)
-        s.library = applyPlanToLibrary(s.library, plan) // enregistré : la copie locale suit, même si la suite échoue
-      }
-      if (Object.keys(mainPatch).length) await setDoc(doc(db, 'users', uid), clean(mainPatch), { merge: true })
-      if (s.cache && !isEmptyPlan(plan)) {
-        const touched = [...Object.keys(plan.libraryCreates), ...Object.keys(plan.patches)]
-        await s.cache.setMany(touched.map((id) => [`lib:${uid}:${id}`, s.library[id]]))
-        await s.cache.deleteMany(plan.removes.map((id) => `lib:${uid}:${id}`))
-      }
+      await commitPlan(db, uid, plan)
     } catch (e) {
-      // Écran = ce qui est réellement enregistré : sinon les modifications suivantes partiraient d'un état faux
+      // Retour à l'état enregistré. (Un très gros lot, ex. import, a pu être écrit en partie : les fiches écrites
+      // ont un updatedAt récent, la prochaine synchronisation par delta les reprend.)
+      s.library = before
       setData(compute())
       setSaveError(e)
       throw e
     }
+    if (s.cache) {
+      const touched = [...Object.keys(plan.libraryCreates), ...Object.keys(plan.patches)]
+      await s.cache.setMany(touched.map((id) => [`lib:${uid}:${id}`, s.library[id]]))
+      await s.cache.deleteMany(plan.removes.map((id) => `lib:${uid}:${id}`))
+    }
+    if (mainPatch) await mutate(mainPatch)
   }
 
   // Bouton « synchroniser » : repart du serveur (relecture complète de la bibliothèque)
@@ -266,7 +280,7 @@ export function useAppData(user) {
   }
 
   return {
-    data, loading, error, saveError, mutate, syncAll,
+    data, loading, error, saveError, mutate, writeLibrary, syncAll,
     // Données complètes (tous les épisodes chargés) pour l'export : indépendant du prochain rendu
     getFullData: async () => { await ensureAllCatalog(); return compute() },
     getCatalogDoc, ensureCatalog, ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog,

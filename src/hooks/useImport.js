@@ -1,4 +1,5 @@
 import i18n from '../i18n/index.js'
+import { assignRatings } from '../data/libraryDocs.js'
 
 function tmdbFetch(path, params = {}) {
   const qs = new URLSearchParams({ path, ...params }).toString()
@@ -38,19 +39,55 @@ function parseCSV(text) {
   })
 }
 
-function autoStatus(importedWorks, watched) {
-  importedWorks.forEach(w => {
+// Statut déduit de la progression ; remplace l'œuvre par une copie (ne jamais modifier les données affichées)
+function autoStatus(works, watched) {
+  Object.values(works).forEach(w => {
     if (!w.seasons || w.status === 'abandonne') return
     const total = w.seasons.reduce((n, s) => n + s.episodes.length, 0)
     if (total === 0) return
     const seen = w.seasons.reduce((n, s) => n + s.episodes.filter(e => watched[`${w.id}-${s.n}-${e.n}`]).length, 0)
     if (seen === 0) return
-    if (seen >= total) w.status = w.ended === false ? 'en_cours' : 'termine'
-    else w.status = 'en_cours'
+    const status = seen >= total ? (w.ended === false ? 'en_cours' : 'termine') : 'en_cours'
+    if (status !== w.status) works[w.id] = { ...w, status }
   })
 }
 
-export function useImport(data, mutate) {
+// Ce que l'import ajoute, en opérations explicites pour writeLibrary (un import n'enlève jamais rien)
+export function importOps(data, { works, watched, ratings, favorites }) {
+  const add = {}
+  const set = {}
+  const watchedDocs = {}
+  const newRatings = {}
+  const newFavorites = {}
+  const touch = (id) => (set[id] ||= {})
+  for (const [id, w] of Object.entries(works)) {
+    if (!data.works[id]) add[id] = w
+    else if (w.status !== data.works[id].status) touch(id).status = w.status
+  }
+  for (const [key, ts] of Object.entries(watched)) {
+    if (data.watched[key]) continue
+    const id = key.split('-').slice(0, -2).join('-')
+    const sub = key.split('-').slice(-2).join('-')
+    if (add[id]) (watchedDocs[id] ||= {})[sub] = ts
+    else if (data.works[id]) touch(id)[`eps.${sub}`] = ts
+  }
+  const ids = Object.keys(works)
+  for (const [key, value] of Object.entries(ratings)) {
+    if (data.ratings[key] === value) continue
+    const [id, subs] = Object.entries(assignRatings({ [key]: value }, ids).byWork)[0] || []
+    if (!id) continue
+    if (add[id]) newRatings[key] = value
+    else for (const sub of Object.keys(subs)) touch(id)[`ratings.${sub}`] = value
+  }
+  for (const id of Object.keys(favorites)) {
+    if (data.favorites?.[id]) continue
+    if (add[id]) newFavorites[id] = true
+    else if (data.works[id]) touch(id).favorite = true
+  }
+  return { add, set, extras: { watchedDocs, main: { ratings: newRatings, favorites: newFavorites } } }
+}
+
+export function useImport(data, writeLibrary) {
   async function importTVTime(onStatus, onFailed) {
     const file = await pickFile('.zip')
     if (!file) return
@@ -189,8 +226,8 @@ export function useImport(data, mutate) {
         }
       }
 
-      autoStatus(Object.values(works), watched)
-      await mutate({ works, watched, ratings, favorites })
+      autoStatus(works, watched)
+      await writeLibrary(importOps(data, { works, watched, ratings, favorites }))
       if (onFailed && failed.length > 0) onFailed(failed)
       onStatus(i18n.t('import.done', { series: i18n.t('import.nSeries', { count: newImports }), episodes: i18n.t('import.nEpisodes', { count: totalEps }), movies: i18n.t('import.nMovies', { count: newMovies }) }))
     } catch (e) { onStatus(i18n.t('import.error', { message: e.message })) }
@@ -299,8 +336,8 @@ export function useImport(data, mutate) {
         }
       }
 
-      autoStatus(Object.values(works), watched)
-      await mutate({ works, watched, ratings, favorites })
+      autoStatus(works, watched)
+      await writeLibrary(importOps(data, { works, watched, ratings, favorites }))
       if (onFailed && failed.length > 0) onFailed(failed)
       onStatus(i18n.t('import.done', { series: i18n.t('import.nSeries', { count: newImports }), episodes: i18n.t('import.nEpisodes', { count: totalEps }), movies: i18n.t('import.nMovies', { count: newMovies }) }))
     } catch (e) { onStatus(i18n.t('import.error', { message: e.message })) }
