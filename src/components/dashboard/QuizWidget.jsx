@@ -122,7 +122,7 @@ export default function QuizWidget({ user, handle, following }) {
       {phase === 'idle' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ flex: 1, fontSize: 14.5, color: 'var(--color-muted)', lineHeight: 1.5 }}>{t('quiz.hint')}</div>
-          <Button variant="primary" onClick={startQuiz}>
+          <Button variant="secondary" onClick={startQuiz}>
             {t('quiz.play')}
           </Button>
         </div>

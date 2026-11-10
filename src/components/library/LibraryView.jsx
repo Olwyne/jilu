@@ -4,6 +4,7 @@ import WorkCard from './WorkCard'
 import { epTotals } from '../../lib/domain'
 import styles from './LibraryView.module.css'
 import Chip from '../ui/Chip'
+import Select from '../ui/Select'
 
 export default function LibraryView({ works, watched, ratings, favorites, onOpenWork }) {
   const { t } = useTranslation()
@@ -100,6 +101,10 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
             </Chip>
           )
         })}
+      </div>
+      <div className={styles.mobileFilters}>
+        <Select label={t('status.label')} value={status} onChange={setStatus} options={STATUSES.map(([value, label]) => ({ value, label }))} />
+        <Select label={t('library.sort')} value={sort} onChange={handleSort} options={SORTS.map(([value, label]) => ({ value, label: label + (sort === value ? (sortDir === 'desc' ? ' ↓' : ' ↑') : '') }))} />
       </div>
       <div className={styles.filtersRow}>
         <div className={styles.smallChips}>

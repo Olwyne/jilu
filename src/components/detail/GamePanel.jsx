@@ -94,7 +94,7 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
   }
   return (
     <Card strong pad="md" style={{ marginBottom: 22 }}>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('game.title')}</h3>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('game.title')}</h2>
 
       {/* Total */}
       <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, marginBottom: 20 }}>

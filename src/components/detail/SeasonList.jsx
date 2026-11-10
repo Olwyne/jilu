@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import i18n from '../../i18n/index.js'
 import { pressable } from '../../lib/a11y'
 import Card from '../ui/Card'
 
 function fmtFull(ts) {
-  const d = new Date(ts)
-  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear()
+  return new Date(ts).toLocaleDateString(i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 
@@ -67,7 +67,7 @@ export default function SeasonList({ work, watched, onToggleEpisode, onMarkSeaso
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <span style={{ fontWeight: 600, fontSize: 14.5, textDecoration: isWatched ? 'line-through' : 'none', color: isWatched ? 'var(--color-muted)' : (aired2 ? 'inherit' : 'var(--color-muted)') }}>{epLabel(work, s, e, t)}</span>
-                        {e.air > 1000 && <span style={{ marginLeft: 8, fontSize: 12, color: aired2 ? 'var(--color-muted)' : 'var(--color-accent)', fontWeight: 500 }}>{fmtFull(e.air)}</span>}
+                        {e.air > 1000 && <span style={{ marginLeft: 8, fontSize: 12, color: 'var(--color-muted)', fontWeight: 500 }}>{fmtFull(e.air)}</span>}
                       </div>
                       {aired2
                         ? <div {...pressable(() => onOpenEpisode(work, s, e), { label: epLabel(work, s, e, t) })} style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: aired2 ? 'var(--color-muted)' : 'transparent', fontSize: 20, lineHeight: 1 }}>›</div>

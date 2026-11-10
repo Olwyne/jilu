@@ -10,19 +10,14 @@ import Card from '../ui/Card'
 
 const RUNTIME = { animes: 24, series: 45, films: 120 }
 
-function formatWatchTime(totalMins) {
+function formatWatchTime(totalMins, t) {
   let m = totalMins
-  const y = Math.floor(m / 525600); m %= 525600
-  const mo = Math.floor(m / 43200); m %= 43200
-  const d = Math.floor(m / 1440); m %= 1440
-  const h = Math.floor(m / 60)
-  const mn = m % 60
   const parts = []
-  if (y) parts.push(`${y} ${y > 1 ? 'ans' : 'an'}`)
-  if (mo) parts.push(`${mo} ${mo > 1 ? 'mois' : 'mois'}`)
-  if (d) parts.push(`${d} ${d > 1 ? 'jours' : 'jour'}`)
-  if (h) parts.push(`${h} ${h > 1 ? 'heures' : 'heure'}`)
-  if (mn || !parts.length) parts.push(`${mn} ${mn > 1 ? 'minutes' : 'minute'}`)
+  for (const [unit, size] of [['year', 525600], ['month', 43200], ['day', 1440], ['hour', 60]]) {
+    const n = Math.floor(m / size); m %= size
+    if (n) parts.push(t('duration.' + unit, { count: n }))
+  }
+  if (m || !parts.length) parts.push(t('duration.minute', { count: m }))
   return parts.join(' ')
 }
 
@@ -61,7 +56,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
       if (watched[`${w.id}-${s.n}-${e.n}`]) totalMinutes += RUNTIME[w.category] || 42
     }))
   })
-  const watchTimeStr = formatWatchTime(totalMinutes)
+  const watchTimeStr = formatWatchTime(totalMinutes, t)
 
   const favWorks = worksArr.filter(w => favorites && favorites[w.id])
   const recentFeed = [...(feed || [])].sort((a, b) => b.ts - a.ts).slice(0, 20)
@@ -106,12 +101,12 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{worksCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{t('profile.works')}</div></div>
-            <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{episodesCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>vus</div></div>
-            <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{ratingsCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>avis</div></div>
+            <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{episodesCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{t('profile.seen')}</div></div>
+            <div style={{ textAlign: 'center' }}><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{ratingsCount}</div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{t('profile.ratings')}</div></div>
           </div>
           <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15 }}>{watchTimeStr}</span>
-            <span style={{ fontSize: 12, color: 'var(--color-muted)' }}>de visionnage</span>
+            <span style={{ fontSize: 12, color: 'var(--color-muted)' }}>{t('profile.watchTime')}</span>
           </div>
         </div>
         {!readOnly && !isMobile && (
@@ -215,7 +210,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                     </div>
                     <div style={{ fontSize: 15, lineHeight: 1.5 }}>{f.text}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 14 }}>
-                      <span {...pressable(() => onToggleLike(f.id))} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer', color: f.liked ? 'var(--color-pink)' : 'var(--color-muted-2)' }}>
+                      <span {...pressable(() => onToggleLike(f.id), { label: t('profile.like'), pressed: !!f.liked })} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer', color: f.liked ? 'var(--color-pink)' : 'var(--color-muted-2)' }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill={f.liked ? 'var(--color-pink)' : 'none'} stroke={f.liked ? 'var(--color-pink)' : 'currentColor'} strokeWidth="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z" /></svg>
                         {f.likes || ''}
                       </span>

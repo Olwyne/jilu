@@ -10,7 +10,6 @@ import Card from '../ui/Card'
 const RUNTIME = { animes: 24, series: 45 }
 const CAT_COLORS = { series: 'var(--color-blue)', films: 'var(--color-pink)', animes: 'var(--color-accent)', mangas: 'var(--color-orange)', livres: 'var(--color-green)', jeux: 'var(--color-gold)', musique: 'var(--color-muted)' }
 const HEAT = ['var(--color-border)', 'var(--heat-1)', 'var(--heat-2)', 'var(--heat-3)', 'var(--heat-4)']
-const MONTHS_FR = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jul', 'aoû', 'sep', 'oct', 'nov', 'déc']
 const HEATMAP_WEEKS = 52
 
 function heatLevel(n) {
@@ -24,7 +23,7 @@ function heatLevel(n) {
 const CARD = { padding: 22, borderRadius: 18, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }
 
 export default function StatsView({ works, watched, ratings, onOpenWork, isMobile, settings = {}, onSaveSettings }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const now = Date.now()
 
   let totalEps = 0, minutes = 0, seriesVues = 0, filmsSeen = 0, animesVus = 0, mangasLus = 0, livresLus = 0, jeuxFinis = 0
@@ -104,7 +103,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
     heatCols.push({ days, month: days[0].month })
   }
   const monthLabels = heatCols.map((col, i) =>
-    (i === 0 || col.month !== heatCols[i - 1].month) ? MONTHS_FR[col.month] : null
+    (i === 0 || col.month !== heatCols[i - 1].month) ? new Date(2000, col.month, 1).toLocaleDateString(i18n.language, { month: 'short' }) : null
   )
 
   return (
@@ -117,9 +116,9 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           [String(totalWorks), t('stats.totalLibrary'), 'var(--color-muted)'],
           [completionRate + ' %', t('stats.completionRate'), 'var(--color-green)'],
           [ratedN ? (ratedSum / ratedN).toFixed(1) : '—', t('stats.avgRating'), 'var(--color-gold)'],
-        ].map(([value, label, color], i) => (
+        ].map(([value, label]) => (
           <Card key={label} dense pad="sm">
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: i === 0 ? 'var(--color-accent)' : 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
             <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3 }}>{label}</div>
           </Card>
         ))}
@@ -134,12 +133,10 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           [String(mangasLus), t('stats.mangasRead'), CAT_COLORS.mangas],
           [String(livresLus), t('stats.livresRead'), CAT_COLORS.livres],
           [String(jeuxFinis), t('stats.gamesFinished'), CAT_COLORS.jeux],
-        ].map(([value, label, color]) => (
+        ].map(([value, label]) => (
           <Card key={label} dense pad="sm">
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
-            <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />{label}
-            </div>
+            <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3 }}>{label}</div>
           </Card>
         ))}
       </div>
@@ -151,8 +148,8 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
           <div style={{ fontSize: 12, color: 'var(--color-muted-2)' }}>{t('stats.activityNote')}</div>
         </div>
         {isMobile ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
-            {heatCols.slice(-13).flatMap((col) => col.days).map((day, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 28px)', gap: 4, justifyContent: 'start' }}>
+            {heatCols.slice(-5).flatMap((col) => col.days).map((day, i) => (
               <div
                 key={i}
                 role={day.count ? 'button' : undefined}
@@ -161,7 +158,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
                 onClick={() => day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && day.count && setSelectedDay(selectedDay === day.dk ? null : day.dk)}
                 title={day.count ? t('stats.heatmap.label', { day: day.day, month: day.month + 1, count: day.count }) : ''}
-                style={{ width: '100%', aspectRatio: '1', borderRadius: 3, background: HEAT[heatLevel(day.count)], cursor: day.count ? 'pointer' : 'default', outline: selectedDay === day.dk ? '2px solid var(--color-accent)' : 'none', outlineOffset: 1 }}
+                style={{ width: 28, height: 28, borderRadius: 6, background: HEAT[heatLevel(day.count)], cursor: day.count ? 'pointer' : 'default', outline: selectedDay === day.dk ? '2px solid var(--color-accent)' : 'none', outlineOffset: 1 }}
               />
             ))}
           </div>
@@ -302,7 +299,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
             {topGenres.map(([g, n]) => (
               <div key={g}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}><span>{g}</span><span style={{ color: 'var(--color-muted)' }}>{n}</span></div>
-                <div style={{ height: 8, borderRadius: 8, width: `${Math.round(n / gMax * 100)}%`, background: 'linear-gradient(90deg, var(--color-accent), var(--color-pink))', minWidth: 8 }} />
+                <div style={{ height: 8, borderRadius: 8, width: `${Math.round(n / gMax * 100)}%`, background: 'var(--color-accent-fill)', minWidth: 8 }} />
               </div>
             ))}
           </div>

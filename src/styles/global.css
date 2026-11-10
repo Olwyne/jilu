@@ -61,3 +61,19 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, .tiptap:focus
 .jilu-fallback { min-height: 50vh; display: grid; place-items: center; color: var(--color-muted); font-size: 14px; animation: jiluFade .2s ease-out .15s both; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Toast on phones: text on its own row, actions below it, no close button (the timer and Undo cover it). */
+.jilu-toast-text { flex: 1; min-width: 0; }
+@media (max-width: 859px) {
+  .jilu-toast-box { flex-wrap: wrap; row-gap: 8px; }
+  .jilu-toast-text { flex: 1 1 100%; }
+}
+@media (pointer: coarse) { .jilu-toast-close { display: none; } }
+
+/* Touch: fields reach 44px tall (pseudo-elements cannot extend inputs). */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]), textarea, select { min-height: 44px; }
+}
+
+/* Field boundaries are the only cue for an input: give them the 3:1 edge colour (inline borders set a hairline). */
+input:not([type="checkbox"]):not([type="radio"]), textarea, select { border-color: var(--color-control-edge) !important; }

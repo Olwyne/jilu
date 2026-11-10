@@ -142,11 +142,13 @@ function ShellInner() {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
+  const [toastHold, setToastHold] = useState(false)
   useEffect(() => {
-    if (!toast) return
+    if (!toast) { setToastHold(false); return }
+    if (toastHold) return
     const t = setTimeout(() => setToast(null), 6000)
     return () => clearTimeout(t)
-  }, [toast])
+  }, [toast, toastHold])
 
   useEffect(() => { setEpisodeModal(null) }, [pathname])
 
@@ -241,6 +243,7 @@ function ShellInner() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
       <a href="#main-content" className="skip-link">{t('a11y.skipToContent')}</a>
+      <Toast toast={toast} onClose={() => setToast(null)} onHold={setToastHold} onUndo={() => { if (toast?.workId) workActions.toggleEpisode(toast.workId, toast.sNum, toast.eNum); setToast(null) }} onOpenRating={() => { if (toast?.workId) setEpisodeModal({ workId: toast.workId, sNum: toast.sNum, eNum: toast.eNum }); setToast(null) }} />
       {!isMobile && <Sidebar profile={{ ...data.profile, email: user?.email }} toCatch={toCatch} />}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 74 : 0 }}>
         <Header
@@ -345,7 +348,6 @@ function ShellInner() {
         </main>
       </div>
       {isMobile && <MobileNav />}
-      <Toast toast={toast} onClose={() => setToast(null)} onUndo={() => { if (toast?.workId) workActions.toggleEpisode(toast.workId, toast.sNum, toast.eNum); setToast(null) }} onOpenRating={() => { if (toast?.workId) setEpisodeModal({ workId: toast.workId, sNum: toast.sNum, eNum: toast.eNum }); setToast(null) }} />
       {searchOpen && (
         <SearchModal
           works={data.works}

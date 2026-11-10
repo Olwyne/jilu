@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import i18n from '../../i18n/index.js'
 import { localizedTitle } from '../../lib/domain'
 import { tmdbFetchEpisode } from '../../catalog/tmdb'
 import ReviewFeed from '../detail/ReviewFeed'
@@ -10,8 +11,7 @@ import StarRating from '../ui/StarRating'
 
 function fmtDate(ts) {
   if (!ts || ts === Infinity) return null
-  const d = new Date(ts)
-  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear()
+  return new Date(ts).toLocaleDateString(i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 

@@ -16,8 +16,8 @@ describe('Toast', () => {
   it('shows "Marked as seen" and work info when toast is set', () => {
     render(<Toast toast={toast} onClose={() => {}} onOpenRating={() => {}} />)
     expect(screen.getByText('Marked as seen')).toBeInTheDocument()
-    expect(screen.getByText('Severance')).toBeInTheDocument()
-    expect(screen.getByText('S1 · E3')).toBeInTheDocument()
+    expect(screen.getByText(/Severance/)).toBeInTheDocument()
+    expect(screen.getByText(/S1 · E3/)).toBeInTheDocument()
   })
 
   it('calls onOpenRating when "Rate" is clicked', async () => {

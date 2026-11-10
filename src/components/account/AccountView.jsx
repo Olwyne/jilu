@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Modal from '../ui/Modal'
-import i18n from '../../i18n/index.js'
 import emailjs from '@emailjs/browser'
 import { doc, getDoc, setDoc, getDocs, writeBatch, collection, query, where } from 'firebase/firestore'
 import { getTodayKey } from '../../lib/quizQuestions'
@@ -120,24 +119,25 @@ function Toggle({ on, onToggle, label, disabled }) {
 
 function Section({ rows, settings, onToggleSetting }) {
   const { t } = useTranslation()
+  const live = rows.filter((r) => !r[3])
+  const soon = rows.filter((r) => r[3])
   return (
     <Card clip style={{ marginBottom: 24 }}>
-      {rows.map(([key, label, desc, disabled]) => (
-        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderTop: '1px solid var(--color-border-sm)', opacity: disabled ? 0.45 : 1 }}>
+      {live.map(([key, label, desc]) => (
+        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderTop: '1px solid var(--color-border-sm)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 600, fontSize: 14.5, display: 'flex', alignItems: 'center', gap: 8 }}>
-              {label}
-              {disabled && (
-                <Badge tone="neutral">{t('settings.comingSoon')}</Badge>
-              )}
-            </div>
+            <div style={{ fontWeight: 600, fontSize: 14.5 }}>{label}</div>
             <div style={{ fontSize: 12.5, color: 'var(--color-muted)', marginTop: 2 }}>{desc}</div>
           </div>
-          <div style={{ pointerEvents: disabled ? 'none' : 'auto' }}>
-            <Toggle on={disabled ? false : !!settings[key]} onToggle={() => onToggleSetting(key)} label={label} disabled={disabled} />
-          </div>
+          <Toggle on={!!settings[key]} onToggle={() => onToggleSetting(key)} label={label} />
         </div>
       ))}
+      {soon.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '14px 20px', borderTop: '1px solid var(--color-border-sm)', fontSize: 13, color: 'var(--color-muted)' }}>
+          <Badge tone="neutral">{t('settings.comingSoon')}</Badge>
+          {soon.map((r) => r[1]).join(' · ')}
+        </div>
+      )}
     </Card>
   )
 }
@@ -273,7 +273,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         </div>
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>{profile.handle || '—'}</h2>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>{profile.handle || '—'}</div>
             <span {...pressable(() => setEditOpen(true))} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>{t('settings.modify')}</span>
           </div>
           <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{user?.email || profile.email}</div>

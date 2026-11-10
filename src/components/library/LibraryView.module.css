@@ -7,13 +7,12 @@
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 20px 18px; }
 @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 12px 10px; } }
 
-/* On phones the three filter rows share one scrolling line each, so posters start sooner. */
+/* On phones: type chips scroll in one row with a right-edge fade; status and sort become dropdowns. */
+.mobileFilters { display: none; }
 @media (max-width: 859px) {
-  .chipsRow { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scrollbar-width: none; margin-bottom: 12px; }
+  .chipsRow { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px 40px; scrollbar-width: none; margin-bottom: 12px; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); }
   .chipsRow::-webkit-scrollbar { display: none; }
   .chipsRow > * { flex-shrink: 0; }
-  .filtersRow { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scrollbar-width: none; gap: 10px; margin-bottom: 16px; }
-  .filtersRow::-webkit-scrollbar { display: none; }
-  .smallChips, .sortChips { flex-wrap: nowrap; flex-shrink: 0; margin-left: 0; }
-  .sortLabel { display: none; }
+  .filtersRow { display: none; }
+  .mobileFilters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 }
