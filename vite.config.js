@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => {
       injectRegister: 'auto',
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,webp,woff2}'],
+        // Les affiches sont téléchargées par le service worker : leurs hôtes doivent figurer dans connect-src (vercel.json)
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/image\.tmdb\.org\/.*/i,
@@ -76,11 +77,6 @@ export default defineConfig(({ mode }) => {
               cacheName: 'gbooks-images',
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
-          },
-          {
-            urlPattern: /^https:\/\/api\.themoviedb\.org\/.*/i,
-            handler: 'NetworkFirst',
-            options: { cacheName: 'tmdb-api', networkTimeoutSeconds: 5 },
           },
           {
             urlPattern: /^https:\/\/graphql\.anilist\.co\/.*/i,
