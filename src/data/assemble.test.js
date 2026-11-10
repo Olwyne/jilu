@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { assembleData, catalogIdsNeededAtStartup } from './assemble.js'
-import { buildUserMigration } from '../lib/migration.js'
+import { buildLibraryDocs } from './libraryDocs.js'
 
 const season = (n, count) => ({ n, name: null, episodes: Array.from({ length: count }, (_, i) => ({ n: i + 1, title: `E${i + 1}`, air: i === 0 ? Infinity : 1000 + i })) })
 
@@ -17,7 +17,6 @@ const v1 = {
   watchedDocs: {
     'tmdb-tv-1': { '1-1': 111, '1-2': 222, '2-1': 333 },
     'anilist-20': { '1-1': 444 },
-    'disparue': { '1-1': 555 },
   },
   main: {
     ratings: { 'w:tmdb-tv-1': 5, 's:tmdb-tv-1-1': 4, 'e:tmdb-tv-1-2-1': 3, 'w:anilist-20': 2 },
@@ -28,7 +27,9 @@ const v1 = {
 }
 
 describe('assembleData : aller-retour ancien modèle → v2 → reconstitué', () => {
-  const { catalog, library } = buildUserMigration(v1)
+  const { catalog, library } = buildLibraryDocs(v1)
+  // Progression sans œuvre (reprise telle quelle par l'ancienne migration ; existe encore en base)
+  library.disparue = { id: 'disparue', catalogId: null, title: 'disparue', orphanProgress: true, eps: { '1-1': 555 }, watchedCount: 1 }
   const data = assembleData({ library, catalog })
 
   it('redonne exactement les mêmes œuvres (champs utilisateur compris), sans les champs internes', () => {
@@ -58,7 +59,7 @@ describe('assembleData : aller-retour ancien modèle → v2 → reconstitué', (
 })
 
 describe('assembleData : cas limites', () => {
-  const { catalog, library } = buildUserMigration(v1)
+  const { catalog, library } = buildLibraryDocs(v1)
 
   it('affiche la liste avec le résumé quand le catalogue n’est pas encore chargé', () => {
     const data = assembleData({ library, catalog: {} })

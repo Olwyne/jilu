@@ -2,9 +2,7 @@
 // en opérations sur les documents de bibliothèque — UNE écriture par document touché, champs ciblés
 // (cocher un épisode = 1 écriture de `eps.1-3`, au lieu de réécrire toute la progression).
 import { collection, deleteField, doc, writeBatch } from 'firebase/firestore'
-import {
-  assignRatings, buildUserMigration, countTruthy, deepEqual, idsThatExist,
-} from '../lib/migration.js'
+import { assignRatings, buildLibraryDocs, deepEqual, idsThatExist } from './libraryDocs.js'
 
 export const DELETE = Symbol('delete')
 const WORK_USER_FIELDS = ['status', 'added', 'finishedAt']
@@ -105,7 +103,7 @@ export function planV2Writes({ uid, prev, patch, now = Date.now() }) {
     }
   }
 
-  // Œuvres nouvelles : document complet construit comme à la migration (progression, notes, favoris compris)
+  // Œuvres nouvelles : documents complets (progression, notes, favoris compris)
   const createdIds = Object.keys(created)
   let libraryCreates = {}
   let catalogCreates = {}
@@ -115,7 +113,7 @@ export function planV2Writes({ uid, prev, patch, now = Date.now() }) {
       const k = splitWatchedKey(key)
       if (k && created[k.workId]) (watchedDocs[k.workId] ||= {})[k.sub] = ts
     }
-    const built = buildUserMigration({
+    const built = buildLibraryDocs({
       uid, works: created, watchedDocs,
       main: { ratings: next.ratings, favorites: next.favorites, games: next.games, reviews: next.reviews },
       now,
@@ -193,4 +191,3 @@ export async function commitPlan(db, uid, plan) {
   return { writes: ops.length }
 }
 
-export { countTruthy }

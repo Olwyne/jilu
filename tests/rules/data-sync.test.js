@@ -8,11 +8,17 @@ import { createCache } from '../../src/data/cache.js'
 import { syncLibrary, clearLibraryCache, OVERLAP_MS, FULL_RESYNC_MS } from '../../src/data/library.js'
 import { loadCatalog } from '../../src/data/catalog.js'
 import { assembleData, catalogIdsNeededAtStartup } from '../../src/data/assemble.js'
-import { migrateAccount } from '../../src/lib/migration.js'
+import { buildLibraryDocs } from '../../src/data/libraryDocs.js'
 
 let env, cache
 const as = (uid) => env.authenticatedContext(uid).firestore()
 const seed = (fn) => env.withSecurityRulesDisabled((c) => fn(c.firestore()))
+// Écrit directement les fiches v2 (catalogue + bibliothèque) d'un compte, règles désactivées
+const seedV2 = (uid, args) => seed(async (d) => {
+  const { catalog, library } = buildLibraryDocs({ uid, ...args })
+  for (const [id, c] of Object.entries(catalog)) await setDoc(doc(d, `catalog/${id}`), c)
+  for (const [id, l] of Object.entries(library)) await setDoc(doc(d, `users/${uid}/library/${id}`), l)
+})
 const season = (n, count) => ({ n, name: null, episodes: Array.from({ length: count }, (_, i) => ({ n: i + 1, title: `E${i + 1}`, air: i === 0 ? Infinity : 1000 })) })
 const work = (id, over = {}) => ({ id, source: 'tmdb', sourceId: Number(id.split('-').pop()), title: `Titre ${id}`, category: 'series', seasons: [season(1, 3)], status: 'en_cours', added: 1, ...over })
 const lib = (id, over = {}) => ({ id, catalogId: id, title: id, status: 'en_cours', eps: {}, watchedCount: 0, updatedAt: 1_000_000, ...over })
@@ -152,22 +158,19 @@ describe('loadCatalog (cache)', () => {
   })
 })
 
-describe('parcours complet : ancien modèle → vraie migration → lecture v2 → reconstitution', () => {
+describe('parcours complet : écriture v2 → lecture v2 → reconstitution', () => {
   it('redonne à l’identique les données d’un compte', async () => {
     const works = {
       'tmdb-tv-1': work('tmdb-tv-1', { status: 'termine', finishedAt: 50 }),
       'tmdb-tv-2': work('tmdb-tv-2', { seasons: [season(1, 2), season(2, 4)], status: 'a_voir' }),
       'tmdb-movie-3': work('tmdb-movie-3', { category: 'films', seasons: null, status: 'termine' }),
     }
-    await seed(async (d) => {
-      await setDoc(doc(d, 'users/alice'), { ratings: { 'w:tmdb-tv-1': 5, 'e:tmdb-tv-2-2-1': 3 }, favorites: { 'tmdb-movie-3': true }, settings: {} })
-      for (const [id, w] of Object.entries(works)) await setDoc(doc(d, `users/alice/works/${id}`), w)
-      await setDoc(doc(d, 'users/alice/watched/tmdb-tv-1'), { eps: { '1-1': 11, '1-2': 12 } })
-      await setDoc(doc(d, 'users/alice/watched/tmdb-tv-2'), { eps: { '2-1': 21 } })
+    await seedV2('alice', {
+      works,
+      watchedDocs: { 'tmdb-tv-1': { '1-1': 11, '1-2': 12 }, 'tmdb-tv-2': { '2-1': 21 } },
+      main: { ratings: { 'w:tmdb-tv-1': 5, 'e:tmdb-tv-2-2-1': 3 }, favorites: { 'tmdb-movie-3': true } },
     })
     const db = as('alice')
-    const migration = await migrateAccount(db, 'alice')
-    expect(migration.verification.ok).toBe(true)
 
     const { library, fetched } = await syncLibrary(db, 'alice', cache)
     expect(fetched).toBe(3)

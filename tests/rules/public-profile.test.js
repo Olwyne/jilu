@@ -52,3 +52,22 @@ describe('suppression de compte', () => {
     await assertSucceeds(deleteDoc(doc(db, 'users/pub')))
   })
 })
+
+describe('ancien modèle (works, watched, migrations)', () => {
+  beforeEach(() => seed(async (d) => {
+    await setDoc(doc(d, 'users/pub/works/w1'), { title: 'A' })
+    await setDoc(doc(d, 'users/pub/watched/w1'), { eps: { '1-1': 1 } })
+  }))
+  it('n’est plus public, ni modifiable : seul le propriétaire le lit et l’efface', async () => {
+    await assertFails(getDocs(collection(anon(), 'users/pub/works')))
+    await assertFails(getDoc(doc(as('bob'), 'users/pub/watched/w1')))
+    await assertFails(setDoc(doc(as('pub'), 'users/pub/works/w2'), { title: 'x' }))
+    await assertSucceeds(getDocs(collection(as('pub'), 'users/pub/works')))
+    await assertSucceeds(deleteDoc(doc(as('pub'), 'users/pub/works/w1')))
+    await assertSucceeds(deleteDoc(doc(as('pub'), 'users/pub/watched/w1')))
+  })
+  it('les autres sous-collections inconnues restent fermées', async () => {
+    await assertFails(setDoc(doc(as('pub'), 'users/pub/autre/x'), { a: 1 }))
+    await assertFails(getDocs(collection(as('pub'), 'users/pub/autre')))
+  })
+})

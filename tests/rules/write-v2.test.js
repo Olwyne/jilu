@@ -10,11 +10,17 @@ import { syncLibrary } from '../../src/data/library.js'
 import { loadCatalog } from '../../src/data/catalog.js'
 import { assembleData } from '../../src/data/assemble.js'
 import { planV2Writes, applyPlanToLibrary, commitPlan, isEmptyPlan } from '../../src/data/writeV2.js'
-import { migrateAccount } from '../../src/lib/migration.js'
+import { buildLibraryDocs } from '../../src/data/libraryDocs.js'
 
 let env
 const as = (uid) => env.authenticatedContext(uid).firestore()
 const seed = (fn) => env.withSecurityRulesDisabled((c) => fn(c.firestore()))
+// Écrit directement les fiches v2 (catalogue + bibliothèque) d'un compte, règles désactivées
+const seedV2 = (uid, args) => seed(async (d) => {
+  const { catalog, library } = buildLibraryDocs({ uid, ...args })
+  for (const [id, c] of Object.entries(catalog)) await setDoc(doc(d, `catalog/${id}`), c)
+  for (const [id, l] of Object.entries(library)) await setDoc(doc(d, `users/${uid}/library/${id}`), l)
+})
 const season = (n, count) => ({ n, name: null, episodes: Array.from({ length: count }, (_, i) => ({ n: i + 1, title: `E${i + 1}`, air: i === 0 ? Infinity : 1000 })) })
 const W = (id, over = {}) => ({ id, source: 'tmdb', sourceId: Number(id.split('-').pop()), title: `Titre ${id}`, category: 'series', genre: 'Drame', year: 2020, seasons: [season(1, 4), season(2, 3)], status: 'a_voir', added: 1, ...over })
 
@@ -49,13 +55,12 @@ const forExistingWorks = (model) => {
 describe('écritures v2 : même résultat que l’ancien modèle', () => {
   it('suite complète d’actions, relue depuis zéro', async () => {
     const start = v1Seed()
-    await seed(async (d) => {
-      for (const [id, w] of Object.entries(start.works)) await setDoc(doc(d, `users/alice/works/${id}`), w)
-      await setDoc(doc(d, 'users/alice/watched/tmdb-tv-1'), { eps: { '1-1': 11, '1-2': 12 } })
-      await setDoc(doc(d, 'users/alice'), { ratings: start.ratings, reviews: start.reviews, favorites: {}, games: {} })
+    await seed((d) => setDoc(doc(d, 'users/alice'), { reviews: start.reviews }))
+    await seedV2('alice', {
+      works: start.works, watchedDocs: { 'tmdb-tv-1': { '1-1': 11, '1-2': 12 } },
+      main: { ratings: start.ratings, reviews: start.reviews, favorites: {}, games: {} },
     })
     const db = as('alice')
-    expect((await migrateAccount(db, 'alice')).verification.ok).toBe(true)
     const cache = await createCache(`w-${Math.random()}`)
     let { library } = await syncLibrary(db, 'alice', cache)
     let model = start
@@ -120,9 +125,8 @@ describe('écritures v2 : même résultat que l’ancien modèle', () => {
 
   it('cocher un épisode = exactement 1 document écrit, même sur une grosse série', async () => {
     const big = W('tmdb-tv-7', { seasons: [season(1, 500)], status: 'en_cours' })
-    await seed((d) => setDoc(doc(d, 'users/alice/works/tmdb-tv-7'), big))
+    await seedV2('alice', { works: { 'tmdb-tv-7': big } })
     const db = as('alice')
-    await migrateAccount(db, 'alice')
     const prev = { works: { 'tmdb-tv-7': big }, watched: {}, ratings: {}, favorites: {}, games: {}, reviews: [] }
     const plan = planV2Writes({ uid: 'alice', prev, patch: { watched: { 'tmdb-tv-7-1-250': 99 } }, now: Date.now() })
     expect((await commitPlan(db, 'alice', plan)).writes).toBe(1)

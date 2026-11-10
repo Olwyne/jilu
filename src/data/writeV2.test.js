@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { planV2Writes, applyPlanToLibrary, nestForFirestore, isEmptyPlan, DELETE } from './writeV2.js'
 import { assembleData } from './assemble.js'
-import { buildUserMigration } from '../lib/migration.js'
+import { buildLibraryDocs } from './libraryDocs.js'
 
 const season = (n, count) => ({ n, name: null, episodes: Array.from({ length: count }, (_, i) => ({ n: i + 1, title: `E${i + 1}`, air: i === 0 ? Infinity : 1000 })) })
 const W = (id, over = {}) => ({ id, source: 'tmdb', sourceId: 1, title: `T ${id}`, category: 'series', seasons: [season(1, 3)], status: 'en_cours', added: 1, ...over })
@@ -92,7 +92,7 @@ describe('planV2Writes : une action = une écriture par document touché', () =>
 
 describe('applyPlanToLibrary / nestForFirestore', () => {
   it('reflète le plan dans la copie locale, avec suppressions de clés', () => {
-    const { library } = buildUserMigration({ uid: 'u', works: base().works, watchedDocs: { a: { '1-1': 10 } }, main: { ratings: base().ratings }, now: 1 })
+    const { library } = buildLibraryDocs({ uid: 'u', works: base().works, watchedDocs: { a: { '1-1': 10 } }, main: { ratings: base().ratings }, now: 1 })
     const p = plan({ watched: { 'a-1-2': 20 }, ratings: {}, favorites: { a: true } })
     const out = applyPlanToLibrary(library, p)
     expect(out.a.eps).toEqual({ '1-2': 20 })
@@ -101,7 +101,7 @@ describe('applyPlanToLibrary / nestForFirestore', () => {
     expect(library.a.eps).toEqual({ '1-1': 10 }) // l'original n'est pas modifié
   })
   it('retire une œuvre supprimée de la copie locale', () => {
-    const { library } = buildUserMigration({ uid: 'u', works: base().works, now: 1 })
+    const { library } = buildLibraryDocs({ uid: 'u', works: base().works, now: 1 })
     expect(Object.keys(applyPlanToLibrary(library, plan({ works: { b: base().works.b } })))).toEqual(['b'])
   })
   it('construit un objet imbriqué pour Firestore (merge)', () => {

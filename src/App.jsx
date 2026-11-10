@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import i18n from './i18n/index.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useAppData, clearLocalCaches } from './hooks/useAppData'
-import { useCutover } from './data/useCutover'
 import { useWorkActions } from './hooks/useWorkActions'
 import { useImport } from './hooks/useImport'
 import { useFollows } from './hooks/useFollows'
@@ -74,15 +73,6 @@ function DetailRoute({ data, workActions, currentUser, onOpenEpisode }) {
 }
 
 // Prépare le compte (rattrapage à la première ouverture) avant d'afficher l'application.
-function Shell() {
-  const { t } = useTranslation()
-  const { user, logout } = useAuth()
-  const { status, progress, retry } = useCutover(user)
-  if (status === 'ready') return <ShellInner />
-  if (status === 'error') return <ErrorScreen message={t('cutover.error')} onRetry={retry} onLogout={logout} />
-  return <div role="status" style={fullScreenBox}>{progress || t('cutover.updating')}</div>
-}
-
 const fullScreenBox = { minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--color-muted)', fontSize: 15, padding: 24, textAlign: 'center' }
 
 function ErrorScreen({ message, onRetry, onLogout }) {
@@ -91,14 +81,14 @@ function ErrorScreen({ message, onRetry, onLogout }) {
     <div role="alert" style={fullScreenBox}>
       <div>
         <p style={{ marginBottom: 14 }}>{message}</p>
-        <Button variant="primary" style={{ marginRight: 10 }} onClick={onRetry}>{t('cutover.retry')}</Button>
-        <Button variant="secondary" onClick={onLogout}>{t('cutover.logout')}</Button>
+        <Button variant="primary" style={{ marginRight: 10 }} onClick={onRetry}>{t('data.retry')}</Button>
+        <Button variant="secondary" onClick={onLogout}>{t('data.logout')}</Button>
       </div>
     </div>
   )
 }
 
-function ShellInner() {
+function Shell() {
   const { user, logout } = useAuth()
   const {
     data, loading, error, saveError, mutate, syncAll, getFullData, getCatalogDoc,

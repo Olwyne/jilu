@@ -77,7 +77,7 @@ for (const ref of userRefs) {
     docExists: snap.exists,
     handle: snap.exists ? (snap.data().profile?.handle || null) : null,
     works: await countDocs(ref.collection('works')),
-    watched: await countDocs(ref.collection('watched')),
+    library: await countDocs(ref.collection('library')),
   })
 }
 
@@ -124,6 +124,7 @@ const rows = [...allUids].map((uid) => {
   if (a && !pseudos.length) notes.push('sans pseudo enregistré')
   if (f && !f.docExists) notes.push('document users absent (sous-collections restantes)')
   if (a?.disabled) notes.push('compte désactivé')
+  // Bloque le retrait du code de migration : ce compte verrait une bibliothèque vide
 
   return {
     uid,
@@ -132,8 +133,8 @@ const rows = [...allUids].map((uid) => {
     'créé le': day(a?.created),
     'dernière connexion': day(a?.lastSignIn),
     pseudo: pseudos.join(',') || f?.handle || '—',
-    œuvres: f?.works ?? 0,
-    'docs vus': f?.watched ?? 0,
+    'œuvres (v1)': f?.works ?? 0,
+    bibliothèque: f?.library ?? 0,
     avis: reviews,
     remarques: notes.join(' · '),
   }
@@ -168,6 +169,7 @@ if (args.backup && orphans.length) {
       user: userSnap.exists ? userSnap.data() : null,
       works: await dumpCollection(userRef.collection('works')),
       watched: await dumpCollection(userRef.collection('watched')),
+      library: await dumpCollection(userRef.collection('library')),
       reviews: (await db.collection('reviews').where('userId', '==', uid).get()).docs.map((d) => ({ id: d.id, data: d.data() })),
       pseudos: (pseudoByUid.get(uid) || []),
       follows: (await db.collection('follows').doc(uid).get()).data() || null,

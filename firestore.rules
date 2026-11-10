@@ -13,22 +13,16 @@ service cloud.firestore {
       allow read, write: if isOwner(uid);
       allow read: if resource.data.settings.publicProfile == true;
 
-      match /works/{workId} {
-        allow read, write: if isOwner(uid);
-        allow read: if get(/databases/$(database)/documents/users/$(uid)).data.settings.publicProfile == true;
-      }
-      match /watched/{workId} {
-        allow read, write: if isOwner(uid);
-        allow read: if get(/databases/$(database)/documents/users/$(uid)).data.settings.publicProfile == true;
+      // Ancien modèle (v1) et marqueurs de migration : plus utilisés, encore en base.
+      // Seul leur propriétaire peut les lire et les effacer (suppression de compte).
+      match /{legacy}/{docId} {
+        allow read, delete: if isOwner(uid) && legacy in ['works', 'watched', 'migrations'];
       }
 
       // Une fiche de bibliothèque par œuvre suivie (progression, statut, notes) ; publique si le profil l'est
       match /library/{workId} {
         allow read, write: if isOwner(uid);
         allow read: if get(/databases/$(database)/documents/users/$(uid)).data.settings.publicProfile == true;
-      }
-      match /migrations/{id} {
-        allow read, write: if isOwner(uid);
       }
     }
 
