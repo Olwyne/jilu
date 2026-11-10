@@ -8,22 +8,32 @@ Stack : React 19 + Vite · Firebase Auth + Firestore · Vercel
 
 ## Prérequis
 
-- Node.js 20+
-- Un projet Firebase (Auth email/mot de passe activé, Firestore en mode production)
-- Clés API optionnelles : TMDB, RAWG, Spotify (pour la recherche de catalogue)
+- Docker (rien d'autre à installer : Node, pnpm, Java et les émulateurs Firebase sont dans l'image)
+- Pour la prod : un projet Firebase (Auth e-mail/mot de passe, Firestore) et un projet Vercel
+- Clés API facultatives en local : TMDB, RAWG, Google Books, Spotify (recherche de catalogue)
 
 ---
 
-## Installation locale
+## Développement local (Docker)
 
 ```bash
-git clone <url-du-dépôt>
-cd jilu-app
-corepack enable              # pnpm (le dépôt utilise pnpm-lock.yaml)
-pnpm install
-cp .env.example .env.local   # puis remplir les variables
-pnpm run dev                 # http://localhost:5173
+git clone <url-du-dépôt> && cd jilu-app
+cp .env.example .env.local   # facultatif : clés des API de catalogue
+make up                      # site http://localhost:5173 · émulateurs http://localhost:4000
 ```
+
+| Commande | Effet |
+|---|---|
+| `make up` | (Re)construit l'image et lance le site + les émulateurs Auth/Firestore |
+| `make down` | Arrête tout ; les comptes et données locales sont conservés |
+| `make logs` | Suit les journaux |
+| `make reset` | Arrête tout et **efface** les données locales des émulateurs |
+| `make ci` | Lint, tests, tests des règles Firestore, build, audit — dans le conteneur |
+
+Le site local est branché sur les **émulateurs** Firebase (projet `demo-jilu`) : aucune donnée de production
+n'est lue ni écrite, et les variables `VITE_FIREBASE_*` sont ignorées. Les règles `firestore.rules` sont
+rechargées à chaud. Les recherches de catalogue passent par les vraies API (clés dans `.env.local`).
+Après un changement de dépendances, relancer `make up` (l'image est reconstruite).
 
 ---
 
@@ -57,11 +67,7 @@ firebase deploy --only firestore:rules
 
 Le fichier `firestore.rules` est inclus dans le dépôt. Chaque utilisateur lit/écrit son propre espace (`users/{uid}`) ; les profils publics sont lisibles par tous ; les pseudos sont uniques et non réattribuables ; les avis et scores du quiz sont validés (types, bornes, auteur).
 
-Tester les règles (émulateur Firestore + Java requis) :
-
-```bash
-pnpm run test:rules
-```
+Tests des règles : inclus dans `make ci`.
 
 ---
 
@@ -77,20 +83,8 @@ Ou connecter le dépôt directement dans le dashboard Vercel (Project → Settin
 
 ---
 
-## Dev Docker
-
-```bash
-docker compose up     # http://localhost:5173 avec hot-reload
-```
-
-`.env.local` doit exister avant de lancer le conteneur.
-
----
-
 ## Tests
 
 ```bash
-pnpm test             # vitest (une passe)
-pnpm run lint         # oxlint
-pnpm run test:rules   # règles Firestore (émulateur)
+make ci   # lint, tests, règles Firestore (émulateur), build, audit
 ```

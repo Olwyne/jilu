@@ -1,4 +1,33 @@
 services:
+  # Auth + Firestore locaux : le site de dev ne touche jamais la production.
+  # Données conservées dans le volume emulator-data (exportées à l'arrêt, réimportées au démarrage).
+  emulators:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    init: true
+    stop_signal: SIGINT # firebase-tools n'exporte les données que sur SIGINT (Ctrl-C)
+    stop_grace_period: 30s
+    working_dir: /emulators
+    volumes:
+      - ./firebase.json:/emulators/firebase.json:ro
+      - ./firestore.rules:/emulators/firestore.rules:ro
+      - emulator-data:/data
+    # Sous-dossier : l'export remplace son dossier cible, impossible sur le point de montage lui-même
+    command: sh -c "mkdir -p /data/export && exec firebase emulators:start --only auth,firestore --project demo-jilu --import /data/export --export-on-exit /data/export"
+    ports:
+      - "4000:4000" # interface des émulateurs
+      - "4400:4400"
+      - "4500:4500"
+      - "9099:9099" # Auth (joint par le navigateur)
+      - "8080:8080" # Firestore (joint par le navigateur)
+      - "9150:9150"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4400/emulators"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
   web:
     build:
       context: .
@@ -7,7 +36,15 @@ services:
       - "5173:5173"
     volumes:
       - .:/app
-      - /app/node_modules
+      - /app/node_modules # dépendances de l'image (make up les renouvelle à chaque lancement)
+    environment:
+      VITE_USE_EMULATOR: "1"
     env_file:
-      - .env.local
-    command: sh -c "pnpm install --frozen-lockfile && pnpm run dev --host"
+      - path: .env.local # clés des API de catalogue (TMDB, RAWG…) : facultatif
+        required: false
+    depends_on:
+      emulators:
+        condition: service_healthy
+
+volumes:
+  emulator-data:
