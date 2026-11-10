@@ -133,11 +133,13 @@ describe('loadCatalog (cache)', () => {
     expect((await loadCatalog(db, ids, cache, { now: 1000 + 31 * 24 * 3600 * 1000, maxAgeMs: ttl })).fetched).toBe(3)
   })
 
-  it('mémorise aussi les fiches absentes pour ne pas les redemander', async () => {
+  it('une fiche absente puis créée (ajout d’une œuvre nouvelle) est trouvée au chargement suivant', async () => {
     const db = as('alice')
-    const first = await loadCatalog(db, ['inconnue'], cache, { now: 1000 })
+    const first = await loadCatalog(db, ['nouvelle'], cache, { now: 1000 }) // « existe déjà ? » avant l'ajout
     expect(first.catalog).toEqual({})
-    expect((await loadCatalog(db, ['inconnue'], cache, { now: 2000 })).fetched).toBe(0)
+    await seed((d) => setDoc(doc(d, 'catalog/nouvelle'), work('nouvelle')))
+    const next = await loadCatalog(db, ['nouvelle'], cache, { now: 2000 })
+    expect(next.catalog.nouvelle).toMatchObject({ title: 'Titre nouvelle' })
   })
 
   it('garde l’ancienne fiche en cas d’absence côté serveur après péremption', async () => {

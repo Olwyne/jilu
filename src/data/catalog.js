@@ -18,7 +18,8 @@ export async function loadCatalog(db, ids, cache, { now = Date.now(), maxAgeMs =
     const entry = await cache.get(key(id))
     if (entry?.doc) result[id] = entry.doc
     const ttl = typeof maxAgeMs === 'function' ? maxAgeMs(entry?.doc) : maxAgeMs
-    const fresh = entry && now - entry.at < ttl
+    // « Absente » n'est jamais tenu pour acquis : la fiche est souvent créée juste après (ajout d'une œuvre nouvelle)
+    const fresh = entry?.doc && now - entry.at < ttl
     if (!fresh || forced.has(id)) toFetch.push(id)
   }
 
@@ -34,7 +35,7 @@ export async function loadCatalog(db, ids, cache, { now = Date.now(), maxAgeMs =
       result[d.id] = d.data()
       entries.push([key(d.id), { doc: d.data(), at: now }])
     })
-    // fiche absente du serveur : on le mémorise aussi (évite de la redemander à chaque ouverture)
+    // fiche absente du serveur : on garde l'ancienne version si on en avait une
     chunk.filter((id) => !found.has(id)).forEach((id) => entries.push([key(id), { doc: result[id] ?? null, at: now }]))
     await cache.setMany(entries)
   }
