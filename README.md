@@ -31,8 +31,10 @@ make up                      # site http://localhost:5173 · émulateurs http://
 | `make ci` | Lint, tests, tests des règles Firestore, build, audit — dans le conteneur |
 
 Le site local est branché sur les **émulateurs** Firebase (projet `demo-jilu`) : aucune donnée de production
-n'est lue ni écrite, et les variables `VITE_FIREBASE_*` sont ignorées. Les règles `firestore.rules` sont
-rechargées à chaud. Les recherches de catalogue passent par les vraies API (clés dans `.env.local`).
+n'est lue ni écrite, et les variables `VITE_FIREBASE_*` sont ignorées. C'est vrai pour tout serveur de dev
+(`vite`), même lancé hors Docker : seul le build de production utilise le vrai projet Firebase. Les règles `firestore.rules` sont
+rechargées à chaud. Les recherches de catalogue passent par les fonctions de `api/` (servies par Vite, même code qu'en prod) et
+les vraies API (clés dans `.env.local`) ; `api/refresh-work` écrit dans l'émulateur.
 Après un changement de dépendances, relancer `make up` (l'image est reconstruite).
 
 ---
@@ -51,7 +53,7 @@ Copier `.env.example` en `.env.local` et renseigner chaque valeur.
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | serveur | Spotify (**ne pas préfixer `VITE_`**) |
 | `FIREBASE_SERVICE_ACCOUNT` | serveur | Clé de compte de service (JSON ou base64) : permet à `api/refresh-work.js` de mettre à jour le catalogue partagé. Jamais dans le dépôt ni côté client |
 
-> Les variables « serveur » sont lues par les fonctions Vercel de `api/` (et par le plugin de dev dans `vite.config.js`). Un préfixe `VITE_` les ferait entrer dans le bundle client.
+> Les variables « serveur » sont lues par les fonctions Vercel de `api/` (servies telles quelles en dev par `vite.config.js`). Un préfixe `VITE_` les ferait entrer dans le bundle client.
 
 > `SPOTIFY_CLIENT_ID` et `SPOTIFY_CLIENT_SECRET` sont lus uniquement par `api/spotify-token.js` (fonction Vercel serverless) — ils ne doivent jamais apparaître dans le bundle client.
 

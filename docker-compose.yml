@@ -38,7 +38,10 @@ services:
       - .:/app
       - /app/node_modules # dépendances de l'image (make up les renouvelle à chaque lancement)
     environment:
-      VITE_USE_EMULATOR: "1"
+      # api/refresh-work (Admin SDK) en local : vers les émulateurs
+      FIRESTORE_EMULATOR_HOST: emulators:8080
+      FIREBASE_AUTH_EMULATOR_HOST: emulators:9099
+      GCLOUD_PROJECT: demo-jilu
     env_file:
       - path: .env.local # clés des API de catalogue (TMDB, RAWG…) : facultatif
         required: false

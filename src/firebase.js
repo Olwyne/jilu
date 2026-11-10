@@ -2,9 +2,10 @@ import { initializeApp } from 'firebase/app'
 import { getAuth, connectAuthEmulator } from 'firebase/auth'
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
 
-// `pnpm dev:local` : émulateurs Auth + Firestore, jamais la base de production.
+// Serveur de dev (`make up`) : toujours les émulateurs Auth + Firestore, jamais la base de production.
 // Projet « demo-* » : le SDK n'a besoin d'aucune vraie clé, et ne peut rien joindre en ligne.
-const useEmulator = import.meta.env.VITE_USE_EMULATOR === '1'
+// (`mode` vaut « test » sous vitest et « production » au build : seuls les vrais réglages y servent.)
+const useEmulator = import.meta.env.MODE === 'development'
 
 const firebaseConfig = useEmulator
   ? { apiKey: 'demo', authDomain: 'localhost', projectId: 'demo-jilu' }

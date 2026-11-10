@@ -6,10 +6,6 @@ function apiUrl(path, params = {}) {
     if (Array.isArray(v)) v.forEach((val) => qs.append(k, val))
     else qs.set(k, v)
   }
-  const qsStr = qs.toString()
-  if (import.meta.env?.DEV) {
-    return `/mangadex-proxy${path}${qsStr ? '?' + qsStr : ''}`
-  }
   qs.set('path', path)
   return '/api/mangadex?' + qs.toString()
 }

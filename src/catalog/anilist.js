@@ -1,7 +1,7 @@
 import { mangadexGetChapterMap } from './mangadex.js'
 import { http } from './http.js'
 
-const ENDPOINT = import.meta.env?.DEV ? '/anilist-proxy' : 'https://graphql.anilist.co'
+const ENDPOINT = 'https://graphql.anilist.co' // CORS ouvert : appel direct, en dev comme en prod
 const DAY = 86400000
 const MIN_INTERVAL = 800
 let lastGqlCall = 0

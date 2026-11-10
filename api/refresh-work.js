@@ -12,6 +12,10 @@ import { fetchFreshWork } from '../src/catalog/refresh.js'
 let handler
 
 function init() {
+  if (!getApps().length && process.env.FIRESTORE_EMULATOR_HOST) {
+    // Dev (docker compose) : émulateurs Auth + Firestore, aucune clé nécessaire. Jamais défini sur Vercel.
+    initializeApp({ projectId: process.env.GCLOUD_PROJECT || 'demo-jilu' })
+  }
   if (!getApps().length) {
     const raw = process.env.FIREBASE_SERVICE_ACCOUNT
     if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT manquante')

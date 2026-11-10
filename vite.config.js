@@ -1,107 +1,44 @@
+import { existsSync } from 'node:fs'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-function tmdbProxyPlugin(env) {
+// Dev : sert les fonctions Vercel de api/ telles quelles (mêmes listes blanches, même code qu'en prod).
+// Adaptateur minimal vers l'API req/res de Vercel : req.query, req.body (texte brut), res.status().json().
+function vercelApiPlugin() {
   return {
-    name: 'tmdb-proxy',
+    name: 'vercel-api',
     configureServer(server) {
-      server.middlewares.use('/api/tmdb', async (req, res) => {
+      server.middlewares.use('/api', async (req, res, next) => {
         const url = new URL(req.url, 'http://localhost')
-        const path = url.searchParams.get('path')
-        url.searchParams.delete('path')
-        url.searchParams.set('api_key', env.TMDB_API_KEY)
-        try {
-          const upstream = await fetch(`https://api.themoviedb.org/3${path}?${url.searchParams}`)
-          const json = await upstream.json()
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify(json))
-        } catch (e) {
-          res.statusCode = 500
-          res.end(JSON.stringify({ error: e.message }))
+        const name = url.pathname.slice(1)
+        // Comme sur Vercel : seules les fonctions sont des routes (jamais _proxy, _lib ni le code source)
+        const notFound = () => { res.statusCode = 404; res.end() }
+        if (!/^[a-z-]+$/.test(name) || !existsSync(`api/${name}.js`)) return notFound()
+        const mod = await server.ssrLoadModule(`/api/${name}.js`)
+        req.query = {}
+        for (const k of new Set(url.searchParams.keys())) {
+          const all = url.searchParams.getAll(k)
+          req.query[k] = all.length > 1 ? all : all[0]
         }
+        let body = ''
+        for await (const chunk of req) body += chunk
+        req.body = body || undefined
+        res.status = (code) => { res.statusCode = code; return res }
+        res.json = (obj) => { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(obj)) }
+        try { await mod.default(req, res) } catch (e) { server.ssrFixStacktrace(e); next(e) }
       })
-    }
-  }
-}
-
-function rawgProxyPlugin(env) {
-  return {
-    name: 'rawg-proxy',
-    configureServer(server) {
-      server.middlewares.use('/api/rawg', async (req, res) => {
-        const url = new URL(req.url, 'http://localhost')
-        url.searchParams.set('key', env.RAWG_API_KEY)
-        try {
-          const upstream = await fetch(`https://api.rawg.io/api/games?${url.searchParams}`)
-          const json = await upstream.json()
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify(json))
-        } catch (e) {
-          res.statusCode = 500
-          res.end(JSON.stringify({ error: e.message }))
-        }
-      })
-    }
-  }
-}
-
-function booksProxyPlugin(env) {
-  return {
-    name: 'books-proxy',
-    configureServer(server) {
-      server.middlewares.use('/api/books', async (req, res) => {
-        const url = new URL(req.url, 'http://localhost')
-        url.searchParams.set('key', env.GOOGLE_BOOKS_API_KEY)
-        try {
-          const upstream = await fetch(`https://www.googleapis.com/books/v1/volumes?${url.searchParams}`)
-          const json = await upstream.json()
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify(json))
-        } catch (e) {
-          res.statusCode = 500
-          res.end(JSON.stringify({ error: e.message }))
-        }
-      })
-    }
-  }
-}
-
-function spotifyTokenPlugin(env) {
-  return {
-    name: 'spotify-token',
-    configureServer(server) {
-      server.middlewares.use('/api/spotify-token', async (req, res) => {
-        const id = env.SPOTIFY_CLIENT_ID
-        const secret = env.SPOTIFY_CLIENT_SECRET
-        const basic = Buffer.from(`${id}:${secret}`).toString('base64')
-        try {
-          const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'grant_type=client_credentials'
-          })
-          const json = await tokenRes.json()
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ access_token: json.access_token }))
-        } catch (e) {
-          res.statusCode = 500
-          res.end(JSON.stringify({ error: e.message }))
-        }
-      })
-    }
+    },
   }
 }
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+  // Clés des API (TMDB, RAWG…) de .env.local : lues par les fonctions de api/ via process.env, comme sur Vercel
+  for (const [k, v] of Object.entries(loadEnv(mode, process.cwd(), ''))) process.env[k] ??= v
   return {
   plugins: [
     react(),
-    tmdbProxyPlugin(env),
-    rawgProxyPlugin(env),
-    booksProxyPlugin(env),
-    spotifyTokenPlugin(env),
+    vercelApiPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
@@ -169,18 +106,6 @@ export default defineConfig(({ mode }) => {
   server: {
     port: process.env.PORT ? parseInt(process.env.PORT) : 5173,
     allowedHosts: ['jilu.localhost', 'localhost'],
-    proxy: {
-      '/anilist-proxy': {
-        target: 'https://graphql.anilist.co',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/anilist-proxy/, '')
-      },
-      '/mangadex-proxy': {
-        target: 'https://api.mangadex.org',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/mangadex-proxy/, '')
-      }
-    }
   },
   test: {
     environment: 'jsdom',
