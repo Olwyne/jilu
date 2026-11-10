@@ -12,10 +12,10 @@ const mockRes = () => {
   res.json = (b) => { res.body = b; return res }
   return res
 }
-const run = async ({ secret = 's', auth = 'Bearer s', airing = [], now = () => NOW, budgetMs } = {}) => {
+const run = async ({ secret = 's', auth = 'Bearer s', airing = [], now = () => NOW, budgetMs, concurrency } = {}) => {
   const store = { listAiring: vi.fn(async () => airing) }
   const res = mockRes()
-  await createCronHandler({ store, fetchFresh: vi.fn(), secret, now, budgetMs })({ headers: { authorization: auth } }, res)
+  await createCronHandler({ store, fetchFresh: vi.fn(), secret, now, budgetMs, concurrency })({ headers: { authorization: auth } }, res)
   return { res, store }
 }
 
@@ -40,7 +40,7 @@ describe('cron de rafraîchissement', () => {
       { id: 'a', refreshedAt: NOW - 5 * DAY },
       { id: 'jamais', refreshedAt: 0 },
     ]
-    const { res } = await run({ airing })
+    const { res } = await run({ airing, concurrency: 1 })
     expect(refreshCatalogWork.mock.calls.map((c) => c[0].id)).toEqual(['jamais', 'a', 'b'])
     expect(refreshCatalogWork.mock.calls[0][0].minAgeMs).toBe(CRON_MIN_AGE_MS)
     expect(res.body).toEqual({ refreshed: 1, skipped: 1, failed: 1, due: 3, remaining: 0 })
@@ -54,5 +54,21 @@ describe('cron de rafraîchissement', () => {
     const { res } = await run({ airing, now, budgetMs: 45_000 })
     expect(res.body.refreshed).toBeLessThan(4)
     expect(res.body.remaining).toBe(4 - res.body.refreshed)
+  })
+
+  it('traite plusieurs œuvres en parallèle, jamais plus que la limite, chacune une seule fois', async () => {
+    let inFlight = 0
+    let peak = 0
+    refreshCatalogWork.mockReset().mockImplementation(async () => {
+      inFlight++; peak = Math.max(peak, inFlight)
+      await new Promise((r) => setTimeout(r, 5))
+      inFlight--
+      return { status: 'refreshed' }
+    })
+    const airing = Array.from({ length: 10 }, (_, i) => ({ id: `w${i}`, refreshedAt: 0 }))
+    const { res } = await run({ airing, concurrency: 3 })
+    expect(peak).toBe(3)
+    expect(new Set(refreshCatalogWork.mock.calls.map((c) => c[0].id)).size).toBe(10)
+    expect(res.body).toMatchObject({ refreshed: 10, remaining: 0 })
   })
 })
