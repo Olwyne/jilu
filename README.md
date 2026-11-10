@@ -10,7 +10,7 @@ Stack : React 19 + Vite · Firebase Auth + Firestore · Vercel
 
 - Docker (rien d'autre à installer : Node, pnpm, Java et les émulateurs Firebase sont dans l'image)
 - Pour la prod : un projet Firebase (Auth e-mail/mot de passe, Firestore) et un projet Vercel
-- Clés API facultatives en local : TMDB, RAWG, Google Books, Spotify (recherche de catalogue)
+- Clés API facultatives en local : TMDB, IGDB (Twitch), Google Books, Spotify (recherche de catalogue)
 
 ---
 
@@ -48,7 +48,7 @@ Copier `.env.example` en `.env.local` et renseigner chaque valeur.
 | `VITE_FIREBASE_API_KEY` … `VITE_FIREBASE_APP_ID` | client | Configuration Firebase (publique par conception — restreindre la clé par référent dans Google Cloud) |
 | `VITE_EMAILJS_PUBLIC_KEY`, `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID` | client | Formulaire de feedback |
 | `TMDB_API_KEY` | serveur | Clé TMDB (séries & films) |
-| `RAWG_API_KEY` | serveur | Clé RAWG (jeux vidéo) |
+| `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` | serveur | Application Twitch pour IGDB (jeux vidéo, durées de jeu) — [dev.twitch.tv/console/apps](https://dev.twitch.tv/console/apps) |
 | `GOOGLE_BOOKS_API_KEY` | serveur | Clé Google Books |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | serveur | Spotify (**ne pas préfixer `VITE_`**) |
 | `FIREBASE_SERVICE_ACCOUNT` | serveur | Clé de compte de service (JSON ou base64) : permet à `api/refresh-work.js` de mettre à jour le catalogue partagé. Jamais dans le dépôt ni côté client |

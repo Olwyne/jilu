@@ -63,6 +63,14 @@ export default defineConfig(({ mode }) => {
             },
           },
           {
+            urlPattern: /^https:\/\/images\.igdb\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'igdb-images',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+          {
             urlPattern: /^https:\/\/media\.rawg\.io\/.*/i,
             handler: 'CacheFirst',
             options: {

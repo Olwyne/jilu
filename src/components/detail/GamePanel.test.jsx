@@ -52,4 +52,11 @@ describe('GamePanel', () => {
     await userEvent.click(checkbox)
     expect(onToggleTier).toHaveBeenCalledWith('g1', 'main')
   })
+
+  it('affiche les durées estimées par IGDB à côté des paliers', () => {
+    render(<GamePanel workId="g1" game={null} timeToBeat={{ main: 50, extra: null, full: 135 }} onAddMinutes={() => {}} onToggleTier={() => {}} />)
+    expect(screen.getByText('≈ 50 h')).toBeInTheDocument()
+    expect(screen.getByText('≈ 135 h')).toBeInTheDocument()
+    expect(screen.getAllByText(/≈/)).toHaveLength(2)
+  })
 })

@@ -269,6 +269,8 @@
   "game.main": "Main quest",
   "game.extra": "Side quests & extras",
   "game.full": "100% completion",
+  "game.estimate": "≈ {{count}} h",
+  "game.estimateSource": "Average time estimated by IGDB",
   "calendar.catchUp": "To catch up",
   "calendar.upcoming": "Upcoming",
   "calendar.toStart": "To start",

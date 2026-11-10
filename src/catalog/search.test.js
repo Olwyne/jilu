@@ -4,13 +4,13 @@ import { searchCatalog } from './search'
 vi.mock('./tmdb', () => ({ tmdbSearch: vi.fn(), tmdbTrending: vi.fn() }))
 vi.mock('./anilist', () => ({ anilistSearch: vi.fn(), anilistTrending: vi.fn(), anilistSearchManga: vi.fn(), anilistTrendingManga: vi.fn() }))
 vi.mock('./googleBooks', () => ({ googleBooksSearch: vi.fn(), googleBooksTrending: vi.fn() }))
-vi.mock('./rawg', () => ({ rawgSearch: vi.fn(), rawgTrending: vi.fn() }))
+vi.mock('./igdb', () => ({ igdbSearch: vi.fn(), igdbTrending: vi.fn() }))
 vi.mock('./spotify', () => ({ spotifySearch: vi.fn() }))
 
 import { tmdbSearch } from './tmdb'
 import { anilistSearch, anilistSearchManga } from './anilist'
 import { googleBooksSearch } from './googleBooks'
-import { rawgSearch } from './rawg'
+import { igdbSearch } from './igdb'
 import { spotifySearch } from './spotify'
 
 describe('searchCatalog', () => {
@@ -19,7 +19,7 @@ describe('searchCatalog', () => {
     anilistSearch.mockResolvedValue([{ id: 'a1', title: 'A' }])
     anilistSearchManga.mockResolvedValue([])
     googleBooksSearch.mockResolvedValue([{ id: 'b1', title: 'B' }])
-    rawgSearch.mockResolvedValue([{ id: 'g1', title: 'G' }])
+    igdbSearch.mockResolvedValue([{ id: 'g1', title: 'G' }])
     spotifySearch.mockResolvedValue([{ id: 's1', title: 'S' }])
     const results = await searchCatalog('x')
     expect(results.map((r) => r.id).sort()).toEqual(['a1', 'b1', 'g1', 's1', 't1'])
@@ -30,7 +30,7 @@ describe('searchCatalog', () => {
     tmdbSearch.mockResolvedValue([])
     anilistSearch.mockResolvedValue([])
     googleBooksSearch.mockResolvedValue([])
-    rawgSearch.mockResolvedValue([])
+    igdbSearch.mockResolvedValue([])
     spotifySearch.mockResolvedValue([])
     const results = await searchCatalog('one piece', 'mangas')
     expect(results).toEqual([{ id: 'm1', title: 'One Piece', category: 'mangas' }])
@@ -41,7 +41,7 @@ describe('searchCatalog', () => {
     anilistSearch.mockResolvedValue([{ id: 'a1', title: 'A' }])
     anilistSearchManga.mockResolvedValue([])
     googleBooksSearch.mockResolvedValue([])
-    rawgSearch.mockResolvedValue([])
+    igdbSearch.mockResolvedValue([])
     spotifySearch.mockResolvedValue([])
     const results = await searchCatalog('x')
     expect(results).toEqual([{ id: 'a1', title: 'A' }])

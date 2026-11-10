@@ -269,6 +269,8 @@
   "game.main": "Quête principale",
   "game.extra": "Extras & secondaires",
   "game.full": "Complétion 100 %",
+  "game.estimate": "≈ {{count}} h",
+  "game.estimateSource": "Durée moyenne estimée par IGDB",
   "calendar.catchUp": "À rattraper",
   "calendar.upcoming": "À venir",
   "calendar.toStart": "À commencer",

@@ -18,7 +18,8 @@ function formatDuration(totalMinutes) {
   return `${h} h ${m} min`
 }
 
-export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) {
+// timeToBeat (facultatif) : durées estimées en heures par IGDB, { main, extra, full }
+export default function GamePanel({ workId, game, timeToBeat, onAddMinutes, onToggleTier }) {
   const { t } = useTranslation()
   const TIERS = [
     ['main', t('game.main')],
@@ -143,6 +144,7 @@ export default function GamePanel({ workId, game, onAddMinutes, onToggleTier }) 
             <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderTop: '1px solid var(--color-border)' }}>
               <div {...pressable(() => onToggleTier(workId, key), { role: 'checkbox', checked: on, label })} style={{ width: 24, height: 24, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', color: 'var(--color-on-green)', background: on ? 'var(--color-green)' : 'transparent', border: `2px solid ${on ? 'var(--color-green)' : 'var(--color-check-border)'}` }}>{on ? '✓' : ''}</div>
               <span style={{ fontWeight: 600, fontSize: 14.5, flex: 1, textDecoration: on ? 'line-through' : 'none', color: on ? 'var(--color-muted)' : 'inherit' }}>{label}</span>
+              {timeToBeat?.[key] && <span title={t('game.estimateSource')} style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('game.estimate', { count: timeToBeat[key] })}</span>}
             </div>
           )
         })}

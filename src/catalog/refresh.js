@@ -3,12 +3,14 @@
 import { tmdbGetDetail, tmdbGetBothMeta } from './tmdb.js'
 import { anilistFindId, anilistGetDetail, anilistGetMangaDetail } from './anilist.js'
 import { spotifyGetDetail } from './spotify.js'
+import { igdbGetDetail } from './igdb.js'
 
 export const DETAIL_FETCHERS = {
   tmdb: tmdbGetDetail,
   anilist: (work) => anilistGetDetail(work.anilistId || work.sourceId).then((d) => ({ ...work, ...d })),
   'anilist-manga': (work) => anilistGetMangaDetail(work.sourceId).then((d) => ({ ...work, ...d })),
-  spotify: spotifyGetDetail
+  spotify: spotifyGetDetail,
+  igdb: igdbGetDetail,
 }
 
 export async function fetchFreshWork(work) {

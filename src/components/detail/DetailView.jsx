@@ -126,7 +126,7 @@ export default function DetailView({ work, watched, ratings, games, actions, onO
       </div>
 
       {work.category === 'jeux' && (
-        <GamePanel workId={work.id} game={games[work.id]} onAddMinutes={actions.addGameMinutes} onToggleTier={actions.toggleGameTier} />
+        <GamePanel workId={work.id} game={games[work.id]} timeToBeat={work.timeToBeat} onAddMinutes={actions.addGameMinutes} onToggleTier={actions.toggleGameTier} />
       )}
 
       {work.seasons && work.seasons.length > 0 && (

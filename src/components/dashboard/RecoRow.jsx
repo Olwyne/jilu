@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { tmdbDiscover } from '../../catalog/tmdb'
 import { anilistDiscoverAnime, anilistDiscoverManga } from '../../catalog/anilist'
-import { rawgDiscover } from '../../catalog/rawg'
+import { igdbDiscover } from '../../catalog/igdb'
 import { googleBooksDiscover } from '../../catalog/googleBooks'
 import PosterBox from '../ui/PosterBox'
 import { pressable } from '../../lib/a11y'
@@ -46,11 +46,11 @@ async function fetchAnilistPool(works, cat) {
   } catch { return [] }
 }
 
-async function fetchRawgPool(works) {
+async function fetchGamesPool(works) {
   const genres = topGenres(works, 'jeux').slice(0, 2)
   const pool = []
   for (const genre of genres.length ? genres : ['action']) {
-    try { const res = await rawgDiscover(genre); for (const r of res) { if (!pool.find((x) => x.id === r.id)) pool.push(r) } } catch { /* skip */ }
+    try { const res = await igdbDiscover(genre); for (const r of res) { if (!pool.find((x) => x.id === r.id)) pool.push(r) } } catch { /* skip */ }
     if (pool.length >= 20) break
   }
   return pool
@@ -140,7 +140,7 @@ export default function RecoRow({ works, onAddWork }) {
       fetchTmdbPool(works, 'series'),
       fetchAnilistPool(works, 'animes'),
       fetchAnilistPool(works, 'mangas'),
-      fetchRawgPool(works),
+      fetchGamesPool(works),
       fetchBooksPool(works),
     ]).then(([films, series, animes, mangas, jeux, livres]) => {
       if (!cancelled) { setPools({ films, series, animes, mangas, jeux, livres }); setLoading(false) }
