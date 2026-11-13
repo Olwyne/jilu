@@ -21,6 +21,16 @@ export function createAdminStore(db = getFirestore()) {
         return { ok: true, doc }
       })
     },
+    // Création seule : false si la fiche existe déjà (créée entre-temps par une autre requête)
+    async create(id, data) {
+      try {
+        await col.doc(id).create(data)
+        return true
+      } catch (e) {
+        if (e.code === 6) return false // ALREADY_EXISTS
+        throw e
+      }
+    },
     async save(id, data) {
       await col.doc(id).set(data) // remplace la fiche entière (sans leaseUntil : le verrou est levé)
     },

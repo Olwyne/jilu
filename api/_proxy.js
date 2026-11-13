@@ -29,7 +29,7 @@ export function pickParams(query, allowed, arrays = []) {
 
 export async function forward(res, url, init) {
   try {
-    const upstream = await fetch(url, init)
+    const upstream = await fetch(url, { signal: AbortSignal.timeout(10_000), ...init }) // API muette : 502, pas 60 s d'attente
     const json = await upstream.json()
     if (upstream.ok) res.setHeader('Cache-Control', CACHE)
     res.status(upstream.status).json(json)

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Modal from '../ui/Modal'
 import emailjs from '@emailjs/browser'
-import { doc, getDoc, setDoc, getDocs, writeBatch, collection, query, where } from 'firebase/firestore'
+import { doc, getDoc, setDoc, getDocs, writeBatch, collection, query, where, documentId } from 'firebase/firestore'
 import { getTodayKey } from '../../lib/quizQuestions'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -55,7 +55,7 @@ function FeedbackSection({ profile }) {
           subject: subject.trim(),
           message: message.trim(),
           user_handle: profile?.handle || '—',
-          user_uid: profile?.uid || '—',
+          user_uid: user.uid,
           user_agent: navigator.userAgent,
           language: navigator.language,
           screen: `${screen.width}×${screen.height} (viewport ${window.innerWidth}×${window.innerHeight})`,
@@ -210,11 +210,22 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           await deleteAll((await getDocs(collection(db, 'users', uid, name))).docs)
         }
         await deleteAll((await getDocs(query(collection(db, 'reviews'), where('userId', '==', uid)))).docs)
+        // Fiches locales du catalogue (œuvres importées sans correspondance) : publiques, et l'uid est dans leur id
+        await deleteAll((await getDocs(query(collection(db, 'catalog'), where(documentId(), '>=', `local-${uid}-`), where(documentId(), '<', `local-${uid}-`)))).docs)
+        // Scores du quiz : un document par jour joué, sous quiz/{jour}. Sans liste des jours joués, on efface
+        // chaque jour depuis la création du compte (± 1 jour : fuseaux horaires) ; effacer un score absent est sans effet.
+        const quizScores = []
+        const day = new Date(user.metadata?.creationTime || Date.now())
+        day.setDate(day.getDate() - 1)
+        const lastDay = Date.now() + 24 * 60 * 60 * 1000
+        for (; day.getTime() <= lastDay; day.setDate(day.getDate() + 1)) {
+          quizScores.push({ ref: doc(db, 'quiz', getTodayKey(day), 'scores', uid) })
+        }
+        await deleteAll(quizScores)
         const handle = (profile?.handle || '').toLowerCase()
         const last = writeBatch(db)
         if (handle) last.delete(doc(db, 'pseudos', handle))
         last.delete(doc(db, 'follows', uid))
-        last.delete(doc(db, 'quiz', getTodayKey(), 'scores', uid))
         last.delete(doc(db, 'users', uid))
         await last.commit()
       })

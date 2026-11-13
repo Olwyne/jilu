@@ -8,6 +8,8 @@ import { refreshCatalogWork, MIN_AGE_MS } from '../../api/_lib/refreshCatalog.js
 let app, db, store
 const NOW = 10 * MIN_AGE_MS
 const season = (n) => ({ n: 1, name: null, episodes: Array.from({ length: n }, (_, i) => ({ n: i + 1, title: `E${i + 1}`, air: i === 0 ? Infinity : 1000 })) })
+// fetchFresh(id) : fiche reconstruite depuis la source
+const upstream = (over = {}) => async (id) => ({ id, source: 'tmdb', sourceId: 1, title: 'Série', category: 'series', seasons: [season(3)], ...over })
 const seed = (over = {}) => db.doc('catalog/tmdb-tv-1').set({ id: 'tmdb-tv-1', source: 'tmdb', sourceId: 1, title: 'Série', category: 'series', seasons: [season(3)], refreshedAt: 1, ...over })
 
 beforeAll(() => {
@@ -23,7 +25,7 @@ beforeEach(async () => {
 describe('rafraîchissement contre Firestore', () => {
   it('5 requêtes simultanées : une seule appelle les API', async () => {
     await seed()
-    const fetchFresh = vi.fn(async (w) => { await new Promise((r) => setTimeout(r, 150)); return { ...w, title: 'Série (maj)', seasons: [season(6)] } })
+    const fetchFresh = vi.fn(async (id) => { await new Promise((r) => setTimeout(r, 150)); return upstream({ title: 'Série (maj)', seasons: [season(6)] })(id) })
     const results = await Promise.all(Array.from({ length: 5 }, () => refreshCatalogWork({ store, fetchFresh, id: 'tmdb-tv-1', now: NOW })))
     expect(fetchFresh).toHaveBeenCalledTimes(1)
     expect(results.filter((r) => r.status === 'refreshed')).toHaveLength(1)
@@ -48,13 +50,13 @@ describe('rafraîchissement contre Firestore', () => {
     const before = (await db.doc('catalog/tmdb-tv-1').get()).data()
     expect(before.leaseUntil).toBe(0)
     expect(before.seasons[0].episodes).toHaveLength(3)
-    const retry = await refreshCatalogWork({ store, fetchFresh: async (w) => ({ ...w, title: 'ok' }), id: 'tmdb-tv-1', now: NOW + 10 })
+    const retry = await refreshCatalogWork({ store, fetchFresh: upstream({ title: 'ok' }), id: 'tmdb-tv-1', now: NOW + 10 })
     expect(retry.status).toBe('refreshed')
   })
 
   it('un résultat vide ne remplace pas la fiche existante', async () => {
     await seed()
-    await expect(refreshCatalogWork({ store, fetchFresh: async (w) => ({ ...w, seasons: [] }), id: 'tmdb-tv-1', now: NOW })).rejects.toMatchObject({ code: 'empty_result' })
+    await expect(refreshCatalogWork({ store, fetchFresh: upstream({ seasons: [] }), id: 'tmdb-tv-1', now: NOW })).rejects.toMatchObject({ code: 'empty_result' })
     expect((await db.doc('catalog/tmdb-tv-1').get()).data().seasons[0].episodes).toHaveLength(3)
   })
 

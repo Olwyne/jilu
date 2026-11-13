@@ -1,7 +1,4 @@
 import i18n from '../i18n/index.js'
-import { tmdbGetBothMeta } from '../catalog/tmdb'
-import { anilistFindId, anilistGetDetail } from '../catalog/anilist'
-import { DETAIL_FETCHERS } from '../catalog/refresh'
 import { DELETE } from '../data/writeV2.js'
 import { assignRatings } from '../data/libraryDocs.js'
 
@@ -31,7 +28,7 @@ const epSub = (key) => key.split('-').slice(-2).join('-')
 const workOfKey = (key) => key.split('-').slice(0, -2).join('-')
 
 // store : { mutate (document utilisateur), writeLibrary (bibliothèque) } fournis par useAppData
-// services (facultatif) : fiche du catalogue partagé et rafraîchissement côté serveur
+// services : création des fiches partagées et rafraîchissement, côté serveur (fournis par useAppData)
 export function useWorkActions(data, { mutate, writeLibrary }, services = {}) {
   // Coche/décoche des épisodes d'une œuvre : { clé: horodatage | null }, statut ajusté au passage
   async function setEpisodes(workId, changes, { confirmResume = false } = {}) {
@@ -122,8 +119,9 @@ export function useWorkActions(data, { mutate, writeLibrary }, services = {}) {
   async function postComment(workId, sNum, eNum, text) {
     const t = (text || '').trim()
     if (!t) return
-    const key = sNum ? `${workId}-${sNum}-${eNum}` : `w:${workId}`
-    const entry = { id: 'c' + Date.now(), key, workId, sNum: sNum || null, eNum: eNum || null, text: t, ts: Date.now(), likes: 0, liked: false }
+    // != null : la saison 0 existe (spéciaux d'animé, scans de manga)
+    const key = sNum != null ? `${workId}-${sNum}-${eNum}` : `w:${workId}`
+    const entry = { id: 'c' + Date.now(), key, workId, sNum: sNum ?? null, eNum: eNum ?? null, text: t, ts: Date.now(), likes: 0, liked: false }
     await mutate({ feed: [entry, ...(data.feed || [])] })
   }
 
@@ -151,7 +149,11 @@ export function useWorkActions(data, { mutate, writeLibrary }, services = {}) {
   }
 
   async function removeWork(workId) {
-    await writeLibrary({ remove: [workId] }) // notes, favori et progression partent avec la fiche
+    // notes, favori et progression partent avec la fiche ; l'avis recopié dans le document utilisateur
+    // (lu par le fil d'amis) aussi
+    const reviews = data.reviews || []
+    if (reviews.some((r) => r.id === workId)) await writeLibrary({ remove: [workId] }, { reviews: reviews.filter((r) => r.id !== workId) })
+    else await writeLibrary({ remove: [workId] })
   }
 
   async function toggleFavorite(workId) {
@@ -173,34 +175,10 @@ export function useWorkActions(data, { mutate, writeLibrary }, services = {}) {
 
   async function addWork(searchResult) {
     if (data.works[searchResult.id]) return
-
-    // Quelqu'un l'a déjà ajoutée : la fiche partagée existe, aucun appel aux API
-    const shared = await services.getCatalogDoc?.(searchResult.id).catch(() => null)
-    let work
-    if (shared) {
-      work = Object.fromEntries(Object.entries(shared).filter(([k]) => !CATALOG_ONLY.includes(k)))
-    } else {
-      const fetchDetail = DETAIL_FETCHERS[searchResult.source]
-      const [detailed, bothMeta] = await Promise.all([
-        fetchDetail ? fetchDetail(searchResult) : Promise.resolve(searchResult),
-        searchResult.source === 'tmdb' ? tmdbGetBothMeta(searchResult) : Promise.resolve({})
-      ])
-      work = { ...detailed, ...bothMeta }
-
-      if (searchResult.category === 'animes' && searchResult.source === 'tmdb') {
-        try {
-          const anilistId = await anilistFindId(searchResult.originalTitle || searchResult.title, searchResult.year)
-          if (anilistId) {
-            const anilistDetail = await anilistGetDetail(anilistId)
-            const keepTmdb = anilistDetail.seasons.length <= 1 && (work.seasons?.length || 0) > 1
-            work = keepTmdb
-              ? { ...work, anilistId }
-              : { ...work, anilistId, seasons: anilistDetail.seasons, ended: anilistDetail.ended }
-          }
-        } catch { /* keep TMDB seasons on failure */ }
-      }
-    }
-
+    // La fiche partagée est créée (si besoin) et remplie par le serveur depuis la source ; on n'envoie que l'identifiant
+    const shared = (await services.createCatalogDocs([searchResult.id]))[searchResult.id]
+    if (!shared) throw new Error(`catalog unavailable: ${searchResult.id}`)
+    const work = Object.fromEntries(Object.entries(shared).filter(([k]) => !CATALOG_ONLY.includes(k)))
     await writeLibrary({ add: { [searchResult.id]: { ...work, status: 'a_voir', added: Date.now() } } })
   }
 

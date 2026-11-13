@@ -17,11 +17,15 @@ async function gql(query, variables, attempt = 0) {
     body: JSON.stringify({ query, variables })
   })
   if (res.status === 429 && attempt < 3) {
+    // Serveur : la fonction est coupée à 60 s, attendre la tuerait. On échoue, l'œuvre sera reprise plus tard.
+    if (typeof window === 'undefined') throw new Error('anilist: rate limited')
     const retryAfter = parseInt(res.headers.get('retry-after') || '60', 10)
     lastGqlCall = Date.now() + retryAfter * 1000
     await new Promise((r) => setTimeout(r, (retryAfter + 1) * 1000))
     return gql(query, variables, attempt + 1)
   }
+  // Une panne ne doit pas passer pour « aucun résultat » (404 = œuvre inconnue d'AniList : réponse normale)
+  if (res.status >= 400 && res.status !== 404) throw new Error(`anilist: ${res.status}`)
   return res.json()
 }
 
@@ -163,7 +167,9 @@ export async function anilistGetDetail(anilistId) {
   }
 
   if (specials.length) {
-    seasons.push({ n: seasons.length + 1, name: 'Spéciaux', episodes: specials.map((e, i) => ({ ...e, n: i + 1 })) })
+    // Numéro fixe (0) : avec « dernière saison + 1 », une nouvelle saison prenait le numéro des spéciaux
+    // et héritait de leur progression. Reprise des données existantes : scripts/migrate-specials.mjs
+    seasons.push({ n: 0, name: 'Spéciaux', episodes: specials.map((e, i) => ({ ...e, n: i + 1 })) })
   }
 
   return { seasons, ended }
@@ -259,4 +265,29 @@ export async function anilistGetMangaDetail(anilistId) {
   }
 
   return { seasons, ended, chapters: totalChapters, volumes: m.volumes || 0 }
+}
+
+// Fiche complète depuis AniList : animé (saisons reconstituées via les relations) ou manga (chapitres via MangaDex)
+export async function anilistGetWork(type, id) {
+  const q = `query ($id: Int) {
+    Media(id: $id, type: ${type === 'manga' ? 'MANGA' : 'ANIME'}) {
+      id title { romaji } genres startDate { year } description coverImage { large }
+    }
+  }`
+  const m = (await gql(q, { id: Number(id) })).data?.Media
+  if (!m) return null
+  const manga = type === 'manga'
+  const base = {
+    source: manga ? 'anilist-manga' : 'anilist',
+    sourceId: m.id,
+    id: manga ? `anilist-manga-${m.id}` : `anilist-${m.id}`,
+    title: m.title.romaji,
+    category: manga ? 'mangas' : 'animes',
+    genre: (m.genres || [])[0] || 'Divers',
+    year: m.startDate?.year || null,
+    overview: (m.description || '').replace(/<[^>]+>/g, ''),
+    poster: m.coverImage?.large || null,
+    release: null,
+  }
+  return { ...base, ...(manga ? await anilistGetMangaDetail(m.id) : await anilistGetDetail(m.id)) }
 }

@@ -91,7 +91,7 @@ function ErrorScreen({ message, onRetry, onLogout }) {
 function Shell() {
   const { user, logout } = useAuth()
   const {
-    data, loading, error, saveError, mutate, writeLibrary, syncAll, getFullData, getCatalogDoc,
+    data, loading, error, saveError, mutate, writeLibrary, syncAll, getFullData, createCatalogDocs,
     ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog, refreshWork, refreshStale, refreshAll,
   } = useAppData(user)
   const navigate = useNavigate()
@@ -102,8 +102,8 @@ function Shell() {
   const [episodeModal, setEpisodeModal] = useState(null)
   const [toast, setToast] = useState(null)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
-  const workActions = useWorkActions(data, { mutate, writeLibrary }, { getCatalogDoc, refreshWork, refreshAll })
-  const { importTVTime, importTVTimeOut } = useImport(data, writeLibrary)
+  const workActions = useWorkActions(data, { mutate, writeLibrary }, { createCatalogDocs, refreshWork, refreshAll })
+  const { importTVTime, importTVTimeOut } = useImport(data, { writeLibrary, createCatalogDocs })
   const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
   const { following } = useFollows(user)
 
@@ -357,21 +357,22 @@ function Shell() {
       {searchOpen && (
         <SearchModal
           works={data.works}
-          onAdd={(r) => {
-            workActions.addWork(r)
-            setToast({
-              header: 'Ajouté à ta bibliothèque',
+          onAdd={(r) => workActions.addWork(r).then(
+            // succès annoncé seulement une fois l'œuvre réellement ajoutée
+            () => setToast({
+              header: t('search.addedToast'),
               title: r.title,
               action: {
-                label: 'Voir',
+                label: t('search.view'),
                 fn: () => {
                   setSearchOpen(false)
                   setToast(null)
                   navigate('/work/' + r.id)
                 }
               }
-            })
-          }}
+            }),
+            () => setToast({ tone: 'error', header: t('search.addFailed'), title: r.title }),
+          )}
           onNavigate={(r) => { setSearchOpen(false); navigate('/work/' + r.id) }}
           onClose={() => setSearchOpen(false)}
         />

@@ -30,11 +30,11 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
   function getContext(f, works) {
     const w = works[f.workId]
     if (!w) return t('profile.onWork')
-    if (f.sNum && f.eNum) {
+    if (f.sNum != null && f.eNum) {
       const cat = w.category
       return `${t('term.' + cat + '.season')} ${f.sNum} · ${t('term.' + cat + '.ep')} ${f.eNum}`
     }
-    if (f.sNum) return `${t('term.' + (w.category) + '.season')} ${f.sNum}`
+    if (f.sNum != null) return `${t('term.' + (w.category) + '.season')} ${f.sNum}`
     return t('profile.onWork')
   }
 

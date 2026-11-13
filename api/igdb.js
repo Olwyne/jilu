@@ -12,6 +12,8 @@ export const OPS = {
   trending: () => ['games', `${FIELDS} where first_release_date > ${Math.floor(Date.now() / 1000) - 120 * DAY} & total_rating_count > 3 & version_parent = null; sort total_rating_count desc; limit 5;`],
   // Les mieux notés d'un genre ou d'un thème (les noms RAWG déjà enregistrés, ex. « Action », sont des thèmes chez IGDB)
   genre: ({ genre }) => genre && ['games', `${FIELDS} where (genres.name ~ *${str(genre)}* | themes.name ~ *${str(genre)}*) & total_rating_count > 50 & version_parent = null; sort total_rating desc; limit 20;`],
+  // Un jeu précis (création ou rafraîchissement d'une fiche)
+  game: ({ id }) => /^\d+$/.test(id || '') && ['games', `${FIELDS} where id = ${id};`],
   // Durées de jeu (en secondes) : rapide (histoire), normal (extras), complet (100 %)
   ttb: ({ id }) => /^\d+$/.test(id || '') && ['game_time_to_beats', `fields game_id,hastily,normally,completely,count; where game_id = ${id};`],
 }

@@ -5,7 +5,7 @@ import { getAuth } from 'firebase-admin/auth'
 import { createHandler } from './_lib/refreshHandler.js'
 import { createAdminStore } from './_lib/adminStore.js'
 import { initAdmin } from './_lib/firebaseAdmin.js'
-import { fetchFreshWork } from '../src/catalog/refresh.js'
+import { fetchWork } from '../src/catalog/fetchWork.js'
 
 let handler
 
@@ -14,7 +14,7 @@ function init() {
   return createHandler({
     verifyToken: async (token) => (await getAuth().verifyIdToken(token)).uid,
     store: createAdminStore(),
-    fetchFresh: fetchFreshWork,
+    fetchFresh: fetchWork,
   })
 }
 

@@ -107,7 +107,7 @@ export default function DashboardView({ works, watched, reviews, feed, onOpenWor
   const feedItems = (feed || []).filter((f) => {
     const w = works[f.workId]
     if (!w || !activeStatuses.has(w.status)) return false
-    if (f.sNum) return !!watched[`${f.workId}-${f.sNum}-${f.eNum}`]
+    if (f.sNum != null) return !!watched[`${f.workId}-${f.sNum}-${f.eNum}`]
     return true
   })
   const reviewItems = (reviews || []).filter((r) => {

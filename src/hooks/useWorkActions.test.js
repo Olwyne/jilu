@@ -2,12 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useWorkActions } from './useWorkActions'
 import { DELETE } from '../data/writeV2.js'
 import { renderHook, act } from '@testing-library/react'
-import { tmdbGetDetail } from '../catalog/tmdb'
-import { anilistFindId, anilistGetDetail, anilistGetMangaDetail } from '../catalog/anilist'
 
-vi.mock('../catalog/tmdb', () => ({ tmdbGetDetail: vi.fn(), tmdbGetBothMeta: vi.fn().mockResolvedValue({}), tmdbSearch: vi.fn() }))
-vi.mock('../catalog/anilist', () => ({ anilistFindId: vi.fn(), anilistGetDetail: vi.fn(), anilistSearch: vi.fn(), anilistGetMangaDetail: vi.fn() }))
-vi.mock('../catalog/spotify', () => ({ spotifyGetDetail: vi.fn() }))
 
 let mutate, writeLibrary
 const store = () => ({ mutate, writeLibrary })
@@ -45,68 +40,6 @@ describe('useWorkActions', () => {
     const { result } = renderHook(() => useWorkActions(data, store()))
     await act(async () => { await result.current.setStatus('w1', 'abandonne') })
     expect(written().set.w1.status).toBe('abandonne')
-  })
-
-  it('addWork fetches full detail before storing, keyed by search result id', async () => {
-    const data = { works: {} }
-    vi.mocked(tmdbGetDetail).mockResolvedValue({ id: 'tmdb-tv-1', title: 'X', seasons: [] })
-    const { result } = renderHook(() => useWorkActions(data, store()))
-    await act(async () => { await result.current.addWork({ source: 'tmdb', id: 'tmdb-tv-1', title: 'X' }) })
-    expect(written().add['tmdb-tv-1']).toMatchObject({ title: 'X', status: 'a_voir' })
-  })
-
-  it('addWork stores anilistId and AniList seasons for anime', async () => {
-    const data = { works: {} }
-    vi.mocked(tmdbGetDetail).mockResolvedValue({
-      id: 'tmdb-tv-131041', sourceId: 131041, title: 'Blue Lock', category: 'animes',
-      originalTitle: 'ブルーロック', year: 2022, seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }]
-    })
-    vi.mocked(anilistFindId).mockResolvedValue(163134)
-    vi.mocked(anilistGetDetail).mockResolvedValue({
-      seasons: [
-        { n: 1, name: null, episodes: [{ n: 1, title: 'Épisode 1', air: 0 }] },
-        { n: 2, name: null, episodes: [{ n: 1, title: 'Épisode 1', air: 1 }] }
-      ],
-      ended: false
-    })
-    const { result } = renderHook(() => useWorkActions(data, store()))
-    await act(async () => {
-      await result.current.addWork({ source: 'tmdb', id: 'tmdb-tv-131041', sourceId: 131041, title: 'Blue Lock', category: 'animes', originalTitle: 'ブルーロック', year: 2022 })
-    })
-    const stored = written().add['tmdb-tv-131041']
-    expect(stored.anilistId).toBe(163134)
-    expect(stored.seasons).toHaveLength(2)
-    expect(stored.title).toBe('Blue Lock')
-  })
-
-  it('addWork with source anilist-manga calls anilistGetMangaDetail with sourceId', async () => {
-    anilistGetMangaDetail.mockResolvedValue({
-      seasons: [{ n: 1, name: 'Tome 1', episodes: [{ n: 1, title: '', air: 1 }] }],
-      ended: false, chapters: 1, volumes: 1
-    })
-    const data = { works: {} }
-    const { result } = renderHook(() => useWorkActions(data, store()))
-    await act(async () => {
-      await result.current.addWork({ source: 'anilist-manga', sourceId: 13, id: 'anilist-manga-13', title: 'One Piece', category: 'mangas', status: 'a_voir' })
-    })
-    expect(anilistGetMangaDetail).toHaveBeenCalledWith(13)
-  })
-
-  it('addWork falls back to TMDB seasons when anilistFindId returns null', async () => {
-    const data = { works: {} }
-    vi.mocked(tmdbGetDetail).mockResolvedValue({
-      id: 'tmdb-tv-999', sourceId: 999, title: 'Some Anime', category: 'animes',
-      originalTitle: 'Some Anime', year: 2023,
-      seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }]
-    })
-    vi.mocked(anilistFindId).mockResolvedValue(null)
-    const { result } = renderHook(() => useWorkActions(data, store()))
-    await act(async () => {
-      await result.current.addWork({ source: 'tmdb', id: 'tmdb-tv-999', sourceId: 999, title: 'Some Anime', category: 'animes', originalTitle: 'Some Anime', year: 2023 })
-    })
-    const stored = written().add['tmdb-tv-999']
-    expect(stored.anilistId).toBeUndefined()
-    expect(stored.seasons).toHaveLength(1)
   })
 
   it('stamps finishedAt when setting status to termine on a work that lacks it', async () => {
@@ -180,29 +113,6 @@ describe('useWorkActions', () => {
     expect(written().set.w1['eps.1-2']).toBeGreaterThan(1)
   })
 
-  it('addWork réutilise la fiche du catalogue partagé sans appeler les API', async () => {
-    const shared = { id: 'tmdb-tv-7', source: 'tmdb', sourceId: 7, title: 'Partagée', category: 'series', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }], updatedAt: 5, refreshedAt: 4, leaseUntil: 0 }
-    const services = { getCatalogDoc: vi.fn().mockResolvedValue(shared) }
-    const { result } = renderHook(() => useWorkActions({ works: {}, watched: {} }, store(), services))
-    await act(async () => { await result.current.addWork({ id: 'tmdb-tv-7', source: 'tmdb', sourceId: 7, category: 'series', title: 'Résultat de recherche' }) })
-    expect(tmdbGetDetail).not.toHaveBeenCalled()
-    expect(anilistFindId).not.toHaveBeenCalled()
-    const { add: works } = written()
-    expect(works['tmdb-tv-7']).toMatchObject({ title: 'Partagée', status: 'a_voir', seasons: expect.any(Array) })
-    expect(works['tmdb-tv-7']).not.toHaveProperty('updatedAt')   // champs internes du catalogue
-    expect(works['tmdb-tv-7']).not.toHaveProperty('refreshedAt')
-    expect(works['tmdb-tv-7']).not.toHaveProperty('leaseUntil')
-  })
-
-  it('addWork interroge les API seulement si personne ne l’a encore ajoutée', async () => {
-    tmdbGetDetail.mockResolvedValue({ id: 'tmdb-tv-8', title: 'Nouvelle', seasons: [{ n: 1, episodes: [] }] })
-    const services = { getCatalogDoc: vi.fn().mockResolvedValue(null) }
-    const { result } = renderHook(() => useWorkActions({ works: {}, watched: {} }, store(), services))
-    await act(async () => { await result.current.addWork({ id: 'tmdb-tv-8', source: 'tmdb', sourceId: 8, category: 'series', title: 'Nouvelle' }) })
-    expect(tmdbGetDetail).toHaveBeenCalledTimes(1)
-    expect(written().add['tmdb-tv-8']).toMatchObject({ status: 'a_voir' })
-  })
-
   it('le rafraîchissement est délégué au serveur (aucun appel d’API depuis le navigateur)', async () => {
     const services = { refreshWork: vi.fn().mockResolvedValue({ refreshed: ['w1'] }), refreshAll: vi.fn().mockResolvedValue({ refreshed: [] }) }
     const { result } = renderHook(() => useWorkActions({ works: { w1: { id: 'w1' } }, watched: {} }, store(), services))
@@ -210,7 +120,6 @@ describe('useWorkActions', () => {
     await act(async () => { await result.current.refreshAllWorks(() => {}) })
     expect(services.refreshWork).toHaveBeenCalledWith('w1')
     expect(services.refreshAll).toHaveBeenCalledTimes(1)
-    expect(tmdbGetDetail).not.toHaveBeenCalled()
     expect(result.current.refreshStaleWorks).toBeUndefined()
   })
   it('noter une œuvre : note + avis personnel dans la fiche, avis recopié pour le fil d’amis', async () => {
@@ -245,6 +154,13 @@ describe('useWorkActions', () => {
     ])
   })
 
+  it('retirer une œuvre retire aussi son avis du document utilisateur (fil d’amis)', async () => {
+    const data = { works: { w1: { id: 'w1' } }, watched: {}, reviews: [{ id: 'w1', rating: 4 }, { id: 'w2', rating: 2 }] }
+    const { result } = renderHook(() => useWorkActions(data, store()))
+    await act(async () => { await result.current.removeWork('w1') })
+    expect(writeLibrary.mock.calls).toEqual([[{ remove: ['w1'] }, { reviews: [{ id: 'w2', rating: 2 }] }]])
+  })
+
   it('reprendre une œuvre abandonnée : refusé, seule la progression est écrite', async () => {
     window.confirm = vi.fn(() => false)
     const data = { works: { w1: { id: 'w1', status: 'abandonne', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }, { n: 2, air: 0 }] }] } }, watched: {} }
@@ -252,4 +168,30 @@ describe('useWorkActions', () => {
     await act(async () => { await result.current.toggleEpisode('w1', 1, 1) })
     expect(written()).toEqual({ set: { w1: { 'eps.1-1': expect.any(Number) } } })
   })
+
+  it('ajout : la fiche est demandée au serveur (identifiant seul), puis la bibliothèque est écrite', async () => {
+    const shared = { id: 'tmdb-tv-7', source: 'tmdb', sourceId: 7, title: 'Partagée', category: 'series', seasons: [{ n: 1, episodes: [] }], updatedAt: 5, refreshedAt: 4, leaseUntil: 0 }
+    const createCatalogDocs = vi.fn(async () => ({ 'tmdb-tv-7': shared }))
+    const { result } = renderHook(() => useWorkActions({ works: {}, watched: {} }, store(), { createCatalogDocs }))
+    await act(async () => { await result.current.addWork({ id: 'tmdb-tv-7', source: 'tmdb', title: 'Résultat de recherche (ignoré)' }) })
+    expect(createCatalogDocs).toHaveBeenCalledWith(['tmdb-tv-7'])
+    const work = written().add['tmdb-tv-7']
+    expect(work).toMatchObject({ title: 'Partagée', status: 'a_voir', seasons: expect.any(Array) })
+    for (const k of ['updatedAt', 'refreshedAt', 'leaseUntil']) expect(work).not.toHaveProperty(k) // champs internes du catalogue
+  })
+
+  it('ajout impossible (source inconnue ou serveur en panne) : rien n’est écrit', async () => {
+    const createCatalogDocs = vi.fn(async () => ({}))
+    const { result } = renderHook(() => useWorkActions({ works: {}, watched: {} }, store(), { createCatalogDocs }))
+    await act(async () => { await expect(result.current.addWork({ id: 'tmdb-tv-8' })).rejects.toThrow('catalog unavailable') })
+    expect(writeLibrary).not.toHaveBeenCalled()
+  })
+
+  it('une œuvre déjà dans la bibliothèque n’est pas redemandée', async () => {
+    const createCatalogDocs = vi.fn()
+    const { result } = renderHook(() => useWorkActions({ works: { w1: { id: 'w1' } }, watched: {} }, store(), { createCatalogDocs }))
+    await act(async () => { await result.current.addWork({ id: 'w1' }) })
+    expect(createCatalogDocs).not.toHaveBeenCalled()
+  })
+
 })

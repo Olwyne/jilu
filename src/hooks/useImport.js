@@ -87,7 +87,30 @@ export function importOps(data, { works, watched, ratings, favorites }) {
   return { add, set, extras: { watchedDocs, main: { ratings: newRatings, favorites: newFavorites } } }
 }
 
-export function useImport(data, writeLibrary) {
+// Fiches partagées créées par le serveur, puis statut déduit des VRAIES saisons (l'historique importé ne contient
+// que les épisodes vus : s'en servir marquerait tout « terminé »). Une œuvre dont la fiche n'a pas pu être créée
+// n'est pas ajoutée : elle resterait sans épisodes. Son titre va dans `failed`.
+export async function prepareImport(data, { works, watched, ratings, favorites }, { createCatalogDocs, failed = [] }) {
+  const sourced = Object.values(works).filter((w) => !data.works[w.id] && w.source && w.sourceId != null).map((w) => w.id)
+  const shared = sourced.length ? await createCatalogDocs(sourced) : {}
+  for (const id of sourced) {
+    if (shared[id]) works[id] = { ...works[id], seasons: shared[id].seasons, ended: shared[id].ended }
+    else { failed.push(works[id].title); delete works[id] }
+  }
+  autoStatus(works, watched)
+  return importOps(data, { works, watched, ratings, favorites })
+}
+
+// store : { writeLibrary, createCatalogDocs } fournis par useAppData
+export function useImport(data, { writeLibrary, createCatalogDocs }) {
+  // Œuvres trouvées sur TMDB : fiches partagées créées par le serveur ; puis bibliothèque (une écriture par œuvre)
+  async function saveImport(maps, onStatus, failed) {
+    await writeLibrary(await prepareImport(data, maps, {
+      createCatalogDocs: (ids) => createCatalogDocs(ids, { onProgress: (done, total) => onStatus(i18n.t('import.catalog', { done, total })) }),
+      failed,
+    }))
+  }
+
   async function importTVTime(onStatus, onFailed) {
     const file = await pickFile('.zip')
     if (!file) return
@@ -163,8 +186,10 @@ export function useImport(data, writeLibrary) {
             const { results } = await tmdbFetch('/search/tv', { query: showName, language: 'fr-FR', page: 1 })
             const hit = results && results[0]; if (!hit) return
             const tmdbId = String(hit.id)
-            if (existingByTmdb.has(tmdbId)) { applyEps(existingByTmdb.get(tmdbId).id, tvData, nName); return }
             const workId = `tmdb-tv-${hit.id}`
+            // par id aussi : les œuvres ajoutées par la recherche n'ont pas de champ tmdbId
+            const existing = existingByTmdb.get(tmdbId) || works[workId]
+            if (existing) { applyEps(existing.id, tvData, nName); return }
             const year = hit.first_air_date ? parseInt(hit.first_air_date.slice(0, 4)) : 0
             const isAnime = (hit.genre_ids || []).includes(16) && (hit.origin_country || []).includes('JP')
             const seasons = Array.from(tvData.seasons.entries()).sort(([a], [b]) => a - b).map(([sNum, epMap]) => ({
@@ -226,8 +251,7 @@ export function useImport(data, writeLibrary) {
         }
       }
 
-      autoStatus(works, watched)
-      await writeLibrary(importOps(data, { works, watched, ratings, favorites }))
+      await saveImport({ works, watched, ratings, favorites }, onStatus, failed)
       if (onFailed && failed.length > 0) onFailed(failed)
       onStatus(i18n.t('import.done', { series: i18n.t('import.nSeries', { count: newImports }), episodes: i18n.t('import.nEpisodes', { count: totalEps }), movies: i18n.t('import.nMovies', { count: newMovies }) }))
     } catch (e) { onStatus(i18n.t('import.error', { message: e.message })) }
@@ -266,7 +290,7 @@ export function useImport(data, writeLibrary) {
             const workId = hit ? `tmdb-tv-${hit.id}` : slug(title)
             if (!workId) return
             const tmdbId = hit ? String(hit.id) : null
-            let work = tmdbId ? existingByTmdb.get(tmdbId) : works[workId]
+            let work = (tmdbId && existingByTmdb.get(tmdbId)) || works[workId]
             if (!work) {
               const isAnime = hit && (hit.genre_ids || []).includes(16) && (hit.origin_country || []).includes('JP')
               const seasons = (show.seasons || []).map(s => ({
@@ -336,8 +360,7 @@ export function useImport(data, writeLibrary) {
         }
       }
 
-      autoStatus(works, watched)
-      await writeLibrary(importOps(data, { works, watched, ratings, favorites }))
+      await saveImport({ works, watched, ratings, favorites }, onStatus, failed)
       if (onFailed && failed.length > 0) onFailed(failed)
       onStatus(i18n.t('import.done', { series: i18n.t('import.nSeries', { count: newImports }), episodes: i18n.t('import.nEpisodes', { count: totalEps }), movies: i18n.t('import.nMovies', { count: newMovies }) }))
     } catch (e) { onStatus(i18n.t('import.error', { message: e.message })) }

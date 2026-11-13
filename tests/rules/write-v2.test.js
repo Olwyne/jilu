@@ -4,7 +4,7 @@ import 'fake-indexeddb/auto'
 import { readFileSync } from 'node:fs'
 import { beforeAll, afterAll, beforeEach, describe, it, expect } from 'vitest'
 import { initializeTestEnvironment, assertFails } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc, getDocs, collection } from 'firebase/firestore'
+import { doc, getDoc, setDoc, getDocs, deleteDoc, collection } from 'firebase/firestore'
 import { createCache } from '../../src/data/cache.js'
 import { syncLibrary } from '../../src/data/library.js'
 import { loadCatalog } from '../../src/data/catalog.js'
@@ -54,8 +54,15 @@ describe('écritures v2 : les vraies actions, relues depuis zéro', () => {
         const plan = buildPlan({ uid: 'alice', library, ...ops })
         if (!isEmptyPlan(plan)) totalWrites += (await commitPlan(db, 'alice', plan)).writes
         library = applyPlanToLibrary(library, plan)
-        catalog = { ...catalog, ...plan.catalogCreates }
+        // comme useAppData : seules les fiches locales viennent du client
+        catalog = { ...catalog, ...Object.fromEntries(Object.entries(plan.catalogCreates).filter(([id]) => id.startsWith('local-'))) }
       },
+    }
+    // Ajout comme dans l'application : la fiche partagée est créée par le serveur (ici : écriture Admin simulée), puis lue
+    const add = async (id, work) => {
+      if (work.sourceId != null) await seed((d) => setDoc(doc(d, `catalog/${id}`), buildLibraryDocs({ uid: 'srv', works: { [id]: work } }).catalog[id]))
+      catalog = { ...catalog, ...(await loadCatalog(db, [id], cache, { force: [id] })).catalog }
+      await store.writeLibrary({ add: { [id]: work } })
     }
     const view = () => assembleData({ library, catalog })
     const step = async (label, fn) => {
@@ -79,20 +86,20 @@ describe('écritures v2 : les vraies actions, relues depuis zéro', () => {
     await step('favori', (a) => a.toggleFavorite('tmdb-movie-3'))
     await step('jeu', (a) => a.addGameMinutes('tmdb-tv-2', 90))
     await step('statut', (a) => a.setStatus('tmdb-movie-3', 'abandonne'))
-    await step('ajouter une série', () => store.writeLibrary({ add: { 'tmdb-tv-50': W('tmdb-tv-50', { status: 'en_cours' }) } }))
+    await step('ajouter une série', () => add('tmdb-tv-50', W('tmdb-tv-50', { status: 'en_cours' })))
     const { sourceId, ...local } = W('ma-serie'); void sourceId
-    await step('ajouter une œuvre locale', () => store.writeLibrary({ add: { 'ma-serie': local } }))
+    await step('ajouter une œuvre locale', () => add('ma-serie', local))
     expect(library['ma-serie'].catalogId).toBe('local-alice-ma-serie')
     await step('retirer une œuvre', (a) => a.removeWork('tmdb-tv-1'))
     expect(view().works['tmdb-tv-1']).toBeUndefined()
-    await step('ré-ajouter l’œuvre retirée', () => store.writeLibrary({ add: { 'tmdb-tv-1': W('tmdb-tv-1') } }))
+    await step('ré-ajouter l’œuvre retirée', () => add('tmdb-tv-1', W('tmdb-tv-1')))
     expect(Object.keys(view().watched).filter((k) => k.startsWith('tmdb-tv-1-'))).toEqual([]) // progression repartie de zéro
     await step('décocher un épisode', (a) => a.toggleEpisode('tmdb-tv-2', 1, 2))
     await step('réinitialiser la progression', (a) => a.resetProgress())
     expect(view().watched).toEqual({})
     await step('tout effacer', (a) => a.clearAll())
     expect(view().works).toEqual({})
-    await step('ajouter après tout effacer', () => store.writeLibrary({ add: { 'tmdb-tv-9': W('tmdb-tv-9') } }))
+    await step('ajouter après tout effacer', () => add('tmdb-tv-9', W('tmdb-tv-9')))
 
     expect(totalWrites).toBeGreaterThan(0)
   })
@@ -109,15 +116,25 @@ describe('écritures v2 : les vraies actions, relues depuis zéro', () => {
     expect(lib.watchedCount).toBe(1)
   })
 
-  it('réutilise une fiche de catalogue existante sans erreur et refuse de la modifier', async () => {
-    const db = as('bob')
-    await commitPlan(db, 'bob', buildPlan({ uid: 'bob', add: { 'tmdb-tv-8': W('tmdb-tv-8') }, now: 1 }))
-    const catalogBefore = (await getDoc(doc(db, 'catalog/tmdb-tv-8'))).data()
-    const other = as('carl')
-    const plan = buildPlan({ uid: 'carl', add: { 'tmdb-tv-8': W('tmdb-tv-8', { title: 'Piraté', seasons: [] }) }, now: 2 })
-    expect((await commitPlan(other, 'carl', plan)).writes).toBe(1) // seulement la bibliothèque de carl
-    expect((await getDoc(doc(db, 'catalog/tmdb-tv-8'))).data()).toEqual(catalogBefore)
-    await assertFails(setDoc(doc(other, 'catalog/tmdb-tv-8'), { title: 'x', category: 'series' }))
-    expect((await getDocs(collection(other, 'users/carl/library'))).size).toBe(1)
+  it('un navigateur ne crée ni ne modifie aucune fiche partagée ; seulement ses fiches locales', async () => {
+    const bob = as('bob')
+    // ajout d'une œuvre : seule la bibliothèque est écrite par le client (la fiche partagée vient du serveur)
+    const plan = buildPlan({ uid: 'bob', add: { 'tmdb-tv-8': W('tmdb-tv-8', { title: 'Piraté' }) }, now: 1 })
+    expect((await commitPlan(bob, 'bob', plan)).writes).toBe(1)
+    expect((await getDoc(doc(bob, 'catalog/tmdb-tv-8'))).exists()).toBe(false)
+    // création directe d'une fiche partagée ou de la fiche locale d'un autre : refusée
+    await assertFails(setDoc(doc(bob, 'catalog/tmdb-tv-9'), { title: 'Fausse', category: 'series' }))
+    await assertFails(setDoc(doc(bob, 'catalog/local-carl-x'), { title: 'x', category: 'series' }))
+    // sa propre fiche locale (import sans correspondance) : acceptée
+    const { sourceId, ...local } = W('ma-serie'); void sourceId
+    await commitPlan(bob, 'bob', buildPlan({ uid: 'bob', add: { 'ma-serie': local }, now: 2 }))
+    expect((await getDoc(doc(bob, 'catalog/local-bob-ma-serie'))).exists()).toBe(true)
+    expect((await getDocs(collection(bob, 'users/bob/library'))).size).toBe(2)
+    // suppression (fin de compte) : sa fiche locale seulement, jamais celle d'un autre ni une fiche partagée
+    await assertFails(deleteDoc(doc(as('carl'), 'catalog/local-bob-ma-serie')))
+    await seed((d) => setDoc(doc(d, 'catalog/tmdb-tv-9'), { title: 'Vraie', category: 'series' }))
+    await assertFails(deleteDoc(doc(bob, 'catalog/tmdb-tv-9')))
+    await deleteDoc(doc(bob, 'catalog/local-bob-ma-serie'))
+    expect((await getDoc(doc(bob, 'catalog/local-bob-ma-serie'))).exists()).toBe(false)
   })
 })

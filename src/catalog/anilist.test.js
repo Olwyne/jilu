@@ -19,6 +19,19 @@ describe('anilistSearch', () => {
   })
 })
 
+describe('pannes AniList', () => {
+  it('une erreur serveur lève, au lieu de passer pour « aucun résultat »', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({ status: 500, json: async () => ({ errors: [] }) })
+    await expect(anilistFindId('Blue Lock', 2022)).rejects.toThrow('anilist: 500')
+  })
+  it('429 côté serveur : échec immédiat, pas 60 s d’attente', async () => {
+    vi.stubGlobal('window', undefined)
+    global.fetch = vi.fn().mockResolvedValueOnce({ status: 429, headers: { get: () => '60' } })
+    await expect(anilistFindId('Blue Lock', 2022)).rejects.toThrow('rate limited')
+    vi.unstubAllGlobals()
+  })
+})
+
 describe('anilistFindId', () => {
   it('returns AniList ID matched by title and year', async () => {
     global.fetch = vi.fn().mockResolvedValueOnce({
@@ -93,6 +106,16 @@ describe('anilistGetDetail', () => {
     expect(detail.seasons[0].episodes).toHaveLength(24)
     expect(detail.seasons[1].episodes).toHaveLength(13)
     expect(detail.ended).toBe(false)
+  })
+
+  it('les spéciaux gardent le numéro 0, quel que soit le nombre de saisons', async () => {
+    const entry = (format, sequel) => ({ json: async () => ({ data: { Media: {
+      episodes: 2, status: 'FINISHED', format, startDate: { year: 2020, month: 1, day: 1 },
+      relations: { edges: sequel ? [{ relationType: 'SEQUEL', node: { id: sequel } }] : [] },
+    } } }) })
+    global.fetch = vi.fn().mockResolvedValueOnce(entry('TV', 2)).mockResolvedValueOnce(entry('OVA', 3)).mockResolvedValueOnce(entry('TV'))
+    const { seasons } = await anilistGetDetail(1)
+    expect(seasons.map((s) => [s.n, s.name])).toEqual([[1, null], [2, null], [0, 'Spéciaux']])
   })
 
   it('stops at cycle to prevent infinite loop', async () => {

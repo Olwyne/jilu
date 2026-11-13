@@ -29,6 +29,17 @@ Garde-fous : lecture seule par défaut ; la suppression est refusée sans sauveg
 projet, ou si Authentication ne renvoie aucun compte (mauvais projet/identifiants : tout paraîtrait orphelin).
 Seuls les comptes absents d'Authentication sont supprimés ; les comptes inactifs ne sont jamais touchés.
 
+## `migrate-specials.mjs` — spéciaux d'animé en saison 0 (à lancer une fois)
+
+La saison « Spéciaux » d'un animé a désormais le numéro fixe 0. Ce script renumérote les fiches du catalogue et
+déplace la progression et les notes déjà enregistrées. Lecture seule sans `--apply`. À lancer **juste après** avoir
+déployé le nouveau code, une seule fois.
+
+```bash
+node scripts/migrate-specials.mjs --project <id-du-projet>           # ce qui serait modifié
+node scripts/migrate-specials.mjs --project <id-du-projet> --apply
+```
+
 ## Depuis Docker (sans rien installer)
 
 ```bash

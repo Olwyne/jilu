@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { igdbSearch, igdbTimeToBeat, igdbGetDetail } from './igdb'
+import { igdbSearch, igdbTimeToBeat, igdbGetWork } from './igdb'
 
 const respond = (body, ok = true) => { global.fetch = vi.fn().mockResolvedValue({ ok, json: async () => body }) }
 beforeEach(() => vi.restoreAllMocks())
@@ -25,10 +25,13 @@ describe('igdb (client)', () => {
     respond([])
     expect(await igdbTimeToBeat(2)).toBeNull()
   })
-  it('à l’ajout : joint les durées quand elles existent, sinon garde la fiche telle quelle', async () => {
-    respond([{ game_id: 1, normally: 36000 }])
-    expect(await igdbGetDetail({ id: 'igdb-1', sourceId: 1 })).toEqual({ id: 'igdb-1', sourceId: 1, timeToBeat: { main: null, extra: 10, full: null } })
-    global.fetch = vi.fn().mockRejectedValue(new Error('réseau'))
-    expect(await igdbGetDetail({ id: 'igdb-2', sourceId: 2 })).toEqual({ id: 'igdb-2', sourceId: 2 })
+  it('fiche complète d’un jeu, avec ses durées si IGDB les connaît', async () => {
+    global.fetch = vi.fn(async (url) => ({ ok: true, json: async () => (String(url).includes('op=game')
+      ? [{ id: 1942, name: 'The Witcher 3', first_release_date: 1431993600, cover: { image_id: 'c' }, genres: [{ name: 'RPG' }] }]
+      : [{ game_id: 1942, normally: 36000 }]) }))
+    expect(await igdbGetWork(1942)).toMatchObject({ id: 'igdb-1942', title: 'The Witcher 3', year: 2015, timeToBeat: { main: null, extra: 10, full: null } })
+    expect(global.fetch.mock.calls[0][0]).toBe('/api/igdb?op=game&id=1942')
+    respond([])
+    expect(await igdbGetWork(2)).toBeNull()
   })
 })

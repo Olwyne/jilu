@@ -107,6 +107,15 @@ describe('quiz', () => {
     await assertFails(setDoc(doc(alice(), 'quiz/2026-10-21/scores/alice'), score({ timeMs: 0 })))
     await assertFails(setDoc(doc(alice(), 'quiz/nimporte/scores/alice'), score()))
   })
+  it('suppression de compte : on efface ses scores, même un jour non joué ; jamais ceux d’un autre', async () => {
+    const a = alice()
+    await assertSucceeds(setDoc(doc(a, 'quiz/2026-10-20/scores/alice'), score()))
+    const batch = writeBatch(a)
+    batch.delete(doc(a, 'quiz/2026-10-20/scores/alice'))
+    batch.delete(doc(a, 'quiz/2026-10-21/scores/alice')) // absent
+    await assertSucceeds(batch.commit())
+    await assertFails(deleteDoc(doc(bob(), 'quiz/2026-10-20/scores/alice')))
+  })
 })
 
 describe('follows', () => {

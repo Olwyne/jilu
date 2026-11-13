@@ -1,5 +1,6 @@
 // Point d'entrée HTTP du rafraîchissement : POST /api/refresh-work { id } + Authorization: Bearer <jeton Firebase>
 import { refreshCatalogWork, RefreshError } from './refreshCatalog.js'
+import { uidFromRequest, jsonBody } from './auth.js'
 
 const HTTP_STATUS = { refreshed: 200, fresh: 200, busy: 202, not_found: 404, unsupported: 422 }
 
@@ -11,19 +12,13 @@ export function createHandler({ verifyToken, store, fetchFresh, now = Date.now }
       return
     }
 
-    const token = /^Bearer (.+)$/.exec(req.headers?.authorization || '')?.[1]
-    let uid
-    try {
-      uid = token ? await verifyToken(token) : null
-    } catch {
-      uid = null
-    }
+    const uid = await uidFromRequest(req, verifyToken)
     if (!uid) {
       res.status(401).json({ error: 'unauthorized' })
       return
     }
 
-    const body = typeof req.body === 'string' ? safeParse(req.body) : req.body
+    const body = jsonBody(req)
     const id = body?.id
     if (typeof id !== 'string' || !id || id.length > 200 || id.includes('/') || id.startsWith('local-')) {
       res.status(400).json({ error: 'invalid id' })
@@ -38,8 +33,4 @@ export function createHandler({ verifyToken, store, fetchFresh, now = Date.now }
       res.status(502).json({ error: e instanceof RefreshError ? e.code : 'upstream error' })
     }
   }
-}
-
-function safeParse(s) {
-  try { return JSON.parse(s) } catch { return null }
 }

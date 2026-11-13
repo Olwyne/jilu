@@ -16,7 +16,7 @@ function setup(over = {}) {
     save: async (id, d) => { docs.set(id, d) },
     releaseLease: vi.fn(async () => {}),
   }
-  const deps = { verifyToken: vi.fn(async () => 'u1'), store, fetchFresh: vi.fn(async (w) => ({ ...w, title: 'S2' })), now: () => 1e12, ...over }
+  const deps = { verifyToken: vi.fn(async () => 'u1'), store, fetchFresh: vi.fn(async (id) => ({ ...doc, id, title: 'S2' })), now: () => 1e12, ...over }
   return { handler: createHandler(deps), deps, docs }
 }
 
