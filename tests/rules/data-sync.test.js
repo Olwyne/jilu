@@ -3,9 +3,9 @@ import 'fake-indexeddb/auto'
 import { readFileSync } from 'node:fs'
 import { beforeAll, afterAll, beforeEach, describe, it, expect } from 'vitest'
 import { initializeTestEnvironment } from '@firebase/rules-unit-testing'
-import { doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { createCache } from '../../src/data/cache.js'
-import { syncLibrary, clearLibraryCache, OVERLAP_MS, FULL_RESYNC_MS } from '../../src/data/library.js'
+import { syncLibrary, clearLibraryCache, OVERLAP_MS, FULL_RESYNC_MS, TOMBSTONE_MAX_AGE_MS } from '../../src/data/library.js'
 import { loadCatalog } from '../../src/data/catalog.js'
 import { assembleData, catalogIdsNeededAtStartup } from '../../src/data/assemble.js'
 import { buildLibraryDocs } from '../../src/data/libraryDocs.js'
@@ -94,6 +94,31 @@ describe('syncLibrary (delta)', () => {
     const weekly = await syncLibrary(db, 'alice', cache, { now: T0 + FULL_RESYNC_MS + 2 * H })
     expect(weekly.full).toBe(true)
     expect(Object.keys(weekly.library)).toEqual(['w1'])
+  })
+
+  it('relecture complète : efface les vieilles traces de suppression, garde les récentes', async () => {
+    const DAY = 24 * H
+    await seed(async (d) => {
+      await setDoc(doc(d, 'users/alice/library/w1'), lib('w1', { updatedAt: T0 }))
+      await setDoc(doc(d, 'users/alice/library/vieux'), { deleted: true, updatedAt: T0 - TOMBSTONE_MAX_AGE_MS - DAY })
+      await setDoc(doc(d, 'users/alice/library/recent'), { deleted: true, updatedAt: T0 - DAY })
+    })
+    const { library } = await syncLibrary(as('alice'), 'alice', cache, { now: T0, purge: true })
+    expect(Object.keys(library)).toEqual(['w1'])
+    await seed(async (d) => {
+      expect((await getDoc(doc(d, 'users/alice/library/vieux'))).exists()).toBe(false)
+      expect((await getDoc(doc(d, 'users/alice/library/recent'))).exists()).toBe(true)
+    })
+  })
+
+  it('profil public : un visiteur synchronise par delta la bibliothèque d’un autre', async () => {
+    await seed(async (d) => {
+      await setDoc(doc(d, 'users/alice'), { settings: { publicProfile: true } })
+      await setDoc(doc(d, 'users/alice/library/w1'), lib('w1', { updatedAt: T0 }))
+    })
+    const visitor = env.unauthenticatedContext().firestore()
+    expect((await syncLibrary(visitor, 'alice', cache, { now: T0 + H })).fetched).toBe(1)
+    expect((await syncLibrary(visitor, 'alice', cache, { now: T0 + 2 * H })).fetched).toBe(0)
   })
 
   it('ne mélange pas les comptes dans le cache et sait l’effacer à la déconnexion', async () => {

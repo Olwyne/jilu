@@ -2,7 +2,8 @@
 import { refreshCatalogWork, RefreshError } from './refreshCatalog.js'
 import { uidFromRequest, jsonBody } from './auth.js'
 
-const HTTP_STATUS = { refreshed: 200, fresh: 200, busy: 202, not_found: 404, unsupported: 422 }
+export const REFRESH_DAILY_MAX = 500 // demandes par utilisateur et par jour (le bouton « tout rafraîchir » en fait 100 au plus)
+const HTTP_STATUS ={ refreshed: 200, fresh: 200, busy: 202, not_found: 404, unsupported: 422 }
 
 export function createHandler({ verifyToken, store, fetchFresh, now = Date.now }) {
   return async function handler(req, res) {
@@ -22,6 +23,10 @@ export function createHandler({ verifyToken, store, fetchFresh, now = Date.now }
     const id = body?.id
     if (typeof id !== 'string' || !id || id.length > 200 || id.includes('/') || id.startsWith('local-')) {
       res.status(400).json({ error: 'invalid id' })
+      return
+    }
+    if (!(await store.consumeQuota(uid, 'refresh', 1, REFRESH_DAILY_MAX, now()))) {
+      res.status(429).json({ error: 'daily quota reached' })
       return
     }
 

@@ -95,7 +95,7 @@ export function useAppData(user) {
     ;(async () => {
       try {
         s.cache = await createCache(CACHE_NAME)
-        const { library } = await syncLibrary(db, uid, s.cache)
+        const { library } = await syncLibrary(db, uid, s.cache, { purge: true })
         if (cancelled) return
         s.library = library
         await loadStartupCatalog(library) // œuvres en cours / à voir : calendrier et « à rattraper »
@@ -114,7 +114,7 @@ export function useAppData(user) {
     async function resync() {
       s.lastSync = Date.now()
       try {
-        const { library } = await syncLibrary(db, uid, s.cache)
+        const { library } = await syncLibrary(db, uid, s.cache, { purge: true })
         s.library = library
         await loadStartupCatalog(library)
         rebuild()
@@ -283,7 +283,7 @@ export function useAppData(user) {
     const s = st.current
     if (!user || !s.cache) return
     await clearLibraryCache(s.cache, uid)
-    const { library } = await syncLibrary(db, uid, s.cache)
+    const { library } = await syncLibrary(db, uid, s.cache, { purge: true })
     s.library = library
     s.lastSync = Date.now()
     await loadStartupCatalog(library)

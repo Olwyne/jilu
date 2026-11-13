@@ -12,6 +12,7 @@ function setup(over = {}) {
   const docs = new Map([['tmdb-tv-1', doc]])
   const store = {
     get: async (id) => docs.get(id) ?? null,
+    consumeQuota: vi.fn(async () => true),
     acquireLease: async (id) => ({ ok: true, doc: docs.get(id) }),
     save: async (id, d) => { docs.set(id, d) },
     releaseLease: vi.fn(async () => {}),
@@ -32,6 +33,12 @@ describe('POST /api/refresh-work', () => {
     expect((await call(handler, { headers: {} })).status).toBe(401)
     deps.verifyToken.mockRejectedValue(new Error('expired'))
     expect((await call(handler)).status).toBe(401)
+    expect(deps.fetchFresh).not.toHaveBeenCalled()
+  })
+  it('plafond quotidien atteint : 429, aucune API appelée', async () => {
+    const { handler, deps } = setup()
+    deps.store.consumeQuota.mockResolvedValue(false)
+    expect((await call(handler)).status).toBe(429)
     expect(deps.fetchFresh).not.toHaveBeenCalled()
   })
   it('valide l’identifiant', async () => {

@@ -14,18 +14,22 @@ export async function loadCatalog(db, ids, cache, { now = Date.now(), maxAgeMs =
   const result = {}
   const toFetch = []
 
-  for (const id of unique) {
-    const entry = await cache.get(key(id))
+  // Lectures du cache puis lots serveur en parallèle : une grosse bibliothèque (écran Statistiques) = des
+  // milliers de fiches, les lire une par une se voit
+  const cached = await Promise.all(unique.map((id) => cache.get(key(id))))
+  unique.forEach((id, i) => {
+    const entry = cached[i]
     if (entry?.doc) result[id] = entry.doc
     const ttl = typeof maxAgeMs === 'function' ? maxAgeMs(entry?.doc) : maxAgeMs
     // « Absente » n'est jamais tenu pour acquis : la fiche est souvent créée juste après (ajout d'une œuvre nouvelle)
     const fresh = entry?.doc && now - entry.at < ttl
     if (!fresh || forced.has(id)) toFetch.push(id)
-  }
+  })
 
   let fetched = 0
-  for (let i = 0; i < toFetch.length; i += IN_LIMIT) {
-    const chunk = toFetch.slice(i, i + IN_LIMIT)
+  const chunks = []
+  for (let i = 0; i < toFetch.length; i += IN_LIMIT) chunks.push(toFetch.slice(i, i + IN_LIMIT))
+  await Promise.all(chunks.map(async (chunk) => {
     const snap = await getDocs(query(collection(db, 'catalog'), where(documentId(), 'in', chunk)))
     fetched += snap.size
     const found = new Set()
@@ -38,6 +42,6 @@ export async function loadCatalog(db, ids, cache, { now = Date.now(), maxAgeMs =
     // fiche absente du serveur : on garde l'ancienne version si on en avait une
     chunk.filter((id) => !found.has(id)).forEach((id) => entries.push([key(id), { doc: result[id] ?? null, at: now }]))
     await cache.setMany(entries)
-  }
+  }))
   return { catalog: result, fetched }
 }

@@ -226,6 +226,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         const last = writeBatch(db)
         if (handle) last.delete(doc(db, 'pseudos', handle))
         last.delete(doc(db, 'follows', uid))
+        last.delete(doc(db, 'quotas', uid))
         last.delete(doc(db, 'users', uid))
         await last.commit()
       })

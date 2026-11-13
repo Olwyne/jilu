@@ -6,6 +6,9 @@ import { canFetchWork } from '../../src/catalog/fetchWork.js'
 import { uidFromRequest, jsonBody } from './auth.js'
 
 export const ENSURE_MAX_IDS = 20
+// Fiches demandées par utilisateur et par jour (les redemandes « pending » comptent). Un import de plus de
+// 2 000 œuvres se termine le lendemain : les œuvres refusées sont listées dans les échecs de l'import.
+export const ENSURE_DAILY_MAX = 2000
 const BUDGET_MS = 45 * 1000 // la fonction est coupée à 60 s ; le reste est signalé « pending »
 const CONCURRENCY = 3
 
@@ -16,13 +19,18 @@ export function createEnsureHandler({ verifyToken, store, fetchWork, now = Date.
       res.status(405).json({ error: 'method not allowed' })
       return
     }
-    if (!(await uidFromRequest(req, verifyToken))) {
+    const uid = await uidFromRequest(req, verifyToken)
+    if (!uid) {
       res.status(401).json({ error: 'unauthorized' })
       return
     }
     const ids = jsonBody(req)?.ids
     if (!Array.isArray(ids) || !ids.length || ids.length > ENSURE_MAX_IDS || !ids.every((id) => typeof id === 'string' && id.length <= 100)) {
       res.status(400).json({ error: 'invalid ids' })
+      return
+    }
+    if (!(await store.consumeQuota(uid, 'ensure', ids.length, ENSURE_DAILY_MAX, now()))) {
+      res.status(429).json({ error: 'daily quota reached' })
       return
     }
 

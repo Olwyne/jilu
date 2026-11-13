@@ -64,6 +64,17 @@ describe('rafraîchissement contre Firestore', () => {
     expect((await refreshCatalogWork({ store, fetchFresh: vi.fn(), id: 'absente', now: NOW })).status).toBe('not_found')
   })
 
+  it('plafond quotidien : compté par utilisateur et par jour, refusé sans rien compter au-delà', async () => {
+    const DAY = 24 * 60 * 60 * 1000
+    await db.doc('quotas/u1').delete()
+    expect(await store.consumeQuota('u1', 'ensure', 20, 30, NOW)).toBe(true)
+    expect(await store.consumeQuota('u1', 'ensure', 20, 30, NOW)).toBe(false)
+    expect(await store.consumeQuota('u1', 'ensure', 10, 30, NOW)).toBe(true)
+    expect(await store.consumeQuota('u1', 'refresh', 1, 1, NOW)).toBe(true) // compteur séparé
+    expect((await db.doc('quotas/u1').get()).data()).toMatchObject({ ensure: 30, refresh: 1 })
+    expect(await store.consumeQuota('u1', 'ensure', 20, 30, NOW + DAY)).toBe(true) // le lendemain : remis à zéro
+  })
+
   it('liste des œuvres en cours : seulement ended == false, avec leur date de rafraîchissement', async () => {
     await seed({ ended: false, refreshedAt: 5 })
     await db.doc('catalog/tmdb-tv-2').set({ id: 'tmdb-tv-2', title: 'Finie', category: 'series', ended: true })

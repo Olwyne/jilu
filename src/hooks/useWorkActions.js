@@ -2,6 +2,10 @@ import i18n from '../i18n/index.js'
 import { DELETE } from '../data/writeV2.js'
 import { assignRatings } from '../data/libraryDocs.js'
 
+// Avis recopiés dans le document utilisateur pour le fil d'amis : les plus récents seulement (le fil en affiche 50).
+// La source reste la fiche de bibliothèque ; recopier tous les avis réécrivait un tableau sans limite à chaque note.
+const FEED_REVIEWS_MAX = 50
+
 // isWatched(clé) : progression après la modification en cours (sans recopier toute la progression)
 function computeAutoStatus(work, isWatched) {
   if (!work.seasons || !work.seasons.length) return null
@@ -104,7 +108,7 @@ export function useWorkActions(data, { mutate, writeLibrary }, services = {}) {
       const prevNote = reviews.find((r) => r.id === id)?.note || ''
       const entry = { id, note: prevNote === 'Note mise à jour.' ? '' : prevNote, rating: next, ts: Date.now() }
       changes.personalReview = entry
-      mainPatch = { reviews: [entry, ...reviews.filter((r) => r.id !== id)] }
+      mainPatch = { reviews: [entry, ...reviews.filter((r) => r.id !== id)].slice(0, FEED_REVIEWS_MAX) }
     }
     await writeLibrary({ set: { [workId]: changes } }, mainPatch)
   }
@@ -152,7 +156,7 @@ export function useWorkActions(data, { mutate, writeLibrary }, services = {}) {
     // notes, favori et progression partent avec la fiche ; l'avis recopié dans le document utilisateur
     // (lu par le fil d'amis) aussi
     const reviews = data.reviews || []
-    if (reviews.some((r) => r.id === workId)) await writeLibrary({ remove: [workId] }, { reviews: reviews.filter((r) => r.id !== workId) })
+    if (reviews.some((r) => r.id === workId)) await writeLibrary({ remove: [workId] }, { reviews: reviews.filter((r) => r.id !== workId).slice(0, FEED_REVIEWS_MAX) })
     else await writeLibrary({ remove: [workId] })
   }
 

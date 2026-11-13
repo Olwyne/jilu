@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { doc, getDoc, getDocs, collection } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { createCache } from '../../data/cache.js'
+import { syncLibrary } from '../../data/library.js'
 import { loadCatalog } from '../../data/catalog.js'
 import { assembleData } from '../../data/assemble.js'
 import { db } from '../../firebase'
@@ -42,11 +43,11 @@ export default function PublicProfilePage() {
         if (!base.settings?.publicProfile) { setStatus('private'); return }
 
         // Bibliothèque publique de l'utilisateur + fiches du catalogue partagé (épisodes pour les statistiques)
-        const libSnap = await getDocs(collection(db, 'users', uid, 'library'))
-        const library = {}
-        libSnap.forEach(d => { if (!d.data().deleted) library[d.id] = { ...d.data(), id: d.id } })
-        const catalogIds = Object.values(library).map(l => l.catalogId).filter(Boolean)
+        // Synchronisation par delta, comme pour sa propre bibliothèque : une seconde visite ne relit que ce qui a
+        // changé (une bibliothèque de 4 000 œuvres relue en entier à chaque visite épuiserait le quota de lectures)
         const cache = await createCache('jilu-public')
+        const { library } = await syncLibrary(db, uid, cache)
+        const catalogIds = Object.values(library).map(l => l.catalogId).filter(Boolean)
         const { catalog } = await loadCatalog(db, catalogIds, cache, { maxAgeMs: 30 * 24 * 60 * 60 * 1000 })
         const assembled = assembleData({ library, catalog })
 

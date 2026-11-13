@@ -10,6 +10,7 @@ function setup({ existing = {}, works = {} } = {}) {
   const docs = new Map(Object.entries(existing))
   const store = {
     get: async (id) => docs.get(id) ?? null,
+    consumeQuota: vi.fn(async () => true),
     create: vi.fn(async (id, d) => { if (docs.has(id)) return false; docs.set(id, d); return true }),
   }
   const fetchWork = vi.fn(async (id) => works[id] ?? null)
@@ -39,6 +40,13 @@ describe('POST /api/catalog-ensure', () => {
     expect(docs.get('tmdb-tv-2')).toEqual({ title: 'Déjà là' })
     expect(fetchWork).toHaveBeenCalledTimes(2) // ni l'existante, ni l'identifiant non pris en charge, ni le doublon
     expect(store.create).toHaveBeenCalledTimes(1)
+  })
+  it('plafond quotidien atteint : 429, aucune source appelée', async () => {
+    const { handler, store, fetchWork } = setup({ works: { 'igdb-2': { title: 'Jeu' } } })
+    store.consumeQuota.mockResolvedValue(false)
+    expect((await call(handler, { body: { ids: ['igdb-2', 'igdb-3'] } })).status).toBe(429)
+    expect(store.consumeQuota).toHaveBeenCalledWith('u1', 'ensure', 2, 2000, 1000)
+    expect(fetchWork).not.toHaveBeenCalled()
   })
   it('une panne d’une source n’empêche pas les autres', async () => {
     const { handler, fetchWork } = setup({ works: { 'igdb-2': { title: 'Jeu' } } })

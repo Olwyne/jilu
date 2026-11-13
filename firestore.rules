@@ -93,6 +93,12 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
 
+    // Compteurs quotidiens tenus par le serveur (api/_lib/adminStore.js) : le propriétaire peut seulement
+    // effacer le sien (suppression de compte)
+    match /quotas/{uid} {
+      allow delete: if isOwner(uid);
+    }
+
     match /follows/{uid} {
       allow read, write: if isOwner(uid);
     }

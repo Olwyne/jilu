@@ -29,81 +29,38 @@ async function gql(query, variables, attempt = 0) {
   return res.json()
 }
 
-export async function anilistSearch(query) {
-  const q = `query ($search: String) {
-    Page(perPage: 10) {
-      media(search: $search, type: ANIME) {
-        id title { romaji } genres startDate { year } description episodes status coverImage { large }
-      }
-    }
-  }`
-  const json = await gql(q, { search: query })
-  return (json.data?.Page?.media || []).map((m) => ({
-    source: 'anilist',
-    sourceId: m.id,
-    id: `anilist-${m.id}`,
-    title: m.title.romaji,
-    category: 'animes',
-    genre: (m.genres || [])[0] || 'Divers',
-    year: m.startDate?.year || null,
-    overview: (m.description || '').replace(/<[^>]+>/g, ''),
-    poster: m.coverImage?.large || null,
-    seasons: null,
-    release: null
-  }))
-}
+const FIELDS = 'id title { romaji } genres startDate { year } description coverImage { large }'
 
-export async function anilistTrending() {
-  const q = `{
-    Page(perPage: 5) {
-      media(sort: TRENDING_DESC, type: ANIME, isAdult: false) {
-        id title { romaji } genres startDate { year } description coverImage { large }
-      }
-    }
-  }`
-  const json = await gql(q, {})
-  return (json.data?.Page?.media || []).map((m) => ({
-    source: 'anilist',
-    sourceId: m.id,
-    id: `anilist-${m.id}`,
-    title: m.title.romaji,
-    category: 'animes',
-    genre: (m.genres || [])[0] || 'Divers',
-    year: m.startDate?.year || null,
-    overview: (m.description || '').replace(/<[^>]+>/g, ''),
-    poster: m.coverImage?.large || null,
-    seasons: null,
-    release: null
-  }))
-}
+// Média AniList -> œuvre (sans saisons : elles viennent de anilistGetDetail / anilistGetMangaDetail)
+const toWork = (m, manga = false) => ({
+  source: manga ? 'anilist-manga' : 'anilist',
+  sourceId: m.id,
+  id: `${manga ? 'anilist-manga' : 'anilist'}-${m.id}`,
+  title: m.title.romaji,
+  category: manga ? 'mangas' : 'animes',
+  genre: (m.genres || [])[0] || 'Divers',
+  year: m.startDate?.year || null,
+  overview: (m.description || '').replace(/<[^>]+>/g, ''),
+  poster: m.coverImage?.large || null,
+  seasons: null,
+  release: null,
+})
 
-export async function anilistDiscoverAnime(genres) {
-  const genreFilter = genres?.length ? `, genre_in: ${JSON.stringify(genres)}` : ''
-  const q = `{ Page(perPage: 20) { media(sort: POPULARITY_DESC, type: ANIME, isAdult: false${genreFilter}) { id title { romaji } genres startDate { year } description coverImage { large } } } }`
-  const json = await gql(q, {})
-  return (json.data?.Page?.media || []).map((m) => ({
-    source: 'anilist', sourceId: m.id, id: `anilist-${m.id}`,
-    title: m.title.romaji, category: 'animes',
-    genre: (m.genres || [])[0] || 'Divers',
-    year: m.startDate?.year || null,
-    overview: (m.description || '').replace(/<[^>]+>/g, ''),
-    poster: m.coverImage?.large || null, seasons: null, release: null
-  }))
+// Liste d'œuvres : `args` = arguments GraphQL de media(...), `manga` = type MANGA
+async function list(perPage, args, manga, variables = {}) {
+  // GraphQL refuse une variable déclarée mais inutilisée : $search seulement pour une recherche
+  const q = `${'search' in variables ? 'query ($search: String) ' : ''}{ Page(perPage: ${perPage}) { media(${args}, type: ${manga ? 'MANGA' : 'ANIME'}) { ${FIELDS} } } }`
+  const json = await gql(q, variables)
+  return (json.data?.Page?.media || []).map((m) => toWork(m, manga))
 }
+const genreFilter = (genres) => (genres?.length ? `, genre_in: ${JSON.stringify(genres)}` : '')
 
-export async function anilistDiscoverManga(genres) {
-  const genreFilter = genres?.length ? `, genre_in: ${JSON.stringify(genres)}` : ''
-  const q = `{ Page(perPage: 20) { media(sort: POPULARITY_DESC, type: MANGA, isAdult: false${genreFilter}) { id title { romaji } genres startDate { year } description coverImage { large } } } }`
-  const json = await gql(q, {})
-  return (json.data?.Page?.media || []).map((m) => ({
-    source: 'anilist-manga', sourceId: m.id, id: `anilist-manga-${m.id}`,
-    title: m.title.romaji, category: 'mangas',
-    genre: (m.genres || [])[0] || 'Divers',
-    year: m.startDate?.year || null,
-    overview: (m.description || '').replace(/<[^>]+>/g, ''),
-    poster: m.coverImage?.large || null, seasons: null, release: null
-  }))
-}
+export const anilistSearch = (query) => list(10, 'search: $search', false, { search: query })
+export const anilistSearchManga = (query) => list(10, 'search: $search, isAdult: false', true, { search: query })
+export const anilistTrending = () => list(5, 'sort: TRENDING_DESC, isAdult: false', false)
+export const anilistTrendingManga = () => list(5, 'sort: TRENDING_DESC, isAdult: false', true)
+export const anilistDiscoverAnime = (genres) => list(20, `sort: POPULARITY_DESC, isAdult: false${genreFilter(genres)}`, false)
+export const anilistDiscoverManga = (genres) => list(20, `sort: POPULARITY_DESC, isAdult: false${genreFilter(genres)}`, true)
 
 export async function anilistFindId(originalTitle, year) {
   const q = `query ($search: String) {
@@ -175,54 +132,6 @@ export async function anilistGetDetail(anilistId) {
   return { seasons, ended }
 }
 
-export async function anilistSearchManga(query) {
-  const q = `query ($search: String) {
-    Page(perPage: 10) {
-      media(search: $search, type: MANGA, isAdult: false) {
-        id title { romaji } genres startDate { year } description coverImage { large }
-      }
-    }
-  }`
-  const json = await gql(q, { search: query })
-  return (json.data?.Page?.media || []).map((m) => ({
-    source: 'anilist-manga',
-    sourceId: m.id,
-    id: `anilist-manga-${m.id}`,
-    title: m.title.romaji,
-    category: 'mangas',
-    genre: (m.genres || [])[0] || 'Divers',
-    year: m.startDate?.year || null,
-    overview: (m.description || '').replace(/<[^>]+>/g, ''),
-    poster: m.coverImage?.large || null,
-    seasons: null,
-    release: null
-  }))
-}
-
-export async function anilistTrendingManga() {
-  const q = `{
-    Page(perPage: 5) {
-      media(sort: TRENDING_DESC, type: MANGA, isAdult: false) {
-        id title { romaji } genres startDate { year } description coverImage { large }
-      }
-    }
-  }`
-  const json = await gql(q, {})
-  return (json.data?.Page?.media || []).map((m) => ({
-    source: 'anilist-manga',
-    sourceId: m.id,
-    id: `anilist-manga-${m.id}`,
-    title: m.title.romaji,
-    category: 'mangas',
-    genre: (m.genres || [])[0] || 'Divers',
-    year: m.startDate?.year || null,
-    overview: (m.description || '').replace(/<[^>]+>/g, ''),
-    poster: m.coverImage?.large || null,
-    seasons: null,
-    release: null
-  }))
-}
-
 export async function anilistGetMangaDetail(anilistId) {
   const q = `query ($id: Int) {
     Media(id: $id, type: MANGA) {
@@ -269,25 +178,9 @@ export async function anilistGetMangaDetail(anilistId) {
 
 // Fiche complète depuis AniList : animé (saisons reconstituées via les relations) ou manga (chapitres via MangaDex)
 export async function anilistGetWork(type, id) {
-  const q = `query ($id: Int) {
-    Media(id: $id, type: ${type === 'manga' ? 'MANGA' : 'ANIME'}) {
-      id title { romaji } genres startDate { year } description coverImage { large }
-    }
-  }`
+  const manga = type === 'manga'
+  const q = `query ($id: Int) { Media(id: $id, type: ${manga ? 'MANGA' : 'ANIME'}) { ${FIELDS} } }`
   const m = (await gql(q, { id: Number(id) })).data?.Media
   if (!m) return null
-  const manga = type === 'manga'
-  const base = {
-    source: manga ? 'anilist-manga' : 'anilist',
-    sourceId: m.id,
-    id: manga ? `anilist-manga-${m.id}` : `anilist-${m.id}`,
-    title: m.title.romaji,
-    category: manga ? 'mangas' : 'animes',
-    genre: (m.genres || [])[0] || 'Divers',
-    year: m.startDate?.year || null,
-    overview: (m.description || '').replace(/<[^>]+>/g, ''),
-    poster: m.coverImage?.large || null,
-    release: null,
-  }
-  return { ...base, ...(manga ? await anilistGetMangaDetail(m.id) : await anilistGetDetail(m.id)) }
+  return { ...toWork(m, manga), ...(manga ? await anilistGetMangaDetail(m.id) : await anilistGetDetail(m.id)) }
 }
