@@ -22,7 +22,7 @@ export async function googleBooksTrending() {
 
 export async function googleBooksDiscover(subject) {
   const q = subject ? `subject:${encodeURIComponent(subject)}` : 'fiction'
-  const res = await fetch(`/api/books?q=${q}&orderBy=relevance&maxResults=20`)
+  const res = await http(`/api/books?q=${q}&orderBy=relevance&maxResults=20`)
   const json = await res.json()
   return (json.items || [])
     .filter((it) => {
@@ -48,7 +48,7 @@ export async function googleBooksDiscover(subject) {
 }
 
 export async function googleBooksSearch(query) {
-  const res = await fetch(`/api/books?q=${encodeURIComponent(query)}&maxResults=10&langRestrict=fr`)
+  const res = await http(`/api/books?q=${encodeURIComponent(query)}&maxResults=10&langRestrict=fr`)
   const json = await res.json()
   return (json.items || [])
     .filter((it) => {

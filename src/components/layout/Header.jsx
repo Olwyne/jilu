@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import styles from './Header.module.css'
-import { pressable } from '../../lib/a11y'
 import BrandMark from '../ui/BrandMark'
 import IconButton from '../ui/IconButton'
 
@@ -18,7 +17,7 @@ export default function Header({
       )}
       <div className={styles.titleBlock}>
         {showBack && (
-          <div className={styles.back} {...pressable(onBack)}>{t('header.back')}</div>
+          <button type="button" className={styles.back} onClick={onBack}>{t('header.back')}</button>
         )}
         {title && <h1 className={styles.title}>{title}</h1>}
         <div className={styles.subtitle}>{subtitle}</div>

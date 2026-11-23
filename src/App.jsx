@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { usePageTitle } from './hooks/usePageTitle'
 import i18n from './i18n/index.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useAppData, clearLocalCaches } from './hooks/useAppData'
@@ -147,6 +148,9 @@ function Shell() {
   useEffect(() => { setEpisodeModal(null) }, [pathname])
 
   // Écriture refusée par le serveur : l'écran est déjà revenu à l'état enregistré, on le dit
+  const workId = pathname.startsWith('/work/') ? pathname.split('/')[2] : null
+  usePageTitle(workId ? data.works[workId]?.title : getRouteCopy(t)[pathname]?.title)
+
   useEffect(() => {
     if (!saveError) return
     setToast({ tone: 'error', header: t('data.saveError'), title: t('data.saveErrorHint'), action: { label: t('data.reload'), fn: () => window.location.reload() } })
@@ -237,7 +241,7 @@ function Shell() {
     URL.revokeObjectURL(url)
   }
 
-  if (loading) return null
+  if (loading) return <RouteFallback />
   // Sans ce garde-fou, un chargement raté affiche une bibliothèque vide (« tout est perdu »)
   if (error) return <ErrorScreen message={t('data.loadError')} onRetry={() => window.location.reload()} onLogout={logout} />
 
@@ -270,7 +274,8 @@ function Shell() {
                 watched={data.watched}
                 ratings={data.ratings}
                 favorites={data.favorites}
-                onOpenWork={openWork}
+                onSearch={() => setSearchOpen(true)}
+                onImport={() => navigate('/account')}
               />
             } />
             <Route path="/calendar" element={
@@ -399,7 +404,7 @@ function Shell() {
 
 function AuthGuard() {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <RouteFallback />
   if (!user) return <LandingPage />
   return <Shell />
 }
@@ -407,7 +412,7 @@ function AuthGuard() {
 function LoginRoute() {
   const { user, loading } = useAuth()
   const location = useLocation()
-  if (loading) return null
+  if (loading) return <RouteFallback />
   if (user) return <Navigate to={location.state?.from || '/dashboard'} replace />
   return <LoginPage />
 }
@@ -415,14 +420,14 @@ function LoginRoute() {
 function SignupRoute() {
   const { user, loading } = useAuth()
   const location = useLocation()
-  if (loading) return null
+  if (loading) return <RouteFallback />
   if (user) return <Navigate to={location.state?.from || '/dashboard'} replace />
   return <SignupPage />
 }
 
 function ForgotPasswordRoute() {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <RouteFallback />
   if (user) return <Navigate to="/dashboard" replace />
   return <ForgotPasswordPage />
 }

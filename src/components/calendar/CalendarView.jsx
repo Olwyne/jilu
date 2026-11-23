@@ -95,7 +95,7 @@ function UpcomingEpisodeRow({ item, onOpenWork, language, t, now }) {
   const { w, s, e } = item
   const d = new Date(e.air)
   return (
-    <div {...pressable(() => onOpenWork(w.id))} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
+    <div {...pressable(() => onOpenWork(w.id), { role: 'link' })} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
       <div style={{ width: 52, flexShrink: 0, textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19, color: 'var(--color-accent)', lineHeight: 1 }}>{d.getDate()}</div>
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', marginTop: 2 }}>{d.toLocaleString(language, { month: 'short' })}</div>
@@ -115,7 +115,7 @@ function UpcomingReleaseRow({ item, onOpenWork, language, now }) {
     ? relText(w.release, now, language)
     : w.year ? String(w.year) : null
   return (
-    <div {...pressable(() => onOpenWork(w.id))} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
+    <div {...pressable(() => onOpenWork(w.id), { role: 'link' })} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '13px 8px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, fontSize: 15 }}>{w.title}</div>
       </div>

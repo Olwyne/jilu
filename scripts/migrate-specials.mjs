@@ -10,8 +10,7 @@
 //   export GOOGLE_APPLICATION_CREDENTIALS=/chemin/vers/cle-de-service.json
 //   node scripts/migrate-specials.mjs --project <id-du-projet-firebase>
 //   node scripts/migrate-specials.mjs --project <id> --apply
-//
-// Non repris : les avis publics (collection reviews) et les commentaires du fil déjà postés sur un épisode spécial.
+// Les avis publics (collection reviews) et les commentaires du fil postés sur un épisode spécial suivent aussi.
 
 import assert from 'node:assert/strict'
 import { parseArgs } from 'node:util'
@@ -74,4 +73,36 @@ for (const l of (await db.collectionGroup('library').get()).docs) {
   if (args.apply) await l.ref.update({ ...next, updatedAt: Date.now() })
 }
 
-console.log(`\n${oldNumber.size} animé(s) avec spéciaux, ${docs} fiche(s) de bibliothèque ${args.apply ? 'modifiée(s)' : 'à modifier (relancer avec --apply)'}.`)
+// 3. Avis publics : un épisode n'a pas d'identifiant, un avis le désigne par (œuvre, saison, épisode).
+//    L'identifiant de l'avis contient ce numéro quand il vient de « noter un épisode » : il est recréé.
+let reviews = 0
+for (const [workId, old] of oldNumber) {
+  for (const r of (await db.collection('reviews').where('workId', '==', workId).get()).docs) {
+    const d = r.data()
+    if (d.sNum !== old) continue
+    reviews++
+    const idFor = (s) => [workId, s, d.eNum, d.userId].filter((x) => x != null).join('-')
+    const ref = r.id === idFor(old) ? db.doc(`reviews/${idFor(0)}`) : r.ref
+    console.log(`avis  ${r.id} : saison ${old} -> 0`)
+    if (!args.apply) continue
+    await ref.set({ ...d, sNum: 0 })
+    if (ref.path !== r.ref.path) await r.ref.delete()
+  }
+}
+
+// 4. Commentaires du fil d'activité (tableau `feed` du document utilisateur)
+let comments = 0
+for (const u of (await db.collection('users').get()).docs) {
+  let changed = 0
+  const feed = (u.get('feed') || []).map((f) => {
+    if (!oldNumber.has(f.workId) || f.sNum !== oldNumber.get(f.workId)) return f
+    changed++
+    return { ...f, sNum: 0, key: `${f.workId}-0-${f.eNum}` }
+  })
+  if (!changed) continue
+  comments += changed
+  console.log(`commentaires  users/${u.id} : ${changed}`)
+  if (args.apply) await u.ref.update({ feed })
+}
+
+console.log(`\n${oldNumber.size} animé(s) avec spéciaux : ${docs} fiche(s) de bibliothèque, ${reviews} avis, ${comments} commentaire(s) ${args.apply ? 'modifiés' : 'à modifier (relancer avec --apply)'}.`)

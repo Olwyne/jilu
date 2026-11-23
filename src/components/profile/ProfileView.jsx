@@ -26,6 +26,8 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
   const { works, watched, ratings, favorites, feed, profile, settings } = data
   const navigate = useNavigate()
   const { handle: handleParam } = useParams()
+  // Visiteur d'un profil public : rien à ouvrir, donc pas de faux lien
+  const open = (workId) => (readOnly || !workId ? undefined : pressable(() => onOpenWork(workId), { role: 'link' }))
 
   function getContext(f, works) {
     const w = works[f.workId]
@@ -138,7 +140,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 14 }}>{t('profile.favorites')}</div>
           <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
             {favWorks.map(w => (
-              <div key={w.id} {...pressable(() => onOpenWork(w.id))} style={{ flexShrink: 0, width: 90, cursor: 'pointer' }}>
+              <div key={w.id} {...open(w.id)} style={{ flexShrink: 0, width: 90 }}>
                 <PosterBox id={w.id} title={w.title} poster={w.poster} width={90} height={130} radius={12} />
                 <div style={{ fontSize: 12, fontWeight: 600, marginTop: 7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title}</div>
                 <div style={{ fontSize: 12, color: 'var(--color-muted-3)' }}>{w.category} · {w.year}</div>
@@ -167,7 +169,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                 const cat = w?.category || 'default'
                 const label = `${t('term.' + cat + '.season')} ${sNum} · ${t('term.' + cat + '.ep')} ${eNum}`
                 return (
-                  <div key={`${workId}-${sNum}-${eNum}`} {...pressable(() => w && onOpenWork(workId))} style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px 16px', borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: w ? 'pointer' : 'default' }}>
+                  <div key={`${workId}-${sNum}-${eNum}`} {...open(w && workId)} style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px 16px', borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: w ? 'pointer' : 'default' }}>
                     <PosterBox id={workId} title={w?.title || workId} poster={w?.poster} width={40} height={58} radius={8} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w?.title || workId}</div>
@@ -195,7 +197,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                 return (
                   <Card key={f.id} style={{ padding: 18 }}>
                     <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
-                      <div {...pressable(() => w && onOpenWork(w.id))} style={{ flexShrink: 0, cursor: 'pointer' }}>
+                      <div {...open(w?.id)} style={{ flexShrink: 0 }}>
                         <PosterBox id={f.workId} title={w ? w.title : f.workId} poster={w?.poster} width={46} height={66} radius={10} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -203,7 +205,7 @@ export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, 
                           <span style={{ fontWeight: 600, fontSize: 14 }}>{pseudo}</span>
                           <span style={{ fontSize: 12.5, color: 'var(--color-muted-3)' }}>· {relText(f.ts, Date.now(), i18n.language)}</span>
                         </div>
-                        <div {...pressable(() => w && onOpenWork(w.id))} style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 5, cursor: 'pointer' }}>
+                        <div {...open(w?.id)} style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 5 }}>
                           <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>{w ? w.title : f.workId}</span> · {context}
                         </div>
                       </div>

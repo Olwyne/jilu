@@ -8,7 +8,6 @@ import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import { initials } from '../../lib/domain'
 import EditProfileModal from '../modals/EditProfileModal'
-import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
 import Chip from '../ui/Chip'
 import Badge from '../ui/Badge'
@@ -111,9 +110,9 @@ function FeedbackSection({ profile }) {
 
 function Toggle({ on, onToggle, label, disabled }) {
   return (
-    <div {...pressable(onToggle, { role: 'switch', checked: on, label, disabled })} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
+    <button type="button" role="switch" aria-checked={on} aria-label={label} disabled={disabled} onClick={onToggle} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', border: 'none', padding: 0, background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
       <div style={{ position: 'absolute', top: 3, left: 3, transform: on ? 'translateX(18px)' : 'none', width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'transform .18s' }} />
-    </div>
+    </button>
   )
 }
 
@@ -286,7 +285,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>{profile.handle || '—'}</div>
-            <span {...pressable(() => setEditOpen(true))} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>{t('settings.modify')}</span>
+            <button type="button" onClick={() => setEditOpen(true)} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600, background: 'none', border: 'none', padding: 0, fontFamily: 'inherit' }}>{t('settings.modify')}</button>
           </div>
           <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{user?.email || profile.email}</div>
           <div style={{ color: 'var(--color-muted-3)', fontSize: 12.5, marginTop: 8 }}>{t('settings.memberSince') + ' '}{profile.memberSince}</div>

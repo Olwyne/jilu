@@ -5,8 +5,9 @@ import { epTotals } from '../../lib/domain'
 import styles from './LibraryView.module.css'
 import Chip from '../ui/Chip'
 import Select from '../ui/Select'
+import Button from '../ui/Button'
 
-export default function LibraryView({ works, watched, ratings, favorites, onOpenWork }) {
+export default function LibraryView({ works, watched, ratings, favorites, onSearch, onImport }) {
   const { t } = useTranslation()
   const [category, setCategory] = useState('all')
   const [status, setStatus] = useState('all')
@@ -121,7 +122,16 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
           ))}
         </div>
       </div>
-      {list.length === 0 && <div className={styles.empty}>{t('library.noResults')}</div>}
+      {Object.keys(works).length === 0 ? (
+        <div className={styles.empty}>
+          <p className={styles.emptyTitle}>{t('library.empty')}</p>
+          <p>{t('library.emptyHint')}</p>
+          <div className={styles.emptyActions}>
+            {onSearch && <Button variant="primary" onClick={onSearch}>{t('library.emptySearch')}</Button>}
+            {onImport && <Button variant="secondary" onClick={onImport}>{t('library.emptyImport')}</Button>}
+          </div>
+        </div>
+      ) : list.length === 0 && <div className={styles.empty}>{t('library.noResults')}</div>}
       <div className={styles.grid}>
         {list.slice(0, visibleCount).map((w) => {
           const { total, watchedCount } = epTotals(w, watched)
@@ -133,7 +143,6 @@ export default function LibraryView({ works, watched, ratings, favorites, onOpen
               watchedCount={watchedCount}
               rating={ratings[`w:${w.id}`] || 0}
               isFavorite={!!(favorites && favorites[w.id])}
-              onClick={() => onOpenWork(w.id)}
             />
           )
         })}

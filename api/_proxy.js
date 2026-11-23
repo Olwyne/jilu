@@ -1,8 +1,33 @@
 // Utilitaires partagés par les fonctions serverless (le préfixe "_" empêche Vercel d'en faire une route).
+import { getAuth } from 'firebase-admin/auth'
+import { initAdminApp } from './_lib/adminApp.js'
 
 // Réponses mises en cache par le CDN Vercel : les mêmes requêtes de plusieurs utilisateurs
 // n'atteignent l'API amont qu'une fois, ce qui protège les quotas.
 const CACHE = 'public, s-maxage=3600, stale-while-revalidate=86400'
+
+async function verifyFirebaseToken(token) {
+  initAdminApp()
+  await getAuth().verifyIdToken(token)
+}
+
+// Les proxys consomment des quotas partagés par toute l'application : réservés aux comptes connectés.
+// Jeton dans X-Firebase-Token et non Authorization : Vercel ne met jamais en cache une requête qui porte
+// Authorization, or c'est le cache CDN qui évite de rappeler l'API pour une même recherche.
+// Le serveur (api/_lib/serverHttp.js) appelle directement la fonction interne, sans passer par ce contrôle.
+export function authenticated(handler, verify = verifyFirebaseToken) {
+  return async function (req, res) {
+    try {
+      const token = req.headers?.['x-firebase-token']
+      if (!token) throw new Error('jeton absent')
+      await verify(token)
+    } catch {
+      res.status(401).json({ error: 'unauthorized' })
+      return
+    }
+    return handler(req, res)
+  }
+}
 
 export function onlyGet(req, res) {
   if (req.method === 'GET' || req.method === 'HEAD') return true

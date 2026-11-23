@@ -18,7 +18,7 @@ Six media types in one app, free, no ads and no subscription, with a direct impo
 ## Operating Context
 - TV Time is shutting down: confirmed by the product owner on 2026-10-22 (no shutdown date recorded). The landing page's lead hook ("TV Time ferme ses portes") rests on this; do not add a date or further claims about it without confirmation.
 - Daily, short, repeated actions: mark watched, rate, comment, check the release calendar.
-- Data comes from external catalogues (TMDB, AniList, RAWG, Google Books, Spotify), refreshed server side into a shared catalogue.
+- Data comes from external catalogues (TMDB, AniList, IGDB, Google Books, Spotify), refreshed server side into a shared catalogue.
 - Accounts are Firebase email/password; profiles can be public at `/u/<handle>`.
 - Deployed on Vercel; installable as a PWA on desktop, iOS and Android.
 

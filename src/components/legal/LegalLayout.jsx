@@ -9,9 +9,10 @@ export default function LegalLayout({ title, date, children }) {
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
 
   useEffect(() => {
-    document.title = `${title} — Jilu`
+    const previous = document.title
+    document.title = `${title} · Jilu`
     document.documentElement.lang = lang
-    return () => { document.title = 'Jilu — Your whole culture, tracked in one place' }
+    return () => { document.title = previous }
   }, [title, lang])
 
   return (

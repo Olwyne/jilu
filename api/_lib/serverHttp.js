@@ -1,11 +1,12 @@
 // Transport HTTP côté serveur des modules de src/catalog : les adresses relatives du navigateur (/api/tmdb, …)
 // sont servies en appelant directement les fonctions api/ correspondantes (mêmes listes blanches, mêmes clés).
 // Les adresses absolues (AniList, Spotify, Open Library) passent telles quelles.
-import tmdb from '../tmdb.js'
-import mangadex from '../mangadex.js'
-import books from '../books.js'
-import igdb from '../igdb.js'
-import spotifyToken from '../spotify-token.js'
+// Fonctions internes (sans le contrôle du jeton) : c'est le serveur lui-même qui appelle
+import { handler as tmdb } from '../tmdb.js'
+import { handler as mangadex } from '../mangadex.js'
+import { handler as books } from '../books.js'
+import { handler as igdb } from '../igdb.js'
+import { handler as spotifyToken } from '../spotify-token.js'
 
 const HANDLERS = { tmdb, mangadex, books, igdb, 'spotify-token': spotifyToken }
 

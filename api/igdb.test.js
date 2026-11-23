@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import handler, { OPS } from './igdb.js'
+import guarded, { handler, OPS } from './igdb.js'
+import { authenticated } from './_proxy.js'
 
 const mockRes = () => {
   const res = { headers: {}, statusCode: 200 }
@@ -12,6 +13,24 @@ const mockRes = () => {
 beforeEach(() => {
   process.env.TWITCH_CLIENT_ID = 'cid'
   process.env.TWITCH_CLIENT_SECRET = 'sec'
+})
+
+describe('proxys : réservés aux comptes connectés', () => {
+  it('sans jeton ou avec un jeton refusé : 401, la fonction n’est pas appelée', async () => {
+    global.fetch = vi.fn()
+    const res = mockRes()
+    await guarded({ method: 'GET', query: { op: 'trending' }, headers: {} }, res)
+    expect(res.statusCode).toBe(401)
+    const inner = vi.fn()
+    const route = authenticated(inner, async (t) => { if (t !== 'bon') throw new Error('refusé') })
+    const refused = mockRes()
+    await route({ headers: { 'x-firebase-token': 'faux' } }, refused)
+    expect(refused.statusCode).toBe(401)
+    expect(inner).not.toHaveBeenCalled()
+    await route({ headers: { 'x-firebase-token': 'bon' } }, mockRes())
+    expect(inner).toHaveBeenCalledTimes(1)
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
 })
 
 describe('api/igdb', () => {

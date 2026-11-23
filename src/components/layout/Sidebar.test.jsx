@@ -1,24 +1,21 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import Sidebar from './Sidebar'
 
-const mockNavigate = vi.fn()
-vi.mock('react-router-dom', () => ({
-  useNavigate: () => mockNavigate,
-  useLocation: () => ({ pathname: '/library' })
-}))
+const renderAt = (path) => render(<MemoryRouter initialEntries={[path]}><Sidebar /></MemoryRouter>)
 
 describe('Sidebar', () => {
   it('renders nav items and highlights the active one', () => {
-    render(<Sidebar />)
-    const libraryItem = screen.getByText('Library').closest('button')
+    renderAt('/library')
+    const libraryItem = screen.getByText('Library').closest('a')
     expect(libraryItem.className).toMatch(/active/)
+    expect(libraryItem).toHaveAttribute('aria-current', 'page')
   })
 
-  it('navigates to the clicked section', async () => {
-    render(<Sidebar />)
-    await userEvent.click(screen.getByText('Calendar'))
-    expect(mockNavigate).toHaveBeenCalledWith('/calendar')
+  it('navigation items are real links (new tab, copy link)', () => {
+    renderAt('/library')
+    expect(screen.getByRole('link', { name: 'Calendar' })).toHaveAttribute('href', '/calendar')
+    screen.getAllByRole('link', { name: 'Home' }).forEach((a) => expect(a).toHaveAttribute('href', '/dashboard'))
   })
 })

@@ -35,7 +35,7 @@ function ActivityList({ items, works, onOpenWork, emptyKey }) {
           return (
             <div
               key={item.id || item._type + item.ts + idx}
-              {...pressable(() => w && onOpenWork(workId))}
+              {...pressable(() => w && onOpenWork(workId), { role: 'link' })}
               style={{ display: 'flex', gap: 14, padding: 14, borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', cursor: w ? 'pointer' : 'default' }}
             >
               <PosterBox id={workId} title={w?.title || ''} poster={w?.poster} width={46} height={66} radius={10} />
@@ -80,7 +80,7 @@ function NextUp({ works, watched, onOpenWork, onWatchNext }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {items.map(({ w, s, e, remaining }) => (
           <Card key={w.id} dense style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 12 }}>
-            <div {...pressable(() => onOpenWork(w.id), { label: w.title })} style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0, cursor: 'pointer' }}>
+            <div {...pressable(() => onOpenWork(w.id), { role: 'link', label: w.title })} style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0, cursor: 'pointer' }}>
               <PosterBox id={w.id} title={w.title} poster={w.poster} width={46} height={66} radius={10} />
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title}</div>

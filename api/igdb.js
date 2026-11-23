@@ -1,4 +1,4 @@
-import { onlyGet, forward } from './_proxy.js'
+import { authenticated, onlyGet, forward } from './_proxy.js'
 
 // IGDB (Twitch) : jeux vidéo. Gratuit pour un usage non commercial, 4 requêtes/s pour toute l'application.
 // Seules quelques opérations fixes sont exposées : la requête IGDB est construite ici, jamais par le client.
@@ -30,7 +30,7 @@ async function twitchToken() {
   return cached.token
 }
 
-export default async function handler(req, res) {
+export async function handler(req, res) {
   if (!onlyGet(req, res)) return
   const op = OPS[req.query.op]
   const built = op && op(req.query)
@@ -52,3 +52,5 @@ export default async function handler(req, res) {
     body,
   })
 }
+
+export default authenticated(handler)

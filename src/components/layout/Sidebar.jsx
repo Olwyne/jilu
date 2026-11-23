@@ -1,11 +1,10 @@
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import styles from './Sidebar.module.css'
 import { initials } from '../../lib/domain'
 import BrandMark from '../ui/BrandMark'
 
 export default function Sidebar({ profile = {}, toCatch = 0 }) {
-  const navigate = useNavigate()
   const { pathname } = useLocation()
   const { t } = useTranslation()
 
@@ -19,28 +18,28 @@ export default function Sidebar({ profile = {}, toCatch = 0 }) {
 
   return (
     <aside className={styles.aside}>
-      <button className={styles.brand} onClick={() => navigate('/dashboard')} aria-label={t('nav.home')}>
+      <Link to="/dashboard" className={styles.brand} aria-label={t('nav.home')}>
         <BrandMark size={34} />
         <div className={styles.name}>Jilu</div>
-      </button>
+      </Link>
       <nav aria-label={t('a11y.mainNav')} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {ITEMS.map((item) => (
-        <button
+        <Link
           key={item.path}
+          to={item.path}
           className={`${styles.navItem} ${pathname === item.path ? styles.active : ''}`}
-          onClick={() => navigate(item.path)}
           aria-current={pathname === item.path ? 'page' : undefined}
         >
           {item.label}
           {item.path === '/calendar' && toCatch > 0 && (
             <span style={{ marginLeft: 'auto', minWidth: 20, height: 20, padding: '0 6px', borderRadius: 20, background: 'var(--color-pink)', color: 'var(--color-on-pink)', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toCatch}</span>
           )}
-        </button>
+        </Link>
       ))}
       </nav>
       <div style={{ flex: 1 }} />
-      <button
-        onClick={() => navigate('/account')}
+      <Link
+        to="/account"
         className={`${styles.accountChip} ${pathname === '/account' ? styles.active : ''}`}
         aria-current={pathname === '/account' ? 'page' : undefined}
       >
@@ -53,7 +52,7 @@ export default function Sidebar({ profile = {}, toCatch = 0 }) {
           <circle cx="12" cy="12" r="3" />
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
         </svg>
-      </button>
+      </Link>
     </aside>
   )
 }

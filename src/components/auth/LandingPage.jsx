@@ -49,11 +49,11 @@ export default function LandingPage() {
 
   useEffect(() => {
     const title = lang === 'fr'
-      ? 'Jilu — Toute ta culture, suivie en un seul endroit'
-      : 'Jilu — Your whole culture, tracked in one place'
+      ? 'Jilu : Toute ta culture, suivie en un seul endroit'
+      : 'Jilu: Your whole culture, tracked in one place'
     const desc = lang === 'fr'
-      ? 'Séries, films, animés, mangas, livres, jeux vidéo — suivi épisode par épisode, stats, calendrier des sorties et profils publics. Gratuit, sans pub.'
-      : 'Series, films, anime, manga, books, video games — episode-by-episode tracking, stats, release calendar, and public profiles. Free, no ads.'
+      ? 'Séries, films, animés, mangas, livres, jeux vidéo : suivi épisode par épisode, stats, calendrier des sorties et profils publics. Gratuit, sans pub.'
+      : 'Series, films, anime, manga, books and video games: episode-by-episode tracking, stats, release calendar and public profiles. Free, no ads.'
     document.title = title
     document.documentElement.lang = lang
     document.querySelector('meta[name="description"]')?.setAttribute('content', desc)

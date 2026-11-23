@@ -15,7 +15,7 @@ export default function Toast({ toast, onClose, onOpenRating, onUndo, onHold }) 
       background: 'var(--color-surface-toast)', border: '1px solid var(--color-border-glass)',
       borderRadius: 16, padding: '14px 18px', display: 'flex', alignItems: 'center',
       gap: 14, boxShadow: `0 8px 32px var(--color-shadow-lg)`,
-      backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+
       minWidth: 260, maxWidth: 380,
     }}>
       <div className="jilu-toast-text">
