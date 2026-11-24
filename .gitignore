@@ -36,3 +36,7 @@ ui-debug.log
 .impeccable/
 preview/
 vite.preview.config.js
+
+# Clés de compte de service Firebase : jamais dans le dépôt
+*-firebase-adminsdk-*.json
+*serviceAccount*.json
