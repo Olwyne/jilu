@@ -386,10 +386,14 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.feedback')}</div>
       <FeedbackSection profile={profile} />
 
+      {/* Se déconnecter n'efface rien : hors de la zone de danger, en bouton neutre */}
+      <div style={{ marginBottom: 24 }}>
+        <Button variant="secondary" onClick={onLogout}>{t('settings.logout')}</Button>
+      </div>
+
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 24 }}>
         <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12 }}>{t('settings.dangerZone')}</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <Button variant="dangerOutline" onClick={onLogout}>{t('settings.logout')}</Button>
           <Button variant="dangerOutline" onClick={() => setDeleteOpen(true)}>{t('settings.deleteAccount')}</Button>
         </div>
       </div>

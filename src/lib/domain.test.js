@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { hash, initials, fmtDate, relText, term, CAT, STATUS, DAY } from './domain'
+import { hash, initials, fmtDate, relText, term, CAT, STATUS, DAY, formatWatchTime } from './domain'
 
 describe('domain helpers', () => {
   it('hash is deterministic and non-negative', () => {
@@ -48,5 +48,13 @@ describe('domain helpers', () => {
   it('CAT and STATUS expose French labels', () => {
     expect(CAT.animes).toBe('Animés')
     expect(STATUS.en_cours.label).toBe('En cours')
+  })
+
+  it('formatWatchTime : exact, jamais arrondi à l\'heure', () => {
+    const t = (k, { count }) => count + ' ' + k.split('.')[1]
+    expect(formatWatchTime(0, t)).toBe('0 minute')
+    expect(formatWatchTime(48, t)).toBe('48 minute')
+    expect(formatWatchTime(125, t)).toBe('2 hour 5 minute')
+    expect(formatWatchTime(1440 + 60, t)).toBe('1 day 1 hour')
   })
 })

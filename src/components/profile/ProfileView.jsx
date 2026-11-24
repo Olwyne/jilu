@@ -2,24 +2,13 @@ import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
-import { initials, relText } from '../../lib/domain'
+import { initials, relText, formatWatchTime } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
 import { pressable } from '../../lib/a11y'
 import IconButton from '../ui/IconButton'
 import Card from '../ui/Card'
 
 const RUNTIME = { animes: 24, series: 45, films: 120 }
-
-function formatWatchTime(totalMins, t) {
-  let m = totalMins
-  const parts = []
-  for (const [unit, size] of [['year', 525600], ['month', 43200], ['day', 1440], ['hour', 60]]) {
-    const n = Math.floor(m / size); m %= size
-    if (n) parts.push(t('duration.' + unit, { count: n }))
-  }
-  if (m || !parts.length) parts.push(t('duration.minute', { count: m }))
-  return parts.join(' ')
-}
 
 export default function ProfileView({ data, onOpenWork, onToggleLike, onDelete, readOnly, isMobile }) {
   const { t, i18n } = useTranslation()

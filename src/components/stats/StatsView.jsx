@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PosterBox from '../ui/PosterBox'
-import { STATUS } from '../../lib/domain'
+import { STATUS, formatWatchTime } from '../../lib/domain'
 import AchievementsGrid from '../ui/AchievementsGrid'
 import GoalsSection from './GoalsSection'
 import { pressable } from '../../lib/a11y'
@@ -73,7 +73,8 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
     }
   })
 
-  const hours = Math.round(minutes / 60)
+  // Arrondir 48 minutes à « 1 h » (ou 20 minutes à « 0 h ») fausse le chiffre : exact sous 10 h, arrondi au-delà
+  const watchTime = minutes < 600 ? formatWatchTime(minutes, t) : Math.round(minutes / 60) + ' h'
   const completionRate = totalWorks ? Math.round((statusCount.termine / totalWorks) * 100) : 0
   const catMax = Math.max(1, ...Object.values(catCount))
   const topGenres = Object.entries(genreCount).sort((a, b) => b[1] - a[1]).slice(0, 6)
@@ -110,7 +111,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
       {/* Top KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: 14 }}>
         {[
-          [hours + ' h', t('stats.watchTime'), 'var(--color-accent)'],
+          [watchTime, t('stats.watchTime'), 'var(--color-accent)'],
           [String(totalEps), t('stats.episodesSeen'), 'var(--color-blue)'],
           [String(totalWorks), t('stats.totalLibrary'), 'var(--color-muted)'],
           [completionRate + ' %', t('stats.completionRate'), 'var(--color-green)'],

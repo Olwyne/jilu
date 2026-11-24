@@ -74,3 +74,15 @@ export function epTotals(work, watched) {
 
 // Translucent wash of a CSS colour (works with theme variables, unlike appending an alpha byte to hex).
 export const tint = (color, pct) => `color-mix(in srgb, ${color} ${pct}%, transparent)`
+
+// « 2 h 5 min », « 48 minutes », « 1 an 3 mois… » : le même texte sur le profil et sur les statistiques
+export function formatWatchTime(totalMins, t) {
+  let m = totalMins
+  const parts = []
+  for (const [unit, size] of [['year', 525600], ['month', 43200], ['day', 1440], ['hour', 60]]) {
+    const n = Math.floor(m / size); m %= size
+    if (n) parts.push(t('duration.' + unit, { count: n }))
+  }
+  if (m || !parts.length) parts.push(t('duration.minute', { count: m }))
+  return parts.join(' ')
+}
