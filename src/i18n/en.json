@@ -126,6 +126,8 @@
   "feedback.suggestion": "Suggestion",
   "feedback.other": "Other",
   "feedback.subjectPlaceholder": "Subject",
+  "feedback.subjectLabel": "Subject",
+  "feedback.messageLabel": "Message",
   "feedback.messagePlaceholder": "Describe the problem or suggestion…",
   "feedback.send": "Send",
   "feedback.sending": "Sending…",

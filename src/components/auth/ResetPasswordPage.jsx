@@ -37,17 +37,18 @@ export default function ResetPasswordPage() {
         <h1 className={styles.title}>{t('auth.newPassword')}</h1>
         {!done ? (
           <>
-            <input
-              className={styles.input}
-              type="password"
-              autoComplete="new-password"
-              placeholder={t('auth.newPasswordPlaceholder')}
-              aria-label={t('auth.newPasswordPlaceholder')}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
-              required
-            />
+            <label className={styles.field}>
+              <span className={styles.label}>{t('auth.newPasswordPlaceholder')}</span>
+              <input
+                className={styles.input}
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </label>
             {error && <div role="alert" className={styles.error}>{error}</div>}
             <button className={styles.button} type="submit">{t('auth.resetButton')}</button>
           </>

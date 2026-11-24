@@ -32,16 +32,17 @@ export default function ForgotPasswordPage() {
         {!sent ? (
           <>
             <p className={styles.subtitle}>{t('auth.forgotSubtitle')}</p>
-            <input
-              className={styles.input}
-              type="email"
-              autoComplete="email"
-              placeholder={t('auth.emailPlaceholder')}
-              aria-label={t('auth.emailPlaceholder')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <label className={styles.field}>
+              <span className={styles.label}>{t('auth.emailPlaceholder')}</span>
+              <input
+                className={styles.input}
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
             {error && <div role="alert" className={styles.error}>{error}</div>}
             <button className={styles.button} type="submit">{t('auth.sendLink')}</button>
           </>

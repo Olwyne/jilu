@@ -31,26 +31,28 @@ export default function LoginPage() {
       <form className={styles.card} onSubmit={handleSubmit}>
         <div className={styles.brand}>Jilu</div>
         <h1 className={styles.title}>{t('auth.login')}</h1>
-        <input
-          className={styles.input}
-          type="email"
-          autoComplete="username"
-          placeholder={t('auth.emailPlaceholder')}
-          aria-label={t('auth.emailPlaceholder')}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          className={styles.input}
-          type="password"
-          autoComplete="current-password"
-          placeholder={t('auth.passwordPlaceholder')}
-          aria-label={t('auth.passwordPlaceholder')}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <label className={styles.field}>
+          <span className={styles.label}>{t('auth.emailPlaceholder')}</span>
+          <input
+            className={styles.input}
+            type="email"
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
+        <label className={styles.field}>
+          <span className={styles.label}>{t('auth.passwordPlaceholder')}</span>
+          <input
+            className={styles.input}
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </label>
         <Link to="/forgot-password" className={styles.switchRight}>
           {t('auth.forgotPassword')}
         </Link>

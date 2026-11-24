@@ -15,6 +15,9 @@ import Card from '../ui/Card'
 
 const TYPE_EMOJI = { bug: '🐛', suggestion: '💡', other: '💬' }
 
+// Libellé visible des champs du formulaire : un placeholder disparaît dès qu'on tape
+const FIELD_LABEL = { fontSize: 13, fontWeight: 600, color: 'var(--color-muted)', marginBottom: -6 }
+
 const RATE_LIMIT = 3
 const WINDOW_MS = 24 * 60 * 60 * 1000
 
@@ -81,19 +84,20 @@ function FeedbackSection({ profile }) {
           <Chip key={ft.value} active={type === ft.value} onClick={() => setType(ft.value)}>{ft.label}</Chip>
         ))}
       </div>
+      <label htmlFor="feedback-subject" style={FIELD_LABEL}>{t('feedback.subjectLabel')}</label>
       <input
+        id="feedback-subject"
         value={subject}
         onChange={e => setSubject(e.target.value)}
-        placeholder={t('feedback.subjectPlaceholder')}
-        aria-label={t('feedback.subjectPlaceholder')}
-        style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
       />
+      <label htmlFor="feedback-message" style={FIELD_LABEL}>{t('feedback.messageLabel')}</label>
       <textarea
+        id="feedback-message"
         value={message}
         onChange={e => setMessage(e.target.value)}
         placeholder={t('feedback.messagePlaceholder')}
-        aria-label={t('feedback.messagePlaceholder')}
-        rows={4}
+                rows={4}
         style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -110,7 +114,7 @@ function FeedbackSection({ profile }) {
 
 function Toggle({ on, onToggle, label, disabled }) {
   return (
-    <button type="button" role="switch" aria-checked={on} aria-label={label} disabled={disabled} onClick={onToggle} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', border: 'none', padding: 0, background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
+    <button type="button" role="switch" aria-checked={on} aria-label={label} disabled={disabled} onClick={onToggle} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', border: 'none', padding: 0, boxShadow: on ? 'none' : 'inset 0 0 0 1px var(--color-control-edge)', background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
       <div style={{ position: 'absolute', top: 3, left: 3, transform: on ? 'translateX(18px)' : 'none', width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'transform .18s' }} />
     </button>
   )
