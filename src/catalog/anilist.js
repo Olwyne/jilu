@@ -151,8 +151,27 @@ export async function anilistGetMangaDetail(anilistId) {
   const volumeEpisodes = {}
   const scanEpisodes = []
 
+  // Scans = chapitres après le dernier tome connu. Avant, un chapitre sans tome est un trou de MangaDex
+  // (ex. One Piece : tomes 8–60 absents), pas un scan.
+  const known = [...chapterMap].filter(([, v]) => v !== null).sort((a, b) => a[0] - b[0])
+  const lastVolChapter = known.length ? known[known.length - 1][0] : 0
+  // shortcut: répartition linéaire des chapitres du trou entre les tomes voisins (approx. à ±1 tome) ;
+  // brancher une vraie source chapitre→tome si la précision devient nécessaire.
+  const volumeOf = (n) => {
+    const v = chapterMap.get(n)
+    if (v != null) return v
+    if (n > lastVolChapter) return null
+    const i = known.findIndex(([c]) => c > n)
+    const next = known[i]
+    const prev = known[i - 1]
+    if (!prev) return next[1]
+    const gap = next[1] - prev[1] - 1
+    if (gap <= 0) return prev[1]
+    return prev[1] + 1 + Math.floor((n - prev[0] - 1) * gap / (next[0] - prev[0] - 1))
+  }
+
   for (let n = 1; n <= totalChapters; n++) {
-    const volNum = chapterMap.get(n) ?? null
+    const volNum = volumeOf(n)
     const air = (volNum === null ? chapterDates?.get(n) : null) || 1
     const ep = { n, title: '', air }
     if (volNum !== null) {

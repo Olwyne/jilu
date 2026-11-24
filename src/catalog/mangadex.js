@@ -88,6 +88,12 @@ export async function mangadexGetChapterMap(mangaTitle) {
     mergeAgg(aggAll) // base pass
     mergeAgg(aggJa)  // ja pass overwrites nulls with real volumes
 
+    // Dates utiles seulement pour les vrais scans : chapitres après le dernier tome connu
+    const lastVolChapter = Math.max(0, ...[...map].filter(([, v]) => v !== null).map(([c]) => c))
+    for (const [id, n] of Object.entries(scanIdToChNum)) {
+      if (n <= lastVolChapter || map.get(n) !== null) delete scanIdToChNum[id]
+    }
+
     const [volDatesRaw, scanDatesRaw] = await Promise.all([
       batchFetchDates(volIdToVolNum),
       batchFetchDates(scanIdToChNum),
