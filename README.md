@@ -36,6 +36,7 @@ n'est lue ni écrite, et les variables `VITE_FIREBASE_*` sont ignorées. C'est v
 rechargées à chaud. Les recherches de catalogue passent par les fonctions de `api/` (servies par Vite, même code qu'en prod) et
 les vraies API (clés dans `.env.local`) ; `api/refresh-work` écrit dans l'émulateur.
 Après un changement de dépendances, relancer `make up` (l'image est reconstruite).
+Si le port 8080 est pris par un autre projet : `FIRESTORE_HOST_PORT=8081 docker compose up -d emulators`, puis `VITE_FIRESTORE_EMULATOR_PORT=8081 pnpm exec vite` (avec `FIRESTORE_EMULATOR_HOST=127.0.0.1:8081 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 GCLOUD_PROJECT=demo-jilu` pour les fonctions `api/`).
 
 ---
 

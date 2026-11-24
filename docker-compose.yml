@@ -20,7 +20,7 @@ services:
       - "4400:4400"
       - "4500:4500"
       - "9099:9099" # Auth (joint par le navigateur)
-      - "8080:8080" # Firestore (joint par le navigateur)
+      - "${FIRESTORE_HOST_PORT:-8080}:8080" # Firestore (joint par le navigateur) : 8081 si 8080 est pris par un autre projet
       - "9150:9150"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4400/emulators"]

@@ -190,6 +190,7 @@
   "library.sort.titre": "A-Z",
   "detail.progress": "Progression",
   "detail.myRating": "Ma note",
+  "detail.moreActions": "Plus d'actions",
   "dashboard.nextUp": "À suivre",
   "dashboard.nextUpMore_one": "{{count}} autre à rattraper",
   "dashboard.nextUpMore_other": "{{count}} autres à rattraper",

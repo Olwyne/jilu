@@ -190,6 +190,7 @@
   "library.sort.titre": "A-Z",
   "detail.progress": "Progress",
   "detail.myRating": "My rating",
+  "detail.moreActions": "More actions",
   "dashboard.nextUp": "Next up",
   "dashboard.nextUpMore_one": "{{count}} more to catch up",
   "dashboard.nextUpMore_other": "{{count}} more to catch up",

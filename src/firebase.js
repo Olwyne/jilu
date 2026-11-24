@@ -31,5 +31,5 @@ setHttp(async (input, init = {}) => {
 
 if (useEmulator) {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
-  connectFirestoreEmulator(db, '127.0.0.1', 8080)
+  connectFirestoreEmulator(db, '127.0.0.1', Number(import.meta.env.VITE_FIRESTORE_EMULATOR_PORT) || 8080) // autre port si 8080 est pris (voir docker-compose.yml)
 }

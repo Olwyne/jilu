@@ -149,7 +149,7 @@ function Shell() {
 
   // Écriture refusée par le serveur : l'écran est déjà revenu à l'état enregistré, on le dit
   const workId = pathname.startsWith('/work/') ? pathname.split('/')[2] : null
-  usePageTitle(workId ? data.works[workId]?.title : getRouteCopy(t)[pathname]?.title)
+  usePageTitle(workId ? data.works[workId]?.title : getRouteCopy(t)[pathname.startsWith('/profile') ? '/profile' : pathname]?.title)
 
   useEffect(() => {
     if (!saveError) return

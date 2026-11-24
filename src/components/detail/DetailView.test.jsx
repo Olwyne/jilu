@@ -26,4 +26,18 @@ describe('DetailView', () => {
     await userEvent.click(screen.getByText('Completed'))
     expect(setStatus).toHaveBeenCalledWith('w1', 'termine')
   })
+
+  it('le menu d\'actions a un nom et un état, s\'ouvre au clavier et Échap le ferme en rendant le focus', async () => {
+    wrap(<DetailView work={work} watched={{}} ratings={{}} games={{}} feed={[]} actions={{ removeWork: vi.fn() }} />)
+    const trigger = screen.getByRole('button', { name: 'More actions' })
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    trigger.focus()
+    await userEvent.keyboard('{Enter}')
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('Remove from library')).toBeInTheDocument()
+    await userEvent.keyboard('{Escape}')
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('Remove from library')).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+  })
 })

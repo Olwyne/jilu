@@ -18,12 +18,24 @@ export default function DetailView({ work, watched, ratings, games, actions, onO
   const [menuOpen, setMenuOpen] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const menuRef = useRef(null)
+  const triggerRef = useRef(null)
 
   useEffect(() => {
     if (!menuOpen) return
     function handleClick(e) { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false) }
+    // Échap ferme le menu et rend le focus au bouton ; en phase de capture, pour ne pas déclencher aussi le retour de page (useKeyboardShortcuts)
+    function handleKey(e) {
+      if (e.key !== 'Escape') return
+      e.stopPropagation()
+      setMenuOpen(false)
+      triggerRef.current?.focus()
+    }
     document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    window.addEventListener('keydown', handleKey, true)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      window.removeEventListener('keydown', handleKey, true)
+    }
   }, [menuOpen])
 
   async function handleRefresh() {
@@ -101,7 +113,7 @@ export default function DetailView({ work, watched, ratings, games, actions, onO
             )}
             {(actions.removeWork || actions.refreshWork || (actions.markWorkWatched && hasEpisodes)) && (
               <div ref={menuRef} style={{ position: 'relative' }}>
-                <div {...pressable(() => setMenuOpen((o) => !o))} style={{ padding: '11px 14px', borderRadius: 13, background: menuOpen ? 'var(--color-border-btn)' : 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', color: 'var(--color-muted)', fontWeight: 700, fontSize: 17, cursor: 'pointer', lineHeight: 1, letterSpacing: 1 }}>⋯</div>
+                <button type="button" ref={triggerRef} aria-label={t('detail.moreActions')} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((o) => !o)} style={{ fontFamily: 'inherit', padding: '11px 14px', borderRadius: 13, background: menuOpen ? 'var(--color-border-btn)' : 'var(--color-chip-bg)', border: '1px solid var(--color-border-btn)', color: 'var(--color-muted)', fontWeight: 700, fontSize: 17, cursor: 'pointer', lineHeight: 1, letterSpacing: 1 }}>⋯</button>
                 {menuOpen && (
                   <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: 210, background: 'var(--color-surface)', border: '1px solid var(--color-border-btn)', borderRadius: 13, boxShadow: '0 8px 32px rgba(0,0,0,.28)', zIndex: 100, overflow: 'hidden' }}>
                     {actions.markWorkWatched && hasEpisodes && (
