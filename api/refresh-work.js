@@ -1,6 +1,4 @@
-// Rafraîchit une fiche du catalogue partagé (voir api/_lib/refreshCatalog.js).
-// Configuration Vercel : variable d'environnement FIREBASE_SERVICE_ACCOUNT (JSON de la clé de compte de service,
-// brut ou encodé en base64) + TMDB_API_KEY (+ SPOTIFY_* pour la musique).
+// Rafraîchit une fiche du catalogue partagé (api/_lib/refreshCatalog.js). Variables Vercel : FIREBASE_SERVICE_ACCOUNT (JSON, brut ou base64), TMDB_API_KEY, SPOTIFY_*.
 import { getAuth } from 'firebase-admin/auth'
 import { createHandler } from './_lib/refreshHandler.js'
 import { createAdminStore } from './_lib/adminStore.js'

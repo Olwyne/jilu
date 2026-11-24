@@ -1,17 +1,7 @@
 #!/usr/bin/env node
-// Supprime les données de l'ANCIEN modèle (v1), plus lues ni écrites depuis la bascule du 2026-10-20 :
-//   - sous-collections users/{uid}/works, users/{uid}/watched, users/{uid}/migrations
-//   - champs works, watched, ratings, favorites, games du document users/{uid}
-//     (ces données vivent dans users/{uid}/library ; le champ `reviews` est gardé : le fil d'amis le lit)
-//
-//   LECTURE SEULE par défaut : compte ce qui serait supprimé. IRRÉVERSIBLE avec --delete, qui exige
-//   --backup <dossier> (copie JSON écrite avant toute suppression) et --confirm <id-du-projet>.
-//   Un compte qui a des œuvres v1 mais aucune fiche v2 (library) n'est jamais touché.
-//
-// Usage :
-//   export GOOGLE_APPLICATION_CREDENTIALS=/chemin/vers/cle-de-service.json
-//   node scripts/purge-legacy.mjs --project <id>
-//   node scripts/purge-legacy.mjs --project <id> --backup ./sauvegarde --delete --confirm <id>
+// Supprime l'ancien modèle v1 (users/{uid}/works|watched|migrations, champs works, watched, ratings, favorites, games), plus lu depuis le 2026-10-20 ; `reviews` reste (fil d'amis).
+// Lecture seule sans --delete, irréversible avec : il exige --backup <dossier> et --confirm <id-du-projet>. Un compte sans fiche v2 n'est jamais touché.
+//   node scripts/purge-legacy.mjs --project <id> [--backup ./sauvegarde --delete --confirm <id>]   (GOOGLE_APPLICATION_CREDENTIALS = clé de service)
 
 import { parseArgs } from 'node:util'
 import { mkdirSync, writeFileSync } from 'node:fs'

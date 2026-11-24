@@ -11,10 +11,8 @@ async function verifyFirebaseToken(token) {
   await getAuth().verifyIdToken(token)
 }
 
-// Les proxys consomment des quotas partagés par toute l'application : réservés aux comptes connectés.
-// Jeton dans X-Firebase-Token et non Authorization : Vercel ne met jamais en cache une requête qui porte
-// Authorization, or c'est le cache CDN qui évite de rappeler l'API pour une même recherche.
-// Le serveur (api/_lib/serverHttp.js) appelle directement la fonction interne, sans passer par ce contrôle.
+// Réservé aux comptes connectés (quotas partagés). Jeton dans X-Firebase-Token : Vercel ne met pas en cache une requête qui porte Authorization.
+// Le serveur appelle directement la fonction interne (api/_lib/serverHttp.js), sans ce contrôle.
 export function authenticated(handler, verify = verifyFirebaseToken) {
   return async function (req, res) {
     try {

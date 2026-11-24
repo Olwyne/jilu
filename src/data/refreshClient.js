@@ -1,6 +1,4 @@
-// Appel de la fonction serveur de rafraîchissement du catalogue partagé (api/refresh-work).
-// Le serveur ne rappelle les API (TMDB, AniList, MangaDex…) que si la fiche est périmée : plusieurs
-// utilisateurs qui cliquent en même temps déclenchent UN seul appel.
+// Appelle api/refresh-work : le serveur ne rappelle les API (TMDB, AniList, MangaDex…) que si la fiche est périmée, donc un seul appel même si plusieurs utilisateurs cliquent.
 import { auth } from '../firebase'
 
 export const REFRESHABLE_SOURCES = ['tmdb', 'anilist', 'anilist-manga', 'spotify', 'googlebooks', 'openlibrary', 'igdb']

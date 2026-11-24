@@ -42,9 +42,7 @@ export default function PublicProfilePage() {
         const base = { ...EMPTY, ...userSnap.data() }
         if (!base.settings?.publicProfile) { setStatus('private'); return }
 
-        // Bibliothèque publique de l'utilisateur + fiches du catalogue partagé (épisodes pour les statistiques)
-        // Synchronisation par delta, comme pour sa propre bibliothèque : une seconde visite ne relit que ce qui a
-        // changé (une bibliothèque de 4 000 œuvres relue en entier à chaque visite épuiserait le quota de lectures)
+        // Synchro par delta, comme pour sa propre bibliothèque (une 2e visite ne relit que ce qui a changé), puis le catalogue partagé (épisodes des statistiques)
         const cache = await createCache('jilu-public')
         const { library } = await syncLibrary(db, uid, cache)
         const catalogIds = Object.values(library).map(l => l.catalogId).filter(Boolean)

@@ -1,6 +1,4 @@
-// Création des fiches du catalogue partagé : POST /api/catalog-ensure { ids } + Authorization: Bearer <jeton Firebase>
-// Seul le serveur crée une fiche partagée, entièrement construite depuis la source (fetchWork) : un navigateur ne
-// peut y injecter aucun contenu. Les fiches déjà présentes ne sont pas touchées.
+// POST /api/catalog-ensure { ids } + jeton Firebase : seul le serveur crée une fiche partagée, construite depuis la source, jamais depuis du contenu client.
 import { clean } from '../../src/lib/catalogUtils.js'
 import { canFetchWork } from '../../src/catalog/fetchWork.js'
 import { uidFromRequest, jsonBody } from './auth.js'

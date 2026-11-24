@@ -1,16 +1,7 @@
 #!/usr/bin/env node
-// Reprise UNIQUE : la saison « Spéciaux » des animés passe du numéro « dernière saison + 1 » au numéro fixe 0
-// (src/catalog/anilist.js). Ce script renumérote les fiches du catalogue et déplace, dans chaque bibliothèque,
-// la progression et les notes des spéciaux vers la saison 0.
-//
-//   LECTURE SEULE par défaut : affiche ce qui serait modifié. Rien n'est écrit sans --apply.
-//   À lancer juste après le déploiement du nouveau code (voir scripts/README.md).
-//
-// Usage :
-//   export GOOGLE_APPLICATION_CREDENTIALS=/chemin/vers/cle-de-service.json
-//   node scripts/migrate-specials.mjs --project <id-du-projet-firebase>
-//   node scripts/migrate-specials.mjs --project <id> --apply
-// Les avis publics (collection reviews) et les commentaires du fil postés sur un épisode spécial suivent aussi.
+// Reprise unique : la saison « Spéciaux » des animés passe de « dernière saison + 1 » au numéro 0 (src/catalog/anilist.js) :
+// catalogue, progression, notes, avis et commentaires. Lecture seule sans --apply ; à lancer juste après le déploiement.
+//   node scripts/migrate-specials.mjs --project <id> [--apply]   (GOOGLE_APPLICATION_CREDENTIALS = clé de service)
 
 import assert from 'node:assert/strict'
 import { parseArgs } from 'node:util'
@@ -48,7 +39,7 @@ initializeApp({ projectId: args.project })
 const db = getFirestore()
 console.log(`Projet : ${args.project}${process.env.FIRESTORE_EMULATOR_HOST ? '  (ÉMULATEUR)' : ''} · ${args.apply ? 'ÉCRITURE' : 'lecture seule'}\n`)
 
-// 1. Catalogue : animés dont la dernière saison est « Spéciaux » -> ancien numéro de cette saison
+// Catalogue : animés dont la dernière saison est « Spéciaux » -> ancien numéro de cette saison
 const oldNumber = new Map()
 for (const c of (await db.collection('catalog').where('category', '==', 'animes').get()).docs) {
   const seasons = c.get('seasons') || []
@@ -61,7 +52,7 @@ for (const c of (await db.collection('catalog').where('category', '==', 'animes'
   if (args.apply) await c.ref.update({ seasons: [...seasons.slice(0, -1), { ...last, n: 0 }], updatedAt: Date.now() })
 }
 
-// 2. Bibliothèques : progression et notes des spéciaux
+// Bibliothèques : progression et notes des spéciaux
 let docs = 0
 for (const l of (await db.collectionGroup('library').get()).docs) {
   const old = oldNumber.get(l.get('catalogId'))
@@ -73,7 +64,7 @@ for (const l of (await db.collectionGroup('library').get()).docs) {
   if (args.apply) await l.ref.update({ ...next, updatedAt: Date.now() })
 }
 
-// 3. Avis publics : un épisode n'a pas d'identifiant, un avis le désigne par (œuvre, saison, épisode).
+// Avis publics : un épisode n'a pas d'identifiant, un avis le désigne par (œuvre, saison, épisode).
 //    L'identifiant de l'avis contient ce numéro quand il vient de « noter un épisode » : il est recréé.
 let reviews = 0
 for (const [workId, old] of oldNumber) {
@@ -90,7 +81,7 @@ for (const [workId, old] of oldNumber) {
   }
 }
 
-// 4. Commentaires du fil d'activité (tableau `feed` du document utilisateur)
+// Commentaires du fil d'activité (tableau `feed` du document utilisateur)
 let comments = 0
 for (const u of (await db.collection('users').get()).docs) {
   let changed = 0

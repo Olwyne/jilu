@@ -35,9 +35,7 @@ export async function syncLibrary(db, uid, cache, { now = Date.now(), purge = fa
     else upserts.push([docKey(uid, d.id), { ...data, id: d.id }])
   })
 
-  // Vieilles traces de suppression : plus aucun appareil n'en a besoin (au-delà de FULL_RESYNC_MS sans
-  // synchronisation, un appareil relit tout et repart d'un cache vide). Sans purge, elles sont relues à chaque
-  // relecture complète, pour toujours. Au mieux : un échec ne gêne pas la synchronisation.
+  // Traces de suppression de plus de 30 jours : plus aucun appareil n'en a besoin (au-delà de FULL_RESYNC_MS il relit tout). Au mieux : un échec ne bloque pas la synchro.
   if (full && purge) {
     const old = snap.docs.filter((d) => d.data().deleted && now - (d.data().updatedAt || 0) > TOMBSTONE_MAX_AGE_MS)
     for (let i = 0; i < old.length; i += 400) {

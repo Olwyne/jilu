@@ -88,9 +88,7 @@ export function importOps(data, { works, watched, ratings, favorites }) {
   return { add, set, extras: { watchedDocs, main: { ratings: newRatings, favorites: newFavorites } } }
 }
 
-// Fiches partagées créées par le serveur, puis statut déduit des VRAIES saisons (l'historique importé ne contient
-// que les épisodes vus : s'en servir marquerait tout « terminé »). Une œuvre dont la fiche n'a pas pu être créée
-// n'est pas ajoutée : elle resterait sans épisodes. Son titre va dans `failed`.
+// Fiches partagées créées par le serveur, puis statut déduit des vraies saisons (l'historique importé ne contient que les épisodes vus : tout serait « terminé »). Sans fiche, l'œuvre n'est pas ajoutée et son titre va dans `failed`.
 export async function prepareImport(data, { works, watched, ratings, favorites }, { createCatalogDocs, failed = [] }) {
   const sourced = Object.values(works).filter((w) => !data.works[w.id] && w.source && w.sourceId != null).map((w) => w.id)
   const shared = sourced.length ? await createCatalogDocs(sourced) : {}

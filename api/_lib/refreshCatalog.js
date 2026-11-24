@@ -1,8 +1,5 @@
-// Cœur du rafraîchissement d'une fiche du catalogue partagé (testable : tout est injecté).
-//
-//  - une fiche rafraîchie depuis moins de MIN_AGE_MS n'est jamais re-demandée aux API (même si 10 personnes cliquent)
-//  - un verrou (lease) évite que deux requêtes simultanées appellent les API pour la même fiche
-//  - un résultat vide ne remplace jamais une fiche existante (une panne d'API ne doit pas abîmer le catalogue de tous)
+// Rafraîchissement d'une fiche partagée (tout est injecté, donc testable). Une fiche récente n'est jamais redemandée aux API, un verrou (lease)
+// évite les appels simultanés, et un résultat vide ne remplace jamais une fiche existante (une panne d'API ne doit pas abîmer le catalogue de tous).
 import { clean, totalEpisodes } from '../../src/lib/catalogUtils.js'
 import { canFetchWork } from '../../src/catalog/fetchWork.js'
 

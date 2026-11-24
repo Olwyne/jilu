@@ -74,7 +74,6 @@ export async function googleBooksSearch(query) {
     })
 }
 
-// Fiche complète d'un volume Google Books
 export async function googleBooksGetWork(volumeId) {
   const res = await http(`/api/books?id=${encodeURIComponent(volumeId)}`)
   if (!res.ok) return null

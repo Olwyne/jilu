@@ -3,9 +3,8 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth'
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
 import { setHttp } from './catalog/http.js'
 
-// Serveur de dev (`make up`) : toujours les émulateurs Auth + Firestore, jamais la base de production.
-// Projet « demo-* » : le SDK n'a besoin d'aucune vraie clé, et ne peut rien joindre en ligne.
-// (`mode` vaut « test » sous vitest et « production » au build : seuls les vrais réglages y servent.)
+// Serveur de dev (`make up`) : toujours les émulateurs, jamais la base de production (projet « demo-* » : aucune vraie clé, rien de joignable en ligne).
+// `mode` vaut « test » sous vitest et « production » au build : seuls les vrais réglages y servent.
 const useEmulator = import.meta.env.MODE === 'development'
 
 const firebaseConfig = useEmulator

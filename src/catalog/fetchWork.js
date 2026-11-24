@@ -1,6 +1,4 @@
-// Fiche complète d'une œuvre construite UNIQUEMENT à partir de sa source, d'après son identifiant.
-// Utilisée par le serveur pour créer (api/catalog-ensure) et rafraîchir (api/refresh-work, cron) le catalogue
-// partagé : aucun contenu venant d'un navigateur n'entre dans une fiche partagée.
+// Fiche complète d'une œuvre depuis sa seule source, d'après son identifiant : c'est ce que le serveur écrit dans le catalogue partagé, jamais du contenu venu d'un navigateur.
 import { tmdbGetWork } from './tmdb.js'
 import { anilistFindId, anilistGetDetail, anilistGetWork } from './anilist.js'
 import { spotifyGetWork } from './spotify.js'
@@ -20,9 +18,7 @@ const SOURCES = [
 
 export const canFetchWork = (id) => SOURCES.some(([re]) => re.test(String(id)))
 
-// Animés venus de TMDB : les saisons d'AniList sont bien plus fidèles (relations suite/préquelle).
-// AniList indisponible : on échoue (l'ancienne fiche est gardée) plutôt que d'enregistrer le découpage TMDB,
-// qui décalerait la progression de tous les utilisateurs.
+// Animés TMDB : les saisons d'AniList sont plus fidèles. AniList en panne : on échoue (ancienne fiche gardée) au lieu d'enregistrer le découpage TMDB, qui décalerait la progression de tous.
 async function withAnilistSeasons(work) {
   const anilistId = await anilistFindId(work.originalTitle || work.title, work.year)
   if (!anilistId) return work
