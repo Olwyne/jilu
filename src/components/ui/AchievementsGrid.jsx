@@ -48,7 +48,7 @@ export default function AchievementsGrid({ works, watched, ratings, compact = fa
           {[...unlocked, ...next].map((a) => (
             <li
               key={a.id}
-              title={`${a.label} — ${a.desc}`}
+              title={`${a.label} : ${a.desc}`}
               aria-label={`${a.unlocked ? t('achievements.unlocked') : t('achievements.locked')} : ${a.label}, ${a.desc}`}
               style={{ display: 'inline-flex', padding: 8, borderRadius: 10, border: `1px ${a.unlocked ? 'solid' : 'dashed'} var(--color-border-btn)`, color: a.unlocked ? 'var(--color-accent)' : 'var(--color-muted)' }}
             >

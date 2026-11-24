@@ -36,6 +36,7 @@ export default function QuizWidget({ user, handle, following }) {
         fetchLeaders()
       }
     }).catch(() => { /* permissions not deployed yet — stay idle */ })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchLeaders est recréée à chaque rendu ; seul le changement de compte ou de jour compte
   }, [user, todayKey])
 
   useEffect(() => {

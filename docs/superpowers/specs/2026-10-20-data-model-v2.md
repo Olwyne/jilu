@@ -3,17 +3,22 @@
 Statut : **en production**. La section 0 décrit le système actuel ; les sections 1 à 9 sont la proposition et le
 journal de migration d'origine (2026-10-20), gardés pour l'historique.
 
-## 0. État actuel (2026-11-10)
+## 0. État actuel (2026-11-13)
 
 **Données (Firestore)**
 - `catalog/{id}` : fiche partagée d'une œuvre (métadonnées, saisons/épisodes, `ended`, `refreshedAt`, `timeToBeat` pour
-  les jeux IGDB). Création seule côté client (première personne qui ajoute l'œuvre) ; mises à jour par le serveur
-  uniquement. Les fiches `local-{uid}-…` (imports sans correspondance) n'appartiennent qu'à leur auteur.
+  les jeux IGDB). Créée et mise à jour par le serveur uniquement, depuis la source (`api/catalog-ensure`,
+  `api/refresh-work`, cron). Les fiches `local-{uid}-…` (imports sans correspondance) sont créées par leur auteur,
+  qui peut seulement les effacer. Animés : la saison « Spéciaux » porte le numéro fixe 0.
 - `users/{uid}/library/{id}` : une fiche par œuvre suivie (statut, `eps`, `watchedCount`, notes, favori, jeu, avis
-  personnel, résumé pour la liste). Suppression douce (`deleted`), `updatedAt` pour la synchronisation par delta.
-- `users/{uid}` : réglages, profil, fil d'activité, copie des avis (lue par le fil d'amis).
-- Ancien modèle `works`, `watched`, `migrations` : encore en base, plus lu ni écrit ; règles = lecture/suppression par
-  le propriétaire seulement. Code de migration retiré le 2026-11-10 (tous les comptes avaient une copie v2 contrôlée).
+  personnel, résumé pour la liste). Suppression douce : il ne reste que `{ deleted, updatedAt }`, effacé pour de bon
+  après 30 jours lors d'une relecture complète. `updatedAt` sert à la synchronisation par delta, y compris pour
+  la visite d'un profil public.
+- `users/{uid}` : réglages, profil, fil d'activité, copie des 50 avis les plus récents (lue par le fil d'amis).
+- `quotas/{uid}` : compteurs quotidiens tenus par le serveur (2 000 fiches demandées, 500 rafraîchissements).
+- Ancien modèle `works`, `watched`, `migrations` (+ champs `works`, `watched`, `ratings`, `favorites`, `games` du
+  document utilisateur) : encore en base, plus lu ni écrit ; règles = lecture/suppression par le propriétaire
+  seulement. Suppression : `scripts/purge-legacy.mjs` (sauvegarde obligatoire, irréversible), pas encore lancé.
 
 **Lecture** (`src/hooks/useAppData.js`) : cache IndexedDB + delta sur `updatedAt` (`src/data/library.js`) ; catalogue
 chargé à la demande (`src/data/catalog.js`), en cache 1 jour (série en diffusion) à 30 jours. Une fiche absente du

@@ -97,29 +97,16 @@ export async function tmdbDiscover(genreId, cat) {
   })
 }
 
-export async function tmdbGetBothMeta(work) {
-  const type = work.category === 'films' ? 'movie' : 'tv'
-  const [fr, en] = await Promise.all([
-    tmdbFetch(`/${type}/${work.sourceId}`, { language: 'fr-FR' }),
-    tmdbFetch(`/${type}/${work.sourceId}`, { language: 'en-US' }),
-  ])
-  const titleFr = type === 'tv' ? fr.name : fr.title
-  const titleEn = type === 'tv' ? en.name : en.title
-  const posterFr = fr.poster_path ? `https://image.tmdb.org/t/p/w300${fr.poster_path}` : null
-  const posterEn = en.poster_path ? `https://image.tmdb.org/t/p/w300${en.poster_path}` : null
-  return {
-    titles: { fr: titleFr, en: titleEn },
-    posters: { fr: posterFr || posterEn, en: posterEn || posterFr }
-  }
-}
+const tmdbPoster = (path) => (path ? `https://image.tmdb.org/t/p/w300${path}` : null)
 
-export async function tmdbGetDetail(work) {
-  if (work.category === 'films') return { ...work, seasons: null }
-  const show = await tmdbFetch(`/tv/${work.sourceId}`, { language: tmdbLocale() })
+async function tmdbSeasons(tvId) {
+  const show = await tmdbFetch(`/tv/${tvId}`, { language: tmdbLocale() })
   const seasons = []
   for (const s of show.seasons || []) {
     if (s.season_number === 0) continue
-    const seasonJson = await tmdbFetch(`/tv/${work.sourceId}/season/${s.season_number}`, { language: tmdbLocale() })
+    const seasonJson = await tmdbFetch(`/tv/${tvId}/season/${s.season_number}`, { language: tmdbLocale() })
+    // Réponse d'erreur (pas de liste d'épisodes) : ne pas enregistrer une saison vide à la place de la vraie
+    if (!seasonJson.episodes) throw new Error(`tmdb: season ${s.season_number} of ${tvId} unavailable`)
     seasons.push({
       n: s.season_number,
       name: s.name || null,
@@ -130,8 +117,39 @@ export async function tmdbGetDetail(work) {
       })).sort((a, b) => a.n - b.n)
     })
   }
-  const ended = show.status === 'Ended' || show.status === 'Canceled'
-  return { ...work, seasons, ended }
+  return { seasons, ended: show.status === 'Ended' || show.status === 'Canceled' }
+}
+
+// Fiche complète depuis TMDB (type : 'tv' | 'movie'), titres et affiches en français et en anglais
+export async function tmdbGetWork(type, sourceId) {
+  const [fr, en] = await Promise.all([
+    tmdbFetch(`/${type}/${sourceId}`, { language: 'fr-FR' }),
+    tmdbFetch(`/${type}/${sourceId}`, { language: 'en-US' }),
+  ])
+  const main = currentLanguage()?.startsWith('fr') ? fr : en
+  const isTv = type === 'tv'
+  const genreIds = (fr.genres || en.genres || []).map((g) => g.id) // identiques dans les deux langues
+  const dateStr = isTv ? main.first_air_date : main.release_date
+  const titles = { fr: isTv ? fr.name : fr.title, en: isTv ? en.name : en.title }
+  const posterFr = tmdbPoster(fr.poster_path)
+  const posterEn = tmdbPoster(en.poster_path)
+  const work = {
+    source: 'tmdb',
+    sourceId: Number(sourceId),
+    id: `tmdb-${type}-${sourceId}`,
+    title: isTv ? main.name : main.title,
+    titles,
+    originalTitle: (isTv ? main.original_name : main.original_title) || null,
+    category: !isTv ? 'films' : genreIds.includes(16) ? 'animes' : 'series',
+    genre: genreLabel(genreIds),
+    year: dateStr ? Number(dateStr.slice(0, 4)) : null,
+    overview: main.overview || '',
+    poster: tmdbPoster(main.poster_path),
+    posters: { fr: posterFr || posterEn, en: posterEn || posterFr },
+    release: dateStr ? Date.parse(dateStr) : null,
+    seasons: null,
+  }
+  return isTv ? { ...work, ...(await tmdbSeasons(sourceId)) } : work
 }
 
 export async function tmdbFetchEpisode(sourceId, sNum, eNum, language) {

@@ -69,19 +69,21 @@ export function nestForFirestore(set) {
 }
 
 export async function commitPlan(db, uid, plan) {
-  // Fiches de catalogue : création seule (les règles interdisent la modification) -> seulement celles qui manquent
-  const catalogIds = Object.keys(plan.catalogCreates)
+  // Fiches de catalogue : le client ne crée que ses fiches locales (local-{uid}-…), et seulement celles qui manquent ;
+  // les fiches partagées sont créées par le serveur (api/catalog-ensure)
+  const catalogIds = Object.keys(plan.catalogCreates).filter((id) => id.startsWith('local-'))
   const existing = catalogIds.length ? await idsThatExist(collection(db, 'catalog'), catalogIds) : new Set()
   const ops = []
-  for (const [id, d] of Object.entries(plan.catalogCreates)) {
-    if (!existing.has(id)) ops.push((b) => b.set(doc(db, 'catalog', id), d))
+  for (const id of catalogIds) {
+    if (!existing.has(id)) ops.push((b) => b.set(doc(db, 'catalog', id), plan.catalogCreates[id]))
   }
   for (const [id, d] of Object.entries(plan.libraryCreates)) ops.push((b) => b.set(doc(db, 'users', uid, 'library', id), d))
   for (const [id, set] of Object.entries(plan.patches)) {
     ops.push((b) => b.set(doc(db, 'users', uid, 'library', id), nestForFirestore(set), { merge: true }))
   }
   for (const id of plan.removes) {
-    ops.push((b) => b.set(doc(db, 'users', uid, 'library', id), { deleted: true, updatedAt: plan.now }, { merge: true }))
+    // sans fusion : il ne reste qu'une trace pour la synchronisation, pas la progression ni les notes
+    ops.push((b) => b.set(doc(db, 'users', uid, 'library', id), { deleted: true, updatedAt: plan.now }))
   }
   for (let i = 0; i < ops.length; i += BATCH_SIZE) {
     const batch = writeBatch(db)

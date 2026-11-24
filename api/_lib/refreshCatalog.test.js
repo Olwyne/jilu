@@ -25,7 +25,8 @@ function fakeStore(initial) {
 
 const stale = (over = {}) => ({ id: 'tmdb-tv-1', source: 'tmdb', sourceId: 1, title: 'Série', category: 'series', seasons: [season(3)], refreshedAt: NOW - 2 * MIN_AGE_MS, ...over })
 let fetchFresh
-beforeEach(() => { fetchFresh = vi.fn(async (w) => ({ ...w, title: 'Série (maj)', seasons: [season(5)], status: 'en_cours', added: 5 })) })
+// fetchFresh(id) : fiche reconstruite depuis la source (fetchWork)
+beforeEach(() => { fetchFresh = vi.fn(async (id) => ({ id, source: 'tmdb', sourceId: 1, title: 'Série (maj)', category: 'series', seasons: [season(5)], status: 'en_cours', added: 5 })) })
 
 describe('refreshCatalogWork', () => {
   it('rafraîchit une fiche périmée et enregistre la version fraîche', async () => {
@@ -50,7 +51,7 @@ describe('refreshCatalogWork', () => {
   })
 
   it('rafraîchit une fiche jamais rafraîchie (migrée)', async () => {
-    const { refreshedAt, ...neverRefreshed } = stale()
+    const { refreshedAt: _refreshedAt, ...neverRefreshed } = stale()
     const store = fakeStore({ 'tmdb-tv-1': neverRefreshed })
     expect((await refreshCatalogWork({ store, fetchFresh, id: 'tmdb-tv-1', now: NOW })).status).toBe('refreshed')
   })
@@ -105,7 +106,7 @@ describe('refreshCatalogWork', () => {
     fetchFresh.mockRejectedValue(new Error('timeout'))
     await expect(refreshCatalogWork({ store, fetchFresh, id: 'tmdb-tv-1', now: NOW })).rejects.toThrow('timeout')
     expect(store.releaseLease).toHaveBeenCalled()
-    expect((await refreshCatalogWork({ store, fetchFresh: vi.fn(async (w) => w), id: 'tmdb-tv-1', now: NOW + 1 })).status).toBe('refreshed')
+    expect((await refreshCatalogWork({ store, fetchFresh: vi.fn(async () => stale()), id: 'tmdb-tv-1', now: NOW + 1 })).status).toBe('refreshed')
   })
 
   it('accepte un film (sans saisons) sans le prendre pour un résultat vide', async () => {
@@ -127,5 +128,23 @@ describe('refreshCatalogWork', () => {
     expect((await refreshCatalogWork({ store: veryRecent, fetchFresh, id: 'tmdb-tv-1', now: NOW, minAgeMs: 1 })).status).toBe('fresh') // plancher
     expect((await refreshCatalogWork({ store: veryRecent, fetchFresh, id: 'tmdb-tv-1', now: NOW, minAgeMs: 'abc' })).status).toBe('fresh')
     expect(MAX_REQUESTED_AGE_MS).toBeGreaterThan(DAY)
+  })
+
+  it('une fiche fausse (créée à la main) est entièrement remplacée : rien de l’ancienne version n’est gardé', async () => {
+    const store = fakeStore({ 'tmdb-tv-1': stale({ title: 'Piratée', poster: 'https://evil.example/x.png', ended: true, junk: 'x' }) })
+    await refreshCatalogWork({ store, fetchFresh, id: 'tmdb-tv-1', now: NOW })
+    expect(fetchFresh).toHaveBeenCalledWith('tmdb-tv-1')
+    const saved = store.docs.get('tmdb-tv-1')
+    expect(saved.title).toBe('Série (maj)')
+    expect(saved).not.toHaveProperty('poster')
+    expect(saved).not.toHaveProperty('junk')
+    expect(saved).not.toHaveProperty('ended')
+  })
+  it('œuvre introuvable à la source : erreur, fiche intacte, verrou levé', async () => {
+    const store = fakeStore({ 'tmdb-tv-1': stale() })
+    fetchFresh.mockResolvedValue(null)
+    await expect(refreshCatalogWork({ store, fetchFresh, id: 'tmdb-tv-1', now: NOW })).rejects.toMatchObject({ code: 'not_found_upstream' })
+    expect(store.save).not.toHaveBeenCalled()
+    expect(store.releaseLease).toHaveBeenCalled()
   })
 })

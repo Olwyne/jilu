@@ -33,7 +33,7 @@ export default function EpisodeModal({ work, sNum, eNum, ratings, actions, watch
     tmdbFetchEpisode(work.sourceId, sNum, eNum, i18n.language?.startsWith('fr') ? 'fr-FR' : 'en-US')
       .then((d) => { if (d.overview) setOverview(d.overview) })
       .catch(() => {})
-  }, [work.sourceId, work.source, work.category, sNum, eNum])
+  }, [work.sourceId, work.source, work.category, sNum, eNum, i18n.language])
 
   const spoilerVisible = isWatched || revealed
 

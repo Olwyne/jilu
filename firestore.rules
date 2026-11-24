@@ -27,8 +27,9 @@ service cloud.firestore {
     }
 
     // Catalogue partagé (métadonnées publiques des œuvres, identiques pour tous) : lisible par tous, y compris
-    // sur un profil public. Création seule côté application ; les mises à jour sont faites par le serveur.
-    // Les fiches « local-{uid}-… » ne peuvent être créées que par leur propriétaire.
+    // sur un profil public. Les fiches partagées sont créées et mises à jour par le serveur seulement, depuis
+    // leur source (api/catalog-ensure, api/refresh-work). Un navigateur ne crée que ses fiches « local-{uid}-… »
+    // (œuvres importées sans correspondance).
     match /catalog/{catalogId} {
       function validCatalog(d) {
         return d.title is string && d.title.size() > 0 && d.title.size() <= 300
@@ -37,9 +38,10 @@ service cloud.firestore {
       }
       allow read: if true;
       allow create: if signedIn() && validCatalog(request.resource.data)
-        && (!catalogId.matches('^local-.*')
-            || catalogId.matches('^local-' + request.auth.uid + '-.*'));
-      allow update, delete: if false;
+        && catalogId.matches('^local-' + request.auth.uid + '-.*');
+      allow update: if false;
+      // Ses propres fiches locales : effacées à la suppression du compte
+      allow delete: if signedIn() && catalogId.matches('^local-' + request.auth.uid + '-.*');
     }
 
     // Un pseudo ne peut être créé que s'il est libre, jamais réécrit par un autre
@@ -89,6 +91,12 @@ service cloud.firestore {
         && request.resource.data.handle is string
         && request.resource.data.handle.size() <= 40;
       allow delete: if isOwner(userId);
+    }
+
+    // Compteurs quotidiens tenus par le serveur (api/_lib/adminStore.js) : le propriétaire peut seulement
+    // effacer le sien (suppression de compte)
+    match /quotas/{uid} {
+      allow delete: if isOwner(uid);
     }
 
     match /follows/{uid} {

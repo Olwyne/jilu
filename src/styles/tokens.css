@@ -4,7 +4,7 @@
   --color-progress-track: rgba(255,255,255,.09);
   --color-dropdown-bg: #1c1c2e;
   --color-modal-bg: #15151d;
-  --color-mobile-nav-bg: rgba(14,14,20,.92);
+  --color-mobile-nav-bg: #0e0e14;
   --color-check-border: #7a7a8c;
   --color-control-edge: #7a7a8c;
   --color-check-border-dim: #2a2a38;
@@ -81,7 +81,7 @@
   --color-progress-track: rgba(0,0,0,.09);
   --color-dropdown-bg: #ffffff;
   --color-modal-bg: #ffffff;
-  --color-mobile-nav-bg: rgba(242,242,247,.92);
+  --color-mobile-nav-bg: #f2f2f7;
   --color-check-border: #77778c;
   --color-control-edge: #77778c;
   --color-check-border-dim: rgba(0,0,0,.13);

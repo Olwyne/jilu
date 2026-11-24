@@ -1,24 +1,19 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import MobileNav from './MobileNav'
 
-const mockNavigate = vi.fn()
-vi.mock('react-router-dom', () => ({
-  useNavigate: () => mockNavigate,
-  useLocation: () => ({ pathname: '/library' })
-}))
+const renderAt = (path) => render(<MemoryRouter initialEntries={[path]}><MobileNav /></MemoryRouter>)
 
 describe('MobileNav', () => {
   it('renders nav items and highlights the active one', () => {
-    render(<MobileNav />)
-    const libraryItem = screen.getByText('Library').closest('button')
+    renderAt('/library')
+    const libraryItem = screen.getByText('Library').closest('a')
     expect(libraryItem.className).toMatch(/active/)
   })
 
-  it('navigates to the clicked section', async () => {
-    render(<MobileNav />)
-    await userEvent.click(screen.getByText('Calendar'))
-    expect(mockNavigate).toHaveBeenCalledWith('/calendar')
+  it('navigation items are real links', () => {
+    renderAt('/library')
+    expect(screen.getByRole('link', { name: 'Calendar' })).toHaveAttribute('href', '/calendar')
   })
 })

@@ -146,6 +146,7 @@ export default function RecoRow({ works, onAddWork }) {
       if (!cancelled) { setPools({ films, series, animes, mangas, jeux, livres }); setLoading(false) }
     })
     return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recommandations calculées à l'ouverture, pas à chaque changement de la bibliothèque
   }, [])
 
   if (loading) return (

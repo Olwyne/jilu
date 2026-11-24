@@ -175,6 +175,8 @@ The mood is calm and confident. Content leads, chrome is quiet, and the accent i
 - Heavy Bricolage Grotesque headings, Instrument Sans body, 12px minimum text.
 - Every colour is a semantic token with a value per theme; components never hold hex literals.
 
+Dial: ENERGY 2 / RHYTHM 2 / MOTION 1. Calm and content-first (ENERGY 2: the app stays quiet, only the landing hero speaks loudly); sections share one grid with deliberate breaks (RHYTHM 2: the landing alternates text, screenshot and proof, the app views keep their own layout); motion is limited to hover feedback and the arrival of dialogs and toasts, and drops its travel under `prefers-reduced-motion` (MOTION 1).
+
 ## Colors
 
 A near-black canvas, translucent white layers, one electric violet, and a small family of signal colours. Every role has a dark and a light value; the frontmatter lists the dark values (the default world), and the light values are given per role below.

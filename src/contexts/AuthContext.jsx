@@ -45,6 +45,7 @@ export function AuthProvider({ children }) {
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
 }
 
+// eslint-disable-next-line react/only-export-components -- le hook vit avec son contexte (seul effet : rechargement à chaud moins fin en dev)
 export function useAuth() {
   return useContext(AuthCtx)
 }

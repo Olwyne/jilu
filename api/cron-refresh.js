@@ -3,7 +3,7 @@
 import { createCronHandler } from './_lib/cronRefresh.js'
 import { createAdminStore } from './_lib/adminStore.js'
 import { initAdmin } from './_lib/firebaseAdmin.js'
-import { fetchFreshWork } from '../src/catalog/refresh.js'
+import { fetchWork } from '../src/catalog/fetchWork.js'
 
 let handler
 
@@ -11,7 +11,7 @@ export default async function (req, res) {
   try {
     if (!handler) {
       initAdmin()
-      handler = createCronHandler({ store: createAdminStore(), fetchFresh: fetchFreshWork, secret: process.env.CRON_SECRET })
+      handler = createCronHandler({ store: createAdminStore(), fetchFresh: fetchWork, secret: process.env.CRON_SECRET })
     }
   } catch (e) {
     console.error('[cron-refresh] configuration', e.message)

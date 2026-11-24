@@ -36,8 +36,10 @@ export async function igdbTimeToBeat(sourceId) {
   return out.main || out.extra || out.full ? out : null
 }
 
-// Ajout d'une œuvre : la fiche de recherche suffit, on y joint les durées de jeu si IGDB les connaît
-export async function igdbGetDetail(work) {
-  const timeToBeat = await igdbTimeToBeat(work.sourceId).catch(() => null)
-  return timeToBeat ? { ...work, timeToBeat } : work
+// Fiche complète d'un jeu, avec ses durées de jeu si IGDB les connaît
+export async function igdbGetWork(gameId) {
+  const [g] = await call({ op: 'game', id: String(gameId) })
+  if (!g) return null
+  const timeToBeat = await igdbTimeToBeat(g.id).catch(() => null)
+  return timeToBeat ? { ...toWork(g), timeToBeat } : toWork(g)
 }

@@ -1,9 +1,9 @@
-import { onlyGet } from './_proxy.js'
+import { authenticated, onlyGet } from './_proxy.js'
 
 // Jeton client-credentials mis en cache dans l'instance (≈ 1 h de validité) et côté CDN.
 let cached = { token: null, expiresAt: 0 }
 
-export default async function handler(req, res) {
+export async function handler(req, res) {
   if (!onlyGet(req, res)) return
   try {
     if (!cached.token || Date.now() > cached.expiresAt - 60_000) {
@@ -25,3 +25,5 @@ export default async function handler(req, res) {
     res.status(502).json({ error: 'upstream error' })
   }
 }
+
+export default authenticated(handler)

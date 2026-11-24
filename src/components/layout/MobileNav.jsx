@@ -1,9 +1,8 @@
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import styles from './MobileNav.module.css'
 
 export default function MobileNav() {
-  const navigate = useNavigate()
   const { pathname } = useLocation()
   const { t } = useTranslation()
 
@@ -65,16 +64,16 @@ export default function MobileNav() {
   return (
     <nav className={styles.nav} aria-label={t('a11y.mainNav')}>
       {ITEMS.map((item) => (
-        <button
+        <Link
           key={item.path}
+          to={item.path}
           className={`${styles.item} ${pathname === item.path ? styles.active : ''}`}
-          onClick={() => navigate(item.path)}
           aria-current={pathname === item.path ? 'page' : undefined}
           aria-label={item.label}
         >
           <span aria-hidden="true">{item.icon}</span>
           <span className={styles.label}>{item.label}</span>
-        </button>
+        </Link>
       ))}
     </nav>
   )

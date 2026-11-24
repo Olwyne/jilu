@@ -1,4 +1,4 @@
-import { onlyGet, forward } from './_proxy.js'
+import { authenticated, onlyGet, forward } from './_proxy.js'
 
 // IGDB (Twitch) : jeux vidéo. Gratuit pour un usage non commercial, 4 requêtes/s pour toute l'application.
 // Seules quelques opérations fixes sont exposées : la requête IGDB est construite ici, jamais par le client.
@@ -12,6 +12,8 @@ export const OPS = {
   trending: () => ['games', `${FIELDS} where first_release_date > ${Math.floor(Date.now() / 1000) - 120 * DAY} & total_rating_count > 3 & version_parent = null; sort total_rating_count desc; limit 5;`],
   // Les mieux notés d'un genre ou d'un thème (les noms RAWG déjà enregistrés, ex. « Action », sont des thèmes chez IGDB)
   genre: ({ genre }) => genre && ['games', `${FIELDS} where (genres.name ~ *${str(genre)}* | themes.name ~ *${str(genre)}*) & total_rating_count > 50 & version_parent = null; sort total_rating desc; limit 20;`],
+  // Un jeu précis (création ou rafraîchissement d'une fiche)
+  game: ({ id }) => /^\d+$/.test(id || '') && ['games', `${FIELDS} where id = ${id};`],
   // Durées de jeu (en secondes) : rapide (histoire), normal (extras), complet (100 %)
   ttb: ({ id }) => /^\d+$/.test(id || '') && ['game_time_to_beats', `fields game_id,hastily,normally,completely,count; where game_id = ${id};`],
 }
@@ -28,7 +30,7 @@ async function twitchToken() {
   return cached.token
 }
 
-export default async function handler(req, res) {
+export async function handler(req, res) {
   if (!onlyGet(req, res)) return
   const op = OPS[req.query.op]
   const built = op && op(req.query)
@@ -50,3 +52,5 @@ export default async function handler(req, res) {
     body,
   })
 }
+
+export default authenticated(handler)

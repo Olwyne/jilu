@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './Auth.module.css'
-import { pressable } from '../../lib/a11y'
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation()
+  usePageTitle(t('auth.forgotTitle'))
   const { resetPassword } = useAuth()
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
@@ -32,16 +32,17 @@ export default function ForgotPasswordPage() {
         {!sent ? (
           <>
             <p className={styles.subtitle}>{t('auth.forgotSubtitle')}</p>
-            <input
-              className={styles.input}
-              type="email"
-              autoComplete="email"
-              placeholder={t('auth.emailPlaceholder')}
-              aria-label={t('auth.emailPlaceholder')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <label className={styles.field}>
+              <span className={styles.label}>{t('auth.emailPlaceholder')}</span>
+              <input
+                className={styles.input}
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
             {error && <div role="alert" className={styles.error}>{error}</div>}
             <button className={styles.button} type="submit">{t('auth.sendLink')}</button>
           </>
@@ -50,9 +51,9 @@ export default function ForgotPasswordPage() {
             {t('auth.emailSent')}
           </p>
         )}
-        <div className={styles.switch} {...pressable(() => navigate('/login'), { role: 'link' })}>
+        <Link to="/login" className={styles.switch}>
           {t('auth.backToLogin')}
-        </div>
+        </Link>
       </form>
     </div>
   )

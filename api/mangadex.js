@@ -1,4 +1,4 @@
-import { onlyGet, pickParams, forward } from './_proxy.js'
+import { authenticated, onlyGet, pickParams, forward } from './_proxy.js'
 
 const ALLOWED_PATHS = [
   /^\/manga$/,
@@ -7,7 +7,7 @@ const ALLOWED_PATHS = [
 ]
 const PARAMS = ['title', 'limit', 'ids[]', 'translatedLanguage[]']
 
-export default async function handler(req, res) {
+export async function handler(req, res) {
   if (!onlyGet(req, res)) return
   const { path } = req.query
   if (typeof path !== 'string' || !ALLOWED_PATHS.some((re) => re.test(path))) {
@@ -18,3 +18,5 @@ export default async function handler(req, res) {
   const qsStr = qs.toString()
   await forward(res, `https://api.mangadex.org${path}${qsStr ? '?' + qsStr : ''}`)
 }
+
+export default authenticated(handler)

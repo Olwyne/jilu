@@ -29,6 +29,29 @@ Garde-fous : lecture seule par défaut ; la suppression est refusée sans sauveg
 projet, ou si Authentication ne renvoie aucun compte (mauvais projet/identifiants : tout paraîtrait orphelin).
 Seuls les comptes absents d'Authentication sont supprimés ; les comptes inactifs ne sont jamais touchés.
 
+## `migrate-specials.mjs` — spéciaux d'animé en saison 0 (à lancer une fois)
+
+La saison « Spéciaux » d'un animé a désormais le numéro fixe 0. Ce script renumérote les fiches du catalogue et
+déplace la progression et les notes déjà enregistrées. Lecture seule sans `--apply`. À lancer **juste après** avoir
+déployé le nouveau code, une seule fois.
+
+```bash
+node scripts/migrate-specials.mjs --project <id-du-projet>           # ce qui serait modifié
+node scripts/migrate-specials.mjs --project <id-du-projet> --apply
+```
+
+## `purge-legacy.mjs` — supprimer l'ancien modèle (irréversible)
+
+Depuis la bascule du 2026-10-20, `users/{uid}/works`, `watched`, `migrations` et les champs `works`, `watched`,
+`ratings`, `favorites`, `games` du document utilisateur ne sont plus lus ni écrits : ce sont des copies mortes
+(plusieurs milliers de documents avec leurs épisodes). Lecture seule par défaut ; la suppression exige une
+sauvegarde et la confirmation du projet. Un compte avec des œuvres v1 mais aucune fiche v2 n'est jamais touché.
+
+```bash
+node scripts/purge-legacy.mjs --project <id-du-projet>                                              # compte seulement
+node scripts/purge-legacy.mjs --project <id-du-projet> --backup ./sauvegarde --delete --confirm <id-du-projet>
+```
+
 ## Depuis Docker (sans rien installer)
 
 ```bash

@@ -1,7 +1,10 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render as rtlRender, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import LibraryView from './LibraryView'
+
+const render = (ui) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>)
 
 const works = {
   w1: { id: 'w1', title: 'One Piece', category: 'animes', year: 1999, status: 'en_cours', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }, { n: 2, air: 0 }] }] },
@@ -15,9 +18,21 @@ describe('LibraryView', () => {
     expect(screen.getByText('One Piece')).toBeInTheDocument()
   })
 
-  it('shows the empty state when no work matches', () => {
-    render(<LibraryView works={{}} watched={{}} ratings={{}} favorites={{}} onOpenWork={() => {}} />)
+  it('empty library: says so and offers search and import', async () => {
+    const onSearch = vi.fn()
+    render(<LibraryView works={{}} watched={{}} ratings={{}} favorites={{}} onOpenWork={() => {}} onSearch={onSearch} onImport={() => {}} />)
+    expect(screen.getByText('Your library is empty.')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Search for a work' }))
+    expect(onSearch).toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Import from TV Time' })).toBeInTheDocument()
+  })
+
+  it('filters that match nothing: says so, without the empty-library message', async () => {
+    render(<LibraryView works={works} watched={{}} ratings={{}} favorites={{}} onOpenWork={() => {}} />)
+    await userEvent.click(screen.getByText('Books'))
+    await userEvent.click(screen.getByText('Completed'))
     expect(screen.getByText('No works match these filters.')).toBeInTheDocument()
+    expect(screen.queryByText('Your library is empty.')).not.toBeInTheDocument()
   })
 
   it('shows "Plan to watch" as default a_voir label', () => {

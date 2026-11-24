@@ -77,3 +77,14 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, .tiptap:focus
 
 /* Field boundaries are the only cue for an input: give them the 3:1 edge colour (inline borders set a hairline). */
 input:not([type="checkbox"]):not([type="radio"]), textarea, select { border-color: var(--color-control-edge) !important; }
+
+/* Interaction affordances, set once here and not per component: an enabled control shows it can be used,
+   a disabled one shows it cannot. Classes with their own cursor (.btn[aria-busy]) still win. */
+:where(button, a[href], summary, select, label[for], [data-pressable]) { cursor: pointer; }
+:where(button:disabled, select:disabled, [aria-disabled="true"]) { cursor: not-allowed; }
+/* pressable() elements are not native buttons: they get the hover and pressed feedback buttons get from their classes.
+   Hover only where a pointer can hover, so a tap does not leave the element dimmed. */
+@media (hover: hover) {
+  [data-pressable]:not([aria-disabled="true"]):hover { opacity: .85; }
+}
+[data-pressable]:not([aria-disabled="true"]):active { opacity: .7; }

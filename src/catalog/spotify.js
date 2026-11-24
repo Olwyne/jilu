@@ -33,9 +33,13 @@ export async function spotifySearch(query) {
   }))
 }
 
-export async function spotifyGetDetail(work) {
+// Fiche complète depuis Spotify : l'artiste, ses albums comme « saisons », leurs titres comme « épisodes »
+export async function spotifyGetWork(artistId) {
   const token = await getToken()
-  const albumsRes = await http(`${BASE}/artists/${work.sourceId}/albums?include_groups=album&limit=20`, {
+  const artistRes = await http(`${BASE}/artists/${artistId}`, { headers: { Authorization: `Bearer ${token}` } })
+  if (!artistRes.ok) return null
+  const a = await artistRes.json()
+  const albumsRes = await http(`${BASE}/artists/${artistId}/albums?include_groups=album&limit=20`, {
     headers: { Authorization: `Bearer ${token}` }
   })
   const albumsJson = await albumsRes.json()
@@ -56,5 +60,17 @@ export async function spotifyGetDetail(work) {
       }))
     })
   }
-  return { ...work, seasons }
+  return {
+    source: 'spotify',
+    sourceId: a.id,
+    id: `spotify-${a.id}`,
+    title: a.name,
+    category: 'musique',
+    genre: (a.genres || [])[0] || 'Divers',
+    year: null,
+    overview: '',
+    poster: a.images?.[0]?.url || null,
+    release: null,
+    seasons,
+  }
 }

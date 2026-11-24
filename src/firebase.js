@@ -1,10 +1,10 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, connectAuthEmulator } from 'firebase/auth'
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
+import { setHttp } from './catalog/http.js'
 
-// Serveur de dev (`make up`) : toujours les émulateurs Auth + Firestore, jamais la base de production.
-// Projet « demo-* » : le SDK n'a besoin d'aucune vraie clé, et ne peut rien joindre en ligne.
-// (`mode` vaut « test » sous vitest et « production » au build : seuls les vrais réglages y servent.)
+// Serveur de dev (`make up`) : toujours les émulateurs, jamais la base de production (projet « demo-* » : aucune vraie clé, rien de joignable en ligne).
+// `mode` vaut « test » sous vitest et « production » au build : seuls les vrais réglages y servent.
 const useEmulator = import.meta.env.MODE === 'development'
 
 const firebaseConfig = useEmulator
@@ -22,7 +22,13 @@ const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 
+// Les proxys /api/… (TMDB, IGDB, Google Books, MangaDex, Spotify) exigent un compte connecté : voir api/_proxy.js
+setHttp(async (input, init = {}) => {
+  const token = typeof input === 'string' && input.startsWith('/api/') && await auth.currentUser?.getIdToken()
+  return fetch(input, token ? { ...init, headers: { ...init.headers, 'X-Firebase-Token': token } } : init)
+})
+
 if (useEmulator) {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
-  connectFirestoreEmulator(db, '127.0.0.1', 8080)
+  connectFirestoreEmulator(db, '127.0.0.1', Number(import.meta.env.VITE_FIRESTORE_EMULATOR_PORT) || 8080) // autre port si 8080 est pris (voir docker-compose.yml)
 }

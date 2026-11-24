@@ -2,19 +2,21 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Modal from '../ui/Modal'
 import emailjs from '@emailjs/browser'
-import { doc, getDoc, setDoc, getDocs, writeBatch, collection, query, where } from 'firebase/firestore'
+import { doc, getDoc, setDoc, getDocs, writeBatch, collection, query, where, documentId } from 'firebase/firestore'
 import { getTodayKey } from '../../lib/quizQuestions'
 import { db } from '../../firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import { initials } from '../../lib/domain'
 import EditProfileModal from '../modals/EditProfileModal'
-import { pressable } from '../../lib/a11y'
 import Button from '../ui/Button'
 import Chip from '../ui/Chip'
 import Badge from '../ui/Badge'
 import Card from '../ui/Card'
 
 const TYPE_EMOJI = { bug: '🐛', suggestion: '💡', other: '💬' }
+
+// Libellé visible des champs du formulaire : un placeholder disparaît dès qu'on tape
+const FIELD_LABEL = { fontSize: 13, fontWeight: 600, color: 'var(--color-muted)', marginBottom: -6 }
 
 const RATE_LIMIT = 3
 const WINDOW_MS = 24 * 60 * 60 * 1000
@@ -55,7 +57,7 @@ function FeedbackSection({ profile }) {
           subject: subject.trim(),
           message: message.trim(),
           user_handle: profile?.handle || '—',
-          user_uid: profile?.uid || '—',
+          user_uid: user.uid,
           user_agent: navigator.userAgent,
           language: navigator.language,
           screen: `${screen.width}×${screen.height} (viewport ${window.innerWidth}×${window.innerHeight})`,
@@ -82,19 +84,20 @@ function FeedbackSection({ profile }) {
           <Chip key={ft.value} active={type === ft.value} onClick={() => setType(ft.value)}>{ft.label}</Chip>
         ))}
       </div>
+      <label htmlFor="feedback-subject" style={FIELD_LABEL}>{t('feedback.subjectLabel')}</label>
       <input
+        id="feedback-subject"
         value={subject}
         onChange={e => setSubject(e.target.value)}
-        placeholder={t('feedback.subjectPlaceholder')}
-        aria-label={t('feedback.subjectPlaceholder')}
-        style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
       />
+      <label htmlFor="feedback-message" style={FIELD_LABEL}>{t('feedback.messageLabel')}</label>
       <textarea
+        id="feedback-message"
         value={message}
         onChange={e => setMessage(e.target.value)}
         placeholder={t('feedback.messagePlaceholder')}
-        aria-label={t('feedback.messagePlaceholder')}
-        rows={4}
+                rows={4}
         style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--color-border-btn)', background: 'var(--color-surface-row)', color: 'var(--color-text)', fontSize: 14, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -111,9 +114,9 @@ function FeedbackSection({ profile }) {
 
 function Toggle({ on, onToggle, label, disabled }) {
   return (
-    <div {...pressable(onToggle, { role: 'switch', checked: on, label, disabled })} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
+    <button type="button" role="switch" aria-checked={on} aria-label={label} disabled={disabled} onClick={onToggle} style={{ width: 44, height: 26, borderRadius: 26, flexShrink: 0, cursor: 'pointer', position: 'relative', border: 'none', padding: 0, boxShadow: on ? 'none' : 'inset 0 0 0 1px var(--color-control-edge)', background: on ? 'var(--color-accent)' : 'rgba(128,128,160,.25)', transition: 'background .18s' }}>
       <div style={{ position: 'absolute', top: 3, left: 3, transform: on ? 'translateX(18px)' : 'none', width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'transform .18s' }} />
-    </div>
+    </button>
   )
 }
 
@@ -210,11 +213,23 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
           await deleteAll((await getDocs(collection(db, 'users', uid, name))).docs)
         }
         await deleteAll((await getDocs(query(collection(db, 'reviews'), where('userId', '==', uid)))).docs)
+        // Fiches locales du catalogue (œuvres importées sans correspondance) : publiques, et l'uid est dans leur id
+        await deleteAll((await getDocs(query(collection(db, 'catalog'), where(documentId(), '>=', `local-${uid}-`), where(documentId(), '<', `local-${uid}-`)))).docs)
+        // Scores du quiz : un document par jour joué, sous quiz/{jour}. Sans liste des jours joués, on efface
+        // chaque jour depuis la création du compte (± 1 jour : fuseaux horaires) ; effacer un score absent est sans effet.
+        const quizScores = []
+        const day = new Date(user.metadata?.creationTime || Date.now())
+        day.setDate(day.getDate() - 1)
+        const lastDay = Date.now() + 24 * 60 * 60 * 1000
+        for (; day.getTime() <= lastDay; day.setDate(day.getDate() + 1)) {
+          quizScores.push({ ref: doc(db, 'quiz', getTodayKey(day), 'scores', uid) })
+        }
+        await deleteAll(quizScores)
         const handle = (profile?.handle || '').toLowerCase()
         const last = writeBatch(db)
         if (handle) last.delete(doc(db, 'pseudos', handle))
         last.delete(doc(db, 'follows', uid))
-        last.delete(doc(db, 'quiz', getTodayKey(), 'scores', uid))
+        last.delete(doc(db, 'quotas', uid))
         last.delete(doc(db, 'users', uid))
         await last.commit()
       })
@@ -274,7 +289,7 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 26, margin: 0 }}>{profile.handle || '—'}</div>
-            <span {...pressable(() => setEditOpen(true))} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}>{t('settings.modify')}</span>
+            <button type="button" onClick={() => setEditOpen(true)} style={{ fontSize: 12.5, color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600, background: 'none', border: 'none', padding: 0, fontFamily: 'inherit' }}>{t('settings.modify')}</button>
           </div>
           <div style={{ color: 'var(--color-muted)', fontSize: 14, marginTop: 3 }}>{user?.email || profile.email}</div>
           <div style={{ color: 'var(--color-muted-3)', fontSize: 12.5, marginTop: 8 }}>{t('settings.memberSince') + ' '}{profile.memberSince}</div>
@@ -375,10 +390,14 @@ export default function AccountView({ profile, settings, onToggleSetting, onSave
       <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>{t('settings.feedback')}</div>
       <FeedbackSection profile={profile} />
 
+      {/* Se déconnecter n'efface rien : hors de la zone de danger, en bouton neutre */}
+      <div style={{ marginBottom: 24 }}>
+        <Button variant="secondary" onClick={onLogout}>{t('settings.logout')}</Button>
+      </div>
+
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 24 }}>
         <div style={{ padding: '8px 4px 4px', fontSize: 13, color: 'var(--color-muted-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12 }}>{t('settings.dangerZone')}</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <Button variant="dangerOutline" onClick={onLogout}>{t('settings.logout')}</Button>
           <Button variant="dangerOutline" onClick={() => setDeleteOpen(true)}>{t('settings.deleteAccount')}</Button>
         </div>
       </div>

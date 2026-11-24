@@ -31,7 +31,7 @@ export function useFriendsFeed(following) {
       setFriendsFeed(flat)
       setLoading(false)
     })
-  }, [JSON.stringify(Object.keys(following || {}).sort())])
+  }, [following])
 
   return { friendsFeed, loading }
 }

@@ -17,6 +17,7 @@ const mods = vi.hoisted(() => ({
   loadCatalog: vi.fn(),
   commitPlan: vi.fn(async () => ({ writes: 1 })),
   requestCatalogRefresh: vi.fn(),
+  requestCatalogCreation: vi.fn(),
 }))
 vi.mock('../data/cache.js', () => ({ createCache: async () => mods.cache }))
 vi.mock('../data/library.js', () => ({ syncLibrary: mods.syncLibrary, clearLibraryCache: mods.clearLibraryCache }))
@@ -24,6 +25,7 @@ vi.mock('../data/catalog.js', () => ({ loadCatalog: mods.loadCatalog }))
 vi.mock('../data/writeV2.js', async (orig) => ({ ...(await orig()), commitPlan: mods.commitPlan }))
 vi.mock('../data/refreshClient.js', () => ({
   requestCatalogRefresh: mods.requestCatalogRefresh,
+  requestCatalogCreation: mods.requestCatalogCreation,
   REFRESHABLE_SOURCES: ['tmdb', 'anilist', 'anilist-manga', 'spotify'],
   AUTO_REFRESH_MIN_AGE_MS: 24 * 3600 * 1000,
 }))
@@ -129,13 +131,31 @@ describe('useAppData : écriture', () => {
     expect(result.current.data.reviews).toEqual([review]) // déjà écrit dans library/a
   })
 
-  it('ajouter une œuvre rend ses épisodes disponibles tout de suite', async () => {
+  it('fiche partagée : créée par le serveur puis lue ; le client n’en écrit aucune', async () => {
     const { result } = await mount()
-    const w = { id: 'n', source: 'tmdb', sourceId: 5, title: 'Nouvelle', category: 'series', seasons: [season(1, 3)], status: 'a_voir', added: 1 }
+    mods.requestCatalogCreation.mockResolvedValue({ n: 'created', x: 'not_found' })
+    let docs
+    await act(async () => { docs = await result.current.createCatalogDocs(['n', 'x']) })
+    expect(mods.loadCatalog).toHaveBeenLastCalledWith(expect.anything(), ['n'], expect.anything(), { force: ['n'] })
+    expect(Object.keys(docs)).toEqual(['n'])
+    const w = { ...docs.n, status: 'a_voir', added: 1 }
     await act(async () => { await result.current.writeLibrary({ add: { n: w } }) })
-    expect(mods.commitPlan.mock.calls[0][2].catalogCreates.n).toMatchObject({ title: 'Nouvelle' })
-    expect(result.current.data.works.n.seasons).toHaveLength(1)
-    expect((await result.current.getCatalogDoc('n')).title).toBe('Nouvelle')
+    expect(result.current.data.works.n.seasons).toHaveLength(1) // épisodes disponibles tout de suite
+  })
+
+  it('serveur indisponible à la création : l’erreur est signalée', async () => {
+    const { result } = await mount()
+    mods.requestCatalogCreation.mockRejectedValue(new Error('offline'))
+    await act(async () => { await expect(result.current.createCatalogDocs(['n'])).rejects.toThrow('offline') })
+    await waitFor(() => expect(result.current.saveError?.message).toBe('offline'))
+  })
+
+  it('œuvre locale (import sans correspondance) : fiche écrite par le client, visible tout de suite', async () => {
+    const { result } = await mount()
+    const w = { id: 'ma-serie', source: 'tmdb', title: 'Ma série', category: 'series', seasons: [season(1, 2)], status: 'a_voir', added: 1 }
+    await act(async () => { await result.current.writeLibrary({ add: { 'ma-serie': w } }) })
+    expect(Object.keys(mods.commitPlan.mock.calls[0][2].catalogCreates)).toEqual(['local-u1-ma-serie'])
+    expect(result.current.data.works['ma-serie'].seasons).toHaveLength(1)
   })
 })
 

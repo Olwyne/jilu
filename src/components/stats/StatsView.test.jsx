@@ -15,4 +15,10 @@ describe('StatsView', () => {
     expect(screen.getByText('Series')).toBeInTheDocument()
     expect(screen.getByText('Films')).toBeInTheDocument()
   })
+
+  it('sans aucune note, « Les mieux notés » dit comment le remplir', () => {
+    const works = { w1: { id: 'w1', title: 'Film X', category: 'films', status: 'termine', seasons: null, genre: 'Action', year: 2023 } }
+    render(<StatsView works={works} watched={{}} ratings={{}} onOpenWork={() => {}} />)
+    expect(screen.getByText('Rate a title from 1 to 5 stars and it shows up here.')).toBeInTheDocument()
+  })
 })

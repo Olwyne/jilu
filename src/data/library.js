@@ -1,6 +1,6 @@
 // Synchronisation « par delta » de la bibliothèque v2 : au démarrage, on part du cache local (0 lecture)
 // et on ne lit sur le serveur que les documents modifiés depuis la dernière synchronisation.
-import { collection, getDocs, orderBy, query, where } from 'firebase/firestore'
+import { collection, getDocs, orderBy, query, where, writeBatch } from 'firebase/firestore'
 
 // Les horloges des appareils diffèrent un peu : on relit une petite fenêtre de recouvrement.
 export const OVERLAP_MS = 10 * 60 * 1000
@@ -10,7 +10,11 @@ export const FULL_RESYNC_MS = 7 * 24 * 60 * 60 * 1000
 const docKey = (uid, id) => `lib:${uid}:${id}`
 const metaKey = (uid) => `libmeta:${uid}`
 
-export async function syncLibrary(db, uid, cache, { now = Date.now() } = {}) {
+// Âge au-delà duquel une trace de suppression est effacée pour de bon (large marge sur FULL_RESYNC_MS)
+export const TOMBSTONE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
+
+// purge : efface les vieilles traces de suppression (sa propre bibliothèque seulement)
+export async function syncLibrary(db, uid, cache, { now = Date.now(), purge = false } = {}) {
   const meta = (await cache.get(metaKey(uid))) || { lastSync: 0, fullSyncAt: 0 }
   const full = now - meta.fullSyncAt > FULL_RESYNC_MS
   const since = full ? 0 : meta.lastSync
@@ -30,6 +34,16 @@ export async function syncLibrary(db, uid, cache, { now = Date.now() } = {}) {
     if (data.deleted) removals.push(docKey(uid, d.id))
     else upserts.push([docKey(uid, d.id), { ...data, id: d.id }])
   })
+
+  // Traces de suppression de plus de 30 jours : plus aucun appareil n'en a besoin (au-delà de FULL_RESYNC_MS il relit tout). Au mieux : un échec ne bloque pas la synchro.
+  if (full && purge) {
+    const old = snap.docs.filter((d) => d.data().deleted && now - (d.data().updatedAt || 0) > TOMBSTONE_MAX_AGE_MS)
+    for (let i = 0; i < old.length; i += 400) {
+      const batch = writeBatch(db)
+      old.slice(i, i + 400).forEach((d) => batch.delete(d.ref))
+      await batch.commit().catch((e) => console.warn('[data] purge', e))
+    }
+  }
 
   const prefix = `lib:${uid}:`
   if (full) await cache.clear(prefix) // relecture complète : repartir d'un cache propre (retire aussi les fantômes)

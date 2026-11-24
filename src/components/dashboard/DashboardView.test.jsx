@@ -8,7 +8,7 @@ describe('DashboardView', () => {
     const works = { w1: { id: 'w1', title: 'X', status: 'en_cours', seasons: null } }
     render(<DashboardView works={works} watched={{}} reviews={[]} feed={[]} onOpenWork={() => {}} />)
     expect(screen.getByText('Latest ratings & comments')).toBeInTheDocument()
-    expect(screen.getByText('No rating or comment on watched episodes.')).toBeInTheDocument()
+    expect(screen.getByText('No ratings or comments yet. Rate an episode you have watched and it shows up here.')).toBeInTheDocument()
   })
 
   it('shows next-up episodes with a mark-watched action', async () => {

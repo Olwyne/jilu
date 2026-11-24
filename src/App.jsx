@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { usePageTitle } from './hooks/usePageTitle'
 import i18n from './i18n/index.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useAppData, clearLocalCaches } from './hooks/useAppData'
@@ -91,7 +92,7 @@ function ErrorScreen({ message, onRetry, onLogout }) {
 function Shell() {
   const { user, logout } = useAuth()
   const {
-    data, loading, error, saveError, mutate, writeLibrary, syncAll, getFullData, getCatalogDoc,
+    data, loading, error, saveError, mutate, writeLibrary, syncAll, getFullData, createCatalogDocs,
     ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog, refreshWork, refreshStale, refreshAll,
   } = useAppData(user)
   const navigate = useNavigate()
@@ -102,8 +103,8 @@ function Shell() {
   const [episodeModal, setEpisodeModal] = useState(null)
   const [toast, setToast] = useState(null)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
-  const workActions = useWorkActions(data, { mutate, writeLibrary }, { getCatalogDoc, refreshWork, refreshAll })
-  const { importTVTime, importTVTimeOut } = useImport(data, writeLibrary)
+  const workActions = useWorkActions(data, { mutate, writeLibrary }, { createCatalogDocs, refreshWork, refreshAll })
+  const { importTVTime, importTVTimeOut } = useImport(data, { writeLibrary, createCatalogDocs })
   const currentUser = user ? { uid: user.uid, handle: data.profile?.handle } : null
   const { following } = useFollows(user)
 
@@ -147,9 +148,13 @@ function Shell() {
   useEffect(() => { setEpisodeModal(null) }, [pathname])
 
   // Écriture refusée par le serveur : l'écran est déjà revenu à l'état enregistré, on le dit
+  const workId = pathname.startsWith('/work/') ? pathname.split('/')[2] : null
+  usePageTitle(workId ? data.works[workId]?.title : getRouteCopy(t)[pathname.startsWith('/profile') ? '/profile' : pathname]?.title)
+
   useEffect(() => {
     if (!saveError) return
     setToast({ tone: 'error', header: t('data.saveError'), title: t('data.saveErrorHint'), action: { label: t('data.reload'), fn: () => window.location.reload() } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seulement à chaque nouvelle erreur, pas au changement de langue
   }, [saveError])
 
   // Comptes sans pseudo (inscription sans étape pseudo, anciens comptes) : on réserve un pseudo
@@ -164,6 +169,7 @@ function Shell() {
     }).then(() => {
       try { localStorage.setItem(flag, '1') } catch { /* ignoré */ }
     }).catch((e) => console.warn('[handle]', e))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une fois par compte, après le chargement (le résultat écrit lui-même data.profile)
   }, [loading, user?.uid])
 
   // Les épisodes viennent du catalogue partagé, chargés selon l'écran affiché
@@ -172,6 +178,7 @@ function Shell() {
     if (pathname.startsWith('/work/')) ensureWorkCatalog(pathname.split('/')[2])
     else if (pathname.startsWith('/stats') || pathname.startsWith('/profile') || pathname.startsWith('/account')) ensureAllCatalog()
     else if (pathname.startsWith('/library')) ensureProgressCatalog()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- les fonctions ensure* sont recréées à chaque rendu : les ajouter relancerait le chargement en boucle
   }, [pathname, loading])
 
   // Rafraîchissement automatique : quelques œuvres en cours de diffusion par session, via le serveur
@@ -181,6 +188,7 @@ function Shell() {
     if (loading || autoRefreshDone.current) return
     autoRefreshDone.current = true
     refreshStale().catch((e) => console.warn('[auto-refresh]', e))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une seule fois par session (garde autoRefreshDone)
   }, [loading])
 
   function handleChangeLanguage(lang) {
@@ -233,7 +241,7 @@ function Shell() {
     URL.revokeObjectURL(url)
   }
 
-  if (loading) return null
+  if (loading) return <RouteFallback />
   // Sans ce garde-fou, un chargement raté affiche une bibliothèque vide (« tout est perdu »)
   if (error) return <ErrorScreen message={t('data.loadError')} onRetry={() => window.location.reload()} onLogout={logout} />
 
@@ -266,7 +274,8 @@ function Shell() {
                 watched={data.watched}
                 ratings={data.ratings}
                 favorites={data.favorites}
-                onOpenWork={openWork}
+                onSearch={() => setSearchOpen(true)}
+                onImport={() => navigate('/account')}
               />
             } />
             <Route path="/calendar" element={
@@ -353,21 +362,22 @@ function Shell() {
       {searchOpen && (
         <SearchModal
           works={data.works}
-          onAdd={(r) => {
-            workActions.addWork(r)
-            setToast({
-              header: 'Ajouté à ta bibliothèque',
+          onAdd={(r) => workActions.addWork(r).then(
+            // succès annoncé seulement une fois l'œuvre réellement ajoutée
+            () => setToast({
+              header: t('search.addedToast'),
               title: r.title,
               action: {
-                label: 'Voir',
+                label: t('search.view'),
                 fn: () => {
                   setSearchOpen(false)
                   setToast(null)
                   navigate('/work/' + r.id)
                 }
               }
-            })
-          }}
+            }),
+            () => setToast({ tone: 'error', header: t('search.addFailed'), title: r.title }),
+          )}
           onNavigate={(r) => { setSearchOpen(false); navigate('/work/' + r.id) }}
           onClose={() => setSearchOpen(false)}
         />
@@ -394,7 +404,7 @@ function Shell() {
 
 function AuthGuard() {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <RouteFallback />
   if (!user) return <LandingPage />
   return <Shell />
 }
@@ -402,7 +412,7 @@ function AuthGuard() {
 function LoginRoute() {
   const { user, loading } = useAuth()
   const location = useLocation()
-  if (loading) return null
+  if (loading) return <RouteFallback />
   if (user) return <Navigate to={location.state?.from || '/dashboard'} replace />
   return <LoginPage />
 }
@@ -410,14 +420,14 @@ function LoginRoute() {
 function SignupRoute() {
   const { user, loading } = useAuth()
   const location = useLocation()
-  if (loading) return null
+  if (loading) return <RouteFallback />
   if (user) return <Navigate to={location.state?.from || '/dashboard'} replace />
   return <SignupPage />
 }
 
 function ForgotPasswordRoute() {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <RouteFallback />
   if (user) return <Navigate to="/dashboard" replace />
   return <ForgotPasswordPage />
 }

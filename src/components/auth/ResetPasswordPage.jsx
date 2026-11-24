@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './Auth.module.css'
-import { pressable } from '../../lib/a11y'
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation()
+  usePageTitle(t('auth.newPassword'))
   const { confirmReset } = useAuth()
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const oobCode = searchParams.get('oobCode')
   const [password, setPassword] = useState('')
@@ -37,26 +37,27 @@ export default function ResetPasswordPage() {
         <h1 className={styles.title}>{t('auth.newPassword')}</h1>
         {!done ? (
           <>
-            <input
-              className={styles.input}
-              type="password"
-              autoComplete="new-password"
-              placeholder={t('auth.newPasswordPlaceholder')}
-              aria-label={t('auth.newPasswordPlaceholder')}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
-              required
-            />
+            <label className={styles.field}>
+              <span className={styles.label}>{t('auth.newPasswordPlaceholder')}</span>
+              <input
+                className={styles.input}
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </label>
             {error && <div role="alert" className={styles.error}>{error}</div>}
             <button className={styles.button} type="submit">{t('auth.resetButton')}</button>
           </>
         ) : (
           <p className={styles.success}>{t('auth.resetSuccess')}</p>
         )}
-        <div className={styles.switch} {...pressable(() => navigate('/login'), { role: 'link' })}>
+        <Link to="/login" className={styles.switch}>
           {t('auth.backToLogin')}
-        </div>
+        </Link>
       </form>
     </div>
   )

@@ -11,7 +11,7 @@ import { syncLibrary, clearLibraryCache } from '../data/library.js'
 import { loadCatalog } from '../data/catalog.js'
 import { assembleData, catalogIdsNeededAtStartup } from '../data/assemble.js'
 import { buildPlan, applyPlanToLibrary, commitPlan, isEmptyPlan } from '../data/writeV2.js'
-import { requestCatalogRefresh, REFRESHABLE_SOURCES, AUTO_REFRESH_MIN_AGE_MS } from '../data/refreshClient.js'
+import { requestCatalogRefresh, requestCatalogCreation, REFRESHABLE_SOURCES, AUTO_REFRESH_MIN_AGE_MS } from '../data/refreshClient.js'
 import { clean } from '../lib/catalogUtils.js'
 import i18n from '../i18n/index.js'
 
@@ -22,7 +22,7 @@ const EMPTY_DATA = {
   feed: [], games: {}, favorites: {},
 }
 
-const CACHE_NAME = 'jilu-v2'
+const CACHE_NAME = 'jilu-v3' // v3 : spéciaux d'animé passés en saison 0, les fiches en cache (jusqu'à 30 jours) sont à relire
 const DAY = 24 * 60 * 60 * 1000
 const MONTH = 30 * DAY
 const RESYNC_AFTER_MS = 2 * 60 * 1000
@@ -95,7 +95,7 @@ export function useAppData(user) {
     ;(async () => {
       try {
         s.cache = await createCache(CACHE_NAME)
-        const { library } = await syncLibrary(db, uid, s.cache)
+        const { library } = await syncLibrary(db, uid, s.cache, { purge: true })
         if (cancelled) return
         s.library = library
         await loadStartupCatalog(library) // œuvres en cours / à voir : calendrier et « à rattraper »
@@ -114,7 +114,7 @@ export function useAppData(user) {
     async function resync() {
       s.lastSync = Date.now()
       try {
-        const { library } = await syncLibrary(db, uid, s.cache)
+        const { library } = await syncLibrary(db, uid, s.cache, { purge: true })
         s.library = library
         await loadStartupCatalog(library)
         rebuild()
@@ -149,15 +149,6 @@ export function useAppData(user) {
   const ensureProgressCatalog = () => ensureCatalog(libraryDocs().filter((l) => l.watchedCount > 0 && l.status !== 'termine').map((l) => l.catalogId))
   const ensureWorkCatalog = (workId) => ensureCatalog([st.current.library[workId]?.catalogId])
 
-  // Fiche du catalogue d'une œuvre (pour l'ajouter sans rappeler les API si quelqu'un l'a déjà ajoutée)
-  async function getCatalogDoc(catalogId) {
-    const s = st.current
-    if (s.catalog[catalogId]) return s.catalog[catalogId]
-    if (!s.cache) return null
-    const { catalog } = await loadCatalog(db, [catalogId], s.cache, { maxAgeMs: MONTH })
-    return catalog[catalogId] || null
-  }
-
   // Relit des fiches depuis le serveur (après un rafraîchissement) et met l'affichage à jour
   async function reloadCatalog(catalogIds) {
     const s = st.current
@@ -165,6 +156,24 @@ export function useAppData(user) {
     const { catalog } = await loadCatalog(db, catalogIds, s.cache, { force: catalogIds })
     s.catalog = { ...s.catalog, ...catalog }
     rebuild()
+  }
+
+  // --- Ajout : le serveur crée les fiches partagées manquantes depuis la source, puis on les lit ---
+  // Retourne { id: fiche } pour les fiches disponibles (créées ou déjà présentes)
+  async function createCatalogDocs(ids, { onProgress } = {}) {
+    const s = st.current
+    let results
+    try {
+      results = await requestCatalogCreation(ids, { onProgress })
+    } catch (e) {
+      setSaveError(e)
+      throw e
+    }
+    const ready = ids.filter((id) => results[id] === 'created' || results[id] === 'exists')
+    if (!ready.length || !s.cache) return {}
+    const { catalog } = await loadCatalog(db, ready, s.cache, { force: ready })
+    s.catalog = { ...s.catalog, ...catalog }
+    return catalog
   }
 
   // --- Rafraîchissement : le serveur interroge les API une seule fois pour tous ---
@@ -247,7 +256,9 @@ export function useAppData(user) {
     if (isEmptyPlan(plan)) return mainPatch && mutate(mainPatch)
     const before = s.library
     s.library = applyPlanToLibrary(s.library, plan)
-    s.catalog = { ...s.catalog, ...plan.catalogCreates } // épisodes d'une œuvre ajoutée disponibles tout de suite
+    // Fiches locales (imports sans correspondance) : écrites par le client, disponibles tout de suite.
+    // Les fiches partagées viennent du serveur (createCatalogDocs), jamais de cette copie.
+    s.catalog = { ...s.catalog, ...Object.fromEntries(Object.entries(plan.catalogCreates).filter(([id]) => id.startsWith('local-'))) }
     setData({ ...compute(), ...mainPatch })
     try {
       await commitPlan(db, uid, plan)
@@ -272,7 +283,7 @@ export function useAppData(user) {
     const s = st.current
     if (!user || !s.cache) return
     await clearLibraryCache(s.cache, uid)
-    const { library } = await syncLibrary(db, uid, s.cache)
+    const { library } = await syncLibrary(db, uid, s.cache, { purge: true })
     s.library = library
     s.lastSync = Date.now()
     await loadStartupCatalog(library)
@@ -283,7 +294,7 @@ export function useAppData(user) {
     data, loading, error, saveError, mutate, writeLibrary, syncAll,
     // Données complètes (tous les épisodes chargés) pour l'export : indépendant du prochain rendu
     getFullData: async () => { await ensureAllCatalog(); return compute() },
-    getCatalogDoc, ensureCatalog, ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog,
+    createCatalogDocs, ensureCatalog, ensureAllCatalog, ensureProgressCatalog, ensureWorkCatalog,
     refreshWork, refreshStale, refreshAll,
   }
 }

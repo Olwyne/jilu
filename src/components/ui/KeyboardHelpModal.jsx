@@ -57,7 +57,7 @@ export default function KeyboardHelpModal({ onClose }) {
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
-        style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 20, padding: '28px 32px', width: 340, maxWidth: '90vw' }}
+        style={{ background: 'var(--color-modal-bg)', border: '1px solid var(--color-border-btn)', borderRadius: 20, padding: '28px 32px', width: 340, maxWidth: '90vw' }}
       >
         <h2 id={titleId} style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 20, margin: '0 0 20px' }}>
           {t('shortcuts.title')}
