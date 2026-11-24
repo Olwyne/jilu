@@ -223,6 +223,25 @@ describe('anilistGetMangaDetail', () => {
     expect(result.seasons[0].n).toBe(0)
   })
 
+  it('spreads chapters missing from MangaDex over the missing volumes, not into Scans', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ data: { Media: {
+        chapters: null, volumes: null, status: 'RELEASING', title: { romaji: 'One Piece' }
+      } } })
+    })
+    // Tome 1 = ch 1-2, tomes 2-3 absents (ch 3-6), tome 4 = ch 7-8, ch 9 sans tome, ch 10 inconnu
+    mangadexGetChapterMap.mockResolvedValueOnce({
+      ...chapterResult(new Map([[1, 1], [2, 1], [5, null], [7, 4], [8, 4], [9, null]])),
+      lastChapter: 10,
+    })
+    const { seasons } = await anilistGetMangaDetail(3)
+    const chapters = (n) => seasons.find((s) => s.n === n)?.episodes.map((e) => e.n)
+    expect(chapters(0)).toEqual([9, 10])
+    expect(chapters(2)).toEqual([3, 4])
+    expect(chapters(3)).toEqual([5, 6])
+    expect(chapters(4)).toEqual([7, 8])
+  })
+
   it('sets ended=true when status is FINISHED', async () => {
     global.fetch = vi.fn().mockResolvedValueOnce({
       json: async () => ({ data: { Media: {
