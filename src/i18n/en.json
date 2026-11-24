@@ -350,6 +350,7 @@
   "stats.byStatus": "By status",
   "stats.topGenres": "Top genres",
   "stats.topRated": "Top rated",
+  "stats.topRatedEmpty": "Rate a title from 1 to 5 stars and it shows up here.",
   "stats.recentActivity": "Recent activity",
   "stats.activityNote": "Based on air dates of checked episodes",
   "stats.seriesWatched": "series watched",

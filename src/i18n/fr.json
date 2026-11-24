@@ -350,6 +350,7 @@
   "stats.byStatus": "Par statut",
   "stats.topGenres": "Genres favoris",
   "stats.topRated": "Les mieux notés",
+  "stats.topRatedEmpty": "Note une œuvre de 1 à 5 étoiles pour la voir apparaître ici.",
   "stats.recentActivity": "Activité récente",
   "stats.activityNote": "Basé sur les dates de diffusion des épisodes cochés",
   "stats.seriesWatched": "séries vues",

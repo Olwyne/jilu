@@ -312,6 +312,7 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
         <div style={CARD}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, margin: '0 0 18px' }}>{t('stats.topRated')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {topRated.length === 0 && <div style={{ fontSize: 13, color: 'var(--color-muted)' }}>{t('stats.topRatedEmpty')}</div>}
             {topRated.map((w) => (
               <div key={w.id} {...pressable(() => onOpenWork(w.id), { role: 'link' })} style={{ display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer' }}>
                 <PosterBox id={w.id} title={w.title} poster={w.poster} width={44} height={62} radius={10} fontSize={15} />

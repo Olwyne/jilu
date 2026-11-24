@@ -6,3 +6,9 @@
 .title { font-family: var(--font-display); font-weight: 700; font-size: 26px; margin: 0; letter-spacing: -.02em; line-height: 1.1; }
 .subtitle { color: var(--color-muted); font-size: 14px; margin-top: 3px; }
 .searchButton { margin-left: auto; color: var(--color-text); }
+/* Petit écran : la barre reste collée en haut, donc elle prend moins de place (alignée sur le 16 px du contenu) */
+@media (max-width: 480px) {
+  .header { padding: 12px 16px; }
+  .title { font-size: 22px; }
+  .subtitle { display: none; }
+}
