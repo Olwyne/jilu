@@ -102,6 +102,7 @@ describe('useWorkActions', () => {
     expect(written().set.w1.finishedAt).toBeUndefined() // pas réécrit : l'ancienne date reste
   })
   it('markAllWatched keeps existing watch dates and never stores booleans', async () => {
+    window.confirm = vi.fn(() => true)
     const data = {
       works: { w1: { id: 'w1', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }, { n: 2, air: 0 }, { n: 3, air: Infinity }] }] } },
       watched: { 'w1-1-1': 123, 'other-1-1': 456 }
@@ -111,6 +112,15 @@ describe('useWorkActions', () => {
     // seuls les épisodes diffusés et pas encore vus sont écrits, avec une vraie date
     expect(written()).toEqual({ set: { w1: { 'eps.1-2': expect.any(Number) } } })
     expect(written().set.w1['eps.1-2']).toBeGreaterThan(1)
+  })
+
+  it('markAllWatched demande confirmation et n\'écrit rien si on refuse', async () => {
+    window.confirm = vi.fn(() => false)
+    const data = { works: { w1: { id: 'w1', seasons: [{ n: 1, episodes: [{ n: 1, air: 0 }] }] } }, watched: {} }
+    const { result } = renderHook(() => useWorkActions(data, store()))
+    await act(async () => { await result.current.markAllWatched() })
+    expect(window.confirm).toHaveBeenCalledTimes(1)
+    expect(writeLibrary).not.toHaveBeenCalled()
   })
 
   it('le rafraîchissement est délégué au serveur (aucun appel d’API depuis le navigateur)', async () => {

@@ -22,7 +22,8 @@ function vercelApiPlugin() {
           req.query[k] = all.length > 1 ? all : all[0]
         }
         let body = ''
-        for await (const chunk of req) body += chunk
+        // Requête abandonnée par le navigateur (ECONNRESET) : sans ce garde-fou, le rejet non géré arrête tout le serveur de dev
+        try { for await (const chunk of req) body += chunk } catch { return }
         req.body = body || undefined
         res.status = (code) => { res.statusCode = code; return res }
         res.json = (obj) => { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(obj)) }

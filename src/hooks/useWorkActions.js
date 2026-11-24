@@ -72,6 +72,7 @@ export function useWorkActions(data, { mutate, writeLibrary }, services = {}) {
   }
 
   async function markAllWatched() {
+    if (!window.confirm(i18n.t('actions.markAllConfirm'))) return // un clic marque toute la bibliothèque : même garde que « Réinitialiser »
     const now = Date.now()
     const set = {}
     Object.values(data.works).forEach((w) => {

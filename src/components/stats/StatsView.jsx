@@ -108,38 +108,43 @@ export default function StatsView({ works, watched, ratings, onOpenWork, isMobil
 
   return (
     <div>
-      {/* Top KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: 14 }}>
+      {/* Chiffre principal d'abord (le temps passé), puis les quatre repères, puis les compteurs par catégorie dans une seule carte :
+          onze cartes identiques ne disaient pas laquelle compte */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
+        <Card dense pad="md" style={{ flex: '2 1 280px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 44, color: 'var(--color-accent)', lineHeight: 1.05 }}>{watchTime}</div>
+          <div style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 6 }}>{t('stats.watchTime')}</div>
+        </Card>
         {[
-          [watchTime, t('stats.watchTime'), 'var(--color-accent)'],
-          [String(totalEps), t('stats.episodesSeen'), 'var(--color-blue)'],
-          [String(totalWorks), t('stats.totalLibrary'), 'var(--color-muted)'],
-          [completionRate + ' %', t('stats.completionRate'), 'var(--color-green)'],
-          [ratedN ? (ratedSum / ratedN).toFixed(1) : '—', t('stats.avgRating'), 'var(--color-gold)'],
+          [String(totalEps), t('stats.episodesSeen')],
+          [String(totalWorks), t('stats.totalLibrary')],
+          [completionRate + ' %', t('stats.completionRate')],
+          [ratedN ? (ratedSum / ratedN).toFixed(1) : '—', t('stats.avgRating')],
         ].map(([value, label]) => (
-          <Card key={label} dense pad="sm">
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
+          <Card key={label} dense pad="sm" style={{ flex: '1 1 130px' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 24, color: 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
             <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3 }}>{label}</div>
           </Card>
         ))}
       </div>
 
-      {/* Category "Viewed/Finished" KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: 30 }}>
-        {[
-          [String(seriesVues), t('stats.seriesWatched'), CAT_COLORS.series],
-          [String(filmsSeen), t('stats.filmsSeen'), CAT_COLORS.films],
-          [String(animesVus), t('stats.animesWatched'), CAT_COLORS.animes],
-          [String(mangasLus), t('stats.mangasRead'), CAT_COLORS.mangas],
-          [String(livresLus), t('stats.livresRead'), CAT_COLORS.livres],
-          [String(jeuxFinis), t('stats.gamesFinished'), CAT_COLORS.jeux],
-        ].map(([value, label]) => (
-          <Card key={label} dense pad="sm">
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, color: 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
-            <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 5, lineHeight: 1.3 }}>{label}</div>
-          </Card>
-        ))}
-      </div>
+      <Card dense pad="sm" style={{ marginBottom: 30 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(104px, 1fr))', gap: 14 }}>
+          {[
+            [String(seriesVues), t('stats.seriesWatched')],
+            [String(filmsSeen), t('stats.filmsSeen')],
+            [String(animesVus), t('stats.animesWatched')],
+            [String(mangasLus), t('stats.mangasRead')],
+            [String(livresLus), t('stats.livresRead')],
+            [String(jeuxFinis), t('stats.gamesFinished')],
+          ].map(([value, label]) => (
+            <div key={label}>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, color: 'var(--color-text)', lineHeight: 1.1 }}>{value}</div>
+              <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 4, lineHeight: 1.3 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* Heatmap + Streak */}
       <div style={{ ...CARD, marginBottom: 30 }}>
